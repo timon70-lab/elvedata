@@ -1,0 +1,43 @@
+name: Oppdater NVE vannføringsdata
+
+on:
+  schedule:
+    - cron: '0 * * * *'   # Kjører hver time på timen
+  workflow_dispatch:        # Kan også kjøres manuelt fra GitHub
+
+jobs:
+  hent-nve-data:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write       # Nødvendig for å pushe JSON-filen
+
+    steps:
+      - name: Sjekk ut repo
+        uses: actions/checkout@v4
+
+      - name: Hent data fra NVE HydAPI
+        env:
+          NVE_API_KEY: ${{ secrets.NVE_API_KEY }}
+        run: |
+          mkdir -p data
+          curl -s \
+            -H "X-API-Key: $NVE_API_KEY" \
+            "https://hydapi.nve.no/api/v1/Observations?StationId=23.8.0&Parameter=1001&ResolutionTime=60&ReferenceTime=P7D/" \
+            -o data/vannforing.json
+          echo "Hentet $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+          # Verifiser at filen er gyldig JSON og inneholder data
+          python3 -c "
+          import json, sys
+          with open('data/vannforing.json') as f:
+              d = json.load(f)
+          obs = d['data'][0]['observations']
+          print(f'OK: {len(obs)} observasjoner')
+          "
+
+      - name: Commit og push JSON-filen
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/vannforing.json
+          git diff --staged --quiet || git commit -m "NVE-data oppdatert $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push
