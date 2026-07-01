@@ -395,11 +395,15 @@ const PHOTOS = [
   { id: 'A-045', lat: 58.130965, lon: 7.365929, file: '20230718_201757.jpg', caption: 'Sone 5A · Elv ved brua', zone: 'Sone 5A', dateISO: '2023-07-18', timeUTC: '18:17', locId: 'Sone 5A' },
   { id: 'A-046', lat: 58.130969, lon: 7.365953, file: '20230718_201809.jpg', caption: 'Sone 5A · Utsikt mot brua i kveldslys', zone: 'Sone 5A', dateISO: '2023-07-18', timeUTC: '18:18', locId: 'Sone 5A' },
   { id: 'A-047', lat: 58.129730, lon: 7.363353, file: '20230718_202534.jpg', caption: 'Sone 5A · Utsikt fra fiskebu mot elva', zone: 'Sone 5A', dateISO: '2023-07-18', timeUTC: '18:25', locId: 'Sone 5A' },
-  { id: 'A-048', lat: 58.118733, lon: 7.340913, file: '20240622_185715.jpg', caption: 'Sone3 · Stille kveldsvann ved bredden', zone: 'Sone3', dateISO: '2024-06-22', timeUTC: '16:57', locId: 'Sone3' },
-  { id: 'A-049', lat: 58.118707, lon: 7.341460, file: '20240622_201949.jpg', caption: 'Sone3 · Solnedgang over elva', zone: 'Sone3', dateISO: '2024-06-22', timeUTC: '18:19', locId: 'Sone3' },
+  { id: 'A-048', lat: 58.118733, lon: 7.340913, file: '20240622_185715.jpg', caption: 'Sone2 · Stille kveldsvann ved bredden', zone: 'Sone2', dateISO: '2024-06-22', timeUTC: '16:57', locId: 'Sone2' },
+  { id: 'A-049', lat: 58.118707, lon: 7.341460, file: '20240622_201949.jpg', caption: 'Sone2 · Solnedgang over elva', zone: 'Sone2', dateISO: '2024-06-22', timeUTC: '18:19', locId: 'Sone2' },
   { id: 'A-050', lat: 58.126726, lon: 7.339869, file: '20240830_160208.jpg', caption: 'Sone 5A · Stryk ved sonestart', zone: 'Sone 5A', dateISO: '2024-08-30', timeUTC: '14:02', locId: 'Sone 5A' },
   { id: 'A-051', lat: 58.130016, lon: 7.359765, file: '20240830_164405.jpg', caption: 'Sone 5A · Stilleflytende elveparti', zone: 'Sone 5A', dateISO: '2024-08-30', timeUTC: '14:44', locId: 'Sone 5A' },
-  { id: 'A-052', lat: 58.130093, lon: 7.359962, file: '20240830_164412.jpg', caption: 'Sone 5A · Kveldslys over elva', zone: 'Sone 5A', dateISO: '2024-08-30', timeUTC: '14:44', locId: 'Sone 5A' }
+  { id: 'A-052', lat: 58.130093, lon: 7.359962, file: '20240830_164412.jpg', caption: 'Sone 5A · Kveldslys over elva', zone: 'Sone 5A', dateISO: '2024-08-30', timeUTC: '14:44', locId: 'Sone 5A' },
+  { id: 'A-053', lat: 58.131197, lon: 7.366067, file: 'PXL_20260604_180012986.MP.jpg', caption: 'Sone 5A · Stryk ved sandbanke', zone: 'Sone 5A', dateISO: '2026-06-04', timeUTC: '18:00', locId: 'Sone 5A' },
+  { id: 'A-054', lat: 58.130061, lon: 7.363242, file: 'PXL_20260604_184558931.MP.jpg', caption: 'Sone 5A · Stille elveparti i regnvær', zone: 'Sone 5A', dateISO: '2026-06-04', timeUTC: '18:45', locId: 'Sone 5A' },
+  { id: 'A-055', lat: 58.130028, lon: 7.363467, file: 'PXL_20260604_192708940.jpg', caption: 'Sone 5A · Fanget laks ved grusbanke', zone: 'Sone 5A', dateISO: '2026-06-04', timeUTC: '19:27', locId: 'Sone 5A' },
+  { id: 'A-056', lat: 58.129878, lon: 7.363481, file: 'PXL_20260604_192954022.MP.jpg', caption: 'Sone 5A · Fiskeutstyr og fangst', zone: 'Sone 5A', dateISO: '2026-06-04', timeUTC: '19:29', locId: 'Sone 5A' }
 ];
 let photoMarkers = [];
 
@@ -511,7 +515,7 @@ function computeScores() {
     const rate        = totalDays > 0 ? vol / totalDays : 0;
     const rateScore   = Math.min(100, (rate / p90Rate) * 100);
     const volumeScore = Math.min(100, (vol  / p90Vol)  * 100);
-    const combined    = Math.round(rateScore * 0.6 + volumeScore * 0.4);
+    const combined    = Math.round(rateScore * 0.8 + volumeScore * 0.2);
     scores[z] = { score: combined, catches: vol };
   });
   return scores;
@@ -627,6 +631,42 @@ function initMap() {
 
   setTimeout(() => map.invalidateSize(), 50);
   setTimeout(() => map.invalidateSize(), 300);
+
+  // "Hvor er jeg?"-kontroll oppe til høyre
+  const LocControl = L.Control.extend({
+    options: { position: 'topright' },
+    onAdd: function() {
+      const btn = L.DomUtil.create('button', '');
+      btn.innerHTML = '📍 Hvor er jeg?';
+      btn.style.cssText = 'background:#fff;color:#333;border:2px solid rgba(0,0,0,0.2);border-radius:4px;padding:5px 10px;font-size:0.75rem;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:none;';
+      btn.title = 'Vis min posisjon på kartet';
+      L.DomEvent.on(btn, 'click', L.DomEvent.stopPropagation);
+      L.DomEvent.on(btn, 'click', () => {
+        btn.innerHTML = '⏳ Søker...';
+        btn.disabled = true;
+        map.locate({ setView: true, maxZoom: 14 });
+      });
+      return btn;
+    }
+  });
+  new LocControl().addTo(map);
+
+  let _myLocMarker = null;
+  map.on('locationfound', (e) => {
+    if (_myLocMarker) _myLocMarker.remove();
+    _myLocMarker = L.circleMarker(e.latlng, {
+      radius: 8, color: '#e53e3e', fillColor: '#e53e3e',
+      fillOpacity: 0.9, weight: 2
+    }).addTo(map).bindTooltip('📍 Du er her', { permanent: false, direction: 'top', className: 'mtip' });
+    document.querySelector('.leaflet-control button') && (document.querySelectorAll('.leaflet-control button')[document.querySelectorAll('.leaflet-control button').length - 1].innerHTML = '📍 Hvor er jeg?');
+    const locBtn = document.querySelector('[title="Vis min posisjon på kartet"]');
+    if (locBtn) { locBtn.innerHTML = '📍 Hvor er jeg?'; locBtn.disabled = false; }
+  });
+  map.on('locationerror', () => {
+    const locBtn = document.querySelector('[title="Vis min posisjon på kartet"]');
+    if (locBtn) { locBtn.innerHTML = '📍 Hvor er jeg?'; locBtn.disabled = false; }
+    alert('Posisjon ikke tilgjengelig. Sjekk at du har gitt tilgang til posisjon i nettleseren.');
+  });
 
   ZONES.forEach(zone => {
     const zc = ZONE_COORDS[zone]; if (!zc) return;
@@ -860,6 +900,11 @@ function _renderPhoto() {
     mk.setIcon(makePhotoIcon(isActive));
     mk.setZIndexOffset(isActive ? 300 : 200);
   });
+
+  // Sentrer kartet på aktiv markør
+  if (activePhoto) {
+    map.panTo([activePhoto.lat, activePhoto.lon], { animate: true, duration: 0.4 });
+  }
 }
 function closePhoto() {
   document.getElementById('photoPanel').classList.remove('visible');
