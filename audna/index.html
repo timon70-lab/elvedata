@@ -1,1 +1,1106 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audna – Dynamisk oversikt</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f4f8; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px 12px 40px; }
+h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #94a3b8; margin-bottom: 16px; text-align: center; }
+.banner { width: 100%; max-width: 480px; background: #0f2d4a; border-radius: 14px; padding: 14px 18px; margin-bottom: 14px; position: relative; }
+.fiskemelding { position: absolute; top: 10px; right: 12px; max-width: 200px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 8px 10px; display: none; }
+.fiskemelding .fm-title { font-size: 0.7rem; font-weight: 600; color: #e2e8f0; display: flex; align-items: center; gap: 5px; }
+.fiskemelding .fm-text { font-size: 0.62rem; color: #94a3b8; margin-top: 3px; line-height: 1.4; }
+.rname { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #9ae6b4; margin-bottom: 6px; }
+.flow-row { display: flex; align-items: baseline; gap: 5px; margin-bottom: 3px; }
+.flow-num { font-size: 1.8rem; font-weight: 800; color: #68d391; line-height: 1; }
+.flow-unit { font-size: 0.7rem; color: #94a3b8; }
+.live-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #68d391; margin-right: 4px; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.station-lbl { font-size: 0.6rem; color: #4a6fa5; margin-bottom: 3px; }
+.flow-status { font-size: 0.6rem; }
+.quota-box { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; gap: 14px; flex-wrap: wrap; }
+.quota-item { font-size: 0.67rem; color: #94a3b8; line-height: 1.5; }
+.quota-item strong { color: #cbd5e1; }
+.ctrl-col { display: flex; flex-direction: column; gap: 11px; padding: 12px 14px 14px; border-left: 2px solid #f0fff4; justify-content: center; min-width: 0; }
+.ctrl-row { display: flex; align-items: center; gap: 8px; }
+.ctrl-row label { font-size: 0.65rem; font-weight: 700; color: #4a5568; white-space: nowrap; min-width: 44px; }
+.ctrl-val { font-size: 0.72rem; font-weight: 700; color: #276749; min-width: 64px; text-align: right; white-space: nowrap; }
+/* Single range */
+.ctrl-row > input[type=range] { flex: 1; accent-color: #276749; cursor: pointer; }
+/* Dual-handle slider */
+.dual-slider { position: relative; flex: 1; height: 20px; display: flex; align-items: center; }
+.dual-slider::before { content: ''; position: absolute; left: 0; right: 0; height: 4px; background: #e2e8f0; border-radius: 2px; }
+.dual-fill { position: absolute; height: 4px; background: #276749; border-radius: 2px; pointer-events: none; z-index: 1; }
+.dual-slider input[type=range] {
+  position: absolute; width: 100%; left: 0; pointer-events: none;
+  -webkit-appearance: none; appearance: none;
+  height: 4px; background: transparent; outline: none; margin: 0; padding: 0;
+}
+.dual-slider input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+  background: #276749; border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2); cursor: pointer; pointer-events: all;
+}
+.dual-slider input[type=range]::-moz-range-thumb {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #276749; border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2); cursor: pointer; pointer-events: all; border: none;
+}
+/* Fly pill */
+.fly-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 6px; border: 1.5px solid #e2e8f0; background: white; color: #94a3b8; font-size: 0.72rem; font-weight: 700; cursor: pointer; transition: all 0.18s; user-select: none; }
+.fly-pill .pip { width: 7px; height: 7px; border-radius: 50%; background: #e2e8f0; transition: background 0.18s; flex-shrink: 0; }
+.fly-pill.active { background: #276749; color: white; border-color: #276749; }
+.fly-pill.active .pip { background: #9ae6b4; }
+/* Zone panel */
+.panel { width: 100%; max-width: 480px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 14px; }
+.panel-body { display: grid; grid-template-columns: 1fr auto; align-items: start; }
+.panel-header { padding: 11px 14px 9px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; display: flex; flex-direction: column; gap: 1px; min-height: 64px; }
+.panel-name { font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #276749; }
+.panel-sub { font-size: 0.58rem; color: #94a3b8; }
+.zone-list { padding: 10px 12px 14px; display: flex; flex-direction: column; gap: 9px; min-height: 160px; }
+.zone-row { display: flex; align-items: center; gap: 10px; cursor: pointer; border-radius: 8px; padding: 4px 6px; transition: background 0.15s; }
+.zone-row:hover { background: #f0fff4; }
+.zone-row.active { background: #c6f6d5; }
+.mini-ring { position: relative; flex-shrink: 0; }
+.mini-ring svg { display: block; }
+.mini-ring .mnum { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 0.68rem; font-weight: 800; line-height: 1; }
+.zone-info { flex: 1; min-width: 0; }
+.zone-name { font-size: 0.76rem; font-weight: 700; color: #1a202c; }
+.zone-catches { font-size: 0.6rem; color: #94a3b8; margin-top: 1px; }
+.zone-map-hint { font-size: 0.58rem; color: #68d391; margin-top: 1px; }
+.no-data { font-size: 0.72rem; color: #94a3b8; padding: 8px 4px; font-style: italic; }
+/* Map */
+.map-panel { width: 100%; max-width: 480px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+.map-header { padding: 10px 14px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; display: flex; justify-content: space-between; align-items: center; }
+.map-header .map-title { font-size: 0.78rem; font-weight: 700; color: #276749; }
+.map-header .map-hint { font-size: 0.62rem; color: #94a3b8; }
+#map { height: 320px; width: 100%; }
+.leaflet-tooltip.mtip { background: #1a202c; color: #e2e8f0; border: 1px solid #4a5568; font-size: .72rem; font-weight: 700; padding: 2px 7px; border-radius: 5px; box-shadow: none; }
+.leaflet-tooltip.mtip::before { display: none; }
 
+.photo-panel { width: 100%; max-width: 480px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-top: 14px; display: none; }
+.photo-panel.visible { display: block; }
+.photo-header { padding: 10px 14px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; display: flex; justify-content: space-between; align-items: center; }
+.photo-header .photo-title { font-size: 0.78rem; font-weight: 700; color: #276749; }
+.photo-grid { display: flex; flex-direction: column; gap: 0; }
+.photo-item { position: relative; cursor: pointer; }
+.photo-item img { width: 100%; display: block; max-height: 260px; object-fit: cover; }
+.photo-caption { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.45); color: white; font-size: 0.65rem; padding: 5px 9px; }
+.photo-fullscreen { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; gap: 10px; }
+.photo-fullscreen.open { display: flex; }
+.photo-fullscreen img { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 6px; }
+.photo-fullscreen .close-btn { color: white; font-size: 1.5rem; cursor: pointer; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
+.photo-fullscreen .photo-fs-caption { color: #cbd5e0; font-size: 0.72rem; }
+
+.photo-panel { width: 100%; max-width: 480px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-top: 14px; display: none; }
+.photo-panel.visible { display: block; }
+.photo-hdr { padding: 10px 14px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; display: flex; justify-content: space-between; align-items: center; }
+.photo-hdr span { font-size: 0.78rem; font-weight: 700; color: #276749; }
+.photo-hdr button { background: none; border: none; color: #94a3b8; font-size: 1rem; cursor: pointer; line-height: 1; }
+.pg-nav-btn { background:none; border:1px solid #c6f6d5; border-radius:4px; color:#276749; font-size:0.85rem; cursor:pointer; padding:2px 7px; line-height:1.4; }
+.pg-nav-btn:disabled { color:#cbd5e0; border-color:#e2e8f0; cursor:not-allowed; }
+.photo-img { width: 100%; display: block; max-height: 280px; object-fit: cover; cursor: pointer; }
+.photo-cap { padding: 7px 14px 10px; font-size: 0.68rem; color: #64748b; }
+.photo-fs { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
+.photo-fs.open { display: flex; }
+.photo-fs img { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 6px; }
+.photo-fs .fs-cap { color: #cbd5e0; font-size: 0.72rem; }
+.photo-fs .fs-close { color: white; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+.zone-info-panel { width:100%; max-width:480px; background:white; border-radius:14px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,.07); margin-top:14px; display:none; }
+.zone-info-panel.visible { display:block; }
+.zi-hdr { padding:10px 14px; background:#f0fff4; border-bottom:2px solid #c6f6d5; display:flex; justify-content:space-between; align-items:center; }
+.zi-hdr-title { font-size:.78rem; font-weight:700; color:#276749; }
+.zi-hdr button { background:none; border:none; color:#94a3b8; font-size:1rem; cursor:pointer; line-height:1; }
+.zi-body { padding:12px 14px 14px; display:flex; flex-direction:column; gap:6px; }
+.zi-desc { font-size:.73rem; color:#374151; line-height:1.5; border-bottom:1px solid #f1f5f9; padding-bottom:8px; margin-bottom:2px; }
+.zi-row { display:flex; justify-content:space-between; align-items:baseline; font-size:.72rem; padding:2px 0; border-bottom:1px solid #f8fafc; }
+.zi-row:last-child { border-bottom:none; }
+.zi-label { color:#64748b; }
+.zi-val { color:#1a202c; font-weight:600; text-align:right; max-width:60%; }
+.zi-score-row { display:flex; align-items:center; gap:8px; padding:6px 0 4px; border-bottom:1px solid #f1f5f9; margin-bottom:4px; }
+.zi-score-num { font-size:1.6rem; font-weight:800; line-height:1; }
+.zi-score-label { font-size:.68rem; color:#64748b; }
+.zi-link { display:inline-block; margin-top:8px; font-size:.7rem; color:#276749; text-decoration:none; border:1px solid #c6f6d5; border-radius:6px; padding:4px 10px; }
+.zi-link:hover { background:#f0fff4; }
+.zi-sources { margin-top:10px; font-size:.62rem; color:#94a3b8; border-top:1px solid #f1f5f9; padding-top:7px; }
+.zi-sources a { color:#94a3b8; text-decoration:underline; }
+
+.total-score-box { display:flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0; position:relative; }
+.total-score-box .mnum { position:absolute; font-size:0.85rem; font-weight:800; line-height:1; }
+.total-score-lbl { font-size:0.54rem; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; margin-top:2px; }
+.stat-box { display:flex; gap:10px; align-items:flex-start; flex-shrink:0; }
+.stat-item { display:flex; flex-direction:column; align-items:center; background:rgba(255,255,255,0.55); border-radius:8px; padding:4px 8px; min-width:44px; }
+.stat-num { font-size:1.05rem; font-weight:800; color:#276749; line-height:1.1; }
+.stat-lbl { font-size:0.54rem; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; text-align:center; margin-top:1px; }
+
+.video-panel { width:100%; max-width:480px; background:white; border-radius:14px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,.07); margin-top:14px; display:none; }
+.video-panel.visible { display:block; }
+.vp-hdr { padding:10px 14px; background:#fff5f5; border-bottom:2px solid #fed7d7; display:flex; justify-content:space-between; align-items:center; }
+.vp-hdr-title { font-size:.78rem; font-weight:700; color:#c53030; }
+.vp-hdr button { background:none; border:none; color:#94a3b8; font-size:1rem; cursor:pointer; }
+.vp-iframe-wrap { position:relative; padding-bottom:56.25%; height:0; overflow:hidden; }
+.vp-iframe-wrap iframe { position:absolute; top:0; left:0; width:100%; height:100%; border:none; }
+.vp-info { padding:12px 14px 14px; font-size:.71rem; color:#374151; }
+.vp-yt-btn { display:inline-block; margin-top:8px; background:#c53030; color:white; text-decoration:none; border-radius:6px; padding:7px 14px; font-size:.75rem; font-weight:700; }
+.vp-yt-btn:hover { background:#9b2c2c; }
+
+.sparkline-row { display:flex; align-items:center; gap:8px; margin-top:4px; }
+.sparkline-wrap { flex:1; height:32px; }
+.sparkline-wrap svg { width:100%; height:32px; }
+.trend-badge { font-size:1.2rem; line-height:1; flex-shrink:0; }
+.trend-label { font-size:0.6rem; color:#94a3b8; line-height:1.2; flex-shrink:0; }
+</style>
+</head>
+<body>
+
+<h1>Audna · Dynamisk oversikt</h1>
+
+<div class="banner">
+  <div class="fiskemelding" id="fiskemelding">
+    <div class="fm-title" id="fmTitle"></div>
+    <div class="fm-text" id="fmText"></div>
+  </div>
+  <div class="rname">🌿 Audna</div>
+  <div class="flow-row"><span class="live-dot"></span><span class="flow-num" id="audnaFlow">…</span><span class="flow-unit">m³/s</span><span class="trend-badge" id="trendBadge" style="font-size:1.2rem;margin-left:6px;"></span><span class="trend-label" id="trendLabel" style="font-size:0.6rem;color:#94a3b8;margin-left:2px;align-self:center;"></span></div>
+  <div class="station-lbl">Gaupefossen · 23.8.0</div>
+  <div class="flow-status" id="audnaStatus"></div>
+  <div class="sparkline-row">
+    <div class="sparkline-wrap"><svg id="sparkSvg" viewBox="0 0 200 32" preserveAspectRatio="none"></svg></div>
+  </div>
+  <div style="font-size:0.55rem; color:#4a6741; text-align:right; margin-top:1px; opacity:0.7;">Vannføring siste 7 dager</div>
+  <div class="quota-box">
+    <div class="quota-item"><strong>Døgn:</strong> 1 laks</div>
+    <div class="quota-item"><strong>Sesong:</strong> 3 laks ≥65 cm</div>
+    <div class="quota-item"><strong>Gjenutsett:</strong> hunnlaks ≥65 cm · maks 3/døgn</div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+      <div>
+        <span class="panel-name">Audna · Topp 3 soner</span>
+      </div>
+      <div class="total-score-box" id="totalScoreBox"></div>
+      <div class="stat-box" id="statBox"></div>
+    </div>
+  </div>
+  <div class="panel-body">
+    <div class="zone-list" id="zoneList"></div>
+    <div class="ctrl-col">
+      <div class="ctrl-row">
+        <label>Vannføring</label>
+        <input type="range" id="flowSlider" min="0" max="80" step="5" value="5" oninput="onFlowChange(this.value)" style="width:90px">
+        <span class="ctrl-val" id="flowVal">5–10 m³/s</span>
+      </div>
+      <div class="ctrl-row">
+        <label>År</label>
+        <div class="dual-slider" style="width:90px">
+          <div class="dual-fill" id="yearFill"></div>
+          <input type="range" id="yearLo" min="2016" max="2025" step="1" value="2016" oninput="onYearChange()">
+          <input type="range" id="yearHi" min="2016" max="2025" step="1" value="2025" oninput="onYearChange()">
+        </div>
+        <span class="ctrl-val" id="yearVal">2016–2025</span>
+      </div>
+      <div class="ctrl-row">
+        <label>Måned</label>
+        <div class="dual-slider" style="width:90px">
+          <div class="dual-fill" id="monthFill"></div>
+          <input type="range" id="monthLo" min="6" max="9" step="1" value="6" oninput="onMonthChange()">
+          <input type="range" id="monthHi" min="6" max="9" step="1" value="9" oninput="onMonthChange()">
+        </div>
+        <span class="ctrl-val" id="monthVal">Jun–Sep</span>
+      </div>
+      <div class="ctrl-row">
+        <div class="fly-pill" id="flyPill" onclick="toggleFly()">
+          <span class="pip"></span> Kun flue
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="map-panel">
+  <div class="map-header">
+    <span class="map-title" id="mapTitle">🗺 Kart</span>
+    <span class="map-hint">Klikk en sone for å zoome inn</span>
+  </div>
+  <div id="map"></div>
+</div>
+
+<script>
+const NVE_CACHE_URL = 'https://timon70-lab.github.io/elvedata/data/vannforing.json';
+const NEDBOR_CACHE_URL = 'https://timon70-lab.github.io/elvedata/data/nedbor.json';
+
+const ZONE_INFO = {
+  'Sone1': {
+    name: 'Sone 1 – Nedre Audna',
+    desc: 'Nederste sone fra sjøen og opp. Stor del brakkvannssone, best egnet for båtfiske etter sjøørret og laks ved innsiget. Tilgjengelig fra Vigeland og ned mot Sniksfjorden.',
+    redskap: 'Flue, sluk, mark',
+    sesong: '1. juni – 31. august',
+    kortUrl: 'https://www.scanatura.no/webshop?id=621',
+    merknader: 'Stengt onsdager. Ungdom under 18 år fisker gratis.'
+  },
+  'Sone2': {
+    name: 'Sone 2 – Gaupefossen',
+    desc: 'Regnes av mange som den beste sonen i Audna. Gaupefossen gir gode fiskeforhold med varierte strømdrag. Sone 2 er delt i 2a, 2c og 2d. Vannstandsmåler Gaupefossen er referansepunktet for hele elva.',
+    redskap: 'Flue, sluk, mark',
+    sesong: '1. juni – 31. august',
+    kortUrl: 'https://www.scanatura.no/webshop?id=621',
+    merknader: 'Stengt onsdager (unntatt sone 2d). Begrenset antall fiskeplasser.'
+  },
+  'Sone3': {
+    name: 'Sone 3 – Haga',
+    desc: 'Rolige og stilleflytende partier mellom Gaupefossen og Melhusfossen. God flueelv med fine høler. Tilgjengelig for alle, men fisket kan være følsomt for lav vannstand.',
+    redskap: 'Flue, sluk, mark',
+    sesong: '1. juni – 31. august',
+    kortUrl: 'https://www.scanatura.no/webshop?id=621',
+    merknader: 'Stengt onsdager. Koster ikke for ungdom under 18 år.'
+  },
+  'Sone4': {
+    name: 'Sone 4 – Melhusfossen',
+    desc: 'Den mest kjente og prestisjetunge plassen i Audna. Melhusfossen er betraktet som den beste fiskeplassen av mange lokale. Privat grunneierfiske fra én side, kortsalg på den andre.',
+    redskap: 'Flue, mark (sirkelkrok påbudt). Slukforbud øverst, sluk tillatt nederst.',
+    sesong: '1. juni – 31. august (stengt kl. 23–04)',
+    kortUrl: 'https://www.scanatura.no/webshop?id=621',
+    merknader: 'Sirkelkrok påbudt siden 2017. Desinfeksjonsstasjon på stedet. Stengt onsdager.'
+  },
+  'Sone 5A': {
+    name: 'Sone 5A – Nedre del',
+    desc: 'Nedre del av den lange sone 5-strekningen. Rolige partier med stilleflytende elv og gode høler. Godt egnet for fluefiske. Lavt fiskepress sammenlignet med sone 2 og 4.',
+    redskap: 'Flue, sluk, mark',
+    sesong: '1. juni – 31. august',
+    kortUrl: 'https://www.scanatura.no/webshop?id=621',
+    merknader: 'Stengt onsdager.'
+  },
+  'Sone 5B': {
+    name: 'Sone 5B – Øvre del',
+    desc: 'Øvre del av sone 5. Lang og fin strekning med varierende karakter. Fisket er noe mer følsomt for lav vannstand enn de nedre sonene, men byr på gode muligheter i normal til høy vannføring.',
+    redskap: 'Flue, sluk, mark',
+    sesong: '1. juni – 31. august',
+    kortUrl: 'https://www.scanatura.no/webshop?id=621',
+    merknader: 'Stengt onsdager.'
+  },
+  'Sone5': {
+    name: 'Sone 5 – Midt-Audna',
+    desc: 'Lang strekning med stilleflytende partier og spredte stryk. Lite fiskepress. Krever noe høyere vannstand for optimalt fiske, men god elv for den som vil ha ro.',
+    redskap: 'Flue, sluk, mark',
+    sesong: '1. juni – 31. august',
+    kortUrl: 'https://www.scanatura.no/webshop?id=621',
+    merknader: 'Stengt onsdager.'
+  },
+  'Sone6': {
+    name: 'Sone 6 – Øvre Audna',
+    desc: 'Øvre del av lakseførende strekning med varierte fiskemuligheter. God elv for fluefiskere. Augustlaksen kan gi fine fangster i god vannstand.',
+    redskap: 'Flue, sluk, mark',
+    sesong: '1. juni – 31. august',
+    kortUrl: 'https://www.scanatura.no/webshop?id=621',
+    merknader: 'Stengt onsdager.'
+  },
+  'Sone7': {
+    name: 'Sone 7 – Gislefoss',
+    desc: 'Gislefoss er den mest kjente fiskeplassen i øvre Audna. Det ble tatt en laks på 13,2 kg her i 2009. God strøm og fine høler. Litt bedre strømdrag enn mange nedre soner.',
+    redskap: 'Flue, sluk, mark',
+    sesong: '1. juni – 31. august',
+    kortUrl: 'https://www.scanatura.no/webshop?id=621',
+    merknader: 'Stengt onsdager. Koster for ungdom under 18 år.'
+  },
+  'Sone8': {
+    name: 'Sone 8 – Øvre strekning',
+    desc: 'Øverste tilgjengelige sone, nær Ytre Øydnevann. Gjennomgående litt bedre strømdrag enn sone 5. Enda mindre fiskepress enn mellomsonene. Best i en god og våt sommer med augustlaks.',
+    redskap: 'Flue, sluk, mark',
+    sesong: '1. juni – 31. august',
+    kortUrl: 'https://www.scanatura.no/webshop?id=621',
+    merknader: 'Stengt onsdager. Fisket mer følsomt for lav vannstand.'
+  }
+};
+
+const FLOW_LOOKUP = {"2025-06-01": 2, "2025-06-02": 2, "2025-06-03": 2, "2025-06-04": 4, "2025-06-05": 4, "2025-06-06": 8, "2025-06-07": 9, "2025-06-08": 6, "2025-06-09": 5, "2025-06-10": 5, "2025-06-11": 5, "2025-06-12": 4, "2025-06-13": 4, "2025-06-14": 4, "2025-06-15": 4, "2025-06-16": 3, "2025-06-17": 3, "2025-06-18": 3, "2025-06-19": 2, "2025-06-20": 2, "2025-06-21": 2, "2025-06-22": 2, "2025-06-23": 2, "2025-06-24": 2, "2025-06-25": 2, "2025-06-26": 2, "2025-06-27": 3, "2025-06-28": 3, "2025-06-29": 2, "2025-06-30": 2, "2025-07-01": 2, "2025-07-02": 2, "2025-07-03": 2, "2025-07-04": 3, "2025-07-05": 5, "2025-07-06": 5, "2025-07-07": 4, "2025-07-08": 3, "2025-07-09": 3, "2025-07-10": 2, "2025-07-11": 2, "2025-07-12": 2, "2025-07-13": 2, "2025-07-14": 3, "2025-07-15": 3, "2025-07-16": 3, "2025-07-17": 3, "2025-07-18": 2, "2025-07-19": 1, "2025-07-20": 1, "2025-07-21": 2, "2025-07-22": 5, "2025-07-23": 5, "2025-07-24": 7, "2025-07-25": 7, "2025-07-26": 4, "2025-07-27": 4, "2025-07-28": 3, "2025-07-29": 3, "2025-07-30": 3, "2025-07-31": 3, "2025-08-01": 3, "2025-08-02": 3, "2025-08-03": 3, "2025-08-04": 4, "2025-08-05": 22, "2025-08-06": 21, "2025-08-07": 15, "2025-08-08": 12, "2025-08-09": 10, "2025-08-10": 12, "2025-08-11": 11, "2025-08-12": 10, "2025-08-13": 10, "2025-08-14": 9, "2025-08-15": 8, "2025-08-16": 7, "2025-08-17": 6, "2025-08-18": 6, "2025-08-19": 5, "2025-08-20": 6, "2025-08-21": 5, "2025-08-22": 4, "2025-08-23": 3, "2025-08-24": 3, "2025-08-25": 3, "2025-08-26": 4, "2025-08-27": 3, "2025-08-28": 3, "2025-08-29": 4, "2025-08-30": 4, "2025-08-31": 3, "2024-06-01": 7, "2024-06-02": 5, "2024-06-03": 7, "2024-06-04": 7, "2024-06-05": 12, "2024-06-06": 11, "2024-06-07": 10, "2024-06-08": 11, "2024-06-09": 13, "2024-06-10": 12, "2024-06-11": 14, "2024-06-12": 15, "2024-06-13": 12, "2024-06-14": 11, "2024-06-15": 27, "2024-06-16": 37, "2024-06-17": 34, "2024-06-18": 32, "2024-06-19": 27, "2024-06-20": 22, "2024-06-21": 19, "2024-06-22": 16, "2024-06-23": 14, "2024-06-24": 12, "2024-06-25": 11, "2024-06-26": 9, "2024-06-27": 9, "2024-06-28": 8, "2024-06-29": 8, "2024-06-30": 8, "2024-07-01": 9, "2024-07-02": 8, "2024-07-03": 6, "2024-07-04": 6, "2024-07-05": 9, "2024-07-06": 11, "2024-07-07": 18, "2024-07-08": 13, "2024-07-09": 10, "2024-07-10": 14, "2024-07-11": 19, "2024-07-12": 16, "2024-07-13": 13, "2024-07-14": 13, "2024-07-15": 17, "2024-07-16": 19, "2024-07-17": 20, "2024-07-18": 17, "2024-07-19": 16, "2024-07-20": 13, "2024-07-21": 12, "2024-07-22": 11, "2024-07-23": 10, "2024-07-24": 9, "2024-07-25": 9, "2024-07-26": 11, "2024-07-27": 11, "2024-07-28": 8, "2024-07-29": 8, "2024-07-30": 7, "2024-07-31": 7, "2024-08-01": 7, "2024-08-02": 7, "2024-08-03": 6, "2024-08-04": 6, "2024-08-05": 6, "2024-08-06": 5, "2024-08-07": 4, "2024-08-08": 4, "2024-08-09": 8, "2024-08-10": 8, "2024-08-11": 7, "2024-08-12": 6, "2024-08-13": 6, "2024-08-14": 7, "2024-08-15": 8, "2024-08-16": 16, "2024-08-17": 11, "2024-08-18": 9, "2024-08-19": 7, "2024-08-20": 9, "2024-08-21": 18, "2024-08-22": 27, "2024-08-23": 40, "2024-08-24": 36, "2024-08-25": 32, "2024-08-26": 49, "2024-08-27": 33, "2024-08-28": 24, "2024-08-29": 20, "2024-08-30": 17, "2024-08-31": 15, "2023-06-01": 2, "2023-06-02": 3, "2023-06-03": 2, "2023-06-04": 2, "2023-06-05": 4, "2023-06-06": 4, "2023-06-07": 3, "2023-06-08": 3, "2023-06-09": 3, "2023-06-10": 3, "2023-06-11": 3, "2023-06-12": 3, "2023-06-13": 3, "2023-06-14": 3, "2023-06-15": 3, "2023-06-16": 3, "2023-06-17": 3, "2023-06-18": 3, "2023-06-19": 3, "2023-06-20": 3, "2023-06-21": 3, "2023-06-22": 3, "2023-06-23": 3, "2023-06-24": 3, "2023-06-25": 3, "2023-06-26": 3, "2023-06-27": 3, "2023-06-28": 3, "2023-06-29": 3, "2023-06-30": 3, "2023-07-01": 2, "2023-07-02": 2, "2023-07-03": 2, "2023-07-04": 2, "2023-07-05": 1, "2023-07-06": 2, "2023-07-07": 1, "2023-07-08": 1, "2023-07-09": 1, "2023-07-10": 3, "2023-07-11": 6, "2023-07-12": 8, "2023-07-13": 7, "2023-07-14": 6, "2023-07-15": 6, "2023-07-16": 11, "2023-07-17": 22, "2023-07-18": 20, "2023-07-19": 17, "2023-07-20": 14, "2023-07-21": 14, "2023-07-22": 12, "2023-07-23": 10, "2023-07-24": 10, "2023-07-25": 10, "2023-07-26": 10, "2023-07-27": 11, "2023-07-28": 10, "2023-07-29": 8, "2023-07-30": 8, "2023-07-31": 10, "2023-08-01": 9, "2023-08-02": 8, "2023-08-03": 8, "2023-08-04": 8, "2023-08-05": 7, "2023-08-06": 5, "2023-08-07": 4, "2023-08-08": 4, "2023-08-09": 4, "2023-08-10": 5, "2023-08-11": 4, "2023-08-12": 4, "2023-08-13": 5, "2023-08-14": 5, "2023-08-15": 13, "2023-08-16": 15, "2023-08-17": 13, "2023-08-18": 11, "2023-08-19": 12, "2023-08-20": 19, "2023-08-21": 14, "2023-08-22": 13, "2023-08-23": 13, "2023-08-24": 12, "2023-08-25": 15, "2023-08-26": 15, "2023-08-27": 13, "2023-08-28": 12, "2023-08-29": 11, "2023-08-30": 12, "2023-08-31": 14, "2022-06-01": 3, "2022-06-02": 3, "2022-06-03": 2, "2022-06-04": 2, "2022-06-05": 2, "2022-06-06": 2, "2022-06-07": 2, "2022-06-08": 2, "2022-06-09": 2, "2022-06-10": 2, "2022-06-11": 2, "2022-06-12": 2, "2022-06-13": 2, "2022-06-14": 1, "2022-06-15": 2, "2022-06-16": 1, "2022-06-17": 1, "2022-06-18": 1, "2022-06-19": 1, "2022-06-20": 1, "2022-06-21": 1, "2022-06-22": 1, "2022-06-23": 1, "2022-06-24": 1, "2022-06-25": 1, "2022-06-26": 1, "2022-06-27": 1, "2022-06-28": 1, "2022-06-29": 1, "2022-06-30": 1, "2022-07-01": 1, "2022-07-02": 1, "2022-07-03": 1, "2022-07-04": 1, "2022-07-05": 1, "2022-07-06": 1, "2022-07-07": 1, "2022-07-08": 1, "2022-07-09": 1, "2022-07-10": 0, "2022-07-11": 1, "2022-07-12": 0, "2022-07-13": 0, "2022-07-14": 0, "2022-07-15": 0, "2022-07-16": 0, "2022-07-17": 0, "2022-07-18": 0, "2022-07-19": 0, "2022-07-20": 0, "2022-07-21": 0, "2022-07-22": 0, "2022-07-23": 0, "2022-07-24": 0, "2022-07-25": 0, "2022-07-26": 1, "2022-07-27": 0, "2022-07-28": 0, "2022-07-29": 0, "2022-07-30": 1, "2022-07-31": 0, "2022-08-01": 2, "2022-08-02": 2, "2022-08-03": 4, "2022-08-04": 3, "2022-08-05": 2, "2022-08-06": 1, "2022-08-07": 1, "2022-08-08": 1, "2022-08-09": 1, "2022-08-10": 1, "2022-08-11": 1, "2022-08-12": 1, "2022-08-13": 1, "2022-08-14": 0, "2022-08-15": 0, "2022-08-16": 1, "2022-08-17": 1, "2022-08-18": 1, "2022-08-19": 1, "2022-08-20": 1, "2022-08-21": 1, "2022-08-22": 1, "2022-08-23": 2, "2022-08-24": 2, "2022-08-25": 2, "2022-08-26": 2, "2022-08-27": 2, "2022-08-28": 2, "2022-08-29": 2, "2022-08-30": 2, "2022-08-31": 2, "2021-06-01": 11, "2021-06-02": 10, "2021-06-03": 10, "2021-06-04": 17, "2021-06-05": 12, "2021-06-06": 10, "2021-06-07": 9, "2021-06-08": 8, "2021-06-09": 8, "2021-06-10": 7, "2021-06-11": 6, "2021-06-12": 5, "2021-06-13": 5, "2021-06-14": 8, "2021-06-15": 9, "2021-06-16": 8, "2021-06-17": 8, "2021-06-18": 8, "2021-06-19": 7, "2021-06-20": 8, "2021-06-21": 11, "2021-06-22": 8, "2021-06-23": 7, "2021-06-24": 6, "2021-06-25": 7, "2021-06-26": 5, "2021-06-27": 4, "2021-06-28": 5, "2021-06-29": 5, "2021-06-30": 5, "2021-07-01": 5, "2021-07-02": 4, "2021-07-03": 3, "2021-07-04": 3, "2021-07-05": 4, "2021-07-06": 6, "2021-07-07": 10, "2021-07-08": 31, "2021-07-09": 21, "2021-07-10": 17, "2021-07-11": 13, "2021-07-12": 11, "2021-07-13": 10, "2021-07-14": 9, "2021-07-15": 8, "2021-07-16": 7, "2021-07-17": 6, "2021-07-18": 5, "2021-07-19": 6, "2021-07-20": 5, "2021-07-21": 5, "2021-07-22": 5, "2021-07-23": 4, "2021-07-24": 3, "2021-07-25": 3, "2021-07-26": 4, "2021-07-27": 4, "2021-07-28": 6, "2021-07-29": 14, "2021-07-30": 10, "2021-07-31": 8, "2021-08-01": 7, "2021-08-02": 6, "2021-08-03": 5, "2021-08-04": 5, "2021-08-05": 5, "2021-08-06": 5, "2021-08-07": 5, "2021-08-08": 5, "2021-08-09": 6, "2021-08-10": 7, "2021-08-11": 7, "2021-08-12": 6, "2021-08-13": 6, "2021-08-14": 8, "2021-08-15": 9, "2021-08-16": 8, "2021-08-17": 8, "2021-08-18": 8, "2021-08-19": 7, "2021-08-20": 7, "2021-08-21": 6, "2021-08-22": 6, "2021-08-23": 6, "2021-08-24": 6, "2021-08-25": 5, "2021-08-26": 5, "2021-08-27": 5, "2021-08-28": 4, "2021-08-29": 4, "2021-08-30": 4, "2021-08-31": 4, "2020-06-01": 3, "2020-06-02": 3, "2020-06-03": 3, "2020-06-04": 4, "2020-06-05": 29, "2020-06-06": 16, "2020-06-07": 10, "2020-06-08": 9, "2020-06-09": 7, "2020-06-10": 7, "2020-06-11": 6, "2020-06-12": 4, "2020-06-13": 5, "2020-06-14": 8, "2020-06-15": 6, "2020-06-16": 6, "2020-06-17": 5, "2020-06-18": 5, "2020-06-19": 5, "2020-06-20": 8, "2020-06-21": 8, "2020-06-22": 6, "2020-06-23": 6, "2020-06-24": 5, "2020-06-25": 3, "2020-06-26": 4, "2020-06-27": 3, "2020-06-28": 3, "2020-06-29": 5, "2020-06-30": 23, "2020-07-01": 16, "2020-07-02": 12, "2020-07-03": 14, "2020-07-04": 14, "2020-07-05": 22, "2020-07-06": 22, "2020-07-07": 15, "2020-07-08": 13, "2020-07-09": 11, "2020-07-10": 13, "2020-07-11": 14, "2020-07-12": 10, "2020-07-13": 9, "2020-07-14": 9, "2020-07-15": 8, "2020-07-16": 8, "2020-07-17": 7, "2020-07-18": 11, "2020-07-19": 28, "2020-07-20": 21, "2020-07-21": 14, "2020-07-22": 12, "2020-07-23": 11, "2020-07-24": 19, "2020-07-25": 15, "2020-07-26": 32, "2020-07-27": 30, "2020-07-28": 78, "2020-07-29": 84, "2020-07-30": 53, "2020-07-31": 38, "2020-08-01": 30, "2020-08-02": 26, "2020-08-03": 21, "2020-08-04": 18, "2020-08-05": 28, "2020-08-06": 26, "2020-08-07": 18, "2020-08-08": 16, "2020-08-09": 14, "2020-08-10": 12, "2020-08-11": 11, "2020-08-12": 10, "2020-08-13": 9, "2020-08-14": 8, "2020-08-15": 6, "2020-08-16": 7, "2020-08-17": 6, "2020-08-18": 5, "2020-08-19": 6, "2020-08-20": 6, "2020-08-21": 7, "2020-08-22": 9, "2020-08-23": 9, "2020-08-24": 8, "2020-08-25": 7, "2020-08-26": 6, "2020-08-27": 6, "2020-08-28": 7, "2020-08-29": 7, "2020-08-30": 7, "2020-08-31": 7, "2020-09-01": 5, "2020-09-02": 5, "2020-09-03": 7, "2020-09-04": 9, "2020-09-05": 10, "2020-09-06": 10, "2020-09-07": 8, "2020-09-08": 8, "2020-09-09": 11, "2020-09-10": 11, "2020-09-11": 9, "2020-09-12": 10, "2020-09-13": 9, "2020-09-14": 10, "2020-09-15": 10, "2019-06-01": 9, "2019-06-02": 9, "2019-06-03": 8, "2019-06-04": 7, "2019-06-05": 8, "2019-06-06": 8, "2019-06-07": 8, "2019-06-08": 8, "2019-06-09": 19, "2019-06-10": 15, "2019-06-11": 12, "2019-06-12": 19, "2019-06-13": 17, "2019-06-14": 17, "2019-06-15": 16, "2019-06-16": 14, "2019-06-17": 13, "2019-06-18": 12, "2019-06-19": 11, "2019-06-20": 10, "2019-06-21": 10, "2019-06-22": 8, "2019-06-23": 7, "2019-06-24": 7, "2019-06-25": 7, "2019-06-26": 6, "2019-06-27": 5, "2019-06-28": 5, "2019-06-29": 4, "2019-06-30": 4, "2019-07-01": 4, "2019-07-02": 3, "2019-07-03": 3, "2019-07-04": 4, "2019-07-05": 3, "2019-07-06": 2, "2019-07-07": 2, "2019-07-08": 3, "2019-07-09": 4, "2019-07-10": 2, "2019-07-11": 2, "2019-07-12": 2, "2019-07-13": 2, "2019-07-14": 2, "2019-07-15": 1, "2019-07-16": 2, "2019-07-17": 1, "2019-07-18": 2, "2019-07-19": 2, "2019-07-20": 4, "2019-07-21": 14, "2019-07-22": 9, "2019-07-23": 8, "2019-07-24": 8, "2019-07-25": 7, "2019-07-26": 7, "2019-07-27": 5, "2019-07-28": 5, "2019-07-29": 5, "2019-07-30": 4, "2019-07-31": 6, "2019-08-01": 6, "2019-08-02": 6, "2019-08-03": 5, "2019-08-04": 4, "2019-08-05": 5, "2019-08-06": 6, "2019-08-07": 6, "2019-08-08": 6, "2019-08-09": 6, "2019-08-10": 11, "2019-08-11": 33, "2019-08-12": 48, "2019-08-13": 33, "2019-08-14": 23, "2019-08-15": 20, "2019-08-16": 19, "2019-08-17": 45, "2019-08-18": 33, "2019-08-19": 30, "2019-08-20": 35, "2019-08-21": 29, "2019-08-22": 46, "2019-08-23": 52, "2019-08-24": 36, "2019-08-25": 28, "2019-08-26": 23, "2019-08-27": 20, "2019-08-28": 18, "2019-08-29": 16, "2019-08-30": 14, "2019-08-31": 11, "2019-09-01": 10, "2019-09-02": 8, "2019-09-03": 8, "2019-09-04": 12, "2019-09-05": 17, "2019-09-06": 16, "2019-09-07": 19, "2019-09-08": 16, "2019-09-09": 16, "2019-09-10": 18, "2019-09-11": 17, "2019-09-12": 17, "2019-09-13": 15, "2019-09-14": 13, "2019-09-15": 33, "2018-06-01": 5, "2018-06-02": 4, "2018-06-03": 3, "2018-06-04": 4, "2018-06-05": 3, "2018-06-06": 4, "2018-06-07": 4, "2018-06-08": 5, "2018-06-09": 5, "2018-06-10": 5, "2018-06-11": 5, "2018-06-12": 3, "2018-06-13": 3, "2018-06-14": 3, "2018-06-15": 4, "2018-06-16": 3, "2018-06-17": 3, "2018-06-18": 4, "2018-06-19": 4, "2018-06-20": 4, "2018-06-21": 6, "2018-06-22": 4, "2018-06-23": 3, "2018-06-24": 3, "2018-06-25": 4, "2018-06-26": 4, "2018-06-27": 5, "2018-06-28": 4, "2018-06-29": 3, "2018-06-30": 3, "2018-07-01": 3, "2018-07-02": 3, "2018-07-03": 3, "2018-07-04": 3, "2018-07-05": 3, "2018-07-06": 2, "2018-07-07": 1, "2018-07-08": 1, "2018-07-09": 1, "2018-07-10": 1, "2018-07-11": 0, "2018-07-12": 1, "2018-07-13": 1, "2018-07-14": 0, "2018-07-15": 0, "2018-07-16": 1, "2018-07-17": 1, "2018-07-18": 1, "2018-07-19": 1, "2018-07-20": 0, "2018-07-21": 0, "2018-07-22": 1, "2018-07-23": 1, "2018-07-24": 0, "2018-07-25": 1, "2018-07-26": 0, "2018-07-27": 1, "2018-07-28": 0, "2018-07-29": 2, "2018-07-30": 1, "2018-07-31": 1, "2018-08-01": 3, "2018-08-02": 2, "2018-08-03": 2, "2018-08-04": 1, "2018-08-05": 1, "2018-08-06": 1, "2018-08-07": 1, "2018-08-08": 1, "2018-08-09": 2, "2018-08-10": 10, "2018-08-11": 9, "2018-08-12": 6, "2018-08-13": 5, "2018-08-14": 5, "2018-08-15": 4, "2018-08-16": 7, "2018-08-17": 16, "2018-08-18": 12, "2018-08-19": 12, "2018-08-20": 10, "2018-08-21": 8, "2018-08-22": 8, "2018-08-23": 10, "2018-08-24": 9, "2018-08-25": 8, "2018-08-26": 8, "2018-08-27": 24, "2018-08-28": 20, "2018-08-29": 14, "2018-08-30": 15, "2018-08-31": 14, "2017-06-01": 6, "2017-06-02": 4, "2017-06-03": 4, "2017-06-04": 4, "2017-06-05": 5, "2017-06-06": 4, "2017-06-07": 6, "2017-06-08": 9, "2017-06-09": 10, "2017-06-10": 11, "2017-06-11": 8, "2017-06-12": 10, "2017-06-13": 10, "2017-06-14": 7, "2017-06-15": 6, "2017-06-16": 9, "2017-06-17": 7, "2017-06-18": 6, "2017-06-19": 6, "2017-06-20": 5, "2017-06-21": 6, "2017-06-22": 4, "2017-06-23": 4, "2017-06-24": 4, "2017-06-25": 4, "2017-06-26": 5, "2017-06-27": 4, "2017-06-28": 3, "2017-06-29": 3, "2017-06-30": 4, "2017-07-01": 2, "2017-07-02": 2, "2017-07-03": 2, "2017-07-04": 2, "2017-07-05": 2, "2017-07-06": 3, "2017-07-07": 2, "2017-07-08": 1, "2017-07-09": 1, "2017-07-10": 1, "2017-07-11": 1, "2017-07-12": 2, "2017-07-13": 1, "2017-07-14": 1, "2017-07-15": 1, "2017-07-16": 1, "2017-07-17": 1, "2017-07-18": 1, "2017-07-19": 2, "2017-07-20": 1, "2017-07-21": 1, "2017-07-22": 3, "2017-07-23": 3, "2017-07-24": 3, "2017-07-25": 2, "2017-07-26": 2, "2017-07-27": 3, "2017-07-28": 4, "2017-07-29": 3, "2017-07-30": 4, "2017-07-31": 8, "2017-08-01": 9, "2017-08-02": 18, "2017-08-03": 25, "2017-08-04": 51, "2017-08-05": 41, "2017-08-06": 26, "2017-08-07": 25, "2017-08-08": 27, "2017-08-09": 24, "2017-08-10": 23, "2017-08-11": 19, "2017-08-12": 16, "2017-08-13": 13, "2017-08-14": 12, "2017-08-15": 12, "2017-08-16": 15, "2017-08-17": 14, "2017-08-18": 18, "2017-08-19": 20, "2017-08-20": 22, "2017-08-21": 18, "2017-08-22": 15, "2017-08-23": 14, "2017-08-24": 14, "2017-08-25": 15, "2017-08-26": 13, "2017-08-27": 12, "2017-08-28": 11, "2017-08-29": 11, "2017-08-30": 11, "2017-08-31": 10, "2017-09-01": 9, "2017-09-02": 8, "2017-09-03": 8, "2017-09-04": 8, "2017-09-05": 8, "2017-09-06": 17, "2017-09-07": 13, "2017-09-08": 18, "2017-09-09": 29, "2017-09-10": 28, "2017-09-11": 82, "2017-09-12": 63, "2017-09-13": 49, "2017-09-14": 40, "2017-09-15": 33, "2016-06-01": 5, "2016-06-02": 5, "2016-06-03": 4, "2016-06-04": 4, "2016-06-05": 3, "2016-06-06": 4, "2016-06-07": 5, "2016-06-08": 5, "2016-06-09": 4, "2016-06-10": 3, "2016-06-11": 2, "2016-06-12": 2, "2016-06-13": 3, "2016-06-14": 3, "2016-06-15": 3, "2016-06-16": 4, "2016-06-17": 5, "2016-06-18": 4, "2016-06-19": 4, "2016-06-20": 5, "2016-06-21": 7, "2016-06-22": 6, "2016-06-23": 6, "2016-06-24": 6, "2016-06-25": 6, "2016-06-26": 8, "2016-06-27": 9, "2016-06-28": 8, "2016-06-29": 8, "2016-06-30": 19, "2016-07-01": 20, "2016-07-02": 21, "2016-07-03": 18, "2016-07-04": 15, "2016-07-05": 14, "2016-07-06": 13, "2016-07-07": 10, "2016-07-08": 9, "2016-07-09": 7, "2016-07-10": 6, "2016-07-11": 7, "2016-07-12": 8, "2016-07-13": 6, "2016-07-14": 9, "2016-07-15": 8, "2016-07-16": 7, "2016-07-17": 5, "2016-07-18": 6, "2016-07-19": 7, "2016-07-20": 6, "2016-07-21": 5, "2016-07-22": 5, "2016-07-23": 3, "2016-07-24": 3, "2016-07-25": 3, "2016-07-26": 4, "2016-07-27": 4, "2016-07-28": 7, "2016-07-29": 8, "2016-07-30": 10, "2016-07-31": 8, "2016-08-01": 6, "2016-08-02": 7, "2016-08-03": 8, "2016-08-04": 26, "2016-08-05": 29, "2016-08-06": 19, "2016-08-07": 16, "2016-08-08": 25, "2016-08-09": 22, "2016-08-10": 17, "2016-08-11": 15, "2016-08-12": 14, "2016-08-13": 13, "2016-08-14": 10, "2016-08-15": 10, "2016-08-16": 9, "2016-08-17": 10, "2016-08-18": 9, "2016-08-19": 8, "2016-08-20": 8, "2016-08-21": 8, "2016-08-22": 11, "2016-08-23": 11, "2016-08-24": 10, "2016-08-25": 10, "2016-08-26": 10, "2016-08-27": 9, "2016-08-28": 9, "2016-08-29": 8, "2016-08-30": 9, "2016-08-31": 9, "2016-09-01": 9, "2016-09-02": 8, "2016-09-03": 8, "2016-09-04": 7, "2016-09-05": 7, "2016-09-06": 6, "2016-09-07": 6, "2016-09-08": 5, "2016-09-09": 5, "2016-09-10": 5, "2016-09-11": 13, "2016-09-12": 10, "2016-09-13": 8, "2016-09-14": 8, "2016-09-15": 8};
+const MONTH_NAMES = {6:'Jun', 7:'Jul', 8:'Aug', 9:'Sep'};
+// Normalisering: 90-persentil av rate og volum (ikke absolutt maks)
+const P90_RATE_ALL = 7.0,  P90_VOL_ALL = 158.2;
+const P90_RATE_FLY = 4.0,  P90_VOL_FLY = 76.6;
+
+const ZONE_COORDS = {
+  'Sone 5A': {s:[58.12663,7.33986], e:[58.15179,7.36636]},
+  'Sone 5B': {s:[58.15189,7.36660], e:[58.21173,7.33608]},
+  'Sone1':   {s:[58.05198,7.27773], e:[58.10616,7.34156]},
+  'Sone2':   {s:[58.10460,7.32402], e:[58.12497,7.33835]},
+  'Sone3':   {s:[58.11864,7.34185], e:[58.12488,7.33926]},
+  'Sone4':   {s:[58.12488,7.33926], e:[58.12555,7.33911]},
+  'Sone5':   {s:[58.12644,7.34040], e:[58.21173,7.33608]},
+  'Sone6':   {s:[58.21189,7.33640], e:[58.22503,7.33559]},
+  'Sone7':   {s:[58.22583,7.33559], e:[58.24200,7.34598]},
+  'Sone8':   {s:[58.24221,7.34617], e:[58.32363,7.36626]},
+};
+
+
+const ALL_DATA = {"2016": {"6": {"0": {"Sone2": 1, "Sone4": 10, "Sone5": 2, "Sone6": 2, "Sone7": 3, "Sone8": 2}, "5": {"Sone1": 1, "Sone2": 7, "Sone3": 8, "Sone4": 78, "Sone5": 16, "Sone6": 19, "Sone7": 1, "Sone8": 1}, "15": {"Sone2": 2, "Sone3": 1, "Sone4": 14, "Sone5": 2, "Sone6": 4, "Sone7": 1, "Sone8": 1}}, "7": {"0": {"Sone2": 2, "Sone4": 24, "Sone5": 10, "Sone6": 5, "Sone7": 1, "Sone8": 6}, "5": {"Sone1": 1, "Sone2": 41, "Sone3": 7, "Sone4": 180, "Sone5": 66, "Sone6": 42, "Sone7": 16, "Sone8": 10}, "10": {"Sone2": 6, "Sone3": 4, "Sone4": 50, "Sone5": 17, "Sone6": 12, "Sone7": 2}, "15": {"Sone2": 9, "Sone3": 9, "Sone4": 13, "Sone5": 2, "Sone6": 1, "Sone7": 4, "Sone8": 2}, "20": {"Sone2": 11, "Sone3": 2, "Sone4": 21, "Sone5": 7, "Sone6": 3, "Sone7": 4, "Sone8": 3}}, "8": {"5": {"Sone2": 8, "Sone3": 6, "Sone4": 64, "Sone5": 42, "Sone6": 16, "Sone7": 12, "Sone8": 8}, "10": {"Sone2": 14, "Sone3": 10, "Sone4": 85, "Sone5": 75, "Sone6": 18, "Sone7": 9, "Sone8": 9}, "15": {"Sone1": 1, "Sone2": 31, "Sone3": 15, "Sone4": 32, "Sone5": 40, "Sone6": 12, "Sone7": 9, "Sone8": 8}, "20": {"Sone2": 8, "Sone3": 1, "Sone4": 7, "Sone5": 24, "Sone6": 1, "Sone7": 4, "Sone8": 4}, "25": {"Sone1": 3, "Sone2": 13, "Sone3": 19, "Sone4": 36, "Sone5": 18, "Sone6": 4, "Sone7": 9, "Sone8": 25}}, "9": {"5": {"Sone2": 2, "Sone5": 7, "Sone6": 3, "Sone8": 3}, "10": {"Sone3": 2, "Sone5": 9, "Sone6": 2, "Sone7": 1, "Sone8": 2}}}, "2017": {"6": {"0": {"Sone2": 11, "Sone4": 23, "Sone5": 9, "Sone6": 1, "Sone7": 5, "Sone8": 6}, "5": {"Sone2": 17, "Sone3": 2, "Sone4": 56, "Sone5": 20, "Sone6": 19, "Sone7": 12, "Sone8": 12}, "10": {"Sone2": 8, "Sone3": 3, "Sone4": 23, "Sone5": 3, "Sone6": 3, "Sone7": 3, "Sone8": 2}}, "7": {"0": {"Sone2": 8, "Sone3": 3, "Sone4": 31, "Sone5": 12, "Sone6": 5, "Sone8": 4}, "5": {"Sone2": 1, "Sone4": 6, "Sone5": 10, "Sone6": 4, "Sone7": 1, "Sone8": 5}}, "8": {"5": {"Sone2": 3, "Sone4": 9, "Sone5": 8, "Sone6": 3, "Sone7": 3, "Sone8": 2}, "10": {"Sone2": 10, "Sone3": 6, "Sone4": 40, "Sone5": 41, "Sone6": 5, "Sone7": 15, "Sone8": 15}, "15": {"Sone2": 13, "Sone3": 8, "Sone4": 47, "Sone5": 35, "Sone6": 6, "Sone7": 6, "Sone8": 1}, "20": {"Sone1": 2, "Sone2": 9, "Sone3": 22, "Sone4": 23, "Sone5": 20, "Sone6": 5, "Sone7": 3, "Sone8": 1}, "25": {"Sone1": 1, "Sone2": 19, "Sone3": 15, "Sone4": 39, "Sone5": 47, "Sone6": 7, "Sone7": 8, "Sone8": 10}, "40": {"Sone1": 1, "Sone2": 11, "Sone3": 9, "Sone4": 3, "Sone5": 18, "Sone7": 3, "Sone8": 1}, "50": {"Sone2": 3, "Sone3": 7, "Sone4": 6, "Sone5": 3, "Sone6": 1, "Sone7": 2, "Sone8": 1}}, "9": {"5": {"Sone2": 1, "Sone4": 2, "Sone5": 3, "Sone6": 1, "Sone8": 1}, "10": {"Sone4": 1, "Sone5": 3}, "15": {"Sone2": 2, "Sone4": 6, "Sone5": 2}, "25": {"Sone3": 2, "Sone4": 7, "Sone5": 9, "Sone6": 1, "Sone7": 2, "Sone8": 13}, "30": {"Sone2": 1, "Sone3": 2, "Sone4": 5, "Sone5": 1, "Sone6": 1, "Sone7": 1, "Sone8": 3}, "40": {"Sone3": 1, "Sone4": 2, "Sone5": 4, "Sone6": 1, "Sone8": 2}, "45": {"Sone3": 2, "Sone4": 8}, "60": {"Sone2": 1, "Sone5": 7, "Sone8": 1}, "80": {"Sone4": 1, "Sone5": 1, "Sone8": 2}}}, "2018": {"6": {"0": {"Sone2": 3, "Sone3": 1, "Sone4": 27, "Sone5": 3, "Sone6": 6, "Sone7": 3, "Sone8": 1}, "5": {"Sone2": 1, "Sone4": 12, "Sone5": 1, "Sone6": 2, "Sone8": 2}}, "7": {"0": {"Sone2": 2, "Sone6": 1}}, "8": {"0": {"Sone2": 1, "Sone4": 4, "Sone6": 2}, "5": {"Sone1": 2, "Sone2": 8, "Sone3": 8, "Sone4": 71, "Sone5": 12, "Sone6": 19, "Sone7": 11, "Sone8": 6}, "10": {"Sone1": 2, "Sone2": 10, "Sone3": 4, "Sone4": 50, "Sone5": 28, "Sone6": 19, "Sone7": 4, "Sone8": 3}, "15": {"Sone1": 1, "Sone2": 3, "Sone3": 2, "Sone4": 9, "Sone5": 11, "Sone7": 4, "Sone8": 4}, "20": {"Sone1": 1, "Sone2": 2, "Sone4": 7, "Sone5": 19, "Sone6": 8, "Sone7": 6, "Sone8": 10}}}, "2019": {"6": {"0": {"Sone5": 1, "Sone7": 1, "Sone8": 1}, "5": {"Sone2": 3, "Sone4": 48, "Sone5": 12, "Sone6": 6, "Sone7": 4, "Sone8": 3}, "10": {"Sone4": 19, "Sone5": 3, "Sone6": 4, "Sone7": 1}, "15": {"Sone2": 6, "Sone3": 2, "Sone4": 16, "Sone5": 4, "Sone6": 9, "Sone7": 2}}, "7": {"0": {"Sone3": 1, "Sone4": 16, "Sone5": 7, "Sone6": 2, "Sone8": 2}, "5": {"Sone2": 5, "Sone3": 10, "Sone4": 111, "Sone5": 16, "Sone6": 3, "Sone7": 2, "Sone8": 3}, "10": {"Sone3": 7, "Sone4": 8, "Sone5": 1, "Sone7": 1}}, "8": {"0": {"Sone4": 4, "Sone5": 1, "Sone8": 3}, "5": {"Sone2": 10, "Sone3": 12, "Sone4": 45, "Sone5": 22, "Sone6": 11, "Sone7": 1, "Sone8": 7}, "10": {"Sone1": 1, "Sone2": 11, "Sone3": 4, "Sone4": 11, "Sone5": 29, "Sone6": 5, "Sone7": 4, "Sone8": 11}, "15": {"Sone2": 5, "Sone3": 6, "Sone4": 16, "Sone5": 11, "Sone6": 7, "Sone7": 12, "Sone8": 7}, "20": {"Sone1": 1, "Sone2": 18, "Sone3": 10, "Sone4": 18, "Sone5": 31, "Sone6": 2, "Sone7": 12, "Sone8": 11}, "25": {"Sone1": 1, "Sone2": 3, "Sone3": 3, "Sone4": 14, "Sone5": 12, "Sone6": 2, "Sone7": 3, "Sone8": 2}, "30": {"Sone1": 2, "Sone2": 34, "Sone3": 14, "Sone4": 12, "Sone5": 54, "Sone6": 10, "Sone7": 13, "Sone8": 21}, "35": {"Sone2": 7, "Sone3": 2, "Sone4": 5, "Sone5": 27, "Sone6": 3, "Sone7": 6, "Sone8": 5}, "45": {"Sone1": 1, "Sone2": 10, "Sone3": 8, "Sone4": 7, "Sone5": 26, "Sone6": 7, "Sone7": 17, "Sone8": 5}, "50": {"Sone2": 4, "Sone3": 1, "Sone5": 15, "Sone7": 5}}, "9": {"5": {"Sone2": 1, "Sone3": 1, "Sone5": 5, "Sone6": 1, "Sone7": 1, "Sone8": 2}, "10": {"Sone3": 1, "Sone5": 3, "Sone6": 1, "Sone7": 2, "Sone8": 3}, "15": {"Sone2": 6, "Sone3": 6, "Sone5": 70, "Sone6": 4, "Sone7": 6, "Sone8": 19}, "30": {"Sone3": 1, "Sone5": 15, "Sone8": 5}}}, "2020": {"6": {"0": {"Sone4": 9, "Sone5": 1, "Sone6": 1, "Sone8": 2}, "5": {"Sone2": 5, "Sone3": 1, "Sone4": 44, "Sone6": 3, "Sone7": 2, "Sone8": 3}, "10": {"Sone4": 7}, "15": {"Sone3": 1, "Sone4": 2}, "20": {"Sone3": 1, "Sone4": 4, "Sone5": 3, "Sone8": 3}}, "7": {"5": {"Sone2": 5, "Sone4": 56, "Sone5": 12, "Sone6": 6, "Sone8": 2}, "10": {"Sone2": 25, "Sone3": 34, "Sone4": 102, "Sone5": 40, "Sone6": 17, "Sone7": 11, "Sone8": 15}, "15": {"Sone1": 1, "Sone2": 15, "Sone3": 16, "Sone4": 48, "Sone5": 25, "Sone6": 9, "Sone7": 5, "Sone8": 12}, "20": {"Sone2": 19, "Sone3": 27, "Sone4": 34, "Sone5": 30, "Sone6": 4, "Sone7": 6, "Sone8": 4}, "25": {"Sone2": 7, "Sone3": 3, "Sone4": 13, "Sone5": 9, "Sone6": 3, "Sone7": 3, "Sone8": 5}, "30": {"Sone2": 31, "Sone3": 27, "Sone4": 30, "Sone5": 33, "Sone6": 3, "Sone7": 9, "Sone8": 6}, "35": {"Sone1": 1, "Sone2": 19, "Sone3": 5, "Sone4": 12, "Sone5": 9, "Sone7": 9, "Sone8": 2}, "50": {"Sone2": 12, "Sone3": 13, "Sone4": 7, "Sone5": 15, "Sone7": 8, "Sone8": 4}, "75": {"Sone2": 3, "Sone3": 4, "Sone4": 4, "Sone5": 1, "Sone6": 2, "Sone7": 2, "Sone8": 3}, "80": {"Sone2": 2, "Sone3": 4, "Sone4": 5, "Sone7": 2}}, "8": {"5": {"Sone2": 11, "Sone3": 2, "Sone4": 26, "Sone5": 55, "Sone6": 12, "Sone7": 2, "Sone8": 20}, "10": {"Sone2": 1, "Sone3": 4, "Sone4": 14, "Sone5": 8, "Sone6": 5, "Sone7": 1, "Sone8": 6}, "15": {"Sone2": 10, "Sone3": 7, "Sone4": 24, "Sone5": 23, "Sone6": 8, "Sone7": 10, "Sone8": 2}, "20": {"Sone2": 3, "Sone3": 3, "Sone4": 12, "Sone5": 9, "Sone6": 4, "Sone7": 3}, "25": {"Sone1": 2, "Sone2": 19, "Sone3": 11, "Sone4": 27, "Sone5": 31, "Sone6": 7, "Sone7": 11, "Sone8": 3}, "30": {"Sone2": 19, "Sone3": 7, "Sone4": 16, "Sone5": 12, "Sone6": 5, "Sone7": 2}}, "9": {"5": {"Sone2": 10, "Sone3": 3, "Sone4": 10, "Sone5": 44, "Sone8": 8}, "10": {"Sone2": 7, "Sone3": 3, "Sone4": 14, "Sone5": 27, "Sone6": 1, "Sone7": 4, "Sone8": 10}}}, "2021": {"6": {"0": {"Sone4": 1}, "5": {"Sone2": 3, "Sone3": 1, "Sone4": 70, "Sone5": 20, "Sone6": 7, "Sone7": 3, "Sone8": 9}, "10": {"Sone2": 1, "Sone3": 4, "Sone4": 31, "Sone5": 7, "Sone6": 3, "Sone7": 4, "Sone8": 1}, "15": {"Sone3": 2, "Sone4": 1, "Sone5": 3, "Sone6": 1, "Sone7": 1}}, "7": {"0": {"Sone1": 2, "Sone4": 16, "Sone5": 4, "Sone6": 5, "Sone7": 2, "Sone8": 3}, "5": {"Sone2": 4, "Sone3": 3, "Sone4": 93, "Sone5": 11, "Sone6": 11, "Sone7": 1, "Sone8": 5}, "10": {"Sone2": 19, "Sone3": 5, "Sone4": 62, "Sone5": 36, "Sone6": 15, "Sone7": 5, "Sone8": 14}, "15": {"Sone2": 3, "Sone3": 1, "Sone4": 12, "Sone6": 2, "Sone7": 3, "Sone8": 5}, "20": {"Sone2": 6, "Sone3": 6, "Sone4": 19, "Sone5": 3, "Sone6": 2, "Sone7": 1, "Sone8": 5}, "30": {"Sone1": 1, "Sone2": 11, "Sone3": 11, "Sone4": 20, "Sone5": 4, "Sone6": 1, "Sone7": 2, "Sone8": 8}}, "8": {"0": {"Sone1": 2, "Sone2": 2, "Sone3": 4, "Sone4": 1, "Sone5": 7, "Sone7": 1}, "5": {"Sone1": 3, "Sone2": 29, "Sone3": 3, "Sone4": 140, "Sone5": 122, "Sone6": 52, "Sone7": 21, "Sone8": 73}}}, "2022": {"6": {"0": {"Sone2": 1, "Sone4": 2, "Sone5": 3, "Sone6": 2}}, "7": {"0": {"Sone4": 2, "Sone5": 2}}, "8": {"0": {"Sone2": 13, "Sone3": 1, "Sone4": 31, "Sone5": 4, "Sone6": 4, "Sone7": 2, "Sone8": 5}}}, "2023": {"6": {"0": {"Sone 5A": 2, "Sone2": 2, "Sone3": 1, "Sone4": 3, "Sone6": 3, "Sone8": 2}}, "7": {"0": {"Sone 5A": 1, "Sone4": 1}, "5": {"Sone 5A": 10, "Sone 5B": 11, "Sone2": 9, "Sone3": 8, "Sone4": 47, "Sone6": 12, "Sone7": 5, "Sone8": 7}, "10": {"Sone 5A": 20, "Sone 5B": 19, "Sone1": 4, "Sone2": 15, "Sone3": 17, "Sone4": 95, "Sone6": 30, "Sone7": 10, "Sone8": 19}, "15": {"Sone 5A": 1, "Sone2": 6, "Sone3": 5, "Sone4": 8, "Sone7": 2}, "20": {"Sone 5A": 9, "Sone 5B": 6, "Sone2": 14, "Sone3": 7, "Sone4": 19, "Sone6": 5, "Sone7": 9, "Sone8": 5}}, "8": {"0": {"Sone 5A": 3, "Sone 5B": 8, "Sone2": 2, "Sone4": 17, "Sone6": 4, "Sone8": 1}, "5": {"Sone 5A": 11, "Sone 5B": 18, "Sone1": 1, "Sone2": 2, "Sone3": 2, "Sone4": 56, "Sone6": 15, "Sone7": 5, "Sone8": 15}, "10": {"Sone 5A": 46, "Sone 5B": 71, "Sone1": 1, "Sone2": 20, "Sone3": 6, "Sone4": 28, "Sone6": 30, "Sone7": 13, "Sone8": 57}, "15": {"Sone 5A": 24, "Sone 5B": 37, "Sone2": 8, "Sone3": 3, "Sone4": 8, "Sone6": 12, "Sone7": 2, "Sone8": 38}}}, "2024": {"6": {"5": {"Sone 5A": 3, "Sone 5B": 1, "Sone2": 1, "Sone4": 12, "Sone6": 4}, "10": {"Sone 5A": 3, "Sone2": 1, "Sone3": 1, "Sone4": 9, "Sone6": 3, "Sone7": 5, "Sone8": 3}, "15": {"Sone 5A": 2, "Sone 5B": 1, "Sone2": 3, "Sone4": 3, "Sone6": 1}, "20": {"Sone2": 1, "Sone4": 1, "Sone8": 1}, "25": {"Sone 5A": 1, "Sone2": 1, "Sone4": 4, "Sone7": 1}, "30": {"Sone 5A": 2, "Sone2": 2, "Sone3": 1, "Sone4": 4, "Sone7": 2, "Sone8": 1}, "35": {"Sone2": 4, "Sone3": 2, "Sone4": 1, "Sone7": 1}}, "7": {"5": {"Sone 5A": 5, "Sone 5B": 2, "Sone2": 4, "Sone3": 7, "Sone4": 42, "Sone6": 6, "Sone8": 4}, "10": {"Sone 5A": 14, "Sone 5B": 7, "Sone2": 9, "Sone3": 5, "Sone4": 58, "Sone6": 14, "Sone7": 5, "Sone8": 7}, "15": {"Sone 5A": 17, "Sone 5B": 2, "Sone2": 17, "Sone3": 8, "Sone4": 26, "Sone6": 10, "Sone7": 5, "Sone8": 7}, "20": {"Sone 5A": 1, "Sone2": 3, "Sone3": 1, "Sone4": 9}}, "8": {"0": {"Sone 5A": 2, "Sone 5B": 1, "Sone4": 6}, "5": {"Sone 5A": 23, "Sone 5B": 17, "Sone2": 11, "Sone3": 2, "Sone4": 50, "Sone6": 9, "Sone7": 3, "Sone8": 26}, "10": {"Sone 5A": 4, "Sone 5B": 3, "Sone2": 1, "Sone4": 2, "Sone6": 2, "Sone7": 3, "Sone8": 6}, "15": {"Sone 5A": 20, "Sone 5B": 21, "Sone2": 10, "Sone3": 3, "Sone4": 4, "Sone6": 6, "Sone7": 2, "Sone8": 8}, "20": {"Sone 5A": 1, "Sone 5B": 11, "Sone2": 2, "Sone4": 2, "Sone6": 3, "Sone7": 1, "Sone8": 4}, "25": {"Sone 5A": 10, "Sone 5B": 7, "Sone2": 1, "Sone6": 1, "Sone8": 6}, "30": {"Sone 5A": 15, "Sone 5B": 16, "Sone2": 4, "Sone3": 2, "Sone4": 2, "Sone6": 3, "Sone7": 1, "Sone8": 12}, "35": {"Sone 5A": 17, "Sone 5B": 16, "Sone2": 2, "Sone4": 1, "Sone6": 3, "Sone7": 1, "Sone8": 10}, "40": {"Sone 5A": 11, "Sone 5B": 6, "Sone2": 4, "Sone3": 1, "Sone6": 2, "Sone7": 2, "Sone8": 8}, "45": {"Sone 5A": 5, "Sone 5B": 2, "Sone3": 1, "Sone6": 2, "Sone7": 1, "Sone8": 3}}}, "2025": {"6": {"0": {"Sone 5A": 1, "Sone4": 9}, "5": {"Sone 5A": 3, "Sone4": 8, "Sone8": 1}}, "7": {"0": {"Sone 5A": 1, "Sone2": 2, "Sone3": 2, "Sone4": 7, "Sone7": 3}, "5": {"Sone 5A": 6, "Sone2": 5, "Sone3": 2, "Sone4": 10, "Sone6": 2}}, "8": {"0": {"Sone 5A": 1, "Sone 5B": 9, "Sone6": 4, "Sone7": 1, "Sone8": 5}, "5": {"Sone 5A": 1, "Sone 5B": 2, "Sone1": 1, "Sone4": 10, "Sone6": 8, "Sone7": 2, "Sone8": 4}, "10": {"Sone 5A": 6, "Sone 5B": 1, "Sone1": 1, "Sone2": 5, "Sone3": 1, "Sone4": 19, "Sone6": 2, "Sone8": 4}, "15": {"Sone 5A": 5, "Sone 5B": 3, "Sone2": 2, "Sone3": 1, "Sone4": 1, "Sone6": 3, "Sone7": 1, "Sone8": 1}, "20": {"Sone 5A": 4, "Sone2": 5, "Sone3": 3, "Sone4": 8}}}};
+const DAYS_DATA = {"2016": {"6": {"0": 14, "5": 15, "15": 1}, "7": {"0": 5, "5": 18, "10": 4, "15": 2, "20": 2}, "8": {"5": 13, "10": 10, "15": 4, "20": 1, "25": 3}, "9": {"5": 13, "10": 2}}, "2017": {"6": {"0": 12, "5": 14, "10": 4}, "7": {"0": 30, "5": 1}, "8": {"5": 1, "10": 12, "15": 8, "20": 4, "25": 4, "40": 1, "50": 1}, "9": {"5": 5, "10": 1, "15": 2, "25": 2, "30": 1, "40": 1, "45": 1, "60": 1, "80": 1}}, "2018": {"6": {"0": 23, "5": 7}, "7": {"0": 31}, "8": {"0": 10, "5": 10, "10": 7, "15": 2, "20": 2}}, "2019": {"6": {"0": 2, "5": 15, "10": 7, "15": 6}, "7": {"0": 21, "5": 9, "10": 1}, "8": {"0": 1, "5": 8, "10": 3, "15": 3, "20": 4, "25": 2, "30": 4, "35": 2, "45": 3, "50": 1}, "9": {"5": 2, "10": 3, "15": 9, "30": 1}}, "2020": {"6": {"0": 9, "5": 17, "10": 1, "15": 1, "20": 1, "25": 1}, "7": {"5": 5, "10": 12, "15": 4, "20": 3, "25": 1, "30": 2, "35": 1, "50": 1, "75": 1, "80": 1}, "8": {"5": 19, "10": 4, "15": 3, "20": 1, "25": 3, "30": 1}, "9": {"5": 8, "10": 7}}, "2021": {"6": {"0": 1, "5": 22, "10": 6, "15": 1}, "7": {"0": 9, "5": 13, "10": 6, "15": 1, "20": 1, "30": 1}, "8": {"0": 4, "5": 27}}, "2022": {"6": {"0": 30}, "7": {"0": 31}, "8": {"0": 31}}, "2023": {"6": {"0": 30}, "7": {"0": 10, "5": 7, "10": 11, "15": 1, "20": 2}, "8": {"0": 5, "5": 9, "10": 13, "15": 4}}, "2024": {"6": {"5": 9, "10": 12, "15": 3, "20": 1, "25": 2, "30": 2, "35": 1}, "7": {"5": 11, "10": 12, "15": 7, "20": 1}, "8": {"0": 2, "5": 16, "10": 1, "15": 4, "20": 2, "25": 1, "30": 2, "35": 1, "40": 1, "45": 1}}, "2025": {"6": {"0": 24, "5": 6}, "7": {"0": 25, "5": 6}, "8": {"0": 14, "5": 8, "10": 6, "15": 1, "20": 2}}};
+const FLY_DATA = {"2016": {"6": {"0": {"Sone2": 1, "Sone5": 2, "Sone6": 2, "Sone8": 2}, "5": {"Sone1": 1, "Sone2": 2, "Sone3": 4, "Sone4": 1, "Sone5": 11, "Sone6": 18}, "15": {"Sone2": 1, "Sone3": 1, "Sone4": 1, "Sone5": 1, "Sone6": 3, "Sone8": 1}}, "7": {"0": {"Sone4": 1, "Sone5": 8, "Sone6": 5, "Sone7": 1, "Sone8": 4}, "5": {"Sone1": 1, "Sone2": 15, "Sone3": 5, "Sone4": 22, "Sone5": 47, "Sone6": 33, "Sone7": 10, "Sone8": 7}, "10": {"Sone2": 6, "Sone3": 2, "Sone4": 1, "Sone5": 14, "Sone6": 9, "Sone7": 1}, "15": {"Sone2": 5, "Sone3": 5, "Sone5": 1, "Sone7": 4, "Sone8": 1}, "20": {"Sone2": 4, "Sone3": 2, "Sone4": 2, "Sone5": 4, "Sone6": 1, "Sone7": 4, "Sone8": 3}}, "8": {"5": {"Sone2": 6, "Sone3": 1, "Sone4": 3, "Sone5": 32, "Sone6": 12, "Sone7": 6, "Sone8": 4}, "10": {"Sone2": 4, "Sone3": 6, "Sone4": 4, "Sone5": 60, "Sone6": 17, "Sone7": 8, "Sone8": 5}, "15": {"Sone2": 14, "Sone3": 8, "Sone4": 1, "Sone5": 32, "Sone6": 9, "Sone7": 9, "Sone8": 4}, "20": {"Sone2": 3, "Sone3": 1, "Sone4": 1, "Sone5": 14, "Sone6": 1, "Sone7": 3, "Sone8": 4}, "25": {"Sone2": 4, "Sone3": 11, "Sone4": 5, "Sone5": 14, "Sone6": 4, "Sone7": 5, "Sone8": 17}}, "9": {"5": {"Sone5": 7, "Sone6": 3, "Sone8": 2}, "10": {"Sone3": 2, "Sone5": 6, "Sone6": 2, "Sone7": 1}}}, "2017": {"6": {"0": {"Sone2": 2, "Sone5": 4, "Sone7": 2, "Sone8": 2}, "5": {"Sone2": 6, "Sone3": 1, "Sone4": 1, "Sone5": 18, "Sone6": 17, "Sone7": 7, "Sone8": 8}, "10": {"Sone2": 4, "Sone3": 1, "Sone5": 1, "Sone6": 3, "Sone7": 3}}, "7": {"0": {"Sone2": 4, "Sone3": 3, "Sone5": 9, "Sone6": 5, "Sone8": 3}, "5": {"Sone5": 6, "Sone6": 2, "Sone7": 1, "Sone8": 3}}, "8": {"5": {"Sone2": 2, "Sone4": 2, "Sone5": 6, "Sone6": 3, "Sone7": 3}, "10": {"Sone2": 4, "Sone3": 6, "Sone4": 4, "Sone5": 29, "Sone6": 4, "Sone7": 8, "Sone8": 12}, "15": {"Sone2": 3, "Sone3": 4, "Sone4": 2, "Sone5": 27, "Sone6": 6, "Sone7": 6, "Sone8": 1}, "20": {"Sone1": 2, "Sone2": 5, "Sone3": 20, "Sone5": 16, "Sone6": 3, "Sone7": 2, "Sone8": 1}, "25": {"Sone2": 10, "Sone3": 12, "Sone4": 8, "Sone5": 41, "Sone6": 4, "Sone7": 6, "Sone8": 6}, "40": {"Sone2": 6, "Sone3": 6, "Sone5": 16, "Sone7": 3, "Sone8": 1}, "50": {"Sone2": 2, "Sone5": 2, "Sone7": 2}}, "9": {"5": {"Sone2": 1, "Sone5": 2, "Sone6": 1, "Sone8": 1}, "15": {"Sone2": 2, "Sone5": 2}, "25": {"Sone3": 1, "Sone5": 8, "Sone7": 2, "Sone8": 12}, "30": {"Sone3": 2, "Sone5": 1, "Sone6": 1, "Sone7": 1, "Sone8": 2}, "40": {"Sone3": 1, "Sone5": 2, "Sone6": 1, "Sone8": 2}, "60": {"Sone2": 1, "Sone5": 2, "Sone8": 1}, "80": {"Sone8": 1}}}, "2018": {"6": {"0": {"Sone2": 1, "Sone5": 3, "Sone6": 2}, "5": {"Sone2": 1, "Sone5": 1, "Sone6": 1, "Sone8": 1}}, "7": {"0": {"Sone2": 2, "Sone6": 1}}, "8": {"0": {"Sone6": 2}, "5": {"Sone1": 2, "Sone2": 3, "Sone3": 7, "Sone4": 1, "Sone5": 7, "Sone6": 18, "Sone7": 6, "Sone8": 1}, "10": {"Sone1": 1, "Sone2": 1, "Sone3": 4, "Sone4": 2, "Sone5": 14, "Sone6": 15, "Sone7": 4, "Sone8": 1}, "15": {"Sone1": 1, "Sone2": 1, "Sone3": 2, "Sone5": 10, "Sone7": 4}, "20": {"Sone1": 1, "Sone2": 1, "Sone5": 16, "Sone6": 7, "Sone7": 4, "Sone8": 7}}}, "2019": {"6": {"0": {"Sone7": 1}, "5": {"Sone2": 1, "Sone5": 6, "Sone6": 4, "Sone7": 2, "Sone8": 1}, "10": {"Sone5": 2, "Sone6": 4, "Sone7": 1}, "15": {"Sone2": 6, "Sone3": 2, "Sone4": 1, "Sone5": 3, "Sone6": 6, "Sone7": 2}}, "7": {"0": {"Sone3": 1, "Sone5": 3, "Sone6": 2}, "5": {"Sone2": 4, "Sone3": 4, "Sone4": 11, "Sone5": 6, "Sone6": 3, "Sone7": 2, "Sone8": 1}, "10": {"Sone3": 5, "Sone7": 1}}, "8": {"0": {"Sone5": 1, "Sone8": 1}, "5": {"Sone2": 2, "Sone3": 7, "Sone5": 18, "Sone6": 9}, "10": {"Sone2": 5, "Sone3": 4, "Sone5": 17, "Sone6": 3, "Sone7": 2, "Sone8": 10}, "15": {"Sone2": 4, "Sone3": 3, "Sone5": 7, "Sone6": 7, "Sone7": 5, "Sone8": 4}, "20": {"Sone2": 11, "Sone3": 9, "Sone5": 23, "Sone6": 2, "Sone7": 9, "Sone8": 9}, "25": {"Sone2": 3, "Sone3": 3, "Sone5": 10, "Sone6": 2}, "30": {"Sone2": 25, "Sone3": 10, "Sone4": 1, "Sone5": 31, "Sone6": 6, "Sone7": 11, "Sone8": 14}, "35": {"Sone2": 3, "Sone3": 2, "Sone5": 19, "Sone6": 1, "Sone7": 4, "Sone8": 4}, "45": {"Sone2": 6, "Sone3": 6, "Sone4": 1, "Sone5": 17, "Sone6": 1, "Sone7": 7, "Sone8": 3}, "50": {"Sone2": 2, "Sone3": 1, "Sone5": 6, "Sone7": 1}}, "9": {"5": {"Sone3": 1, "Sone5": 5, "Sone6": 1}, "10": {"Sone3": 1, "Sone5": 3, "Sone6": 1, "Sone7": 1}, "15": {"Sone2": 1, "Sone3": 6, "Sone5": 53, "Sone6": 4, "Sone7": 4, "Sone8": 13}, "30": {"Sone3": 1, "Sone5": 8, "Sone8": 4}}}, "2020": {"6": {"0": {"Sone5": 1, "Sone8": 2}, "5": {"Sone2": 3, "Sone3": 1, "Sone4": 2, "Sone6": 3, "Sone7": 1, "Sone8": 1}, "15": {"Sone3": 1}, "20": {"Sone3": 1, "Sone4": 1, "Sone5": 3, "Sone8": 2}}, "7": {"5": {"Sone2": 1, "Sone4": 5, "Sone5": 10, "Sone6": 5}, "10": {"Sone2": 10, "Sone3": 29, "Sone4": 14, "Sone5": 29, "Sone6": 15, "Sone7": 8, "Sone8": 9}, "15": {"Sone1": 1, "Sone2": 9, "Sone3": 10, "Sone4": 6, "Sone5": 18, "Sone6": 8, "Sone7": 2, "Sone8": 4}, "20": {"Sone2": 7, "Sone3": 21, "Sone4": 2, "Sone5": 17, "Sone6": 4, "Sone7": 2, "Sone8": 4}, "25": {"Sone2": 1, "Sone3": 3, "Sone5": 6, "Sone6": 3, "Sone7": 3, "Sone8": 3}, "30": {"Sone2": 21, "Sone3": 24, "Sone5": 23, "Sone6": 1, "Sone7": 3, "Sone8": 2}, "35": {"Sone1": 1, "Sone2": 7, "Sone3": 3, "Sone5": 5, "Sone7": 3}, "50": {"Sone2": 7, "Sone3": 8, "Sone5": 9, "Sone7": 3, "Sone8": 2}, "75": {"Sone3": 3, "Sone5": 1, "Sone8": 1}}, "8": {"5": {"Sone2": 4, "Sone4": 1, "Sone5": 23, "Sone6": 9, "Sone8": 6}, "10": {"Sone3": 4, "Sone5": 7, "Sone6": 4, "Sone7": 1, "Sone8": 4}, "15": {"Sone2": 4, "Sone3": 7, "Sone4": 1, "Sone5": 18, "Sone6": 8, "Sone7": 7, "Sone8": 2}, "20": {"Sone2": 1, "Sone3": 3, "Sone5": 7, "Sone6": 4, "Sone7": 1}, "25": {"Sone2": 8, "Sone3": 11, "Sone4": 4, "Sone5": 24, "Sone6": 4, "Sone7": 6, "Sone8": 1}, "30": {"Sone2": 7, "Sone3": 7, "Sone5": 6, "Sone6": 5, "Sone7": 1}}, "9": {"5": {"Sone3": 1, "Sone5": 24, "Sone8": 6}, "10": {"Sone3": 1, "Sone5": 14, "Sone6": 1, "Sone7": 4, "Sone8": 6}}}, "2021": {"6": {"5": {"Sone2": 1, "Sone3": 1, "Sone4": 1, "Sone5": 18, "Sone6": 6, "Sone7": 1, "Sone8": 6}, "10": {"Sone2": 1, "Sone3": 2, "Sone5": 5, "Sone6": 1, "Sone7": 1}, "15": {"Sone3": 2, "Sone5": 3, "Sone6": 1, "Sone7": 1}}, "7": {"0": {"Sone5": 2, "Sone6": 5, "Sone7": 2, "Sone8": 1}, "5": {"Sone2": 2, "Sone3": 1, "Sone4": 4, "Sone5": 4, "Sone6": 10, "Sone7": 1, "Sone8": 4}, "10": {"Sone2": 5, "Sone3": 2, "Sone4": 1, "Sone5": 24, "Sone6": 14, "Sone7": 4, "Sone8": 8}, "15": {"Sone2": 3, "Sone6": 2, "Sone7": 2, "Sone8": 3}, "20": {"Sone2": 5, "Sone3": 4, "Sone4": 1, "Sone5": 2, "Sone6": 2, "Sone8": 1}, "30": {"Sone2": 7, "Sone3": 9, "Sone5": 4, "Sone6": 1, "Sone7": 2, "Sone8": 5}}, "8": {"0": {"Sone2": 1, "Sone5": 1}, "5": {"Sone2": 14, "Sone3": 1, "Sone4": 4, "Sone5": 75, "Sone6": 45, "Sone7": 10, "Sone8": 50}}}, "2022": {"6": {"0": {"Sone2": 1, "Sone5": 3, "Sone6": 2}}, "7": {"0": {"Sone5": 1}}, "8": {"0": {"Sone2": 3, "Sone3": 1, "Sone4": 3, "Sone6": 2}}}, "2023": {"6": {"0": {"Sone 5A": 1, "Sone6": 1, "Sone8": 1}}, "7": {"5": {"Sone 5A": 8, "Sone 5B": 7, "Sone2": 3, "Sone3": 6, "Sone4": 5, "Sone6": 12, "Sone7": 4, "Sone8": 1}, "10": {"Sone 5A": 14, "Sone 5B": 9, "Sone2": 5, "Sone3": 9, "Sone4": 8, "Sone6": 24, "Sone7": 6, "Sone8": 11}, "15": {"Sone2": 4, "Sone3": 3, "Sone7": 2}, "20": {"Sone 5A": 5, "Sone 5B": 5, "Sone2": 8, "Sone3": 4, "Sone4": 1, "Sone6": 4, "Sone7": 6, "Sone8": 2}}, "8": {"0": {"Sone 5A": 3, "Sone 5B": 4, "Sone6": 4}, "5": {"Sone 5A": 8, "Sone 5B": 12, "Sone3": 2, "Sone4": 6, "Sone6": 14, "Sone7": 4, "Sone8": 7}, "10": {"Sone 5A": 30, "Sone 5B": 45, "Sone2": 4, "Sone3": 5, "Sone4": 2, "Sone6": 27, "Sone7": 9, "Sone8": 41}, "15": {"Sone 5A": 20, "Sone 5B": 16, "Sone3": 2, "Sone6": 10, "Sone7": 2, "Sone8": 29}}}, "2024": {"6": {"5": {"Sone 5A": 2, "Sone 5B": 1, "Sone2": 1, "Sone4": 1, "Sone6": 2}, "10": {"Sone 5A": 1, "Sone2": 1, "Sone3": 1, "Sone6": 2, "Sone7": 4, "Sone8": 1}, "15": {"Sone 5A": 2, "Sone2": 1, "Sone4": 1}, "20": {"Sone2": 1, "Sone8": 1}, "25": {"Sone 5A": 1, "Sone2": 1, "Sone7": 1}, "30": {"Sone2": 1, "Sone7": 2, "Sone8": 1}, "35": {"Sone2": 2, "Sone3": 2, "Sone7": 1}}, "7": {"5": {"Sone 5A": 3, "Sone 5B": 2, "Sone2": 3, "Sone3": 7, "Sone4": 2, "Sone6": 3, "Sone8": 3}, "10": {"Sone 5A": 13, "Sone 5B": 6, "Sone2": 5, "Sone3": 2, "Sone4": 9, "Sone6": 9, "Sone7": 2, "Sone8": 5}, "15": {"Sone 5A": 17, "Sone2": 11, "Sone3": 5, "Sone4": 1, "Sone6": 8, "Sone7": 4, "Sone8": 7}, "20": {"Sone 5A": 1, "Sone2": 2, "Sone3": 1}}, "8": {"0": {"Sone 5A": 2, "Sone 5B": 1}, "5": {"Sone 5A": 12, "Sone 5B": 16, "Sone2": 1, "Sone3": 2, "Sone4": 1, "Sone6": 8, "Sone8": 13}, "10": {"Sone 5A": 3, "Sone 5B": 3, "Sone6": 1, "Sone8": 5}, "15": {"Sone 5A": 14, "Sone 5B": 15, "Sone2": 2, "Sone3": 2, "Sone6": 6, "Sone7": 2, "Sone8": 5}, "20": {"Sone 5B": 8, "Sone2": 2, "Sone6": 3, "Sone7": 1, "Sone8": 4}, "25": {"Sone 5A": 3, "Sone 5B": 3, "Sone6": 1, "Sone8": 4}, "30": {"Sone 5A": 11, "Sone 5B": 10, "Sone3": 2, "Sone6": 3, "Sone8": 9}, "35": {"Sone 5A": 4, "Sone 5B": 8, "Sone2": 1, "Sone6": 2, "Sone8": 9}, "40": {"Sone 5A": 3, "Sone 5B": 3, "Sone6": 1, "Sone7": 1, "Sone8": 6}, "45": {"Sone 5A": 2, "Sone3": 1, "Sone6": 1, "Sone7": 1, "Sone8": 1}}}, "2025": {"7": {"0": {"Sone3": 2, "Sone7": 1}, "5": {"Sone 5A": 6, "Sone2": 1, "Sone4": 1, "Sone6": 2}}, "8": {"0": {"Sone6": 3, "Sone7": 1, "Sone8": 2}, "5": {"Sone 5A": 1, "Sone 5B": 2, "Sone6": 4, "Sone8": 3}, "10": {"Sone 5A": 4, "Sone 5B": 1, "Sone2": 1, "Sone3": 1, "Sone6": 2, "Sone8": 3}, "15": {"Sone 5A": 4, "Sone 5B": 3, "Sone2": 2, "Sone3": 1, "Sone6": 3, "Sone7": 1, "Sone8": 1}, "20": {"Sone 5A": 4, "Sone2": 2, "Sone3": 1}}}};
+const ZONES = ['Sone1','Sone2','Sone3','Sone4','Sone 5A','Sone 5B','Sone5','Sone6','Sone7','Sone8'];
+
+
+const BILDE_BASE = 'https://timon70-lab.github.io/elvedata/bilder/audna/';
+const PHOTOS = [
+  { id: 'A-001', lat: 58.129878, lon: 7.363481, file: 'Sone5A_20260604_1929.jpg', caption: 'Sone 5A · Grusbanke ved elva', zone: 'Sone 5A', dateISO: '2026-06-04', timeUTC: '19:29', locId: 'Sone 5A' },
+  { id: 'A-002', lat: 58.270874, lon: 7.351215, file: 'Sone8_20230727_2012.jpg', caption: 'Sone 8 · Kveldsstemning', zone: 'Sone8', dateISO: '2023-07-27', timeUTC: '20:12', locId: 'Sone8' },
+  { id: 'A-003', lat: 58.269466, lon: 7.352070, file: 'Sone8_20230727_1939.jpg', caption: 'Sone 8 · Grusstrand ved elva', zone: 'Sone8', dateISO: '2023-07-27', timeUTC: '19:39', locId: 'Sone8' },
+  { id: 'A-004', lat: 58.266640, lon: 7.351889, file: 'Sone8_20230727_1920.jpg', caption: 'Sone 8 · Stille høl', zone: 'Sone8', dateISO: '2023-07-27', timeUTC: '19:20', locId: 'Sone8' },
+  { id: 'A-005', lat: 58.265235, lon: 7.352226, file: 'Sone8_20230727_1844.jpg', caption: 'Sone 8 · Utsikt fra brua', zone: 'Sone8', dateISO: '2023-07-27', timeUTC: '18:44', locId: 'Sone8' },
+  { id: 'A-006', lat: 58.242163, lon: 7.345708, file: 'Sone7_20230727_1555.jpg', caption: 'Sone 7 · Stryk og høl', zone: 'Sone7', dateISO: '2023-07-27', timeUTC: '15:55', locId: 'Sone7' },
+  { id: 'A-007', lat: 58.242172, lon: 7.345722, file: 'Sone7_20230727_1556.jpg', caption: 'Sone 7 · Stor stein i elva', zone: 'Sone7', dateISO: '2023-07-27', timeUTC: '15:56', locId: 'Sone7' },
+  { id: 'A-008', lat: 58.242172, lon: 7.345722, file: 'Sone7_20230727_1556_2.jpg', caption: 'Sone 7 · Rolige partier', zone: 'Sone7', dateISO: '2023-07-27', timeUTC: '15:56', locId: 'Sone7' },
+  { id: 'A-009', lat: 58.258547, lon: 7.345471, file: 'Sone8_20230727_1745.jpg', caption: 'Sone 8 · Sandbanke ved kveld', zone: 'Sone8', dateISO: '2023-07-27', timeUTC: '17:45', locId: 'Sone8' },
+  { id: 'A-010', lat: 58.258573, lon: 7.345426, file: 'Sone8_20230727_1745_2.jpg', caption: 'Sone 8 · Grusstrand og høl', zone: 'Sone8', dateISO: '2023-07-27', timeUTC: '17:45', locId: 'Sone8' },
+  { id: 'A-011', lat: 58.258573, lon: 7.345426, file: 'Sone8_20230727_1745_3.jpg', caption: 'Sone 8 · Stille kveldselv', zone: 'Sone8', dateISO: '2023-07-27', timeUTC: '17:45', locId: 'Sone8' },
+  { id: 'A-012', lat: 58.259488, lon: 7.347211, file: 'Sone8_20230727_1805.jpg', caption: 'Sone 8 · Utsikt nedover elva', zone: 'Sone8', dateISO: '2023-07-27', timeUTC: '18:05', locId: 'Sone8' },
+  { id: 'A-013', lat: 58.118597, lon: 7.341340, file: '20230718_181021.jpg', caption: 'Sone2 · Fisker ved grusbanke nær bebyggelse', zone: 'Sone2', dateISO: '2023-07-18', timeUTC: '16:10', locId: 'Sone2' },
+  { id: 'A-014', lat: 58.118597, lon: 7.341340, file: '20230718_181030.jpg', caption: 'Sone2 · Utsikt over elva mot bebyggelse', zone: 'Sone2', dateISO: '2023-07-18', timeUTC: '16:10', locId: 'Sone2' },
+  { id: 'A-015', lat: 58.127703, lon: 7.356072, file: '20230718_182554.jpg', caption: 'Sone 5A · Elvesving med solglitter', zone: 'Sone 5A', dateISO: '2023-07-18', timeUTC: '16:25', locId: 'Sone 5A' },
+  { id: 'A-016', lat: 58.206869, lon: 7.338345, file: '20230718_184259.jpg', caption: 'Sone 5B · Grasbanke ved elvesving', zone: 'Sone 5B', dateISO: '2023-07-18', timeUTC: '16:42', locId: 'Sone 5B' },
+  { id: 'A-017', lat: 58.207125, lon: 7.338056, file: '20230718_184417.jpg', caption: 'Sone 5B · Stille høl med skogkant', zone: 'Sone 5B', dateISO: '2023-07-18', timeUTC: '16:44', locId: 'Sone 5B' },
+  { id: 'A-018', lat: 58.207125, lon: 7.338056, file: '20230718_184435.jpg', caption: 'Sone 5B · Elvesving i kveldslys', zone: 'Sone 5B', dateISO: '2023-07-18', timeUTC: '16:44', locId: 'Sone 5B' },
+  { id: 'A-019', lat: 58.219946, lon: 7.340285, file: '20230718_185045.jpg', caption: 'Sone6 · Stryk mot fjellsiden', zone: 'Sone6', dateISO: '2023-07-18', timeUTC: '16:50', locId: 'Sone6' },
+  { id: 'A-020', lat: 58.219946, lon: 7.340285, file: '20230718_185050.jpg', caption: 'Sone6 · Elv mot dalgang', zone: 'Sone6', dateISO: '2023-07-18', timeUTC: '16:50', locId: 'Sone6' },
+  { id: 'A-021', lat: 58.268416, lon: 7.353303, file: '20230718_190100.jpg', caption: 'Sone 8 · Solfylt elvesving ved skogkanten', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:01', locId: 'Sone8' },
+  { id: 'A-022', lat: 58.268416, lon: 7.353303, file: '20230718_190108.jpg', caption: 'Sone 8 · Utsikt mot fjellskogen', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:01', locId: 'Sone8' },
+  { id: 'A-023', lat: 58.268425, lon: 7.353610, file: '20230718_190434.jpg', caption: 'Sone 8 · Stilleflytende parti', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:04', locId: 'Sone8' },
+  { id: 'A-024', lat: 58.245640, lon: 7.347760, file: '20230718_192100.jpg', caption: 'Sone 8 · Stryk ved skogkanten', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:21', locId: 'Sone8' },
+  { id: 'A-025', lat: 58.245630, lon: 7.347742, file: '20230718_192104.jpg', caption: 'Sone 8 · Strykparti i kveldslys', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:21', locId: 'Sone8' },
+  { id: 'A-026', lat: 58.246052, lon: 7.347586, file: '20230718_192337.jpg', caption: 'Sone 8 · Rolig høl ved steinblokk', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:23', locId: 'Sone8' },
+  { id: 'A-027', lat: 58.246052, lon: 7.347586, file: '20230718_192340.jpg', caption: 'Sone 8 · Stille elveparti ved veiskulder', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:23', locId: 'Sone8' },
+  { id: 'A-028', lat: 58.246052, lon: 7.347586, file: '20230718_192343.jpg', caption: 'Sone 8 · Rolig elvesving i kveldslys', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:23', locId: 'Sone8' },
+  { id: 'A-029', lat: 58.246810, lon: 7.347736, file: '20230718_192542.jpg', caption: 'Sone 8 · Stryk mot skogkledd li', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:25', locId: 'Sone8' },
+  { id: 'A-030', lat: 58.242144, lon: 7.345723, file: '20230718_193202.jpg', caption: 'Sone 8 · Strykparti med greiner over vannet', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:32', locId: 'Sone8' },
+  { id: 'A-031', lat: 58.242146, lon: 7.345723, file: '20230718_193205.jpg', caption: 'Sone 8 · Sti til fiskeplassen', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:32', locId: 'Sone8' },
+  { id: 'A-032', lat: 58.242144, lon: 7.345723, file: '20230718_193208.jpg', caption: 'Sone 8 · Solnedgang over elva', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:32', locId: 'Sone8' },
+  { id: 'A-033', lat: 58.238806, lon: 7.344557, file: '20230718_193547.jpg', caption: 'Sone 7 · Stille elv med grusbanke', zone: 'Sone7', dateISO: '2023-07-18', timeUTC: '17:35', locId: 'Sone7' },
+  { id: 'A-034', lat: 58.238804, lon: 7.344561, file: '20230718_193549.jpg', caption: 'Sone 7 · Elv mot fjellveggen', zone: 'Sone7', dateISO: '2023-07-18', timeUTC: '17:35', locId: 'Sone7' },
+  { id: 'A-035', lat: 58.238804, lon: 7.344561, file: '20230718_193552.jpg', caption: 'Sone 7 · Grusbanke i kveldslys', zone: 'Sone7', dateISO: '2023-07-18', timeUTC: '17:35', locId: 'Sone7' },
+  { id: 'A-036', lat: 58.237151, lon: 7.346016, file: '20230718_193927.jpg', caption: 'Sone 7 · Stryk ved fiskebu', zone: 'Sone7', dateISO: '2023-07-18', timeUTC: '17:39', locId: 'Sone7' },
+  { id: 'A-037', lat: 58.213375, lon: 7.336295, file: '20230718_194831.jpg', caption: 'Sone6 · Fiskebu i skogkanten', zone: 'Sone6', dateISO: '2023-07-18', timeUTC: '17:48', locId: 'Sone6' },
+  { id: 'A-038', lat: 58.213381, lon: 7.336307, file: '20230718_194903.jpg', caption: 'Sone6 · Stille kveldsvann', zone: 'Sone6', dateISO: '2023-07-18', timeUTC: '17:49', locId: 'Sone6' },
+  { id: 'A-039', lat: 58.194346, lon: 7.341593, file: '20230718_195634.jpg', caption: 'Sone 5B · Elvesving med sti ned til vannet', zone: 'Sone 5B', dateISO: '2023-07-18', timeUTC: '17:56', locId: 'Sone 5B' },
+  { id: 'A-040', lat: 58.194346, lon: 7.341593, file: '20230718_195708.jpg', caption: 'Sone 5B · Utsikt over elva i kveldslys', zone: 'Sone 5B', dateISO: '2023-07-18', timeUTC: '17:57', locId: 'Sone 5B' },
+  { id: 'A-041', lat: 58.194346, lon: 7.341593, file: '20230718_195711.jpg', caption: 'Sone 5B · Rolig parti med skyer i refleksjon', zone: 'Sone 5B', dateISO: '2023-07-18', timeUTC: '17:57', locId: 'Sone 5B' },
+  { id: 'A-042', lat: 58.191348, lon: 7.342470, file: '20230718_200228.jpg', caption: 'Sone 5B · Elvesving mot kveldssola', zone: 'Sone 5B', dateISO: '2023-07-18', timeUTC: '18:02', locId: 'Sone 5B' },
+  { id: 'A-043', lat: 58.191348, lon: 7.342470, file: '20230718_200234.jpg', caption: 'Sone 5B · Grusbanke i kveldslys', zone: 'Sone 5B', dateISO: '2023-07-18', timeUTC: '18:02', locId: 'Sone 5B' },
+  { id: 'A-044', lat: 58.191348, lon: 7.342470, file: '20230718_200238.jpg', caption: 'Sone 5B · Stille parti ved grusbanke', zone: 'Sone 5B', dateISO: '2023-07-18', timeUTC: '18:02', locId: 'Sone 5B' },
+  { id: 'A-045', lat: 58.130965, lon: 7.365929, file: '20230718_201757.jpg', caption: 'Sone 5A · Elv ved brua', zone: 'Sone 5A', dateISO: '2023-07-18', timeUTC: '18:17', locId: 'Sone 5A' },
+  { id: 'A-046', lat: 58.130969, lon: 7.365953, file: '20230718_201809.jpg', caption: 'Sone 5A · Utsikt mot brua i kveldslys', zone: 'Sone 5A', dateISO: '2023-07-18', timeUTC: '18:18', locId: 'Sone 5A' },
+  { id: 'A-047', lat: 58.129730, lon: 7.363353, file: '20230718_202534.jpg', caption: 'Sone 5A · Utsikt fra fiskebu mot elva', zone: 'Sone 5A', dateISO: '2023-07-18', timeUTC: '18:25', locId: 'Sone 5A' },
+  { id: 'A-048', lat: 58.118733, lon: 7.340913, file: '20240622_185715.jpg', caption: 'Sone2 · Stille kveldsvann ved bredden', zone: 'Sone2', dateISO: '2024-06-22', timeUTC: '16:57', locId: 'Sone2' },
+  { id: 'A-049', lat: 58.118707, lon: 7.341460, file: '20240622_201949.jpg', caption: 'Sone2 · Solnedgang over elva', zone: 'Sone2', dateISO: '2024-06-22', timeUTC: '18:19', locId: 'Sone2' },
+  { id: 'A-050', lat: 58.126726, lon: 7.339869, file: '20240830_160208.jpg', caption: 'Sone 5A · Stryk ved sonestart', zone: 'Sone 5A', dateISO: '2024-08-30', timeUTC: '14:02', locId: 'Sone 5A' },
+  { id: 'A-051', lat: 58.130016, lon: 7.359765, file: '20240830_164405.jpg', caption: 'Sone 5A · Stilleflytende elveparti', zone: 'Sone 5A', dateISO: '2024-08-30', timeUTC: '14:44', locId: 'Sone 5A' },
+  { id: 'A-052', lat: 58.130093, lon: 7.359962, file: '20240830_164412.jpg', caption: 'Sone 5A · Kveldslys over elva', zone: 'Sone 5A', dateISO: '2024-08-30', timeUTC: '14:44', locId: 'Sone 5A' },
+  { id: 'A-053', lat: 58.131197, lon: 7.366067, file: 'PXL_20260604_180012986.MP.jpg', caption: 'Sone 5A · Stryk ved sandbanke', zone: 'Sone 5A', dateISO: '2026-06-04', timeUTC: '18:00', locId: 'Sone 5A' },
+  { id: 'A-054', lat: 58.130061, lon: 7.363242, file: 'PXL_20260604_184558931.MP.jpg', caption: 'Sone 5A · Stille elveparti i regnvær', zone: 'Sone 5A', dateISO: '2026-06-04', timeUTC: '18:45', locId: 'Sone 5A' },
+  { id: 'A-055', lat: 58.130028, lon: 7.363467, file: 'PXL_20260604_192708940.jpg', caption: 'Sone 5A · Fanget laks ved grusbanke', zone: 'Sone 5A', dateISO: '2026-06-04', timeUTC: '19:27', locId: 'Sone 5A' },
+  { id: 'A-056', lat: 58.129878, lon: 7.363481, file: 'PXL_20260604_192954022.MP.jpg', caption: 'Sone 5A · Fiskeutstyr og fangst', zone: 'Sone 5A', dateISO: '2026-06-04', timeUTC: '19:29', locId: 'Sone 5A' }
+];
+let photoMarkers = [];
+
+const VIDEOS = [
+  { lat: 58.129927, lon: 7.363705, zone: 'Sone 5A', youtubeId: 'sDY-r8Zj6rg', caption: 'Sone 5A · Fangst', dateISO: '2026-06-04' }
+];
+let videoMarkers = [];
+
+let activePhoto = null;
+let currentFlow = 5;
+let yearLo = 2016, yearHi = 2025;
+let monthLo = 6, monthHi = 9;
+let flyOnly = false;
+let activeZone = null;
+let map = null;
+let mapLayers = {};
+
+// ── CONTROLS ──────────────────────────────────────────────────────────────
+function onFlowChange(val) {
+  currentFlow = parseInt(val);
+  document.getElementById('flowVal').textContent = currentFlow + '–' + (currentFlow+5) + ' m³/s';
+  update();
+}
+
+function updateDualFill(loId, hiId, fillId, min, max) {
+  const lo = parseInt(document.getElementById(loId).value);
+  const hi = parseInt(document.getElementById(hiId).value);
+  const pLo = (Math.min(lo,hi) - min) / (max - min) * 100;
+  const pHi = (Math.max(lo,hi) - min) / (max - min) * 100;
+  const f = document.getElementById(fillId);
+  f.style.left = pLo + '%';
+  f.style.width = (pHi - pLo) + '%';
+}
+
+function onYearChange() {
+  yearLo = parseInt(document.getElementById('yearLo').value);
+  yearHi = parseInt(document.getElementById('yearHi').value);
+  const lo = Math.min(yearLo,yearHi), hi = Math.max(yearLo,yearHi);
+  document.getElementById('yearVal').textContent = lo === hi ? String(lo) : lo + '–' + hi;
+  updateDualFill('yearLo','yearHi','yearFill',2016,2025);
+  update();
+}
+
+function onMonthChange() {
+  monthLo = parseInt(document.getElementById('monthLo').value);
+  monthHi = parseInt(document.getElementById('monthHi').value);
+  const lo = Math.min(monthLo,monthHi), hi = Math.max(monthLo,monthHi);
+  document.getElementById('monthVal').textContent = lo === hi ? MONTH_NAMES[lo] : MONTH_NAMES[lo] + '–' + MONTH_NAMES[hi];
+  updateDualFill('monthLo','monthHi','monthFill',6,9);
+  update();
+}
+
+function toggleFly() {
+  flyOnly = !flyOnly;
+  document.getElementById('flyPill').classList.toggle('active', flyOnly);
+  update();
+}
+
+// ── SCORES ────────────────────────────────────────────────────────────────
+function computeStats() {
+  const yLo = Math.min(yearLo,yearHi), yHi = Math.max(yearLo,yearHi);
+  const mLo = Math.min(monthLo,monthHi), mHi = Math.max(monthLo,monthHi);
+  const bin = String(currentFlow);
+  const data = flyOnly ? FLY_DATA : ALL_DATA;
+
+  let totalCatches = 0, totalDays = 0;
+  for (let y = yLo; y <= yHi; y++) {
+    const yd = data[y], dy = DAYS_DATA[y];
+    for (let m = mLo; m <= mHi; m++) {
+      const ym = yd?.[m], dm = dy?.[m];
+      if (ym?.[bin]) {
+        Object.values(ym[bin]).forEach(v => totalCatches += v);
+      }
+      if (dm?.[bin]) totalDays += dm[bin];
+    }
+  }
+  const perDay = totalDays > 0 ? (totalCatches / totalDays) : 0;
+  return { totalCatches, totalDays, perDay };
+}
+
+function computeScores() {
+  const data    = flyOnly ? FLY_DATA      : ALL_DATA;
+  const p90Rate = flyOnly ? P90_RATE_FLY  : P90_RATE_ALL;
+  const p90Vol  = flyOnly ? P90_VOL_FLY   : P90_VOL_ALL;
+  const bin = String(currentFlow);
+
+  // Akkumuler fangster per sone og antall dager i utvalget
+  const catches = {};
+  ZONES.forEach(z => catches[z] = 0);
+  let totalDays = 0, hasAny = false;
+  for (let y = Math.min(yearLo,yearHi); y <= Math.max(yearLo,yearHi); y++) {
+    for (let m = Math.min(monthLo,monthHi); m <= Math.max(monthLo,monthHi); m++) {
+      const days = DAYS_DATA[String(y)]?.[String(m)]?.[bin] || 0;
+      totalDays += days;
+      const bd = data[String(y)]?.[String(m)]?.[bin];
+      if (!bd) continue;
+      for (const [zone, cnt] of Object.entries(bd)) {
+        if (catches.hasOwnProperty(zone)) { catches[zone] += cnt; hasAny = true; }
+      }
+    }
+  }
+  if (!hasAny) return null;
+
+  // Score = 60% rate (fangst/dag vs P90) + 40% volum (totalt vs P90)
+  // Normalisert mot 90-persentil — score 100 = eksepsjonelt godt fiske
+  const scores = {};
+  ZONES.forEach(z => {
+    const vol         = catches[z];
+    const rate        = totalDays > 0 ? vol / totalDays : 0;
+    const rateScore   = Math.min(100, (rate / p90Rate) * 100);
+    const volumeScore = Math.min(100, (vol  / p90Vol)  * 100);
+    const combined    = Math.round(rateScore * 0.8 + volumeScore * 0.2);
+    scores[z] = { score: combined, catches: vol };
+  });
+  return scores;
+}
+
+function scoreColor(s) {
+  if (s >= 70) return '#38a169';
+  if (s >= 45) return '#3182ce';
+  if (s >= 25) return '#ed8936';
+  return '#e53e3e';
+}
+
+function drawRing(score, color) {
+  const r=20, c=24, circ=+(2*Math.PI*r).toFixed(1), off=+(circ-(score/100)*circ).toFixed(1);
+  return '<svg width="48" height="48" viewBox="0 0 48 48">'
+    +'<circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="none" stroke="#e2e8f0" stroke-width="5"/>'
+    +'<circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="5"'
+    +' stroke-linecap="round" stroke-dasharray="'+circ+'" stroke-dashoffset="'+off+'"'
+    +' transform="rotate(-90 '+c+' '+c+')"/></svg>';
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────
+function update() {
+  const scores = computeScores();
+  const container = document.getElementById('zoneList');
+  container.innerHTML = '';
+
+  if (!scores) {
+    const placeholderRing = '<div class="zone-row" style="opacity:0.35;pointer-events:none">'
+      + '<div class="mini-ring">' + drawRing(0,'#e2e8f0') + '<div class="mnum" style="color:#e2e8f0">–</div></div>'
+      + '<div class="zone-info"><div class="zone-name" style="color:#cbd5e0">–</div><div class="zone-catches">–</div></div>'
+      + '</div>';
+    container.innerHTML = placeholderRing + placeholderRing + placeholderRing;
+    document.getElementById('statBox').innerHTML =
+      '<div class="stat-item"><span class="stat-num">–</span><span class="stat-lbl">Fangster</span></div>' +
+      '<div class="stat-item"><span class="stat-num">–</span><span class="stat-lbl">Dager</span></div>' +
+      '<div class="stat-item"><span class="stat-num">–</span><span class="stat-lbl">Per dag</span></div>';
+    document.getElementById('totalScoreBox').innerHTML =
+      '<div style="position:relative;display:inline-flex;align-items:center;justify-content:center">'
+      + drawRing(0, '#e2e8f0')
+      + '<div class="mnum" style="position:absolute;color:#e2e8f0;font-size:0.85rem;font-weight:800">–</div>'
+      + '</div>'
+      + '<div class="total-score-lbl">Score</div>';
+    updateMap(null);
+    return;
+  }
+
+  const top3 = ZONES.slice().sort((a,b) => {
+    const scoreDiff = scores[b].score - scores[a].score;
+    if (scoreDiff !== 0) return scoreDiff;
+    return scores[b].catches - scores[a].catches;
+  }).slice(0,3);
+  const st = computeStats();
+  top3.forEach(zone => {
+    const {score, catches} = scores[zone];
+    const col = scoreColor(score);
+    const perDay = st.totalDays > 0 ? (catches / st.totalDays).toFixed(2) : '–';
+    const row = document.createElement('div');
+    row.className = 'zone-row' + (zone === activeZone ? ' active' : '');
+    row.innerHTML =
+      '<div class="mini-ring">'+drawRing(score,col)+'<div class="mnum" style="color:'+col+'">'+score+'</div></div>'
+      +'<div class="zone-info">'
+      +'<div class="zone-name">'+zone+'</div>'
+      +'<div class="zone-catches">'+perDay+' fangster/dag</div>'
+      +(ZONE_COORDS[zone] ? '<div class="zone-map-hint">📍 Klikk for å vise på kart</div>' : '')
+      +'</div>';
+    if (ZONE_COORDS[zone]) {
+      row.addEventListener('click', () => selectZone(zone));
+    }
+    container.appendChild(row);
+  });
+
+  const fly = flyOnly ? 'Kun flue · ' : '';
+  const yLo = Math.min(yearLo,yearHi), yHi = Math.max(yearLo,yearHi);
+  const mLo = Math.min(monthLo,monthHi), mHi = Math.max(monthLo,monthHi);
+  const yrLbl = yLo === yHi ? String(yLo) : yLo + '–' + yHi;
+  const moLbl = mLo === mHi ? MONTH_NAMES[mLo] : MONTH_NAMES[mLo] + '–' + MONTH_NAMES[mHi];
+
+  updateMap(scores);
+  if (activeZone) showZoneInfo(activeZone);
+
+  // Oppdater statistikk-boks
+  const perDayStr = st.perDay > 0 ? st.perDay.toFixed(2) : '\u2013';
+  document.getElementById('statBox').innerHTML =
+    '<div class="stat-item"><span class="stat-num">' + st.totalCatches + '</span><span class="stat-lbl">Fangster</span></div>' +
+    '<div class="stat-item"><span class="stat-num">' + st.totalDays + '</span><span class="stat-lbl">Dager</span></div>' +
+    '<div class="stat-item"><span class="stat-num">' + perDayStr + '</span><span class="stat-lbl">Per dag</span></div>';
+
+  // Total score = fangstvektet snitt av alle soners score
+  const allScores = ZONES.map(z => scores[z]);
+  const totalW = allScores.reduce((s,z) => s + z.catches, 0);
+  const riverScore = totalW > 0
+    ? Math.round(allScores.reduce((s,z) => s + z.score * z.catches, 0) / totalW)
+    : 0;
+  const riverCol = scoreColor(riverScore);
+  document.getElementById('totalScoreBox').innerHTML =
+    '<div style="position:relative;display:inline-flex;align-items:center;justify-content:center">'
+    + drawRing(riverScore, riverCol)
+    + '<div class="mnum" style="position:absolute;color:' + riverCol + ';font-size:0.85rem;font-weight:800">' + riverScore + '</div>'
+    + '</div>'
+    + '<div class="total-score-lbl">Score</div>';
+}
+
+// ── MAP ───────────────────────────────────────────────────────────────────
+function initMap() {
+  if (map) return;
+  const container = document.getElementById('map');
+  container.style.height = '320px';
+  map = L.map('map', {zoomControl: true}).setView([58.18, 7.33], 10);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap', maxZoom: 17
+  }).addTo(map);
+
+  setTimeout(() => map.invalidateSize(), 50);
+  setTimeout(() => map.invalidateSize(), 300);
+
+  // "Hvor er jeg?"-kontroll oppe til høyre
+  const LocControl = L.Control.extend({
+    options: { position: 'topright' },
+    onAdd: function() {
+      const btn = L.DomUtil.create('button', '');
+      btn.innerHTML = '📍 Hvor er jeg?';
+      btn.style.cssText = 'background:#fff;color:#333;border:2px solid rgba(0,0,0,0.2);border-radius:4px;padding:5px 10px;font-size:0.75rem;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:none;';
+      btn.title = 'Vis min posisjon på kartet';
+      L.DomEvent.on(btn, 'click', L.DomEvent.stopPropagation);
+      L.DomEvent.on(btn, 'click', () => {
+        btn.innerHTML = '⏳ Søker...';
+        btn.disabled = true;
+        map.locate({ setView: true, maxZoom: 14 });
+      });
+      return btn;
+    }
+  });
+  new LocControl().addTo(map);
+
+  let _myLocMarker = null;
+  map.on('locationfound', (e) => {
+    if (_myLocMarker) _myLocMarker.remove();
+    _myLocMarker = L.circleMarker(e.latlng, {
+      radius: 8, color: '#e53e3e', fillColor: '#e53e3e',
+      fillOpacity: 0.9, weight: 2
+    }).addTo(map).bindTooltip('📍 Du er her', { permanent: false, direction: 'top', className: 'mtip' });
+    document.querySelector('.leaflet-control button') && (document.querySelectorAll('.leaflet-control button')[document.querySelectorAll('.leaflet-control button').length - 1].innerHTML = '📍 Hvor er jeg?');
+    const locBtn = document.querySelector('[title="Vis min posisjon på kartet"]');
+    if (locBtn) { locBtn.innerHTML = '📍 Hvor er jeg?'; locBtn.disabled = false; }
+  });
+  map.on('locationerror', () => {
+    const locBtn = document.querySelector('[title="Vis min posisjon på kartet"]');
+    if (locBtn) { locBtn.innerHTML = '📍 Hvor er jeg?'; locBtn.disabled = false; }
+    alert('Posisjon ikke tilgjengelig. Sjekk at du har gitt tilgang til posisjon i nettleseren.');
+  });
+
+  ZONES.forEach(zone => {
+    const zc = ZONE_COORDS[zone]; if (!zc) return;
+    const label = zone.replace('Sone','').trim();
+
+    const startMk = L.marker(zc.s, {icon: makeStartIcon(label, '#94a3b8', false, false), zIndexOffset: 10}).addTo(map);
+    startMk.bindTooltip(zone, {permanent: false, direction: 'top', className: 'mtip'});
+    startMk.on('click', () => { selectZone(zone); if (activeZone === zone) showZoneInfo(zone); });
+
+    const endMk = L.marker(zc.e, {icon: makeEndIcon(), opacity: 0, zIndexOffset: 5}).addTo(map);
+    endMk.bindTooltip(zone + ' · slutt', {permanent: false, direction: 'top', className: 'mtip'});
+
+    mapLayers[zone] = {startMk, endMk};
+  });
+
+  // Video markers
+  VIDEOS.forEach((video, idx) => {
+    const mk = L.marker([video.lat, video.lon], { icon: makeVideoIcon(), zIndexOffset: 250, opacity: 0 }).addTo(map);
+    mk.bindTooltip('🎣 Vis fangstvideo', { permanent: false, direction: 'top', className: 'mtip' });
+    mk.on('click', (e) => { L.DomEvent.stopPropagation(e); window.open('https://www.youtube.com/watch?v=' + video.youtubeId, '_blank'); });
+    videoMarkers.push({ mk, zone: video.zone });
+  });
+
+  // Photo markers
+  PHOTOS.forEach((photo, idx) => {
+    const icon = makePhotoIcon(false);
+    const mk = L.marker([photo.lat, photo.lon], { icon, zIndexOffset: 200, opacity: 0 }).addTo(map);
+    mk.bindTooltip('📷 Vis bilde', { permanent: false, direction: 'top', className: 'mtip' });
+    mk.on('click', (e) => { L.DomEvent.stopPropagation(e); openZonePhotos(photo.zone, idx); });
+    photoMarkers.push({ mk, zone: photo.zone, photosIdx: idx });
+  });
+
+}
+
+
+function makeVideoIcon() {
+  return L.divIcon({
+    html: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+      <circle cx="10" cy="10" r="9" fill="#c53030" stroke="white" stroke-width="1.5"/>
+      <polygon points="8,6 8,14 15,10" fill="white"/>
+    </svg>`,
+    className: '',
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+    tooltipAnchor: [0, -12],
+  });
+}
+function makePhotoIcon(active) {
+  const size = active ? 24 : 16;
+  const r = active ? 11 : 7;
+  const stroke = active ? 2.5 : 1.5;
+  const fs = active ? 12 : 8;
+  const y = active ? 17 : 11.5;
+  const fill = active ? '#276749' : '#0f2d4a';
+  const ring = active ? `<circle cx="${size/2}" cy="${size/2}" r="${r+3}" fill="none" stroke="white" stroke-width="2.5" opacity="0.6"/>` : '';
+  return L.divIcon({
+    html: `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+      ${ring}
+      <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="${fill}" stroke="white" stroke-width="${stroke}"/>
+      <text x="${size/2}" y="${y}" text-anchor="middle" fill="white" font-size="${fs}">📷</text>
+    </svg>`,
+    className: '',
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2],
+    tooltipAnchor: [0, -10],
+  });
+}
+function makeStartIcon(label, color, isSelected, isDimmed) {
+  const size = isSelected ? 36 : 30;
+  const fs = isSelected ? 11 : 9;
+  const opacity = isDimmed ? 0.50 : 1;
+  const stroke = isSelected ? '#fff' : 'rgba(0,0,0,0.15)';
+  const sw = isSelected ? 2.5 : 1.5;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" opacity="${opacity}">
+    <circle cx="${size/2}" cy="${size/2}" r="${size/2-2}" fill="${color}" stroke="${stroke}" stroke-width="${sw}"/>
+    <text x="${size/2}" y="${size/2+fs*0.38}" text-anchor="middle" fill="#fff" font-size="${fs}" font-weight="700" font-family="Segoe UI,sans-serif">${label}</text>
+  </svg>`;
+  return L.divIcon({html: svg, className: '', iconSize: [size,size], iconAnchor: [size/2,size/2], tooltipAnchor: [0,-size/2]});
+}
+
+function makeEndIcon(color) {
+  const col = color || '#475569';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21">
+    <circle cx="10.5" cy="10.5" r="8.5" fill="${col}" stroke="#fff" stroke-width="2"/>
+    <line x1="6.5" y1="10.5" x2="14.5" y2="10.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+  </svg>`;
+  return L.divIcon({html: svg, className: '', iconSize: [21,21], iconAnchor: [10.5,10.5]});
+}
+
+function updateMap(scores) {
+  if (!map) return;
+  ZONES.forEach(zone => {
+    const l = mapLayers[zone]; if (!l) return;
+    const isSelected = zone === activeZone;
+    const isDimmed = activeZone !== null && !isSelected;
+    const sc = scores ? (scores[zone]?.score || 0) : 0;
+    const col = isDimmed ? '#94a3b8' : (scores ? scoreColor(sc) : '#94a3b8');
+    const label = zone.replace('Sone','').trim();
+    l.startMk.setIcon(makeStartIcon(label, col, isSelected, isDimmed));
+    l.startMk.setZIndexOffset(isSelected ? 100 : 10);
+    l.endMk.setIcon(makeEndIcon(col));
+    l.endMk.setOpacity(isSelected ? 1 : 0);
+  });
+  // Show photo markers only when their zone is active
+  photoMarkers.forEach(({ mk, zone }) => {
+    mk.setOpacity(activeZone === zone ? 1 : 0);
+    if (mk._icon) mk._icon.style.pointerEvents = activeZone === zone ? 'auto' : 'none';
+  });
+  videoMarkers.forEach(({ mk, zone }) => {
+    mk.setOpacity(activeZone === zone ? 1 : 0);
+    if (mk._icon) mk._icon.style.pointerEvents = activeZone === zone ? 'auto' : 'none';
+  });
+}
+
+function selectZone(zone) {
+  if (activeZone === zone) {
+    activeZone = null;
+    document.getElementById('mapTitle').textContent = '🗺 Kart';
+    const allCoords = ZONES.flatMap(z => ZONE_COORDS[z] ? [ZONE_COORDS[z].s, ZONE_COORDS[z].e] : []);
+    if (allCoords.length) map.fitBounds(allCoords, {padding: [40,40], animate: true, maxZoom: 10});
+    closePhoto();
+    closeZoneInfo();
+    closeVideo();
+  } else {
+    activeZone = zone;
+    document.getElementById('mapTitle').textContent = '🗺 ' + zone;
+    const zc = ZONE_COORDS[zone];
+    if (zc) map.fitBounds([zc.s, zc.e], {padding: [50,50], animate: true, maxZoom: 14});
+  }
+  update();
+}
+
+function showZoneInfo(zone) {
+  const info = ZONE_INFO[zone];
+  if (!info) return;
+  const scores = computeScores();
+  const score = scores ? (scores[zone]?.score ?? 0) : 0;
+  const catches = scores ? (scores[zone]?.catches ?? 0) : 0;
+  const col = scoreColor(score);
+
+  const yLo = Math.min(yearLo,yearHi), yHi = Math.max(yearLo,yearHi);
+  const mLo = Math.min(monthLo,monthHi), mHi = Math.max(monthLo,monthHi);
+  const yrLbl = yLo===yHi ? String(yLo) : yLo+'–'+yHi;
+  const moLbl = mLo===mHi ? MONTH_NAMES[mLo] : MONTH_NAMES[mLo]+'–'+MONTH_NAMES[mHi];
+
+  document.getElementById('ziTitle').textContent = '📍 ' + info.name;
+  document.getElementById('ziBody').innerHTML = `
+    <div class="zi-score-row">
+      <div class="zi-score-num" style="color:${col}">${score}</div>
+      <div class="zi-score-label">Score (${yrLbl} · ${moLbl} · ${currentFlow}–${currentFlow+5} m³/s)<br>${catches === 1 ? '1 fangst' : catches + ' fangster'} i utvalget</div>
+    </div>
+    <div class="zi-desc">${info.desc}</div>
+    <div class="zi-row"><span class="zi-label">Redskap</span><span class="zi-val">${info.redskap}</span></div>
+    <div class="zi-row"><span class="zi-label">Sesong</span><span class="zi-val">${info.sesong}</span></div>
+    <div class="zi-row"><span class="zi-label">Merknader</span><span class="zi-val">${info.merknader}</span></div>
+    <a class="zi-link" href="https://www.google.com/maps/dir/?api=1&destination=${ZONE_COORDS[zone]?.s[0]},${ZONE_COORDS[zone]?.s[1]}&travelmode=driving" target="_blank">🗺 Veibeskrivelse hit ↗</a>
+    <a class="zi-link" href="${info.kortUrl}" target="_blank">🎫 Kjøp fiskekort ↗</a>
+    <div class="zi-sources">Kilder: <a href="https://www.inatur.no/laksefiske/58a17c2ae4b0af1d2056b3d2" target="_blank">inatur.no</a> · <a href="https://lakseelver.no/nb/elver/audna/about" target="_blank">lakseelver.no</a> · <a href="https://www.audna.no" target="_blank">audna.no</a></div>
+  `;
+  const panel = document.getElementById('zoneInfoPanel');
+  panel.classList.add('visible');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeZoneInfo() {
+  document.getElementById('zoneInfoPanel').classList.remove('visible');
+}
+
+let _activePhotoIdx = 0;
+let _activeZonePhotos = [];
+
+function openZonePhotos(zone, photosIdx) {
+  _activeZonePhotos = PHOTOS.filter(p => p.zone === zone)
+    .sort((a, b) => a.lat - b.lat);
+  // Find position of clicked photo within zone group
+  const clickedPhoto = PHOTOS[photosIdx];
+  const posInGroup = clickedPhoto ? _activeZonePhotos.findIndex(p => p === clickedPhoto) : 0;
+  _activePhotoIdx = posInGroup >= 0 ? posInGroup : 0;
+  _renderPhoto();
+  document.getElementById('photoPanel').classList.add('visible');
+  document.getElementById('photoPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function openVideo(idx) {
+  const v = VIDEOS[idx];
+  const dateStr = v.dateISO ? new Date(v.dateISO).toLocaleDateString('nb-NO', {day:'numeric', month:'long', year:'numeric'}) : '';
+  document.getElementById('vpTitle').textContent = '🎣 ' + v.caption;
+  document.getElementById('vpInfo').innerHTML = (dateStr ? '<span>' + dateStr + '</span><br>' : '')
+    + '<a href="https://www.youtube.com/watch?v=' + v.youtubeId + '" target="_blank" class="vp-yt-btn">▶ Se video på YouTube ↗</a>';
+  const panel = document.getElementById('videoPanel');
+  panel.classList.add('visible');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeVideo() {
+  document.getElementById('videoPanel').classList.remove('visible');
+}
+
+function showPhoto(idx) {
+  if (idx < 0 || idx >= _activeZonePhotos.length) return;
+  _activePhotoIdx = idx;
+  _renderPhoto();
+}
+
+function _renderPhoto() {
+  const p = _activeZonePhotos[_activePhotoIdx];
+  const n = _activeZonePhotos.length;
+  if (!p) return;
+
+  document.getElementById('photoImg').src = BILDE_BASE + p.file;
+  document.getElementById('photoTitle').textContent = '📷 ' + p.zone + (p.id ? ' · ' + p.id : '');
+  document.getElementById('photoCounter').textContent = n > 1 ? (_activePhotoIdx + 1) + ' / ' + n : '';
+
+  const flowVal = FLOW_LOOKUP[p.dateISO];
+  const flowStr = flowVal !== undefined ? flowVal + ' m³/s' : 'Vannstand ukjent';
+  const dateStr = p.dateISO ? new Date(p.dateISO).toLocaleDateString('nb-NO', {day:'numeric', month:'long', year:'numeric'}) : '';
+  document.getElementById('photoCap').textContent = p.caption + (dateStr ? ' · ' + dateStr : '') + ' · ' + flowStr;
+
+  const prevBtn = document.getElementById('photoPrev');
+  const nextBtn = document.getElementById('photoNext');
+  prevBtn.disabled = _activePhotoIdx === 0;
+  prevBtn.style.opacity = _activePhotoIdx === 0 ? '0.3' : '1';
+  nextBtn.disabled = _activePhotoIdx >= n - 1;
+  nextBtn.style.opacity = _activePhotoIdx >= n - 1 ? '0.3' : '1';
+
+  // Highlight active photo marker on map
+  const activePhoto = _activeZonePhotos[_activePhotoIdx];
+  photoMarkers.forEach(({ mk, zone, photosIdx }) => {
+    if (activeZone !== zone) return; // only update visible markers
+    const isActive = PHOTOS[photosIdx] === activePhoto;
+    mk.setIcon(makePhotoIcon(isActive));
+    mk.setZIndexOffset(isActive ? 300 : 200);
+  });
+
+  // Sentrer kartet på aktiv markør
+  if (activePhoto) {
+    map.panTo([activePhoto.lat, activePhoto.lon], { animate: true, duration: 0.4 });
+  }
+}
+function closePhoto() {
+  document.getElementById('photoPanel').classList.remove('visible');
+  _activeZonePhotos = [];
+  photoMarkers.forEach(({ mk }) => mk.setIcon(makePhotoIcon(false)));
+}
+function openFullscreen() {
+  if (!_activeZonePhotos.length) return;
+  const p = _activeZonePhotos[_activePhotoIdx];
+  if (!p) return;
+  document.getElementById('fsImg').src = BILDE_BASE + p.file;
+  document.getElementById('fsCap').textContent = p.caption;
+  document.getElementById('photoFs').classList.add('open');
+}
+function closeFullscreen() {
+  document.getElementById('photoFs').classList.remove('open');
+}
+
+// ── NVE ───────────────────────────────────────────────────────────────────
+async function fetchNVE() {
+  try {
+    const res = await fetch(NVE_CACHE_URL);
+    if (!res.ok) throw new Error('cache ikke tilgjengelig');
+    const json = await res.json();
+    const obs = json.data[0].observations.filter(o => o.value !== null);
+    if (!obs.length) throw new Error('no data');
+
+    // Current value
+    const val = obs[obs.length - 1].value;
+    document.getElementById('audnaFlow').textContent = val.toFixed(1);
+    document.getElementById('audnaStatus').innerHTML = '<span style="color:#68d391">✅ Live NVE</span>';
+    const bin = Math.floor(val/5)*5;
+    currentFlow = Math.max(0, Math.min(80, bin));
+    document.getElementById('flowSlider').value = currentFlow;
+    onFlowChange(currentFlow);
+
+    // Trend: compare to 3 hours ago
+    const val3h = obs.length >= 4 ? obs[obs.length - 4].value : null;
+    const trendEl = document.getElementById('trendBadge');
+    const lblEl   = document.getElementById('trendLabel');
+    if (val3h !== null) {
+      const diff = val - val3h;
+      if (diff > 0.5)       { trendEl.textContent = '↑'; trendEl.style.color = '#68d391'; lblEl.textContent = 'Stigende siste 3t'; }
+      else if (diff < -0.5) { trendEl.textContent = '↓'; trendEl.style.color = '#fc8181'; lblEl.textContent = 'Synkende siste 3t'; }
+      else                  { trendEl.textContent = '→'; trendEl.style.color = '#94a3b8'; lblEl.textContent = 'Stabil siste 3t'; }
+    }
+
+    // Sparkline
+    drawSparkline(obs.map(o => o.value));
+    return;
+  } catch(e) {
+    document.getElementById('audnaFlow').textContent = '–';
+    document.getElementById('audnaStatus').innerHTML = '<span style="color:#fc8181">⚠️ NVE ikke tilgjengelig</span>';
+  }
+}
+
+async function fetchNedbor() {
+  try {
+    const res = await fetch(NEDBOR_CACHE_URL);
+    if (!res.ok) return;
+    const json = await res.json();
+    const ts = json.properties.timeseries;
+    const now = Date.now();
+    const H24 = now + 24*3600*1000;
+    const H48 = now + 48*3600*1000;
+
+    // Summer nedbør neste 24t og 24-48t. Foretrekk next_1_hours; bruk next_6_hours
+    // kun der timeoppløsning mangler (hopper da 6t frem for å unngå dobbelttelling).
+    let sum24 = 0, sum48 = 0;
+    let i = 0;
+    while (i < ts.length) {
+      const t = new Date(ts[i].time).getTime();
+      if (t >= H48) break;
+      const d = ts[i].data;
+      let mm = null, span = 1;
+      if (d.next_1_hours) { mm = d.next_1_hours.details.precipitation_amount; span = 1; }
+      else if (d.next_6_hours) { mm = d.next_6_hours.details.precipitation_amount; span = 6; }
+      if (mm !== null && t >= now - 3600*1000) {
+        if (t < H24) sum24 += mm; else sum48 += mm;
+      }
+      i += span;
+    }
+
+    const el = document.getElementById('fiskemelding');
+    const title = document.getElementById('fmTitle');
+    const text = document.getElementById('fmText');
+    const r24 = Math.round(sum24);
+    const r48 = Math.round(sum48);
+
+    if (sum24 >= 10) {
+      title.textContent = '🌧️ Gode forhold i vente';
+      text.textContent = `Ca. ${r24} mm regn neste døgn gir trolig stigende vann. Audna reagerer raskt – følg med fra i morgen.`;
+    } else if (sum24 >= 3) {
+      title.textContent = '🌦️ Litt regn i vente';
+      text.textContent = `Ca. ${r24} mm neste døgn – mulig svak stigning i vannet.`;
+    } else if (sum48 >= 10) {
+      title.textContent = '🌧️ Regn om 1–2 døgn';
+      text.textContent = `Ca. ${r48} mm ventet i morgen/overimorgen – stigning i vente.`;
+    } else {
+      title.textContent = '☀️ Tørt i vente';
+      text.textContent = 'Lite nedbør neste 48 t – forvent stabilt eller sakte synkende vann.';
+    }
+    el.style.display = 'block';
+  } catch(e) { /* fiskemelding er valgfri – feiler stille */ }
+}
+
+function drawSparkline(values) {
+  const svg = document.getElementById('sparkSvg');
+  if (!svg || !values.length) return;
+  const W = 200, H = 32, pad = 2;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+  const pts = values.map((v, i) => {
+    const x = pad + (i / (values.length - 1)) * (W - pad * 2);
+    const y = H - pad - ((v - min) / range) * (H - pad * 2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+  // Area fill
+  const areaPoints = `${pad},${H} ` + pts.join(' ') + ` ${W-pad},${H}`;
+  svg.innerHTML =
+    `<defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">` +
+    `<stop offset="0%" stop-color="#68d391" stop-opacity="0.4"/>` +
+    `<stop offset="100%" stop-color="#68d391" stop-opacity="0.05"/>` +
+    `</linearGradient></defs>` +
+    `<polygon points="${areaPoints}" fill="url(#sg)"/>` +
+    `<polyline points="${pts.join(' ')}" fill="none" stroke="#68d391" stroke-width="1.5" stroke-linejoin="round"/>`;
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+initMap();
+onFlowChange(5);
+onYearChange();
+onMonthChange();
+// Init stat boxes with placeholders so header never collapses
+document.getElementById('statBox').innerHTML =
+  '<div class="stat-item"><span class="stat-num">–</span><span class="stat-lbl">Fangster</span></div>' +
+  '<div class="stat-item"><span class="stat-num">–</span><span class="stat-lbl">Dager</span></div>' +
+  '<div class="stat-item"><span class="stat-num">–</span><span class="stat-lbl">Per dag</span></div>';
+document.getElementById('totalScoreBox').innerHTML =
+  '<div style="position:relative;display:inline-flex;align-items:center;justify-content:center">'
+  + drawRing(0, '#e2e8f0')
+  + '<div class="mnum" style="position:absolute;color:#e2e8f0;font-size:0.85rem;font-weight:800">–</div>'
+  + '</div>'
+  + '<div class="total-score-lbl">Score</div>';
+fetchNVE().then(() => update());
+fetchNedbor();
+window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
+</script>
+
+
+
+
+
+
+<div class="photo-panel" id="photoPanel">
+  <div class="photo-hdr">
+    <span id="photoTitle">📷 Bilde</span>
+    <div style="display:flex; align-items:center; gap:6px;">
+      <button class="pg-nav-btn" id="photoPrev" onclick="showPhoto(_activePhotoIdx-1)" title="Forrige (sør)">&#8595;</button>
+      <span id="photoCounter" style="font-size:0.65rem; color:#94a3b8;"></span>
+      <button class="pg-nav-btn" id="photoNext" onclick="showPhoto(_activePhotoIdx+1)" title="Neste (nord)">&#8593;</button>
+      <button onclick="closePhoto()" style="background:none;border:none;color:#94a3b8;font-size:1rem;cursor:pointer;margin-left:4px;">×</button>
+    </div>
+  </div>
+  <img class="photo-img" id="photoImg" src="" alt="" onclick="openFullscreen()" style="cursor:zoom-in">
+  <div class="photo-cap" id="photoCap"></div>
+</div>
+
+<div class="photo-fs" id="photoFs" onclick="closeFullscreen()">
+  <button class="fs-close" onclick="closeFullscreen()">×</button>
+  <img id="fsImg" src="" alt="">
+  <div class="fs-cap" id="fsCap"></div>
+</div>
+
+
+
+<div class="zone-info-panel" id="zoneInfoPanel">
+  <div class="zi-hdr">
+    <span class="zi-hdr-title" id="ziTitle">Soneinfo</span>
+    <button onclick="closeZoneInfo()">×</button>
+  </div>
+  <div class="zi-body" id="ziBody"></div>
+</div>
+
+<div class="video-panel" id="videoPanel">
+  <div class="vp-hdr">
+    <span class="vp-hdr-title" id="vpTitle">🎣 Fangstvideo</span>
+    <button onclick="closeVideo()">×</button>
+  </div>
+  <div class="vp-info" id="vpInfo"></div>
+</div>
+<div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt<br>
+  <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
+</div>
+
+</body>
+</html>
