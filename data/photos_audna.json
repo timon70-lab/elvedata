@@ -624,54 +624,6 @@
   "vannforing": 17
  },
  {
-  "id": "A-053",
-  "file": "PXL_20260604_180012986.MP.jpg",
-  "caption": "Sone 5A · Stryk ved sandbanke",
-  "zone": "Sone 5A",
-  "dateISO": "2026-06-04",
-  "timeUTC": "18:00",
-  "locId": "Sone 5A",
-  "lat": 58.131197,
-  "lon": 7.366067,
-  "vannforing": null
- },
- {
-  "id": "A-054",
-  "file": "PXL_20260604_184558931.MP.jpg",
-  "caption": "Sone 5A · Stille elveparti i regnvær",
-  "zone": "Sone 5A",
-  "dateISO": "2026-06-04",
-  "timeUTC": "18:45",
-  "locId": "Sone 5A",
-  "lat": 58.130061,
-  "lon": 7.363242,
-  "vannforing": null
- },
- {
-  "id": "A-055",
-  "file": "PXL_20260604_192708940.jpg",
-  "caption": "Sone 5A · Fanget laks ved grusbanke",
-  "zone": "Sone 5A",
-  "dateISO": "2026-06-04",
-  "timeUTC": "19:27",
-  "locId": "Sone 5A",
-  "lat": 58.130028,
-  "lon": 7.363467,
-  "vannforing": null
- },
- {
-  "id": "A-056",
-  "file": "PXL_20260604_192954022.MP.jpg",
-  "caption": "Sone 5A · Fiskeutstyr og fangst",
-  "zone": "Sone 5A",
-  "dateISO": "2026-06-04",
-  "timeUTC": "19:29",
-  "locId": "Sone 5A",
-  "lat": 58.129878,
-  "lon": 7.363481,
-  "vannforing": null
- },
- {
   "id": "A-057",
   "lat": 58.131197,
   "lon": 7.366067,
