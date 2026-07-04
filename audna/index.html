@@ -347,64 +347,8 @@ const ZONES = ['Sone1','Sone2','Sone3','Sone4','Sone 5A','Sone 5B','Sone5','Sone
 
 
 const BILDE_BASE = 'https://timon70-lab.github.io/elvedata/bilder/audna/';
-const PHOTOS = [
-  { id: 'A-001', lat: 58.129878, lon: 7.363481, file: 'Sone5A_20260604_1929.jpg', caption: 'Sone 5A · Grusbanke ved elva', zone: 'Sone 5A', dateISO: '2026-06-04', timeUTC: '19:29', locId: 'Sone 5A' },
-  { id: 'A-002', lat: 58.270874, lon: 7.351215, file: 'Sone8_20230727_2012.jpg', caption: 'Sone 8 · Kveldsstemning', zone: 'Sone8', dateISO: '2023-07-27', timeUTC: '20:12', locId: 'Sone8' },
-  { id: 'A-003', lat: 58.269466, lon: 7.352070, file: 'Sone8_20230727_1939.jpg', caption: 'Sone 8 · Grusstrand ved elva', zone: 'Sone8', dateISO: '2023-07-27', timeUTC: '19:39', locId: 'Sone8' },
-  { id: 'A-004', lat: 58.266640, lon: 7.351889, file: 'Sone8_20230727_1920.jpg', caption: 'Sone 8 · Stille høl', zone: 'Sone8', dateISO: '2023-07-27', timeUTC: '19:20', locId: 'Sone8' },
-  { id: 'A-005', lat: 58.265235, lon: 7.352226, file: 'Sone8_20230727_1844.jpg', caption: 'Sone 8 · Utsikt fra brua', zone: 'Sone8', dateISO: '2023-07-27', timeUTC: '18:44', locId: 'Sone8' },
-  { id: 'A-006', lat: 58.242163, lon: 7.345708, file: 'Sone7_20230727_1555.jpg', caption: 'Sone 7 · Stryk og høl', zone: 'Sone7', dateISO: '2023-07-27', timeUTC: '15:55', locId: 'Sone7' },
-  { id: 'A-007', lat: 58.242172, lon: 7.345722, file: 'Sone7_20230727_1556.jpg', caption: 'Sone 7 · Stor stein i elva', zone: 'Sone7', dateISO: '2023-07-27', timeUTC: '15:56', locId: 'Sone7' },
-  { id: 'A-008', lat: 58.242172, lon: 7.345722, file: 'Sone7_20230727_1556_2.jpg', caption: 'Sone 7 · Rolige partier', zone: 'Sone7', dateISO: '2023-07-27', timeUTC: '15:56', locId: 'Sone7' },
-  { id: 'A-009', lat: 58.258547, lon: 7.345471, file: 'Sone8_20230727_1745.jpg', caption: 'Sone 8 · Sandbanke ved kveld', zone: 'Sone8', dateISO: '2023-07-27', timeUTC: '17:45', locId: 'Sone8' },
-  { id: 'A-010', lat: 58.258573, lon: 7.345426, file: 'Sone8_20230727_1745_2.jpg', caption: 'Sone 8 · Grusstrand og høl', zone: 'Sone8', dateISO: '2023-07-27', timeUTC: '17:45', locId: 'Sone8' },
-  { id: 'A-011', lat: 58.258573, lon: 7.345426, file: 'Sone8_20230727_1745_3.jpg', caption: 'Sone 8 · Stille kveldselv', zone: 'Sone8', dateISO: '2023-07-27', timeUTC: '17:45', locId: 'Sone8' },
-  { id: 'A-012', lat: 58.259488, lon: 7.347211, file: 'Sone8_20230727_1805.jpg', caption: 'Sone 8 · Utsikt nedover elva', zone: 'Sone8', dateISO: '2023-07-27', timeUTC: '18:05', locId: 'Sone8' },
-  { id: 'A-013', lat: 58.118597, lon: 7.341340, file: '20230718_181021.jpg', caption: 'Sone2 · Fisker ved grusbanke nær bebyggelse', zone: 'Sone2', dateISO: '2023-07-18', timeUTC: '16:10', locId: 'Sone2' },
-  { id: 'A-014', lat: 58.118597, lon: 7.341340, file: '20230718_181030.jpg', caption: 'Sone2 · Utsikt over elva mot bebyggelse', zone: 'Sone2', dateISO: '2023-07-18', timeUTC: '16:10', locId: 'Sone2' },
-  { id: 'A-015', lat: 58.127703, lon: 7.356072, file: '20230718_182554.jpg', caption: 'Sone 5A · Elvesving med solglitter', zone: 'Sone 5A', dateISO: '2023-07-18', timeUTC: '16:25', locId: 'Sone 5A' },
-  { id: 'A-016', lat: 58.206869, lon: 7.338345, file: '20230718_184259.jpg', caption: 'Sone 5B · Grasbanke ved elvesving', zone: 'Sone 5B', dateISO: '2023-07-18', timeUTC: '16:42', locId: 'Sone 5B' },
-  { id: 'A-017', lat: 58.207125, lon: 7.338056, file: '20230718_184417.jpg', caption: 'Sone 5B · Stille høl med skogkant', zone: 'Sone 5B', dateISO: '2023-07-18', timeUTC: '16:44', locId: 'Sone 5B' },
-  { id: 'A-018', lat: 58.207125, lon: 7.338056, file: '20230718_184435.jpg', caption: 'Sone 5B · Elvesving i kveldslys', zone: 'Sone 5B', dateISO: '2023-07-18', timeUTC: '16:44', locId: 'Sone 5B' },
-  { id: 'A-019', lat: 58.219946, lon: 7.340285, file: '20230718_185045.jpg', caption: 'Sone6 · Stryk mot fjellsiden', zone: 'Sone6', dateISO: '2023-07-18', timeUTC: '16:50', locId: 'Sone6' },
-  { id: 'A-020', lat: 58.219946, lon: 7.340285, file: '20230718_185050.jpg', caption: 'Sone6 · Elv mot dalgang', zone: 'Sone6', dateISO: '2023-07-18', timeUTC: '16:50', locId: 'Sone6' },
-  { id: 'A-021', lat: 58.268416, lon: 7.353303, file: '20230718_190100.jpg', caption: 'Sone 8 · Solfylt elvesving ved skogkanten', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:01', locId: 'Sone8' },
-  { id: 'A-022', lat: 58.268416, lon: 7.353303, file: '20230718_190108.jpg', caption: 'Sone 8 · Utsikt mot fjellskogen', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:01', locId: 'Sone8' },
-  { id: 'A-023', lat: 58.268425, lon: 7.353610, file: '20230718_190434.jpg', caption: 'Sone 8 · Stilleflytende parti', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:04', locId: 'Sone8' },
-  { id: 'A-024', lat: 58.245640, lon: 7.347760, file: '20230718_192100.jpg', caption: 'Sone 8 · Stryk ved skogkanten', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:21', locId: 'Sone8' },
-  { id: 'A-025', lat: 58.245630, lon: 7.347742, file: '20230718_192104.jpg', caption: 'Sone 8 · Strykparti i kveldslys', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:21', locId: 'Sone8' },
-  { id: 'A-026', lat: 58.246052, lon: 7.347586, file: '20230718_192337.jpg', caption: 'Sone 8 · Rolig høl ved steinblokk', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:23', locId: 'Sone8' },
-  { id: 'A-027', lat: 58.246052, lon: 7.347586, file: '20230718_192340.jpg', caption: 'Sone 8 · Stille elveparti ved veiskulder', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:23', locId: 'Sone8' },
-  { id: 'A-028', lat: 58.246052, lon: 7.347586, file: '20230718_192343.jpg', caption: 'Sone 8 · Rolig elvesving i kveldslys', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:23', locId: 'Sone8' },
-  { id: 'A-029', lat: 58.246810, lon: 7.347736, file: '20230718_192542.jpg', caption: 'Sone 8 · Stryk mot skogkledd li', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:25', locId: 'Sone8' },
-  { id: 'A-030', lat: 58.242144, lon: 7.345723, file: '20230718_193202.jpg', caption: 'Sone 8 · Strykparti med greiner over vannet', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:32', locId: 'Sone8' },
-  { id: 'A-031', lat: 58.242146, lon: 7.345723, file: '20230718_193205.jpg', caption: 'Sone 8 · Sti til fiskeplassen', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:32', locId: 'Sone8' },
-  { id: 'A-032', lat: 58.242144, lon: 7.345723, file: '20230718_193208.jpg', caption: 'Sone 8 · Solnedgang over elva', zone: 'Sone8', dateISO: '2023-07-18', timeUTC: '17:32', locId: 'Sone8' },
-  { id: 'A-033', lat: 58.238806, lon: 7.344557, file: '20230718_193547.jpg', caption: 'Sone 7 · Stille elv med grusbanke', zone: 'Sone7', dateISO: '2023-07-18', timeUTC: '17:35', locId: 'Sone7' },
-  { id: 'A-034', lat: 58.238804, lon: 7.344561, file: '20230718_193549.jpg', caption: 'Sone 7 · Elv mot fjellveggen', zone: 'Sone7', dateISO: '2023-07-18', timeUTC: '17:35', locId: 'Sone7' },
-  { id: 'A-035', lat: 58.238804, lon: 7.344561, file: '20230718_193552.jpg', caption: 'Sone 7 · Grusbanke i kveldslys', zone: 'Sone7', dateISO: '2023-07-18', timeUTC: '17:35', locId: 'Sone7' },
-  { id: 'A-036', lat: 58.237151, lon: 7.346016, file: '20230718_193927.jpg', caption: 'Sone 7 · Stryk ved fiskebu', zone: 'Sone7', dateISO: '2023-07-18', timeUTC: '17:39', locId: 'Sone7' },
-  { id: 'A-037', lat: 58.213375, lon: 7.336295, file: '20230718_194831.jpg', caption: 'Sone6 · Fiskebu i skogkanten', zone: 'Sone6', dateISO: '2023-07-18', timeUTC: '17:48', locId: 'Sone6' },
-  { id: 'A-038', lat: 58.213381, lon: 7.336307, file: '20230718_194903.jpg', caption: 'Sone6 · Stille kveldsvann', zone: 'Sone6', dateISO: '2023-07-18', timeUTC: '17:49', locId: 'Sone6' },
-  { id: 'A-039', lat: 58.194346, lon: 7.341593, file: '20230718_195634.jpg', caption: 'Sone 5B · Elvesving med sti ned til vannet', zone: 'Sone 5B', dateISO: '2023-07-18', timeUTC: '17:56', locId: 'Sone 5B' },
-  { id: 'A-040', lat: 58.194346, lon: 7.341593, file: '20230718_195708.jpg', caption: 'Sone 5B · Utsikt over elva i kveldslys', zone: 'Sone 5B', dateISO: '2023-07-18', timeUTC: '17:57', locId: 'Sone 5B' },
-  { id: 'A-041', lat: 58.194346, lon: 7.341593, file: '20230718_195711.jpg', caption: 'Sone 5B · Rolig parti med skyer i refleksjon', zone: 'Sone 5B', dateISO: '2023-07-18', timeUTC: '17:57', locId: 'Sone 5B' },
-  { id: 'A-042', lat: 58.191348, lon: 7.342470, file: '20230718_200228.jpg', caption: 'Sone 5B · Elvesving mot kveldssola', zone: 'Sone 5B', dateISO: '2023-07-18', timeUTC: '18:02', locId: 'Sone 5B' },
-  { id: 'A-043', lat: 58.191348, lon: 7.342470, file: '20230718_200234.jpg', caption: 'Sone 5B · Grusbanke i kveldslys', zone: 'Sone 5B', dateISO: '2023-07-18', timeUTC: '18:02', locId: 'Sone 5B' },
-  { id: 'A-044', lat: 58.191348, lon: 7.342470, file: '20230718_200238.jpg', caption: 'Sone 5B · Stille parti ved grusbanke', zone: 'Sone 5B', dateISO: '2023-07-18', timeUTC: '18:02', locId: 'Sone 5B' },
-  { id: 'A-045', lat: 58.130965, lon: 7.365929, file: '20230718_201757.jpg', caption: 'Sone 5A · Elv ved brua', zone: 'Sone 5A', dateISO: '2023-07-18', timeUTC: '18:17', locId: 'Sone 5A' },
-  { id: 'A-046', lat: 58.130969, lon: 7.365953, file: '20230718_201809.jpg', caption: 'Sone 5A · Utsikt mot brua i kveldslys', zone: 'Sone 5A', dateISO: '2023-07-18', timeUTC: '18:18', locId: 'Sone 5A' },
-  { id: 'A-047', lat: 58.129730, lon: 7.363353, file: '20230718_202534.jpg', caption: 'Sone 5A · Utsikt fra fiskebu mot elva', zone: 'Sone 5A', dateISO: '2023-07-18', timeUTC: '18:25', locId: 'Sone 5A' },
-  { id: 'A-048', lat: 58.118733, lon: 7.340913, file: '20240622_185715.jpg', caption: 'Sone2 · Stille kveldsvann ved bredden', zone: 'Sone2', dateISO: '2024-06-22', timeUTC: '16:57', locId: 'Sone2' },
-  { id: 'A-049', lat: 58.118707, lon: 7.341460, file: '20240622_201949.jpg', caption: 'Sone2 · Solnedgang over elva', zone: 'Sone2', dateISO: '2024-06-22', timeUTC: '18:19', locId: 'Sone2' },
-  { id: 'A-050', lat: 58.126726, lon: 7.339869, file: '20240830_160208.jpg', caption: 'Sone 5A · Stryk ved sonestart', zone: 'Sone 5A', dateISO: '2024-08-30', timeUTC: '14:02', locId: 'Sone 5A' },
-  { id: 'A-051', lat: 58.130016, lon: 7.359765, file: '20240830_164405.jpg', caption: 'Sone 5A · Stilleflytende elveparti', zone: 'Sone 5A', dateISO: '2024-08-30', timeUTC: '14:44', locId: 'Sone 5A' },
-  { id: 'A-052', lat: 58.130093, lon: 7.359962, file: '20240830_164412.jpg', caption: 'Sone 5A · Kveldslys over elva', zone: 'Sone 5A', dateISO: '2024-08-30', timeUTC: '14:44', locId: 'Sone 5A' },
-  { id: 'A-053', lat: 58.131197, lon: 7.366067, file: 'PXL_20260604_180012986.MP.jpg', caption: 'Sone 5A · Stryk ved sandbanke', zone: 'Sone 5A', dateISO: '2026-06-04', timeUTC: '18:00', locId: 'Sone 5A' },
-  { id: 'A-054', lat: 58.130061, lon: 7.363242, file: 'PXL_20260604_184558931.MP.jpg', caption: 'Sone 5A · Stille elveparti i regnvær', zone: 'Sone 5A', dateISO: '2026-06-04', timeUTC: '18:45', locId: 'Sone 5A' },
-  { id: 'A-055', lat: 58.130028, lon: 7.363467, file: 'PXL_20260604_192708940.jpg', caption: 'Sone 5A · Fanget laks ved grusbanke', zone: 'Sone 5A', dateISO: '2026-06-04', timeUTC: '19:27', locId: 'Sone 5A' },
-  { id: 'A-056', lat: 58.129878, lon: 7.363481, file: 'PXL_20260604_192954022.MP.jpg', caption: 'Sone 5A · Fiskeutstyr og fangst', zone: 'Sone 5A', dateISO: '2026-06-04', timeUTC: '19:29', locId: 'Sone 5A' }
-];
+const PHOTOS_URL = 'https://timon70-lab.github.io/elvedata/data/photos_audna.json';
+let PHOTOS = [];
 let photoMarkers = [];
 
 const VIDEOS = [
@@ -690,7 +634,12 @@ function initMap() {
     videoMarkers.push({ mk, zone: video.zone });
   });
 
-  // Photo markers
+}
+
+function addPhotoMarkers() {
+  if (!map) return;
+  photoMarkers.forEach(({ mk }) => mk.remove());
+  photoMarkers = [];
   PHOTOS.forEach((photo, idx) => {
     const icon = makePhotoIcon(false);
     const mk = L.marker([photo.lat, photo.lon], { icon, zIndexOffset: 200, opacity: 0 }).addTo(map);
@@ -698,7 +647,16 @@ function initMap() {
     mk.on('click', (e) => { L.DomEvent.stopPropagation(e); openZonePhotos(photo.zone, idx); });
     photoMarkers.push({ mk, zone: photo.zone, photosIdx: idx });
   });
+}
 
+async function fetchPhotos() {
+  try {
+    const res = await fetch(PHOTOS_URL);
+    if (!res.ok) return;
+    PHOTOS = await res.json();
+    addPhotoMarkers();
+    updateMap(computeScores());
+  } catch(e) { /* bilder er valgfrie – feiler stille */ }
 }
 
 
@@ -880,7 +838,7 @@ function _renderPhoto() {
   document.getElementById('photoTitle').textContent = '📷 ' + p.zone + (p.id ? ' · ' + p.id : '');
   document.getElementById('photoCounter').textContent = n > 1 ? (_activePhotoIdx + 1) + ' / ' + n : '';
 
-  const flowVal = FLOW_LOOKUP[p.dateISO];
+  const flowVal = (p.vannforing !== undefined && p.vannforing !== null) ? p.vannforing : FLOW_LOOKUP[p.dateISO];
   const flowStr = flowVal !== undefined ? flowVal + ' m³/s' : 'Vannstand ukjent';
   const dateStr = p.dateISO ? new Date(p.dateISO).toLocaleDateString('nb-NO', {day:'numeric', month:'long', year:'numeric'}) : '';
   document.getElementById('photoCap').textContent = p.caption + (dateStr ? ' · ' + dateStr : '') + ' · ' + flowStr;
@@ -1052,6 +1010,7 @@ document.getElementById('totalScoreBox').innerHTML =
   + '<div class="total-score-lbl">Score</div>';
 fetchNVE().then(() => update());
 fetchNedbor();
+fetchPhotos();
 window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </script>
 
