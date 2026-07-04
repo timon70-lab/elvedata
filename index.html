@@ -11,19 +11,25 @@
   header { padding: 18px 20px 10px; text-align: center; }
   header h1 { margin: 0; font-size: 1.3rem; font-weight: 700; }
   header p { margin: 4px 0 0; font-size: 0.8rem; color: #94a3b8; }
-  #map { width: 100%; height: 78vh; min-height: 420px; }
-  .legend { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; padding: 10px 16px 18px; font-size: 0.72rem; color: #94a3b8; }
+  #map { width: 100%; height: 78vh; min-height: 460px; }
+  .legend { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; padding: 10px 16px 18px; font-size: 0.7rem; color: #94a3b8; }
   .legend span { display: inline-flex; align-items: center; gap: 5px; }
   .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
-  .river-marker { display: flex; align-items: center; justify-content: center; border-radius: 50%; color: #fff; font-weight: 800; font-size: 0.85rem; border: 2px solid rgba(255,255,255,0.85); box-shadow: 0 1px 4px rgba(0,0,0,0.35); }
+  .river-marker { display: flex; align-items: center; justify-content: center; border-radius: 50%; color: #fff; font-weight: 800; font-size: 0.82rem; border: 2px solid rgba(255,255,255,0.85); box-shadow: 0 1px 4px rgba(0,0,0,0.35); }
+  .river-marker.stop { background: #b91c1c; font-size: 1.1rem; }
+  .river-marker.opening { background: #d69e2e; font-size: 0.64rem; }
+  .river-marker.nodata { background: #4a5568; font-size: 1rem; }
   .popup-card { font-family: inherit; min-width: 170px; }
   .popup-card .pc-title { font-weight: 700; font-size: 0.95rem; margin: 0 0 2px; color: #0f2d4a; }
   .popup-card .pc-flow { font-size: 0.78rem; color: #475569; margin: 0 0 8px; }
   .popup-card .pc-score { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
   .popup-card .pc-score-num { font-size: 1.4rem; font-weight: 800; }
   .popup-card .pc-score-lbl { font-size: 0.72rem; color: #64748b; }
+  .popup-card .pc-status { font-size: 0.82rem; color: #1a202c; margin: 0 0 10px; font-weight: 600; }
+  .popup-card .pc-substatus { font-size: 0.74rem; color: #64748b; margin: -6px 0 10px; }
   .popup-card a.pc-link { display: block; text-align: center; background: #0f2d4a; color: #fff; text-decoration: none; padding: 7px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; }
   .leaflet-popup-content-wrapper { border-radius: 10px; }
+  .leaflet-tooltip.nodata-tip { font-size: 0.72rem; }
 </style>
 </head>
 <body>
@@ -40,30 +46,51 @@
   <span><span class="dot" style="background:#3182ce"></span> 50–69 godt</span>
   <span><span class="dot" style="background:#dd6b20"></span> 30–49 middels</span>
   <span><span class="dot" style="background:#e53e3e"></span> 0–29 svakt</span>
-  <span><span class="dot" style="background:#718096"></span> data mangler</span>
+  <span><span class="dot" style="background:#4a5568"></span> Ingen data</span>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
+const MONTH_ABBR_NO = ['','jan','feb','mar','apr','mai','jun','jul','aug','sep','okt','nov','des'];
+const MONTH_NAMES_LONG = ['','januar','februar','mars','april','mai','juni','juli','august','september','oktober','november','desember'];
+
+function formatShort(md) {
+  const m = Math.floor(md / 100), d = md % 100;
+  return d + '.' + MONTH_ABBR_NO[m];
+}
+function formatLong(md) {
+  const m = Math.floor(md / 100), d = md % 100;
+  return d + '. ' + MONTH_NAMES_LONG[m];
+}
+function parseMD(str) {
+  const [m, d] = str.split('-').map(Number);
+  return m * 100 + d;
+}
+
 const RIVERS = [
   {
-    id: 'audna',
-    name: 'Audna',
-    lat: 58.13, lon: 7.35,
+    id: 'audna', regulation: 'none', name: 'Audna', lat: 58.19512, lon: 7.34214, hasData: true,
     dashboardUrl: 'https://timon70-lab.github.io/elvedata/audna/',
     flowUrl: 'https://timon70-lab.github.io/elvedata/data/vannforing.json',
     scoreTable: {"0":18,"5":51,"10":52,"15":49,"20":67,"25":70,"30":75,"35":59,"40":56,"45":38,"50":74,"60":58,"75":37,"80":25},
-    maxBin: 80
+    maxBin: 80, seasonStart: '06-01', seasonEnd: '08-31'
   },
   {
-    id: 'lygna',
-    name: 'Lygna',
-    lat: 58.21, lon: 7.14,
+    id: 'lygna', regulation: 'none', name: 'Lygna', lat: 58.25278, lon: 7.18556, hasData: true,
     dashboardUrl: 'https://timon70-lab.github.io/elvedata/lygna/',
     flowUrl: 'https://timon70-lab.github.io/elvedata/data/vannforing_lygna.json',
     scoreTable: {"0":24,"5":44,"10":61,"15":62,"20":57,"25":56,"30":56,"35":45,"40":54,"45":54,"50":46,"55":57,"60":0,"65":74,"70":78},
-    maxBin: 70
-  }
+    maxBin: 70, seasonStart: '06-15', seasonEnd: '08-31'
+  },
+  { id: 'storelva', regulation: 'none',    name: 'Storelva (Vegårvassdraget)', lat: 58.63946, lon: 8.89749, hasData: false, seasonStart: '08-01', seasonEnd: '09-15' },
+  { id: 'nidelva', regulation: 'heavy',     name: 'Nidelva (Arendal)',          lat: 58.4471, lon: 8.60796, hasData: false, seasonStart: '06-15', seasonEnd: '09-15' },
+  { id: 'tovdalselva', regulation: 'moderate', name: 'Tovdalselva',                lat: 58.31994, lon: 8.19338, hasData: false, seasonStart: '06-01', seasonEnd: '08-31' },
+  { id: 'otra', regulation: 'heavy',        name: 'Otra',                       lat: 58.20162, lon: 7.93629, hasData: false, seasonStart: '06-15', seasonEnd: '08-17' },
+  { id: 'songdalselva', regulation: 'none',name: 'Songdalselva (Sygna)',       lat: 58.15147, lon: 7.8362, hasData: false, seasonStart: '07-15', seasonEnd: '08-31' },
+  { id: 'mandalselva', regulation: 'moderate', name: 'Mandalselva',                lat: 58.22845, lon: 7.51148, hasData: false, seasonStart: '06-01', seasonEnd: '08-31' },
+  { id: 'kvina', regulation: 'heavy',       name: 'Kvina',                      lat: 58.31777, lon: 6.95605, hasData: false, seasonStart: '06-01', seasonEnd: '08-15' },
+  { id: 'sireana', regulation: 'heavy',     name: 'Sireåna (Sira)',             lat: 58.29747, lon: 6.45852, hasData: false, seasonStart: '07-01', seasonEnd: '08-31' },
+  { id: 'bjerkreimselva', regulation: 'light', name: 'Bjerkreimselva',          lat: 58.5407, lon: 6.03607, hasData: false, seasonStart: '06-01', seasonEnd: '09-20' }
 ];
 
 function scoreColor(s) {
@@ -72,6 +99,25 @@ function scoreColor(s) {
   if (s >= 50) return '#3182ce';
   if (s >= 30) return '#dd6b20';
   return '#e53e3e';
+}
+
+const REG_COLORS = { none: '#9ae6b4', light: '#f09595', moderate: '#e24b4a', heavy: '#791f1f' };
+
+function regIconSvg(mainSize, regulation) {
+  const isNatural = regulation === 'none' || !regulation;
+  const color = REG_COLORS[regulation] || REG_COLORS.none;
+  const iconSize = isNatural
+    ? Math.max(16, Math.round(mainSize * 0.4))
+    : Math.max(19, Math.round(mainSize * 0.47));
+  const offset = -Math.round(iconSize * 0.3);
+  const shape = isNatural
+    ? '<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" fill="' + color + '" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>'
+    : '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="' + color + '" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>';
+  return '<svg width="' + iconSize + '" height="' + iconSize + '" viewBox="0 0 24 24" style="position:absolute; top:' + offset + 'px; right:' + offset + 'px; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.5));">' + shape + '</svg>';
+}
+
+function wrapWithBadge(mainHtml, mainSize, regulation) {
+  return '<div style="position:relative; width:' + mainSize + 'px; height:' + mainSize + 'px;">' + mainHtml + regIconSvg(mainSize, regulation) + '</div>';
 }
 
 function nearestBinScore(table, bin, maxBin) {
@@ -83,64 +129,140 @@ function nearestBinScore(table, bin, maxBin) {
   return null;
 }
 
-const map = L.map('map', { zoomControl: true }).setView([58.16, 7.28], 9);
+// Felles sesong-vurdering: 'score' = i sesong, 'opening' = før sesongstart, 'closed' = etter sesongslutt
+function seasonPhase(seasonStart, seasonEnd, now) {
+  const today = (now.getMonth() + 1) * 100 + now.getDate();
+  const start = parseMD(seasonStart);
+  const end = parseMD(seasonEnd);
+  if (today >= start && today <= end) return { phase: 'score' };
+  if (today < start) return { phase: 'opening', date: start };
+  return { phase: 'closed', date: start };
+}
+
+// Avgjør hva slags markør en elv skal ha akkurat nå
+function riverState(river, now) {
+  if (river.hasData) {
+    return seasonPhase(river.seasonStart, river.seasonEnd, now);
+  }
+  if (river.seasonStart) {
+    const ph = seasonPhase(river.seasonStart, river.seasonEnd, now);
+    if (ph.phase === 'opening') return { phase: 'opening-nodata', date: ph.date };
+  }
+  return { phase: 'nodata' };
+}
+
+const map = L.map('map', { zoomControl: true }).setView([58.35, 7.55], 8);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap-bidragsytere',
   maxZoom: 18
 }).addTo(map);
 
-RIVERS.forEach(async (river) => {
-  const icon = L.divIcon({
-    className: '',
-    html: '<div class="river-marker" style="width:44px;height:44px;background:#718096">…</div>',
-    iconSize: [44, 44],
-    iconAnchor: [22, 22]
-  });
-  const marker = L.marker([river.lat, river.lon], { icon }).addTo(map);
-  marker.bindPopup(
-    '<div class="popup-card">' +
-      '<p class="pc-title">' + river.name + '</p>' +
-      '<p class="pc-flow">Henter vannføring…</p>' +
-    '</div>'
-  );
+const now = new Date();
 
-  let flowVal = null, score = null;
-  try {
-    const res = await fetch(river.flowUrl);
-    if (res.ok) {
-      const json = await res.json();
-      const obs = json.data[0].observations.filter(o => o.value !== null);
-      if (obs.length) {
-        flowVal = obs[obs.length - 1].value;
-        const bin = Math.floor(flowVal / 5) * 5;
-        score = nearestBinScore(river.scoreTable, bin, river.maxBin);
-      }
+RIVERS.forEach((river) => {
+  const st = riverState(river, now);
+
+  // --- Elver uten dashboard: kun markør + tooltip, ingen klikk-aksjon ---
+  if (st.phase === 'nodata' || st.phase === 'opening-nodata') {
+    let inner, tipText, size;
+    if (st.phase === 'opening-nodata') {
+      size = 38;
+      inner = '<div class="river-marker opening" style="width:' + size + 'px;height:' + size + 'px">' + formatShort(st.date) + '</div>';
+      tipText = '<strong>' + river.name + '</strong><br>Åpner ' + formatLong(st.date) + ' for laksefiske';
+    } else {
+      size = 36;
+      inner = '<div class="river-marker nodata" style="width:' + size + 'px;height:' + size + 'px">-</div>';
+      tipText = '<strong>' + river.name + '</strong><br>Kommer?';
     }
-  } catch (e) { /* marker faller tilbake til grå/ukjent */ }
-
-  const col = scoreColor(score);
-  const el = marker.getElement();
-  if (el) {
-    const inner = el.querySelector('.river-marker');
-    inner.style.background = col;
-    inner.textContent = score !== null ? score : '–';
+    const html = wrapWithBadge(inner, size, river.regulation);
+    const icon = L.divIcon({ className: '', html: html, iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
+    const marker = L.marker([river.lat, river.lon], { icon }).addTo(map);
+    marker.bindTooltip(tipText, { className: 'nodata-tip', direction: 'top' });
+    return;
   }
 
-  const flowStr = flowVal !== null ? flowVal.toFixed(1) + ' m³/s' : 'ikke tilgjengelig';
-  const scoreStr = score !== null ? score : '–';
-  marker.setPopupContent(
-    '<div class="popup-card">' +
-      '<p class="pc-title">' + river.name + '</p>' +
-      '<p class="pc-flow">Vannføring: ' + flowStr + '</p>' +
-      '<div class="pc-score">' +
-        '<span class="pc-score-num" style="color:' + col + '">' + scoreStr + '</span>' +
-        '<span class="pc-score-lbl">fiskescore<br>nå</span>' +
-      '</div>' +
-      '<a class="pc-link" href="' + river.dashboardUrl + '" target="_blank">Åpne dashboard →</a>' +
-    '</div>'
+  // --- Elver med dashboard: score / åpner-dato / stengt ---
+  const mainSize = 44;
+  const icon = L.divIcon({
+    className: '',
+    html: wrapWithBadge('<div class="river-marker" style="width:' + mainSize + 'px;height:' + mainSize + 'px;background:#718096">…</div>', mainSize, river.regulation),
+    iconSize: [mainSize, mainSize], iconAnchor: [mainSize / 2, mainSize / 2]
+  });
+  const marker = L.marker([river.lat, river.lon], { icon }).addTo(map);
+  marker.bindTooltip('<strong>' + river.name + '</strong>', { className: 'nodata-tip', direction: 'top' });
+  marker.bindPopup(
+    '<div class="popup-card"><p class="pc-title">' + river.name + '</p><p class="pc-flow">Laster…</p></div>'
   );
+
+  async function render() {
+    const el = marker.getElement();
+    const inner = el ? el.querySelector('.river-marker') : null;
+
+    if (st.phase === 'closed') {
+      if (inner) { inner.className = 'river-marker stop'; inner.style.background = '#b91c1c'; inner.textContent = '⛔'; }
+      marker.setPopupContent(
+        '<div class="popup-card">' +
+          '<p class="pc-title">' + river.name + '</p>' +
+          '<p class="pc-status">Stengt for sesongen</p>' +
+          '<p class="pc-substatus">Åpner ' + formatLong(st.date) + '</p>' +
+          '<a class="pc-link" href="' + river.dashboardUrl + '" target="_blank">Åpne dashboard →</a>' +
+        '</div>'
+      );
+      return;
+    }
+    if (st.phase === 'opening') {
+      if (inner) { inner.className = 'river-marker opening'; inner.style.background = '#d69e2e'; inner.textContent = formatShort(st.date); }
+      marker.setPopupContent(
+        '<div class="popup-card">' +
+          '<p class="pc-title">' + river.name + '</p>' +
+          '<p class="pc-status">Åpner ' + formatLong(st.date) + '</p>' +
+          '<a class="pc-link" href="' + river.dashboardUrl + '" target="_blank">Åpne dashboard →</a>' +
+        '</div>'
+      );
+      return;
+    }
+
+    // phase === 'score' -> hent live vannføring
+    let flowVal = null, score = null;
+    try {
+      const res = await fetch(river.flowUrl);
+      if (res.ok) {
+        const json = await res.json();
+        const obs = json.data[0].observations.filter(o => o.value !== null);
+        if (obs.length) {
+          flowVal = obs[obs.length - 1].value;
+          const bin = Math.floor(flowVal / 5) * 5;
+          score = nearestBinScore(river.scoreTable, bin, river.maxBin);
+        }
+      }
+    } catch (e) { /* marker faller tilbake til grå/ukjent */ }
+
+    const col = scoreColor(score);
+    if (inner) { inner.style.background = col; inner.textContent = score !== null ? score : '–'; }
+
+    const flowStr = flowVal !== null ? flowVal.toFixed(1) + ' m³/s' : 'ikke tilgjengelig';
+    const scoreStr = score !== null ? score : '–';
+    marker.setPopupContent(
+      '<div class="popup-card">' +
+        '<p class="pc-title">' + river.name + '</p>' +
+        '<p class="pc-flow">Vannføring: ' + flowStr + '</p>' +
+        '<div class="pc-score">' +
+          '<span class="pc-score-num" style="color:' + col + '">' + scoreStr + '</span>' +
+          '<span class="pc-score-lbl">fiskescore<br>nå</span>' +
+        '</div>' +
+        '<a class="pc-link" href="' + river.dashboardUrl + '" target="_blank">Åpne dashboard →</a>' +
+      '</div>'
+    );
+  }
+
+  render();
 });
 </script>
+
+<div style="width:100%; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt<br>
+  <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
+</div>
 
 </body>
 </html>
