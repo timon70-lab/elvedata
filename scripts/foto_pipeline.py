@@ -86,7 +86,17 @@ def read_exif(path):
                 lat = _dms_to_deg(gd["GPSLatitude"], gd.get("GPSLatitudeRef", "N"))
                 lon = _dms_to_deg(gd["GPSLongitude"], gd.get("GPSLongitudeRef", "E"))
     except Exception:
-        pass
+        lat = lon = None
+
+    # Pixel m.fl. kan skrive GPS-tagger med NaN/0-verdier når posisjon manglet.
+    # Behandle alt som ikke er gyldige koordinater som "mangler GPS".
+    import math
+    if lat is not None and lon is not None:
+        if (not isinstance(lat, float) or not isinstance(lon, float)
+                or math.isnan(lat) or math.isnan(lon)
+                or not (-90 <= lat <= 90) or not (-180 <= lon <= 180)
+                or (lat == 0 and lon == 0)):
+            lat = lon = None
 
     return lat, lon, dt
 
@@ -125,6 +135,8 @@ def assign_zone(lat, lon, local_dt):
         d = _dist_point_segment_m((lat, lon), a, b)
         if d < best_d:
             best_zone, best_d = zone, d
+    if best_zone is None:
+        return None, None  # kaller må håndtere (flyttes til manuell)
     return best_zone, round(best_d)
 
 
@@ -191,13 +203,23 @@ def main():
         src = os.path.join(INBOX_DIR, name)
         print(f"Behandler {name} ...")
 
-        lat, lon, local_dt = read_exif(src)
+        try:
+            lat, lon, local_dt = read_exif(src)
+        except Exception as e:
+            print(f"  EXIF-lesing feilet ({e}) -> flyttes til manuell-mappe.")
+            shutil.move(src, os.path.join(MANUAL_DIR, name))
+            continue
+
         if lat is None or lon is None:
-            print("  Mangler GPS -> flyttes til manuell-mappe.")
+            print("  Mangler gyldig GPS -> flyttes til manuell-mappe.")
             shutil.move(src, os.path.join(MANUAL_DIR, name))
             continue
 
         zone, dist_m = assign_zone(lat, lon, local_dt)
+        if zone is None:
+            print("  Sonetilordning feilet -> flyttes til manuell-mappe.")
+            shutil.move(src, os.path.join(MANUAL_DIR, name))
+            continue
         print(f"  Sone: {zone} (avstand {dist_m} m)")
 
         vannforing = fetch_vannforing(local_dt)
@@ -212,14 +234,19 @@ def main():
             out_name = f"{base}_{n}.jpg"
             n += 1
 
-        img = Image.open(src)
-        img = ImageOps.exif_transpose(img)
-        if img.width > MAX_WIDTH:
-            h = round(img.height * MAX_WIDTH / img.width)
-            img = img.resize((MAX_WIDTH, h), Image.LANCZOS)
-        img.convert("RGB").save(
-            os.path.join(OUT_DIR, out_name), "JPEG", quality=JPEG_QUALITY, optimize=True
-        )
+        try:
+            img = Image.open(src)
+            img = ImageOps.exif_transpose(img)
+            if img.width > MAX_WIDTH:
+                h = round(img.height * MAX_WIDTH / img.width)
+                img = img.resize((MAX_WIDTH, h), Image.LANCZOS)
+            img.convert("RGB").save(
+                os.path.join(OUT_DIR, out_name), "JPEG", quality=JPEG_QUALITY, optimize=True
+            )
+        except Exception as e:
+            print(f"  Bildeprosessering feilet ({e}) -> flyttes til manuell-mappe.")
+            shutil.move(src, os.path.join(MANUAL_DIR, name))
+            continue
 
         photos.append({
             "id": f"{ID_PREFIX}-{next_num:03d}",
