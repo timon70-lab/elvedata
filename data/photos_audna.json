@@ -650,5 +650,18 @@
   "vannforing": 26.6,
   "autoSone": true,
   "soneAvstandM": 1014
+ },
+ {
+  "id": "A-059",
+  "lat": 58.130028,
+  "lon": 7.363467,
+  "file": "Sone5A_20260604_2127.jpg",
+  "caption": "Sone 5A",
+  "zone": "Sone 5A",
+  "dateISO": "2026-06-04",
+  "timeUTC": "19:27",
+  "locId": "Sone 5A",
+  "vannforing": null,
+  "autoSone": false
  }
 ]
