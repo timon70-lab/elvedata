@@ -9,7 +9,7 @@
   "locId": "Sone 5A",
   "lat": 58.129878,
   "lon": 7.363481,
-  "vannforing": null
+  "vannforing": 26
  },
  {
   "id": "A-002",
@@ -661,7 +661,7 @@
   "dateISO": "2026-06-04",
   "timeUTC": "19:27",
   "locId": "Sone 5A",
-  "vannforing": null,
+  "vannforing": 26,
   "autoSone": false
  }
 ]
