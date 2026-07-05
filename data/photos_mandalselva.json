@@ -1,1 +1,30 @@
-[]
+[
+ {
+  "id": "M-001",
+  "lat": 58.139581,
+  "lon": 7.542667,
+  "file": "HaugeB1_20260601_1759.jpg",
+  "caption": "Hauge B1",
+  "zone": "Hauge B1",
+  "dateISO": "2026-06-01",
+  "timeUTC": "15:59",
+  "locId": "Hauge B1",
+  "vannforing": 72.4,
+  "autoSone": true,
+  "soneAvstandM": 8
+ },
+ {
+  "id": "M-002",
+  "lat": 58.226578,
+  "lon": 7.515881,
+  "file": "Sone3_20260602_1918.jpg",
+  "caption": "Sone 3",
+  "zone": "Sone 3",
+  "dateISO": "2026-06-02",
+  "timeUTC": "17:18",
+  "locId": "Sone 3",
+  "vannforing": 52.0,
+  "autoSone": true,
+  "soneAvstandM": 566
+ }
+]
