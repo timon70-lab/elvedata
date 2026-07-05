@@ -1,9 +1,9 @@
 name: Fangst-pipeline (Inatur laksebørs)
 
 on:
-  workflow_dispatch:   # Kjør manuelt fra Actions-fanen til vi har bekreftet at det virker
-  # schedule:
-  #   - cron: '30 * * * *'   # Aktiver denne (og fjern manuell-only) når testen er OK
+  workflow_dispatch:
+  schedule:
+    - cron: '30 * * * *'   # Hver time, 30 min over (unngår å kollidere med NVE-cachen på hel time)
 
 permissions:
   contents: write
