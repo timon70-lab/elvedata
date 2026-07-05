@@ -1,16 +1,1 @@
-[
- {
-  "id": "M-001",
-  "lat": 58.103558,
-  "lon": 7.969631,
-  "file": "HaugeD_20260705_2141.jpg",
-  "caption": "Hauge D",
-  "zone": "Hauge D",
-  "dateISO": "2026-07-05",
-  "timeUTC": "19:41",
-  "locId": "Hauge D",
-  "vannforing": 30.8,
-  "autoSone": true,
-  "soneAvstandM": 24999
- }
-]
+[]
