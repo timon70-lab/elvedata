@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - 'bilder/innboks/audna/**'
+      - 'bilder/innboks/mandalselva/**'
+      - 'bilder/innboks/lygna/**'
   workflow_dispatch:
 
 permissions:
