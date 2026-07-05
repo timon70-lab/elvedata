@@ -1,0 +1,38 @@
+[
+ {
+  "dato": "2026-07-05",
+  "sone": "Sone 5A",
+  "vekt": 2.7,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-04",
+  "sone": "Sone4",
+  "vekt": 4.5,
+  "agn": "Meitemark"
+ },
+ {
+  "dato": "2026-07-04",
+  "sone": "Sone4",
+  "vekt": 1.05,
+  "agn": "Meitemark"
+ },
+ {
+  "dato": "2026-07-03",
+  "sone": "Sone2",
+  "vekt": 1.7,
+  "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-03",
+  "sone": "Sone4",
+  "vekt": 2.6,
+  "agn": "Meitemark"
+ },
+ {
+  "dato": "2026-07-03",
+  "sone": "Sone3",
+  "vekt": 2.3,
+  "agn": "Stang"
+ }
+]
