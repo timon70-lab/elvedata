@@ -1,0 +1,35 @@
+name: Fangst-pipeline (Inatur laksebørs)
+
+on:
+  workflow_dispatch:   # Kjør manuelt fra Actions-fanen til vi har bekreftet at det virker
+  # schedule:
+  #   - cron: '30 * * * *'   # Aktiver denne (og fjern manuell-only) når testen er OK
+
+permissions:
+  contents: write
+
+jobs:
+  hent-fangster:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sjekk ut repo
+        uses: actions/checkout@v4
+
+      - name: Sett opp Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Installer avhengigheter
+        run: pip install requests
+
+      - name: Kjør fangst-pipeline
+        run: python scripts/fangst_pipeline.py
+
+      - name: Commit og push resultat
+        run: |
+          git config user.name "fangst-pipeline"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/fangster_audna.json data/fangster_lygna.json data/fangster_mandalselva.json
+          git diff --cached --quiet || git commit -m "Fangst-data oppdatert $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push
