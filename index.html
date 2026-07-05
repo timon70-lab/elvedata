@@ -87,7 +87,13 @@ const RIVERS = [
   { id: 'tovdalselva', regulation: 'moderate', name: 'Tovdalselva',                lat: 58.31994, lon: 8.19338, hasData: false, seasonStart: '06-01', seasonEnd: '08-31' },
   { id: 'otra', regulation: 'heavy',        name: 'Otra',                       lat: 58.20162, lon: 7.93629, hasData: false, seasonStart: '06-15', seasonEnd: '08-17' },
   { id: 'songdalselva', regulation: 'none',name: 'Songdalselva (Sygna)',       lat: 58.15147, lon: 7.8362, hasData: false, seasonStart: '07-15', seasonEnd: '08-31' },
-  { id: 'mandalselva', regulation: 'moderate', name: 'Mandalselva',                lat: 58.22845, lon: 7.51148, hasData: false, seasonStart: '06-01', seasonEnd: '08-31' },
+  {
+    id: 'mandalselva', regulation: 'moderate', name: 'Mandalselva', lat: 58.22845, lon: 7.51148, hasData: true,
+    dashboardUrl: 'https://timon70-lab.github.io/elvedata/mandalselva/',
+    flowUrl: 'https://timon70-lab.github.io/elvedata/data/vannforing_mandalselva.json',
+    scoreTable: {"15":61,"20":80,"25":85,"30":80,"35":85,"40":85,"45":85,"50":85,"55":87,"60":87,"65":78,"70":84,"75":82,"80":73,"85":78,"90":79,"95":69,"100":75,"105":75,"110":68,"115":74,"120":63,"125":65,"130":78,"135":73,"140":0,"145":59,"150":84},
+    maxBin: 150, seasonStart: '06-01', seasonEnd: '08-31'
+  },
   { id: 'kvina', regulation: 'heavy',       name: 'Kvina',                      lat: 58.31777, lon: 6.95605, hasData: false, seasonStart: '06-01', seasonEnd: '08-15' },
   { id: 'sireana', regulation: 'heavy',     name: 'Sireåna (Sira)',             lat: 58.29747, lon: 6.45852, hasData: false, seasonStart: '07-01', seasonEnd: '08-31' },
   { id: 'bjerkreimselva', regulation: 'light', name: 'Bjerkreimselva',          lat: 58.5407, lon: 6.03607, hasData: false, seasonStart: '06-01', seasonEnd: '09-20' }
