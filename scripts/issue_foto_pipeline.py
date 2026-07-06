@@ -248,7 +248,7 @@ def extract_image_urls(body):
     md = re.findall(r'!\[[^\]]*\]\((https://[^\s)]+)\)', body)
     bare = re.findall(
         r'(https://(?:github\.com/user-attachments/assets|user-images\.githubusercontent\.com|'
-        r'private-user-images\.githubusercontent\.com)/[^\s)]+)',
+        r'private-user-images\.githubusercontent\.com)/[^\s")\'<>]+)',
         body,
     )
     seen, out = set(), []
