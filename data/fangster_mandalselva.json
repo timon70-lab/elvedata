@@ -31,6 +31,24 @@
  },
  {
   "dato": "2026-07-04",
+  "sone": "Fossefjellene",
+  "vekt": 1.8,
+  "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-04",
+  "sone": "Fossefjellene",
+  "vekt": 2.8,
+  "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-04",
+  "sone": "Holmesland P",
+  "vekt": 1.8,
+  "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-04",
   "sone": "Steinshylen",
   "vekt": 4.4,
   "agn": "Flue"
