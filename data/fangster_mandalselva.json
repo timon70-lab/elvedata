@@ -31,6 +31,12 @@
  },
  {
   "dato": "2026-07-04",
+  "sone": "Steinshylen",
+  "vekt": 4.4,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-04",
   "sone": "Sone 3",
   "vekt": 2,
   "agn": "Meitemark"
