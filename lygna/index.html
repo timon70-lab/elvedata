@@ -28,7 +28,7 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .ctrl-col { display: flex; flex-direction: column; gap: 11px; padding: 12px 14px 14px; border-left: 2px solid #f0fff4; justify-content: center; min-width: 0; }
 .ctrl-row { display: flex; align-items: center; gap: 8px; }
 .ctrl-row label { font-size: 0.65rem; font-weight: 700; color: #4a5568; white-space: nowrap; min-width: 44px; }
-.ctrl-val { font-size: 0.72rem; font-weight: 700; color: #276749; min-width: 64px; text-align: right; white-space: nowrap; }
+.ctrl-val { font-size: 0.72rem; font-weight: 700; color: #276749; min-width: 88px; text-align: right; white-space: nowrap; }
 /* Single range */
 .ctrl-row > input[type=range] { flex: 1; accent-color: #276749; cursor: pointer; }
 /* Dual-handle slider */
@@ -444,7 +444,8 @@ function zoneLabel(zone) {
 
 
 const BILDE_BASE = 'https://timon70-lab.github.io/elvedata/bilder/lygna/';
-const PHOTOS = [];
+const PHOTOS_URL = 'https://timon70-lab.github.io/elvedata/data/photos_lygna.json';
+let PHOTOS = [];
 let photoMarkers = [];
 
 const VIDEOS = [];
@@ -728,7 +729,12 @@ function initMap() {
     videoMarkers.push({ mk, zone: video.zone });
   });
 
-  // Photo markers
+}
+
+function addPhotoMarkers() {
+  if (!map) return;
+  photoMarkers.forEach(({ mk }) => mk.remove());
+  photoMarkers = [];
   PHOTOS.forEach((photo, idx) => {
     const icon = makePhotoIcon(false);
     const mk = L.marker([photo.lat, photo.lon], { icon, zIndexOffset: 200, opacity: 0 }).addTo(map);
@@ -736,7 +742,16 @@ function initMap() {
     mk.on('click', (e) => { L.DomEvent.stopPropagation(e); openZonePhotos(photo.zone, idx); });
     photoMarkers.push({ mk, zone: photo.zone, photosIdx: idx });
   });
+}
 
+async function fetchPhotos() {
+  try {
+    const res = await fetch(PHOTOS_URL);
+    if (!res.ok) return;
+    PHOTOS = await res.json();
+    addPhotoMarkers();
+    updateMap(computeScores());
+  } catch(e) { /* bilder er valgfrie – feiler stille */ }
 }
 
 
@@ -823,8 +838,7 @@ function selectZone(zone) {
   if (activeZone === zone) {
     activeZone = null;
     document.getElementById('mapTitle').textContent = '🗺 Kart';
-    const allCoords = ZONES.flatMap(z => ZONE_COORDS[z] ? [ZONE_COORDS[z].s, ZONE_COORDS[z].e] : []);
-    if (allCoords.length) map.fitBounds(allCoords, {padding: [40,40], animate: true, maxZoom: 10});
+    // Behold kartets posisjon/zoom som den var for den lukkede sonen - ikke zoom ut.
     closePhoto();
     closeZoneInfo();
     closeVideo();
@@ -918,7 +932,7 @@ function _renderPhoto() {
   document.getElementById('photoTitle').textContent = '📷 ' + p.zone + (p.id ? ' · ' + p.id : '');
   document.getElementById('photoCounter').textContent = n > 1 ? (_activePhotoIdx + 1) + ' / ' + n : '';
 
-  const flowVal = FLOW_LOOKUP[p.dateISO];
+  const flowVal = (p.vannforing !== undefined && p.vannforing !== null) ? p.vannforing : FLOW_LOOKUP[p.dateISO];
   const flowStr = flowVal !== undefined ? flowVal + ' m³/s' : 'Vannstand ukjent';
   const dateStr = p.dateISO ? new Date(p.dateISO).toLocaleDateString('nb-NO', {day:'numeric', month:'long', year:'numeric'}) : '';
   document.getElementById('photoCap').textContent = p.caption + (dateStr ? ' · ' + dateStr : '') + ' · ' + flowStr;
@@ -1090,6 +1104,7 @@ document.getElementById('totalScoreBox').innerHTML =
   + '<div class="total-score-lbl">Score</div>';
 fetchNVE().then(() => update());
 fetchNedbor();
+fetchPhotos();
 window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </script>
 
@@ -1136,7 +1151,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div class="vp-info" id="vpInfo"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt<br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.007</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
