@@ -539,7 +539,7 @@ function update() {
   const moLbl = mLo === mHi ? MONTH_NAMES[mLo] : MONTH_NAMES[mLo] + '–' + MONTH_NAMES[mHi];
 
   updateMap(scores);
-  if (activeZone) showZoneInfo(activeZone);
+  if (activeZone) showZoneInfo(activeZone, false); // kun oppdater innhold, ikke scroll (kalles ved hver slider-endring)
 
   // Oppdater statistikk-boks
   const perDayStr = st.perDay > 0 ? st.perDay.toFixed(2) : '\u2013';
@@ -756,7 +756,7 @@ function selectZone(zone) {
   update();
 }
 
-function showZoneInfo(zone) {
+function showZoneInfo(zone, scrollTo = true) {
   const info = ZONE_INFO[zone];
   if (!info) return;
   const scores = computeScores();
@@ -785,7 +785,7 @@ function showZoneInfo(zone) {
   `;
   const panel = document.getElementById('zoneInfoPanel');
   panel.classList.add('visible');
-  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (scrollTo) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function closeZoneInfo() {
@@ -1056,7 +1056,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div class="vp-info" id="vpInfo"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.115</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.116</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
