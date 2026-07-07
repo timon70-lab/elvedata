@@ -1,0 +1,8 @@
+{
+  "score": {
+    "default":     { "rateWeight": 0.8, "volWeight": 0.2 },
+    "audna":       { "rateWeight": 0.8, "volWeight": 0.2 },
+    "lygna":       { "rateWeight": 0.8, "volWeight": 0.2 },
+    "mandalselva": { "rateWeight": 0.8, "volWeight": 0.2 }
+  }
+}
