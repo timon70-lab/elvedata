@@ -1,1 +1,192 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Elvedata · Admin</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+       background: #f0f4f8; color: #1a202c; display: flex; flex-direction: column;
+       align-items: center; padding: 20px 12px 60px; min-height: 100vh; }
+h1 { font-size: 1.25rem; margin-bottom: 4px; }
+.sub { font-size: 0.75rem; color: #64748b; margin-bottom: 20px; }
+.card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        padding: 16px; width: 100%; max-width: 480px; margin-bottom: 14px; }
+.card h2 { font-size: 0.95rem; margin-bottom: 10px; color: #2d3748; }
+label { font-size: 0.8rem; color: #475569; display: block; margin-bottom: 4px; }
+input[type="password"] { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1;
+        border-radius: 6px; font-size: 0.85rem; }
+.token-row { display: flex; gap: 8px; }
+.token-row input { flex: 1; }
+button { background: #2b6cb0; color: #fff; border: none; border-radius: 6px;
+         padding: 8px 14px; font-size: 0.85rem; cursor: pointer; }
+button:hover { background: #2c5282; }
+button:disabled { background: #94a3b8; cursor: not-allowed; }
+button.secondary { background: #e2e8f0; color: #334155; }
+button.secondary:hover { background: #cbd5e1; }
+.river-row { padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+.river-row:last-child { border-bottom: none; }
+.river-hdr { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.river-name { font-weight: 600; font-size: 0.9rem; text-transform: capitalize; }
+.river-val { font-size: 0.8rem; color: #2b6cb0; font-variant-numeric: tabular-nums;
+             min-width: 150px; text-align: right; }
+input[type="range"] { width: 100%; accent-color: #2b6cb0; }
+.hint { font-size: 0.7rem; color: #94a3b8; margin-top: 4px; }
+#status { font-size: 0.8rem; margin-top: 10px; min-height: 1.2em; }
+#status.ok { color: #276749; }
+#status.err { color: #c53030; }
+.save-row { display: flex; gap: 8px; margin-top: 14px; align-items: center; }
+.warn { font-size: 0.7rem; color: #92400e; background: #fef3c7; border-radius: 6px;
+        padding: 8px 10px; margin-top: 12px; line-height: 1.4; }
+</style>
+</head>
+<body>
 
+<h1>⚙️ Elvedata · Admin</h1>
+<div class="sub">Scorevekting rate/volum · skriver til <code>data/config.json</code></div>
+
+<div class="card">
+  <h2>🔑 GitHub-token</h2>
+  <label for="tokenInput">Fine-grained PAT (kun elvedata-repo, contents: read/write)</label>
+  <div class="token-row">
+    <input type="password" id="tokenInput" placeholder="github_pat_...">
+    <button class="secondary" onclick="saveToken()">Lagre</button>
+  </div>
+  <div class="hint">Lagres kun i localStorage i denne nettleseren — aldri i repoet.</div>
+</div>
+
+<div class="card">
+  <h2>⚖️ Vekting rate / volum</h2>
+  <div id="rivers"><div class="hint">Laster config …</div></div>
+  <div class="save-row">
+    <button id="saveBtn" onclick="saveConfig()" disabled>💾 Lagre til GitHub</button>
+    <button class="secondary" onclick="loadConfig()">↺ Last på nytt</button>
+  </div>
+  <div id="status"></div>
+  <div class="warn">⚠️ Denne siden ligger åpent på GitHub Pages, men er ubrukelig uten ditt
+  personlige token. Ikke lenk til den fra dashbordene eller oversiktskartet.</div>
+</div>
+
+<script>
+const OWNER = 'timon70-lab';
+const REPO  = 'elvedata';
+const PATH  = 'data/config.json';
+const API   = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`;
+const TOKEN_KEY = 'elvedata_admin_token';
+
+let config = null;   // hele config-objektet (kan inneholde mer enn score)
+let sha    = null;   // git-sha for filen, kreves ved skriving
+
+function getToken() { return localStorage.getItem(TOKEN_KEY) || ''; }
+
+function saveToken() {
+  const t = document.getElementById('tokenInput').value.trim();
+  if (!t) { setStatus('Tomt token — ikke lagret.', true); return; }
+  localStorage.setItem(TOKEN_KEY, t);
+  document.getElementById('tokenInput').value = '';
+  setStatus('Token lagret i denne nettleseren. ✓', false);
+  loadConfig();
+}
+
+function setStatus(msg, isErr) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = isErr ? 'err' : 'ok';
+}
+
+function headers() {
+  const h = { 'Accept': 'application/vnd.github+json' };
+  const t = getToken();
+  if (t) h['Authorization'] = 'Bearer ' + t;
+  return h;
+}
+
+async function loadConfig() {
+  setStatus('Henter config …', false);
+  try {
+    const res = await fetch(API, { headers: headers(), cache: 'no-cache' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    sha = data.sha;
+    // Base64 → UTF-8
+    const raw = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))));
+    config = JSON.parse(raw);
+    renderRivers();
+    document.getElementById('saveBtn').disabled = false;
+    setStatus('Config lastet. ✓', false);
+  } catch (e) {
+    setStatus('Kunne ikke hente config: ' + e.message, true);
+  }
+}
+
+function renderRivers() {
+  const wrap = document.getElementById('rivers');
+  wrap.innerHTML = '';
+  if (!config || !config.score) { wrap.innerHTML = '<div class="hint">Ingen score-seksjon i config.</div>'; return; }
+  Object.keys(config.score).forEach(river => {
+    const w = config.score[river];
+    const pct = Math.round((w.rateWeight || 0) * 100);
+    const row = document.createElement('div');
+    row.className = 'river-row';
+    row.innerHTML = `
+      <div class="river-hdr">
+        <span class="river-name">${river}</span>
+        <span class="river-val" id="val_${river}">rate ${pct}% · volum ${100 - pct}%</span>
+      </div>
+      <input type="range" min="0" max="100" step="5" value="${pct}"
+             oninput="onSlide('${river}', this.value)">`;
+    wrap.appendChild(row);
+  });
+}
+
+function onSlide(river, val) {
+  const pct = parseInt(val, 10);
+  config.score[river].rateWeight = pct / 100;
+  config.score[river].volWeight  = (100 - pct) / 100;
+  document.getElementById('val_' + river).textContent =
+    `rate ${pct}% · volum ${100 - pct}%`;
+}
+
+async function saveConfig() {
+  if (!getToken()) { setStatus('Lagre token først.', true); return; }
+  if (!config || !sha) { setStatus('Last config først.', true); return; }
+  document.getElementById('saveBtn').disabled = true;
+  setStatus('Lagrer …', false);
+  try {
+    const jsonStr = JSON.stringify(config, null, 2) + '\n';
+    // UTF-8 → Base64
+    const b64 = btoa(unescape(encodeURIComponent(jsonStr)));
+    const res = await fetch(API, {
+      method: 'PUT',
+      headers: { ...headers(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: 'Oppdater scorevekting via admin',
+        content: b64,
+        sha: sha
+      })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error('HTTP ' + res.status + (err.message ? ' — ' + err.message : ''));
+    }
+    const data = await res.json();
+    sha = data.content.sha;   // ny sha for neste lagring
+    setStatus('Lagret! ✓ Dashbordene ser endringen ved neste sidelasting (Pages-cache ~10 min).', false);
+  } catch (e) {
+    setStatus('Lagring feilet: ' + e.message, true);
+  } finally {
+    document.getElementById('saveBtn').disabled = false;
+  }
+}
+
+// Init
+if (getToken()) {
+  document.getElementById('tokenInput').placeholder = 'Token er lagret ✓ (lim inn nytt for å bytte)';
+}
+loadConfig();
+</script>
+
+</body>
+</html>
