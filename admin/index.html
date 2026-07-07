@@ -34,6 +34,9 @@ button.secondary:hover { background: #cbd5e1; }
              min-width: 150px; text-align: right; }
 input[type="range"] { width: 100%; accent-color: #2b6cb0; }
 .hint { font-size: 0.7rem; color: #94a3b8; margin-top: 4px; }
+.param-row { display: flex; gap: 16px; margin-top: 8px; }
+.param-row label { font-size: 0.75rem; color: #475569; display: flex; align-items: center; gap: 6px; }
+.param-row input { width: 64px; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 0.8rem; }
 #status { font-size: 0.8rem; margin-top: 10px; min-height: 1.2em; }
 #status.ok { color: #276749; }
 #status.err { color: #c53030; }
@@ -45,7 +48,7 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
 <body>
 
 <h1>⚙️ Elvedata · Admin</h1>
-<div class="sub">Scorevekting rate/volum · skriver til <code>data/config.json</code></div>
+<div class="sub">Scoringsparametre (vekting · shrinkage · knekkpunkt) · skriver til <code>data/config.json</code></div>
 
 <div class="card">
   <h2>🔑 GitHub-token</h2>
@@ -58,7 +61,7 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
 </div>
 
 <div class="card">
-  <h2>⚖️ Vekting rate / volum</h2>
+  <h2>⚖️ Scoringsparametre per elv</h2>
   <div id="rivers"><div class="hint">Laster config …</div></div>
   <div class="save-row">
     <button id="saveBtn" onclick="saveConfig()" disabled>💾 Lagre til GitHub</button>
@@ -128,6 +131,8 @@ function renderRivers() {
   Object.keys(config.score).forEach(river => {
     const w = config.score[river];
     const pct = Math.round((w.rateWeight || 0) * 100);
+    const shrinkC = (w.shrinkC != null) ? w.shrinkC : 15;
+    const knee = (w.knee != null) ? w.knee : 80;
     const row = document.createElement('div');
     row.className = 'river-row';
     row.innerHTML = `
@@ -136,7 +141,15 @@ function renderRivers() {
         <span class="river-val" id="val_${river}">rate ${pct}% · volum ${100 - pct}%</span>
       </div>
       <input type="range" min="0" max="100" step="5" value="${pct}"
-             oninput="onSlide('${river}', this.value)">`;
+             oninput="onSlide('${river}', this.value)">
+      <div class="param-row">
+        <label>shrinkC <input type="number" min="0" max="60" step="5" value="${shrinkC}"
+               oninput="onParam('${river}','shrinkC',this.value)"
+               title="Pseudo-dager: hvor mange dagers datagrunnlag prioren teller som. Høyere = mer konservativ i tynne bins."></label>
+        <label>knee <input type="number" min="50" max="95" step="5" value="${knee}"
+               oninput="onParam('${river}','knee',this.value)"
+               title="Knekkpunkt: score ved P90-nivå. Lineær 0–knee opp til P90, log-komprimert knee–100 mot historisk maks."></label>
+      </div>`;
     wrap.appendChild(row);
   });
 }
@@ -147,6 +160,11 @@ function onSlide(river, val) {
   config.score[river].volWeight  = (100 - pct) / 100;
   document.getElementById('val_' + river).textContent =
     `rate ${pct}% · volum ${100 - pct}%`;
+}
+
+function onParam(river, key, val) {
+  const n = parseInt(val, 10);
+  if (isFinite(n)) config.score[river][key] = n;
 }
 
 async function saveConfig() {
