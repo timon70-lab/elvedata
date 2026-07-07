@@ -1,6 +1,18 @@
 [
  {
   "dato": "2026-07-07",
+  "sone": "Sone 3",
+  "vekt": 6,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-07",
+  "sone": "Sone 3",
+  "vekt": 1.5,
+  "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-07",
   "sone": "Delomr 2, Sone Fuskeland under Nødingfossen",
   "vekt": 4.9,
   "agn": "Sluk"
