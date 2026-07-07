@@ -246,6 +246,8 @@ const MONTH_NAMES = {6:'Jun', 7:'Jul', 8:'Aug', 9:'Sep'};
 // Normalisering: 90-persentil av rate og volum (ikke absolutt maks)
 const P90_RATE_ALL = 0.82,  P90_VOL_ALL = 38.0;
 const P90_RATE_FLY = 0.64,  P90_VOL_FLY = 28.0;
+const MAX_RATE_ALL = 17.9,  MAX_VOL_ALL = 2043;
+const MAX_RATE_FLY = 11.56, MAX_VOL_FLY = 1077;
 
 const ZONE_COORDS = {"Bjåhylen": {"s": [58.26443,7.51949],"e": [58.27256,7.5224]},"Bjørkenes": {"s": [58.12563,7.53263],"e": [58.12878,7.53292]},"Bringsdal A": {"s": [58.1098,7.53488],"e": [58.11112,7.53627]},"Bringsdal B": {"s": [58.11122,7.53637],"e": [58.11409,7.53641]},"Bringsdal C": {"s": [58.11411,7.53618],"e": [58.11625,7.5298]},"Fossefjellene": {"s": [58.11845,7.52884],"e": [58.11994,7.52804]},"Fossefjellene syd": {"s": [58.11744,7.52565],"e": [58.1185,7.52862]},"Furuholmen": {"s": [58.12167,7.52964],"e": [58.12549,7.53305]},"Fuskeland A": {"s": [58.10933,7.53458],"e": [58.11157,7.53383]},"Fuskeland B": {"s": [58.11167,7.53407],"e": [58.11373,7.53477]},"Fuskeland C": {"s": [58.11375,7.53455],"e": [58.11425,7.53212]},"Fuskeland D": {"s": [58.11436,7.532],"e": [58.116,7.52794]},"Fuskeland under Nødingfossen": {"s": [58.1032,7.53277],"e": [58.10524,7.5338]},"Grimefossen A": {"s": [58.11655,7.52844],"e": [58.11818,7.53012]},"Grimefossen B": {"s": [58.11828,7.53022],"e": [58.12126,7.52994]},"Hauge A": {"s": [58.13593,7.53885],"e": [58.1389,7.54186]},"Hauge B1": {"s": [58.13902,7.542],"e": [58.14082,7.54367]},"Hauge B2": {"s": [58.14117,7.54411],"e": [58.14277,7.54544]},"Hauge C": {"s": [58.14288,7.54558],"e": [58.14465,7.54796]},"Hauge D": {"s": [58.14545,7.54837],"e": [58.14958,7.55351]},"Heia": {"s": [58.09776,7.5324],"e": [58.09928,7.53348]},"Holmegård": {"s": [58.0973,7.53079],"e": [58.10246,7.53241]},"Holmesland A": {"s": [58.13577,7.53744],"e": [58.13945,7.54166]},"Holmesland B": {"s": [58.13968,7.54173],"e": [58.14218,7.54428]},"Holmesland C": {"s": [58.1456,7.54808],"e": [58.14894,7.55274]},"Holmesland P": {"s": [58.14227,7.54432],"e": [58.14474,7.54758]},"Klevelandsfossen": {"s": [58.25034,7.51761],"e": [58.25436,7.51854]},"Laksehylen": {"s": [58.28023,7.52474],"e": [58.29398,7.52741]},"Møll": {"s": [58.09016,7.52388],"e": [58.09329,7.52707]},"Nedre Holum": {"s": [58.04857,7.49707],"e": [58.07799,7.5169]},"Nedre Nøding": {"s": [58.09947,7.53363],"e": [58.101,7.53455]},"Nodehylen": {"s": [58.27287,7.52251],"e": [58.28054,7.5249]},"Smeland": {"s": [58.12867,7.53316],"e": [58.13589,7.5375]},"Sone 1": {"s": [58.02,7.45592],"e": [58.0481,7.49793]},"Sone 3": {"s": [58.14889,7.55298],"e": [58.25011,7.51745]},"Sone 4": {"s": [58.29408,7.52763],"e": [58.43661,7.54922]},"Steinshylen": {"s": [58.25473,7.51858],"e": [58.26406,7.51934]},"Stoveland": {"s": [58.12132,7.53011],"e": [58.12699,7.53454]},"Strædethylen": {"s": [58.27918,7.52291],"e": [58.28334,7.52582]},"Øvre Nøding": {"s": [58.12842,7.53385],"e": [58.13221,7.53603]}};
 
@@ -259,14 +261,19 @@ const ZONES = ["Bjåhylen","Bjørkenes","Bringsdal A","Bringsdal B","Bringsdal C
 const BILDE_BASE = 'https://timon70-lab.github.io/elvedata/bilder/mandalselva/';
 const PHOTOS_URL = 'https://timon70-lab.github.io/elvedata/data/photos_mandalselva.json';
 
-/* ---------- Sentral konfig (data/config.json) — vekting rate/volum m.m. ---------- */
-let SCORE_WEIGHTS = { rate: 0.8, vol: 0.2 };   // fallback hvis config.json ikke kan hentes
+/* ---------- Sentral konfig (data/config.json) — scoringsparametre ---------- */
+let SCORE_CFG = { rate: 0.8, vol: 0.2, shrinkC: 15, knee: 80 };   // fallback hvis config.json ikke kan hentes
 fetch('https://timon70-lab.github.io/elvedata/data/config.json', { cache: 'no-cache' })
   .then(r => r.ok ? r.json() : null)
   .then(cfg => {
     const w = cfg && cfg.score && (cfg.score.mandalselva || cfg.score.default);
     if (w && isFinite(w.rateWeight) && isFinite(w.volWeight)) {
-      SCORE_WEIGHTS = { rate: w.rateWeight, vol: w.volWeight };
+      SCORE_CFG = {
+        rate: w.rateWeight,
+        vol: w.volWeight,
+        shrinkC: isFinite(w.shrinkC) ? w.shrinkC : 15,
+        knee: isFinite(w.knee) ? w.knee : 80
+      };
       try { update(); } catch (e) {}
     }
   })
@@ -351,47 +358,92 @@ function computeStats() {
   return { totalCatches, totalDays, perDay };
 }
 
-function computeScores() {
-  const data    = flyOnly ? FLY_DATA      : ALL_DATA;
-  const p90Rate = flyOnly ? P90_RATE_FLY  : P90_RATE_ALL;
-  const p90Vol  = flyOnly ? P90_VOL_FLY   : P90_VOL_ALL;
-  const bin = String(currentFlow);
-
-  // Akkumuler fangster per sone og antall dager i utvalget
+function binZoneStats(bin) {
+  // Fangster per sone og antall dager for én bin innenfor valgt år/måned-vindu
+  const data = flyOnly ? FLY_DATA : ALL_DATA;
   const catches = {};
   ZONES.forEach(z => catches[z] = 0);
-  let totalDays = 0, hasAny = false;
+  let days = 0;
   for (let y = Math.min(yearLo,yearHi); y <= Math.max(yearLo,yearHi); y++) {
     for (let m = Math.min(monthLo,monthHi); m <= Math.max(monthLo,monthHi); m++) {
-      const days = DAYS_DATA[String(y)]?.[String(m)]?.[bin] || 0;
-      totalDays += days;
+      days += DAYS_DATA[String(y)]?.[String(m)]?.[bin] || 0;
       const bd = data[String(y)]?.[String(m)]?.[bin];
       if (!bd) continue;
       for (const [zone, cnt] of Object.entries(bd)) {
-        if (catches.hasOwnProperty(zone)) { catches[zone] += cnt; hasAny = true; }
+        if (catches.hasOwnProperty(zone)) catches[zone] += cnt;
       }
     }
   }
-  if (!hasAny) return null;
+  return { catches, days };
+}
 
-  // Score = vektet rate (fangst/dag vs P90) + volum (totalt vs P90) — vekter fra data/config.json
-  // Normalisert mot 90-persentil — score 100 = eksepsjonelt godt fiske
+function scaleScore(x, p90, xmax) {
+  // To-segments skala: lineær 0→knee opp til P90, log-komprimert knee→100 mot historisk maks
+  if (x <= 0 || p90 <= 0) return 0;
+  const knee = SCORE_CFG.knee;
+  if (x <= p90) return knee * x / p90;
+  return Math.min(100, knee + (100 - knee) * Math.log(x / p90) / Math.log(Math.max(xmax / p90, 1.001)));
+}
+
+function computeScores() {
+  // Rørledning: glatting (nabobins, vekter 1-2-1) → shrinkage (mot sonens
+  // snittrate i vinduet, styrke shrinkC pseudo-dager) → to-segments skala.
+  // Justerbare parametre (vekting, shrinkC, knee) hentes fra data/config.json.
+  const p90Rate = flyOnly ? P90_RATE_FLY : P90_RATE_ALL;
+  const p90Vol  = flyOnly ? P90_VOL_FLY  : P90_VOL_ALL;
+  const maxRate = flyOnly ? MAX_RATE_FLY : MAX_RATE_ALL;
+  const maxVol  = flyOnly ? MAX_VOL_FLY  : MAX_VOL_ALL;
+  const data    = flyOnly ? FLY_DATA     : ALL_DATA;
+
+  // Senterbin + nabobins (glatting)
+  const center = binZoneStats(String(currentFlow));
+  const lower  = binZoneStats(String(currentFlow - 5));
+  const upper  = binZoneStats(String(currentFlow + 5));
+  const wC = 2, wN = 1;
+  const poolDays = wC*center.days + (lower.days > 0 ? wN*lower.days : 0) + (upper.days > 0 ? wN*upper.days : 0);
+  if (poolDays === 0) return null;   // ingen observerte dager nær denne vannføringen i vinduet
+  const effDays = poolDays / wC;
+
+  // Prior: sonens snittrate over ALLE vannføringer i valgt vindu
+  const totals = {};
+  ZONES.forEach(z => totals[z] = 0);
+  let allDays = 0;
+  for (let y = Math.min(yearLo,yearHi); y <= Math.max(yearLo,yearHi); y++) {
+    for (let m = Math.min(monthLo,monthHi); m <= Math.max(monthLo,monthHi); m++) {
+      const dm = DAYS_DATA[String(y)]?.[String(m)];
+      if (dm) for (const b of Object.keys(dm)) allDays += dm[b];
+      const md = data[String(y)]?.[String(m)];
+      if (!md) continue;
+      for (const b of Object.keys(md)) {
+        for (const [zone, cnt] of Object.entries(md[b])) {
+          if (totals.hasOwnProperty(zone)) totals[zone] += cnt;
+        }
+      }
+    }
+  }
+
+  const C = SCORE_CFG.shrinkC;
   const scores = {};
   ZONES.forEach(z => {
-    const vol         = catches[z];
-    const rate        = totalDays > 0 ? vol / totalDays : 0;
-    const rateScore   = Math.min(100, (rate / p90Rate) * 100);
-    const volumeScore = Math.min(100, (vol  / p90Vol)  * 100);
-    const combined    = Math.round(rateScore * SCORE_WEIGHTS.rate + volumeScore * SCORE_WEIGHTS.vol);
+    const vol    = center.catches[z];
+    const pooled = wC*center.catches[z] + (lower.days > 0 ? wN*lower.catches[z] : 0) + (upper.days > 0 ? wN*upper.catches[z] : 0);
+    const smRate = pooled / poolDays;
+    const prior  = allDays > 0 ? totals[z] / allDays : 0;
+    const shrunk = (smRate * effDays + C * prior) / (effDays + C);
+    const combined = Math.round(
+      scaleScore(shrunk, p90Rate, maxRate) * SCORE_CFG.rate +
+      scaleScore(vol,    p90Vol,  maxVol)  * SCORE_CFG.vol
+    );
     scores[z] = { score: combined, catches: vol };
   });
   return scores;
 }
 
 function scoreColor(s) {
-  if (s >= 70) return '#38a169';
-  if (s >= 45) return '#3182ce';
-  if (s >= 25) return '#ed8936';
+  const k = SCORE_CFG.knee / 100;   // terskler skalert til knee (80 => 56/36/20)
+  if (s >= 70*k) return '#38a169';
+  if (s >= 45*k) return '#3182ce';
+  if (s >= 25*k) return '#ed8936';
   return '#e53e3e';
 }
 
@@ -989,7 +1041,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div class="vp-info" id="vpInfo"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.012</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.013</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
