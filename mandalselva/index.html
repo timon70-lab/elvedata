@@ -258,6 +258,19 @@ const ZONES = ["Bjåhylen","Bjørkenes","Bringsdal A","Bringsdal B","Bringsdal C
 
 const BILDE_BASE = 'https://timon70-lab.github.io/elvedata/bilder/mandalselva/';
 const PHOTOS_URL = 'https://timon70-lab.github.io/elvedata/data/photos_mandalselva.json';
+
+/* ---------- Sentral konfig (data/config.json) — vekting rate/volum m.m. ---------- */
+let SCORE_WEIGHTS = { rate: 0.8, vol: 0.2 };   // fallback hvis config.json ikke kan hentes
+fetch('https://timon70-lab.github.io/elvedata/data/config.json', { cache: 'no-cache' })
+  .then(r => r.ok ? r.json() : null)
+  .then(cfg => {
+    const w = cfg && cfg.score && (cfg.score.mandalselva || cfg.score.default);
+    if (w && isFinite(w.rateWeight) && isFinite(w.volWeight)) {
+      SCORE_WEIGHTS = { rate: w.rateWeight, vol: w.volWeight };
+      try { update(); } catch (e) {}
+    }
+  })
+  .catch(() => {});
 let PHOTOS = [];
 let photoMarkers = [];
 
@@ -361,7 +374,7 @@ function computeScores() {
   }
   if (!hasAny) return null;
 
-  // Score = 60% rate (fangst/dag vs P90) + 40% volum (totalt vs P90)
+  // Score = vektet rate (fangst/dag vs P90) + volum (totalt vs P90) — vekter fra data/config.json
   // Normalisert mot 90-persentil — score 100 = eksepsjonelt godt fiske
   const scores = {};
   ZONES.forEach(z => {
@@ -369,7 +382,7 @@ function computeScores() {
     const rate        = totalDays > 0 ? vol / totalDays : 0;
     const rateScore   = Math.min(100, (rate / p90Rate) * 100);
     const volumeScore = Math.min(100, (vol  / p90Vol)  * 100);
-    const combined    = Math.round(rateScore * 0.8 + volumeScore * 0.2);
+    const combined    = Math.round(rateScore * SCORE_WEIGHTS.rate + volumeScore * SCORE_WEIGHTS.vol);
     scores[z] = { score: combined, catches: vol };
   });
   return scores;
@@ -976,7 +989,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div class="vp-info" id="vpInfo"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt<br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.012</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
