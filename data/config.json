@@ -4,5 +4,11 @@
     "audna":       { "rateWeight": 0.8, "volWeight": 0.2, "shrinkC": 15, "knee": 80 },
     "lygna":       { "rateWeight": 0.8, "volWeight": 0.2, "shrinkC": 15, "knee": 80 },
     "mandalselva": { "rateWeight": 0.6, "volWeight": 0.4, "shrinkC": 15, "knee": 80 }
+  },
+  "sparkline": {
+    "default":     { "max": 12,  "normal": 6.5 },
+    "audna":       { "max": 11,  "normal": 6 },
+    "lygna":       { "max": 12,  "normal": 6.5 },
+    "mandalselva": { "max": 75,  "normal": 52 }
   }
 }
