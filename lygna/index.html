@@ -450,6 +450,7 @@ const PHOTOS_URL = 'https://timon70-lab.github.io/elvedata/data/photos_lygna.jso
 
 /* ---------- Sentral konfig (data/config.json) — scoringsparametre ---------- */
 let SCORE_CFG = { rate: 0.8, vol: 0.2, shrinkC: 15, knee: 80 };   // fallback hvis config.json ikke kan hentes
+let SPARK_CFG = { max: 12, normal: 6.5 };   // fallback: P75 / median sesongvannføring
 fetch('https://timon70-lab.github.io/elvedata/data/config.json', { cache: 'no-cache' })
   .then(r => r.ok ? r.json() : null)
   .then(cfg => {
@@ -461,6 +462,8 @@ fetch('https://timon70-lab.github.io/elvedata/data/config.json', { cache: 'no-ca
         shrinkC: isFinite(w.shrinkC) ? w.shrinkC : 15,
         knee: isFinite(w.knee) ? w.knee : 80
       };
+      const sp = cfg && cfg.sparkline && (cfg.sparkline.lygna || cfg.sparkline.default);
+      if (sp && isFinite(sp.max) && isFinite(sp.normal)) SPARK_CFG = { max: sp.max, normal: sp.normal };
       try { update(); } catch (e) {}
     }
   })
@@ -619,7 +622,7 @@ function computeScores() {
       scaleScore(shrunk, p90Rate, maxRate) * SCORE_CFG.rate +
       scaleScore(vol,    p90Vol,  maxVol)  * SCORE_CFG.vol
     );
-    scores[z] = { score: combined, catches: vol };
+    scores[z] = { score: combined, catches: vol, winTotal: totals[z] };
   });
   return scores;
 }
@@ -710,10 +713,17 @@ function update() {
 
   // Total score = fangstvektet snitt av alle soners score
   const allScores = ZONES.map(z => scores[z]);
-  const totalW = allScores.reduce((s,z) => s + z.catches, 0);
-  const riverScore = totalW > 0
-    ? Math.round(allScores.reduce((s,z) => s + z.score * z.catches, 0) / totalW)
-    : 0;
+  let totalW = allScores.reduce((s,z) => s + z.catches, 0);
+  let riverScore;
+  if (totalW > 0) {
+    riverScore = Math.round(allScores.reduce((s,z) => s + z.score * z.catches, 0) / totalW);
+  } else {
+    // Ingen fangster i senterbinen: vekt med sonens vindutotaler i stedet
+    const fbW = allScores.reduce((s,z) => s + (z.winTotal || 0), 0);
+    riverScore = fbW > 0
+      ? Math.round(allScores.reduce((s,z) => s + z.score * (z.winTotal || 0), 0) / fbW)
+      : 0;
+  }
   const riverCol = scoreColor(riverScore);
   document.getElementById('totalScoreBox').innerHTML =
     '<div style="position:relative;display:inline-flex;align-items:center;justify-content:center">'
@@ -1132,9 +1142,12 @@ function drawSparkline(values) {
   const svg = document.getElementById('sparkSvg');
   if (!svg || !values.length) return;
   const W = 200, H = 32, pad = 2;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = max - min || 1;
+  // 0-forankret y-akse med fast minimumstak (SPARK_CFG.max): lav uke ser lav ut,
+  // en flomuke løfter taket dynamisk. Skala-taket vises som tall på y-aksen,
+  // og median sesongvannføring (SPARK_CFG.normal) som stiplet referanselinje.
+  const min = 0;
+  const max = Math.max(SPARK_CFG.max, ...values);
+  const range = max || 1;
   const pts = values.map((v, i) => {
     const x = pad + (i / (values.length - 1)) * (W - pad * 2);
     const y = H - pad - ((v - min) / range) * (H - pad * 2);
@@ -1142,13 +1155,16 @@ function drawSparkline(values) {
   });
   // Area fill
   const areaPoints = `${pad},${H} ` + pts.join(' ') + ` ${W-pad},${H}`;
+  const yNorm = (H - pad - ((SPARK_CFG.normal - min) / range) * (H - pad * 2)).toFixed(1);
   svg.innerHTML =
     `<defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">` +
     `<stop offset="0%" stop-color="#68d391" stop-opacity="0.4"/>` +
     `<stop offset="100%" stop-color="#68d391" stop-opacity="0.05"/>` +
     `</linearGradient></defs>` +
+    `<line x1="${pad}" y1="${yNorm}" x2="${W-pad}" y2="${yNorm}" stroke="#9ae6b4" stroke-opacity="0.45" stroke-width="0.8" stroke-dasharray="3,3"/>` +
     `<polygon points="${areaPoints}" fill="url(#sg)"/>` +
-    `<polyline points="${pts.join(' ')}" fill="none" stroke="#68d391" stroke-width="1.5" stroke-linejoin="round"/>`;
+    `<polyline points="${pts.join(' ')}" fill="none" stroke="#68d391" stroke-width="1.5" stroke-linejoin="round"/>` +
+    `<text x="${pad+1}" y="7" font-size="6.5" fill="#9ae6b4" fill-opacity="0.65" font-family="inherit">${Math.round(max)}</text>`;
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────
@@ -1216,7 +1232,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div class="vp-info" id="vpInfo"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.011</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.015</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
