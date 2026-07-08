@@ -133,6 +133,9 @@ function renderRivers() {
     const pct = Math.round((w.rateWeight || 0) * 100);
     const shrinkC = (w.shrinkC != null) ? w.shrinkC : 15;
     const knee = (w.knee != null) ? w.knee : 80;
+    const sp = (config.sparkline && (config.sparkline[river] || config.sparkline.default)) || {};
+    const sparkMax = (sp.max != null) ? sp.max : 12;
+    const sparkNormal = (sp.normal != null) ? sp.normal : 6.5;
     const row = document.createElement('div');
     row.className = 'river-row';
     row.innerHTML = `
@@ -149,6 +152,14 @@ function renderRivers() {
         <label>knee <input type="number" min="50" max="95" step="5" value="${knee}"
                oninput="onParam('${river}','knee',this.value)"
                title="Knekkpunkt: score ved P90-nivå. Lineær 0–knee opp til P90, log-komprimert knee–100 mot historisk maks."></label>
+      </div>
+      <div class="param-row">
+        <label>spark maks <input type="number" min="1" max="500" step="1" value="${sparkMax}"
+               oninput="onSpark('${river}','max',this.value)"
+               title="Minste skala-tak for sparkline (m³/s). Anbefalt: P75 av sesongvannføring."></label>
+        <label>spark normal <input type="number" min="0" max="500" step="0.5" value="${sparkNormal}"
+               oninput="onSpark('${river}','normal',this.value)"
+               title="Stiplet referanselinje (m³/s). Anbefalt: median sesongvannføring."></label>
       </div>`;
     wrap.appendChild(row);
   });
@@ -165,6 +176,14 @@ function onSlide(river, val) {
 function onParam(river, key, val) {
   const n = parseInt(val, 10);
   if (isFinite(n)) config.score[river][key] = n;
+}
+
+function onSpark(river, key, val) {
+  const n = parseFloat(val);
+  if (!isFinite(n)) return;
+  if (!config.sparkline) config.sparkline = {};
+  if (!config.sparkline[river]) config.sparkline[river] = {};
+  config.sparkline[river][key] = n;
 }
 
 async function saveConfig() {
