@@ -2,6 +2,18 @@
  {
   "dato": "2026-07-08",
   "sone": "Sone 3",
+  "vekt": 6,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-08",
+  "sone": "Sone 3",
+  "vekt": 4.5,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-08",
+  "sone": "Sone 3",
   "vekt": 4,
   "agn": "Meitemark"
  },
