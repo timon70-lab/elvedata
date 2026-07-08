@@ -31,6 +31,12 @@
  },
  {
   "dato": "2026-07-07",
+  "sone": "Hauge B1",
+  "vekt": 2.6,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-07",
   "sone": "Holmesland A",
   "vekt": 2,
   "agn": "Sluk"
