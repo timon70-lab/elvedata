@@ -7,6 +7,12 @@
  },
  {
   "dato": "2026-07-08",
+  "sone": "Sone 3",
+  "vekt": 1.8,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-08",
   "sone": "Holmesland A",
   "vekt": 2,
   "agn": "Sluk"
