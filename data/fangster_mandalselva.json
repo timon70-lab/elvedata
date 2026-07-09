@@ -1,5 +1,23 @@
 [
  {
+  "dato": "2026-07-09",
+  "sone": "Sone 3",
+  "vekt": 3,
+  "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-08",
+  "sone": "Holmesland A",
+  "vekt": 2,
+  "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-08",
+  "sone": "Bringsdal C",
+  "vekt": 2,
+  "agn": "Meitemark"
+ },
+ {
   "dato": "2026-07-08",
   "sone": "Sone 3",
   "vekt": 6,
@@ -27,6 +45,12 @@
   "dato": "2026-07-08",
   "sone": "Sone 3",
   "vekt": 1.2,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-07",
+  "sone": "Sone 3",
+  "vekt": 1.1,
   "agn": "Flue"
  },
  {
