@@ -1,6 +1,30 @@
 [
  {
   "dato": "2026-07-10",
+  "sone": "Sone 3",
+  "vekt": 2.3,
+  "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-10",
+  "sone": "Sone 3",
+  "vekt": 2,
+  "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-10",
+  "sone": "Sone 3",
+  "vekt": 1.6,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-10",
+  "sone": "Sone 3",
+  "vekt": 6.2,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-10",
   "sone": "Delomr 2, Strømmen",
   "vekt": 2,
   "agn": "Flue"
