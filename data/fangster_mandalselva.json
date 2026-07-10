@@ -1,5 +1,11 @@
 [
  {
+  "dato": "2026-07-10",
+  "sone": "Fuskeland under Nødingfossen",
+  "vekt": 1.7,
+  "agn": "Flue"
+ },
+ {
   "dato": "2026-07-09",
   "sone": "Sone 3",
   "vekt": 4.5,
@@ -45,6 +51,12 @@
   "dato": "2026-07-09",
   "sone": "Sone 3",
   "vekt": 3,
+  "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-08",
+  "sone": "Nodehylen",
+  "vekt": 2.5,
   "agn": "Sluk"
  },
  {
