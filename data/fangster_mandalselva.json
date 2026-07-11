@@ -1,6 +1,30 @@
 [
  {
   "dato": "2026-07-11",
+  "sone": "Fuskeland under Nødingfossen",
+  "vekt": 2.2,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-11",
+  "sone": "Holmesland A",
+  "vekt": 2,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-11",
+  "sone": "Holmesland A",
+  "vekt": 3.6,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-11",
+  "sone": "Sone 3",
+  "vekt": 1.9,
+  "agn": "Meitemark"
+ },
+ {
+  "dato": "2026-07-11",
   "sone": "Sone 3",
   "vekt": 2.6,
   "agn": "Flue"
@@ -28,6 +52,12 @@
   "sone": "Delomr 2, Sone Fuskeland under Nødingfossen",
   "vekt": 3.5,
   "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-10",
+  "sone": "Sone 3",
+  "vekt": 2.9,
+  "agn": "Meitemark"
  },
  {
   "dato": "2026-07-10",
