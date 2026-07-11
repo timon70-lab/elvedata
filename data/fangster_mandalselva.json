@@ -1,6 +1,18 @@
 [
  {
   "dato": "2026-07-11",
+  "sone": "Delomr 2, Strømmen",
+  "vekt": 2.7,
+  "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-11",
+  "sone": "Delomr 2, Strømmen",
+  "vekt": 1.9,
+  "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-11",
   "sone": "Fuskeland under Nødingfossen",
   "vekt": 2.2,
   "agn": "Flue"
