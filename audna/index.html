@@ -30,9 +30,9 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .ctrl-row label { font-size: 0.65rem; font-weight: 700; color: #4a5568; white-space: nowrap; min-width: 44px; }
 .ctrl-val { font-size: 0.72rem; font-weight: 700; color: #276749; min-width: 88px; text-align: right; white-space: nowrap; }
 /* Single range */
-.ctrl-row > input[type=range] { flex: 1; accent-color: #276749; cursor: pointer; }
+.ctrl-row > input[type=range] { width: 90px; flex: 0 0 90px; accent-color: #276749; cursor: pointer; }
 /* Dual-handle slider */
-.dual-slider { position: relative; flex: 1; height: 20px; display: flex; align-items: center; }
+.dual-slider { position: relative; width: 90px; flex: 0 0 90px; height: 20px; display: flex; align-items: center; }
 .dual-slider::before { content: ''; position: absolute; left: 0; right: 0; height: 4px; background: #e2e8f0; border-radius: 2px; }
 .dual-fill { position: absolute; height: 4px; background: #276749; border-radius: 2px; pointer-events: none; z-index: 1; }
 .dual-slider input[type=range] {
@@ -58,6 +58,12 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 /* Zone panel */
 .panel { width: 100%; max-width: 480px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 14px; }
 .panel-body { display: grid; grid-template-columns: 1fr auto; align-items: start; }
+@media (max-width: 520px) {
+  .fiskemelding { position: static; max-width: none; margin-top: 10px; }
+  .panel-body { grid-template-columns: 1fr; }
+  .ctrl-col { border-left: none; border-top: 2px solid #f0fff4; justify-content: flex-start; }
+  .ctrl-row > input[type=range], .dual-slider { width: auto; flex: 1 1 auto; }
+}
 .panel-header { padding: 11px 14px 9px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; display: flex; flex-direction: column; gap: 1px; min-height: 64px; }
 .panel-name { font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #276749; }
 .panel-sub { font-size: 0.58rem; color: #94a3b8; }
@@ -161,10 +167,6 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 <h1>Audna · Dynamisk oversikt</h1>
 
 <div class="banner">
-  <div class="fiskemelding" id="fiskemelding">
-    <div class="fm-title" id="fmTitle"></div>
-    <div class="fm-text" id="fmText"></div>
-  </div>
   <div class="rname">🌿 Audna</div>
   <div class="flow-row"><span class="live-dot"></span><span class="flow-num" id="audnaFlow">…</span><span class="flow-unit">m³/s</span><span class="trend-badge" id="trendBadge" style="font-size:1.2rem;margin-left:6px;"></span><span class="trend-label" id="trendLabel" style="font-size:0.6rem;color:#94a3b8;margin-left:2px;align-self:center;"></span></div>
   <div class="station-lbl">Gaupefossen · 23.8.0</div>
@@ -177,6 +179,10 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
     <div class="quota-item"><strong>Døgn:</strong> 1 laks</div>
     <div class="quota-item"><strong>Sesong:</strong> 3 laks ≥65 cm</div>
     <div class="quota-item"><strong>Gjenutsett:</strong> hunnlaks ≥65 cm · maks 3/døgn</div>
+  </div>
+  <div class="fiskemelding" id="fiskemelding">
+    <div class="fm-title" id="fmTitle"></div>
+    <div class="fm-text" id="fmText"></div>
   </div>
 </div>
 
@@ -195,12 +201,12 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
     <div class="ctrl-col">
       <div class="ctrl-row">
         <label>Vannføring</label>
-        <input type="range" id="flowSlider" min="0" max="55" step="5" value="5" oninput="onFlowChange(this.value)" style="width:90px">
+        <input type="range" id="flowSlider" min="0" max="55" step="5" value="5" oninput="onFlowChange(this.value)">
         <span class="ctrl-val" id="flowVal">5–10 m³/s</span>
       </div>
       <div class="ctrl-row">
         <label>År</label>
-        <div class="dual-slider" style="width:90px">
+        <div class="dual-slider">
           <div class="dual-fill" id="yearFill"></div>
           <input type="range" id="yearLo" min="2016" max="2025" step="1" value="2016" oninput="onYearChange()">
           <input type="range" id="yearHi" min="2016" max="2025" step="1" value="2025" oninput="onYearChange()">
@@ -209,7 +215,7 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
       </div>
       <div class="ctrl-row">
         <label>Måned</label>
-        <div class="dual-slider" style="width:90px">
+        <div class="dual-slider">
           <div class="dual-fill" id="monthFill"></div>
           <input type="range" id="monthLo" min="6" max="9" step="1" value="6" oninput="onMonthChange()">
           <input type="range" id="monthHi" min="6" max="9" step="1" value="9" oninput="onMonthChange()">
@@ -1137,7 +1143,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div class="vp-info" id="vpInfo"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.121</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.123</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
