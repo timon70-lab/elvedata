@@ -170,9 +170,9 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 
 <div class="banner">
   <div class="rname">🌿 Otra</div>
-  <div class="flow-row"><span class="live-dot"></span><span class="flow-num" id="otraFlow">…</span><span class="flow-unit">m³/s</span><span class="trend-badge" id="trendBadge" style="font-size:1.2rem;margin-left:6px;"></span><span class="trend-label" id="trendLabel" style="font-size:0.6rem;color:#94a3b8;margin-left:2px;align-self:center;"></span></div>
+  <div class="flow-row"><span class="live-dot"></span><span class="flow-num" id="audnaFlow">…</span><span class="flow-unit">m³/s</span><span class="trend-badge" id="trendBadge" style="font-size:1.2rem;margin-left:6px;"></span><span class="trend-label" id="trendLabel" style="font-size:0.6rem;color:#94a3b8;margin-left:2px;align-self:center;"></span></div>
   <div class="station-lbl">Heisel · 21.11.0</div>
-  <div class="flow-status" id="otraStatus"></div>
+  <div class="flow-status" id="audnaStatus"></div>
   <div class="sparkline-row">
     <div class="sparkline-wrap"><svg id="sparkSvg" viewBox="0 0 200 32" preserveAspectRatio="none"></svg></div>
   </div>
@@ -559,7 +559,7 @@ function initMap() {
   if (map) return;
   const container = document.getElementById('map');
   container.style.height = '320px';
-  map = L.map('map', {zoomControl: true}).setView([58.149, 7.532], 11);
+  map = L.map('map', {zoomControl: true}).setView([58.198, 7.970], 12);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap', maxZoom: 17
   }).addTo(map);
@@ -1000,7 +1000,7 @@ function drawSparkline(values) {
 
 // ── INIT ──────────────────────────────────────────────────────────────────
 initMap();
-onFlowChange(25);
+onFlowChange(100);
 onYearChange();
 onMonthChange();
 // Init stat boxes with placeholders so header never collapses
