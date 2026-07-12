@@ -32,9 +32,13 @@ jobs:
             -H "X-API-Key: $NVE_API_KEY" \
             "https://hydapi.nve.no/api/v1/Observations?StationId=22.4.0&Parameter=1001&ResolutionTime=60&ReferenceTime=P7D/" \
             -o data/vannforing_mandalselva.json
+          curl -s \
+            -H "X-API-Key: $NVE_API_KEY" \
+            "https://hydapi.nve.no/api/v1/Observations?StationId=21.11.0&Parameter=1001&ResolutionTime=60&ReferenceTime=P7D/" \
+            -o data/vannforing_otra.json
           python3 -c "
           import json
-          for fn, navn in [('data/vannforing.json','Audna/Gaupefossen'), ('data/vannforing_lygna.json','Lygna/Tingvatn'), ('data/vannforing_mandalselva.json','Mandalselva/Kjølemo')]:
+          for fn, navn in [('data/vannforing.json','Audna/Gaupefossen'), ('data/vannforing_lygna.json','Lygna/Tingvatn'), ('data/vannforing_mandalselva.json','Mandalselva/Kjølemo'), ('data/vannforing_otra.json','Otra/Heisel')]:
               with open(fn) as f:
                   d = json.load(f)
               obs = d['data'][0]['observations']
@@ -59,6 +63,6 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/vannforing.json data/vannforing_lygna.json data/vannforing_mandalselva.json data/nedbor.json
+          git add data/vannforing.json data/vannforing_lygna.json data/vannforing_mandalselva.json data/vannforing_otra.json data/nedbor.json
           git diff --staged --quiet || git commit -m "Data oppdatert $(date -u '+%Y-%m-%d %H:%M UTC')"
           git push
