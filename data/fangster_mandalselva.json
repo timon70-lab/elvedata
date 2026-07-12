@@ -1,5 +1,17 @@
 [
  {
+  "dato": "2026-07-12",
+  "sone": "Sone 3",
+  "vekt": 2.3,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-12",
+  "sone": "Hauge D",
+  "vekt": 2.4,
+  "agn": "Flue"
+ },
+ {
   "dato": "2026-07-11",
   "sone": "Sone 3",
   "vekt": 1.6,
@@ -69,6 +81,12 @@
   "dato": "2026-07-11",
   "sone": "Delomr 2, Sone Fuskeland under Nødingfossen",
   "vekt": 3.5,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-10",
+  "sone": "Delomr 2, Strømmen",
+  "vekt": 3.2,
   "agn": "Flue"
  },
  {
