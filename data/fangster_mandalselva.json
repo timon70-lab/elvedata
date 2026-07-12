@@ -73,6 +73,12 @@
  },
  {
   "dato": "2026-07-10",
+  "sone": "Holmesland B",
+  "vekt": 2,
+  "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-10",
   "sone": "Sone 3",
   "vekt": 2.9,
   "agn": "Meitemark"
