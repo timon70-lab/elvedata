@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Henter "siste fangster" for Audna, Lygna og Mandalselva fra Inaturs laksebørs
+Henter "siste fangster" for Audna, Lygna, Mandalselva og Otra fra Inaturs laksebørs
 (laksebors.inatur.no/graphql) og skriver ut filtrerte, anonymiserte JSON-filer
 til data/fangster_<elv>.json.
 
@@ -29,6 +29,7 @@ RIVERS = {
     "audna":       {"river_id": 621,  "out": "data/fangster_audna.json"},
     "lygna":       {"river_id": 25,   "out": "data/fangster_lygna.json"},
     "mandalselva": {"river_id": 1542, "out": "data/fangster_mandalselva.json"},
+    "otra":        {"river_id": 6,    "out": "data/fangster_otra.json"},
 }
 
 QUERY = """
