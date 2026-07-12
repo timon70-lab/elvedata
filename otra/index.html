@@ -617,6 +617,17 @@ function initMap() {
     mapLayers[zone] = {startMk, endMk};
   });
 
+  // Zoom kartet til å vise alle soner med kjente koordinater, i stedet for
+  // et fast senterpunkt som kan vise mye tomt terreng (f.eks. naturreservat).
+  const allZoneCoords = [];
+  ZONES.forEach(zone => {
+    const zc = ZONE_COORDS[zone];
+    if (zc) { allZoneCoords.push(zc.s); allZoneCoords.push(zc.e); }
+  });
+  if (allZoneCoords.length) {
+    map.fitBounds(allZoneCoords, {padding: [30, 30], maxZoom: 14});
+  }
+
   function updateLabelVisibility() {
     const show = map.getZoom() >= LABEL_ZOOM_THRESHOLD;
     Object.values(mapLayers).forEach(({ startMk }) => {
@@ -894,7 +905,7 @@ async function fetchNVE() {
     const val = obs[obs.length - 1].value;
     document.getElementById('audnaFlow').textContent = val.toFixed(1);
     document.getElementById('audnaStatus').innerHTML = '<span style="color:#68d391">✅ Live NVE</span>';
-    const bin = Math.floor(val/5)*5;
+    const bin = Math.floor(val/25)*25;
     currentFlow = Math.max(50, Math.min(300, bin));
     document.getElementById('flowSlider').value = currentFlow;
     onFlowChange(currentFlow);
@@ -1063,7 +1074,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div class="vp-info" id="vpInfo"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.001</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.003</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
