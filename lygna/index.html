@@ -796,7 +796,7 @@ function initMap() {
     startMk.bindTooltip(zone, {permanent: false, direction: 'top', className: 'mtip'});
     startMk.on('click', () => { selectZone(zone); if (activeZone === zone) showZoneInfo(zone); });
 
-    const endMk = L.marker(zc.e, {icon: makeEndIcon(), opacity: 0, zIndexOffset: 5}).addTo(map);
+    const endMk = L.marker(zc.e, {icon: makeEndIcon(), opacity: 0, zIndexOffset: 5, interactive: false}).addTo(map);
     endMk.bindTooltip(zone + ' · slutt', {permanent: false, direction: 'top', className: 'mtip'});
 
     mapLayers[zone] = {startMk, endMk};
@@ -903,6 +903,7 @@ function updateMap(scores) {
     l.startMk.setZIndexOffset(isSelected ? 100 : 10);
     l.endMk.setIcon(makeEndIcon(col));
     l.endMk.setOpacity(isSelected ? 1 : 0);
+    if (l.endMk._icon) l.endMk._icon.style.pointerEvents = isSelected ? 'auto' : 'none';
   });
   // Show photo markers only when their zone is active
   photoMarkers.forEach(({ mk, zone }) => {
@@ -1238,7 +1239,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div class="vp-info" id="vpInfo"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.017</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.018</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
