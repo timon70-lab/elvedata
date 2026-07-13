@@ -104,7 +104,14 @@ const RIVERS = [
   { id: 'storelva', regulation: 'none',    name: 'Storelva (Vegårvassdraget)', lat: 58.63946, lon: 8.89749, hasData: false, seasonStart: '08-01', seasonEnd: '09-15' },
   { id: 'nidelva', regulation: 'heavy',     name: 'Nidelva (Arendal)',          lat: 58.4471, lon: 8.60796, hasData: false, seasonStart: '06-15', seasonEnd: '09-15' },
   { id: 'tovdalselva', regulation: 'moderate', name: 'Tovdalselva',                lat: 58.31994, lon: 8.19338, hasData: false, seasonStart: '06-01', seasonEnd: '08-31' },
-  { id: 'otra', regulation: 'heavy',        name: 'Otra',                       lat: 58.20162, lon: 7.93629, hasData: false, seasonStart: '06-15', seasonEnd: '08-17' },
+  {
+    id: 'otra', regulation: 'heavy', name: 'Otra', lat: 58.20162, lon: 7.93629, hasData: true,
+    dashboardUrl: 'https://timon70-lab.github.io/elvedata/otra/',
+    flowUrl: 'https://timon70-lab.github.io/elvedata/data/vannforing_otra.json',
+    catchUrl: 'https://timon70-lab.github.io/elvedata/data/fangster_otra.json',
+    scoreTable: {"50":73,"75":72,"100":69,"125":62,"150":58,"175":44,"200":54,"225":61,"250":44,"275":43,"300":43},
+    maxBin: 300, binStep: 25, seasonStart: '06-15', seasonEnd: '08-17'
+  },
   { id: 'songdalselva', regulation: 'none',name: 'Songdalselva (Sygna)',       lat: 58.15147, lon: 7.8362, hasData: false, seasonStart: '07-15', seasonEnd: '08-31' },
   {
     id: 'mandalselva', regulation: 'moderate', name: 'Mandalselva', lat: 58.22845, lon: 7.51148, hasData: true,
@@ -258,7 +265,8 @@ RIVERS.forEach((river) => {
         const obs = json.data[0].observations.filter(o => o.value !== null);
         if (obs.length) {
           flowVal = obs[obs.length - 1].value;
-          const bin = Math.floor(flowVal / 5) * 5;
+          const step = river.binStep || 5;
+          const bin = Math.floor(flowVal / step) * step;
           score = nearestBinScore(river.scoreTable, bin, river.maxBin);
         }
       }
@@ -338,7 +346,7 @@ RIVERS.forEach((river) => {
 </script>
 
 <div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.019</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.020</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
