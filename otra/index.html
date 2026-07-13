@@ -63,6 +63,7 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
   .panel-body { grid-template-columns: 1fr; }
   .ctrl-col { border-left: none; border-top: 2px solid #f0fff4; justify-content: flex-start; }
   .ctrl-row > input[type=range], .dual-slider { width: auto; flex: 1 1 auto; }
+  .zi-topbins { margin-left: 0; align-items: flex-start; width: 100%; margin-top: 4px; }
 }
 .panel-header { padding: 11px 14px 9px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; display: flex; flex-direction: column; gap: 1px; min-height: 64px; }
 .panel-name { font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #276749; }
@@ -130,9 +131,15 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .zi-row:last-child { border-bottom:none; }
 .zi-label { color:#64748b; }
 .zi-val { color:#1a202c; font-weight:600; text-align:right; max-width:60%; }
-.zi-score-row { display:flex; align-items:center; gap:8px; padding:6px 0 4px; border-bottom:1px solid #f1f5f9; margin-bottom:4px; }
+.zi-score-row { display:flex; align-items:center; gap:8px; padding:6px 0 4px; border-bottom:1px solid #f1f5f9; margin-bottom:4px; flex-wrap:wrap; }
 .zi-score-num { font-size:1.6rem; font-weight:800; line-height:1; }
 .zi-score-label { font-size:.68rem; color:#64748b; }
+.zi-topbins { margin-left:auto; display:flex; flex-direction:column; gap:3px; align-items:flex-start; }
+.zi-topbins-hdr { font-size:.62rem; font-weight:700; color:#276749; margin-bottom:1px; }
+.zi-topbin-row { display:flex; align-items:center; gap:5px; }
+.zi-topbin-row svg { display:block; flex-shrink:0; }
+.zi-topbin-txt { font-size:.62rem; color:#64748b; white-space:nowrap; }
+.zi-topbin-empty { font-size:.62rem; color:#94a3b8; font-style:italic; }
 .zi-link { display:inline-block; margin-top:8px; font-size:.7rem; color:#276749; text-decoration:none; border:1px solid #c6f6d5; border-radius:6px; padding:4px 10px; }
 .zi-link:hover { background:#f0fff4; }
 .zi-sources { margin-top:10px; font-size:.62rem; color:#94a3b8; border-top:1px solid #f1f5f9; padding-top:7px; }
@@ -295,6 +302,7 @@ const VIDEOS = [
 let videoMarkers = [];
 
 let activePhoto = null;
+const FLOW_STEP = 25; // Otra: bins i 25 m³/s intervaller (matcher flowSlider step-attributt)
 let currentFlow = 100;
 let yearLo = 2016, yearHi = 2025;
 let monthLo = 6, monthHi = 9;
@@ -406,8 +414,8 @@ function computeScores() {
 
   // Senterbin + nabobins (glatting)
   const center = binZoneStats(String(currentFlow));
-  const lower  = binZoneStats(String(currentFlow - 5));
-  const upper  = binZoneStats(String(currentFlow + 5));
+  const lower  = binZoneStats(String(currentFlow - FLOW_STEP));
+  const upper  = binZoneStats(String(currentFlow + FLOW_STEP));
   const wC = 2, wN = 1;
   const poolDays = wC*center.days + (lower.days > 0 ? wN*lower.days : 0) + (upper.days > 0 ? wN*upper.days : 0);
   if (poolDays === 0) return null;   // ingen observerte dager nær denne vannføringen i vinduet
@@ -463,6 +471,70 @@ function drawRing(score, color) {
     +'<circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="5"'
     +' stroke-linecap="round" stroke-dasharray="'+circ+'" stroke-dashoffset="'+off+'"'
     +' transform="rotate(-90 '+c+' '+c+')"/></svg>';
+}
+
+function drawMiniRing(score, color) {
+  const r=12, c=16, circ=+(2*Math.PI*r).toFixed(1), off=+(circ-(score/100)*circ).toFixed(1);
+  return '<svg width="32" height="32" viewBox="0 0 32 32">'
+    +'<circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="none" stroke="#e2e8f0" stroke-width="4"/>'
+    +'<circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="4"'
+    +' stroke-linecap="round" stroke-dasharray="'+circ+'" stroke-dashoffset="'+off+'"'
+    +' transform="rotate(-90 '+c+' '+c+')"/>'
+    +'<text x="'+c+'" y="'+(c+3.5)+'" text-anchor="middle" font-size="10" font-weight="800" fill="'+color+'">'+score+'</text>'
+    +'</svg>';
+}
+
+function computeZoneBinScores(zone) {
+  // Beregner sonens score for HVER vannføringsbin i valgt år/måned-vindu.
+  // Brukes til "beste vannføring for denne sonen"-visningen i infopanelet —
+  // avhenger bevisst KUN av år/måned-sliderne, ikke av vannførings-slideren,
+  // slik at brukeren kan se hvilken vannføring som historisk gir best score
+  // for akkurat denne sonen, uavhengig av hva slideren står på nå.
+  const p90Rate = flyOnly ? P90_RATE_FLY : P90_RATE_ALL;
+  const p90Vol  = flyOnly ? P90_VOL_FLY  : P90_VOL_ALL;
+  const maxRate = flyOnly ? MAX_RATE_FLY : MAX_RATE_ALL;
+  const maxVol  = flyOnly ? MAX_VOL_FLY  : MAX_VOL_ALL;
+  const data    = flyOnly ? FLY_DATA     : ALL_DATA;
+  const C = SCORE_CFG.shrinkC;
+  const wC = 2, wN = 1;
+  const yLo = Math.min(yearLo,yearHi), yHi = Math.max(yearLo,yearHi);
+  const mLo = Math.min(monthLo,monthHi), mHi = Math.max(monthLo,monthHi);
+
+  // Samle alle bins med observerte dager i valgt vindu + sonens snittrate (prior)
+  const binSet = new Set();
+  let allDays = 0, zoneTotal = 0;
+  for (let y = yLo; y <= yHi; y++) {
+    for (let m = mLo; m <= mHi; m++) {
+      const dm = DAYS_DATA[String(y)]?.[String(m)];
+      if (dm) for (const b of Object.keys(dm)) { binSet.add(b); allDays += dm[b]; }
+      const md = data[String(y)]?.[String(m)];
+      if (md) for (const b of Object.keys(md)) { if (md[b][zone]) zoneTotal += md[b][zone]; }
+    }
+  }
+  const prior = allDays > 0 ? zoneTotal / allDays : 0;
+
+  const results = [];
+  binSet.forEach(binStr => {
+    const bin = parseInt(binStr);
+    const center = binZoneStats(binStr);
+    const lower  = binZoneStats(String(bin - FLOW_STEP));
+    const upper  = binZoneStats(String(bin + FLOW_STEP));
+    const poolDays = wC*center.days + (lower.days > 0 ? wN*lower.days : 0) + (upper.days > 0 ? wN*upper.days : 0);
+    if (poolDays === 0) return;
+    const effDays = poolDays / wC;
+    const vol = center.catches[zone] || 0;
+    const pooled = wC*vol + (lower.days > 0 ? wN*(lower.catches[zone]||0) : 0) + (upper.days > 0 ? wN*(upper.catches[zone]||0) : 0);
+    const smRate = pooled / poolDays;
+    const shrunk = (smRate * effDays + C * prior) / (effDays + C);
+    const score = Math.round(
+      scaleScore(shrunk, p90Rate, maxRate) * SCORE_CFG.rate +
+      scaleScore(vol,    p90Vol,  maxVol)  * SCORE_CFG.vol
+    );
+    results.push({ bin, score, catches: vol, days: center.days });
+  });
+
+  results.sort((a,b) => b.score - a.score || b.catches - a.catches);
+  return results.slice(0,3);
 }
 
 // ── RENDER ────────────────────────────────────────────────────────────────
@@ -781,11 +853,22 @@ function showZoneInfo(zone, scrollTo = true) {
   const yrLbl = yLo===yHi ? String(yLo) : yLo+'–'+yHi;
   const moLbl = mLo===mHi ? MONTH_NAMES[mLo] : MONTH_NAMES[mLo]+'–'+MONTH_NAMES[mHi];
 
+  const topBins = computeZoneBinScores(zone);
+  const topBinsHtml = topBins.length
+    ? '<div class="zi-topbins-hdr">Beste vannføring for sonen</div>' + topBins.map(tb => {
+        const bc = scoreColor(tb.score);
+        const label = tb.bin >= 300 ? '300+' : tb.bin + '–' + (tb.bin + FLOW_STEP);
+        return '<div class="zi-topbin-row">' + drawMiniRing(tb.score, bc)
+          + '<span class="zi-topbin-txt">' + label + ' m³/s</span></div>';
+      }).join('')
+    : '';
+
   document.getElementById('ziTitle').textContent = '📍 ' + info.name;
   document.getElementById('ziBody').innerHTML = `
     <div class="zi-score-row">
       <div class="zi-score-num" style="color:${col}">${score}</div>
       <div class="zi-score-label">Score (${yrLbl} · ${moLbl} · ${currentFlow >= 300 ? '300+' : currentFlow + '–' + (currentFlow+25)} m³/s)<br>${catches === 1 ? '1 fangst' : catches + ' fangster'} i utvalget</div>
+      <div class="zi-topbins">${topBinsHtml}</div>
     </div>
     <div class="zi-desc">${info.desc}</div>
     <div class="zi-row"><span class="zi-label">Redskap</span><span class="zi-val">${info.redskap}</span></div>
@@ -1074,7 +1157,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div class="vp-info" id="vpInfo"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.003</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.007</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
