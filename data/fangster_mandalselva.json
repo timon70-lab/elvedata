@@ -1,6 +1,30 @@
 [
  {
   "dato": "2026-07-13",
+  "sone": "Delomr 2, Strømmen",
+  "vekt": 3,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-13",
+  "sone": "Fuskeland B",
+  "vekt": 1.8,
+  "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-13",
+  "sone": "Sone 3",
+  "vekt": 1.5,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-13",
+  "sone": "Delomr 3",
+  "vekt": 2.2,
+  "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-13",
   "sone": "Fuskeland under Nødingfossen",
   "vekt": 2.3,
   "agn": "Sluk"
