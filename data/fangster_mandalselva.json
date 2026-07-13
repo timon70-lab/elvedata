@@ -1,9 +1,39 @@
 [
  {
   "dato": "2026-07-13",
+  "sone": "Hauge C",
+  "vekt": 2.4,
+  "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-13",
+  "sone": "Hauge C",
+  "vekt": 2.3,
+  "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-13",
   "sone": "Sone 3",
   "vekt": 2.2,
   "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-12",
+  "sone": "Delomr 2, Øvre Nøding",
+  "vekt": 1.4,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-12",
+  "sone": "Hauge C",
+  "vekt": 2,
+  "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-12",
+  "sone": "Hauge C",
+  "vekt": 2.4,
+  "agn": "Flue"
  },
  {
   "dato": "2026-07-12",
@@ -46,6 +76,18 @@
   "sone": "Hauge D",
   "vekt": 2.4,
   "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-11",
+  "sone": "Hauge C",
+  "vekt": 2.1,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-11",
+  "sone": "Hauge C",
+  "vekt": 1.9,
+  "agn": "Sluk"
  },
  {
   "dato": "2026-07-11",
