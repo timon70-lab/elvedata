@@ -25,6 +25,24 @@
  },
  {
   "dato": "2026-07-13",
+  "sone": "Holmesland A",
+  "vekt": 2.5,
+  "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-13",
+  "sone": "Holmesland A",
+  "vekt": 2.5,
+  "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-13",
+  "sone": "Sone 3",
+  "vekt": 3.1,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-13",
   "sone": "Sone 3",
   "vekt": 2.3,
   "agn": "Flue"
