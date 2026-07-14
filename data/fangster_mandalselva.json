@@ -1,6 +1,54 @@
 [
  {
   "dato": "2026-07-14",
+  "sone": "Sone 3",
+  "vekt": 2.5,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-14",
+  "sone": "Sone 3",
+  "vekt": 2,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-14",
+  "sone": "Sone 3",
+  "vekt": 2,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-14",
+  "sone": "Hauge C",
+  "vekt": 2.5,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-14",
+  "sone": "Hauge C",
+  "vekt": 1.9,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-14",
+  "sone": "Hauge C",
+  "vekt": 1.6,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-14",
+  "sone": "Hauge C",
+  "vekt": 1.2,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-14",
+  "sone": "Sone 3",
+  "vekt": 2.3,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-14",
   "sone": "Holmesland A",
   "vekt": 1.9,
   "agn": "Flue"
@@ -28,6 +76,12 @@
   "sone": "Sone 3",
   "vekt": 1.8,
   "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-13",
+  "sone": "Hauge C",
+  "vekt": 1.5,
+  "agn": "Flue"
  },
  {
   "dato": "2026-07-13",
