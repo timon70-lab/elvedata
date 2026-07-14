@@ -1,6 +1,12 @@
 [
  {
   "dato": "2026-07-14",
+  "sone": "Sone 4A",
+  "vekt": 3.2,
+  "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-14",
   "sone": "Sone 3A",
   "vekt": 3.1,
   "agn": "Sluk"
