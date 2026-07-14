@@ -40,5 +40,33 @@
   "vannforing": 76.4,
   "autoSone": true,
   "soneAvstandM": 410
+ },
+ {
+  "id": "M-004",
+  "lat": 58.226644,
+  "lon": 7.516092,
+  "file": "Sone3_20260713_1932.jpg",
+  "caption": "Sone 3",
+  "zone": "Sone 3",
+  "dateISO": "2026-07-13",
+  "timeUTC": "17:32",
+  "locId": "Sone 3",
+  "vannforing": 62.5,
+  "autoSone": true,
+  "soneAvstandM": 553
+ },
+ {
+  "id": "M-005",
+  "lat": 58.210347,
+  "lon": 7.524422,
+  "file": "Sone3_20260713_2012.jpg",
+  "caption": "Sone 3",
+  "zone": "Sone 3",
+  "dateISO": "2026-07-13",
+  "timeUTC": "18:12",
+  "locId": "Sone 3",
+  "vannforing": 62.5,
+  "autoSone": true,
+  "soneAvstandM": 403
  }
 ]
