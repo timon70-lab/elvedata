@@ -1,6 +1,12 @@
 [
  {
   "dato": "2026-07-13",
+  "sone": "Sone 3",
+  "vekt": 2.3,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-13",
   "sone": "Hauge D",
   "vekt": 2.1,
   "agn": "Flue"
