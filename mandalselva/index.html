@@ -133,8 +133,15 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .zi-score-row { display:flex; align-items:center; gap:8px; padding:6px 0 4px; border-bottom:1px solid #f1f5f9; margin-bottom:4px; }
 .zi-score-num { font-size:1.6rem; font-weight:800; line-height:1; }
 .zi-score-label { font-size:.68rem; color:#64748b; }
+.zi-topbins { margin-left:auto; display:flex; flex-direction:column; gap:3px; align-items:flex-start; }
+.zi-topbins-hdr { font-size:.62rem; font-weight:700; color:#276749; margin-bottom:1px; }
+.zi-topbin-row { display:flex; align-items:center; gap:5px; }
+.zi-topbin-row svg { display:block; flex-shrink:0; }
+.zi-topbin-txt { font-size:.62rem; color:#64748b; white-space:nowrap; }
+.zi-topbin-stats { font-size:.6rem; color:#94a3b8; margin-top:2px; white-space:nowrap; }
 .zi-link { display:inline-block; margin-top:8px; font-size:.7rem; color:#276749; text-decoration:none; border:1px solid #c6f6d5; border-radius:6px; padding:4px 10px; }
 .zi-link:hover { background:#f0fff4; }
+.zi-price { font-size:.78rem; font-weight:700; color:#1a202c; text-align:center; padding:6px 4px; background:#f8fafc; border-radius:6px; margin-top:2px; }
 .zi-sources { margin-top:10px; font-size:.62rem; color:#94a3b8; border-top:1px solid #f1f5f9; padding-top:7px; }
 .zi-sources a { color:#94a3b8; text-decoration:underline; }
 
@@ -268,6 +275,7 @@ const BILDE_BASE = 'https://timon70-lab.github.io/elvedata/bilder/mandalselva/';
 const PHOTOS_URL = 'https://timon70-lab.github.io/elvedata/data/photos_mandalselva.json';
 
 /* ---------- Sentral konfig (data/config.json) — scoringsparametre ---------- */
+const PRICES = {"Bjåhylen":{"dogn":800},"Bjørkenes":{"dogn":300},"Bringsdal A":{"dogn":250},"Bringsdal B":{"dogn":250},"Bringsdal C":{"dogn":250},"Fossefjellene":{"dogn":500},"Fossefjellene syd":{"dogn":450},"Furuholmen":{"dogn":300,"sesong":1000},"Fuskeland A":{"dogn":450},"Fuskeland B":{"dogn":450},"Fuskeland C":{"dogn":400},"Fuskeland D":{"dogn":450},"Fuskeland E":{"dogn":400},"Fuskeland under Nødingfossen":{"dogn":900},"Grimefossen A":{"dogn":400},"Grimefossen B":{"dogn":400},"Hauge A":{"dogn":450},"Hauge B1":{"dogn":450},"Hauge B2":{"dogn":425},"Hauge C":{"dogn":650},"Hauge D":{"dogn":350},"Heia":{"dogn":100},"Holmegård":{"dogn":150,"sesong":1250},"Holmesland A":{"dogn":590},"Holmesland B":{"dogn":375},"Holmesland C":{"dogn":325},"Holmesland P":{"dogn":670},"Klevelandsfossen":{"dogn":500},"Laksehylen":{"dogn":1000},"Møll":{"dogn":100,"sesong":500},"Nedre Holum":{"dogn":50,"sesong":500},"Nedre Nøding":{"dogn":350},"Nodehylen":{"dogn":1000},"Smeland":{"dogn":250,"sesong":1000},"Sone 1":{"dogn":150,"sesong":800},"Sone 3":{"dogn":455,"sesong":7980},"Sone 4":{"dogn":300,"sesong":3000},"Steinshylen":{"dogn":1000},"Stoveland":{"dogn":200,"sesong":1000},"Strædethylen":{"dogn":600}};
 let SCORE_CFG = { rate: 0.8, vol: 0.2, shrinkC: 15, knee: 80 };   // fallback hvis config.json ikke kan hentes
 let SPARK_CFG = { max: 75, normal: 52 };   // fallback: P75 / median sesongvannføring
 fetch('https://timon70-lab.github.io/elvedata/data/config.json', { cache: 'no-cache' })
@@ -463,6 +471,67 @@ function drawRing(score, color) {
     +'<circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="5"'
     +' stroke-linecap="round" stroke-dasharray="'+circ+'" stroke-dashoffset="'+off+'"'
     +' transform="rotate(-90 '+c+' '+c+')"/></svg>';
+}
+
+function drawMiniRing(score, color) {
+  const r=12, c=16, circ=+(2*Math.PI*r).toFixed(1), off=+(circ-(score/100)*circ).toFixed(1);
+  return '<svg width="32" height="32" viewBox="0 0 32 32">'
+    +'<circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="none" stroke="#e2e8f0" stroke-width="4"/>'
+    +'<circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="4"'
+    +' stroke-linecap="round" stroke-dasharray="'+circ+'" stroke-dashoffset="'+off+'"'
+    +' transform="rotate(-90 '+c+' '+c+')"/>'
+    +'<text x="'+c+'" y="'+(c+3.5)+'" text-anchor="middle" font-size="10" font-weight="800" fill="'+color+'">'+score+'</text>'
+    +'</svg>';
+}
+
+function computeZoneBinScores(zone) {
+  // Beregner sonens score for HVER vannføringsbin i valgt år/måned-vindu.
+  // Brukes til «beste vannføring for denne sonen»-visningen i infopanelet —
+  // avhenger bevisst KUN av år/måned-sliderne, ikke av vannførings-slideren.
+  const p90Rate = flyOnly ? P90_RATE_FLY : P90_RATE_ALL;
+  const p90Vol  = flyOnly ? P90_VOL_FLY  : P90_VOL_ALL;
+  const maxRate = flyOnly ? MAX_RATE_FLY : MAX_RATE_ALL;
+  const maxVol  = flyOnly ? MAX_VOL_FLY  : MAX_VOL_ALL;
+  const data    = flyOnly ? FLY_DATA     : ALL_DATA;
+  const C = SCORE_CFG.shrinkC;
+  const wC = 2, wN = 1;
+  const yLo = Math.min(yearLo,yearHi), yHi = Math.max(yearLo,yearHi);
+  const mLo = Math.min(monthLo,monthHi), mHi = Math.max(monthLo,monthHi);
+
+  const binSet = new Set();
+  let allDays = 0, zoneTotal = 0;
+  for (let y = yLo; y <= yHi; y++) {
+    for (let m = mLo; m <= mHi; m++) {
+      const dm = DAYS_DATA[String(y)]?.[String(m)];
+      if (dm) for (const b of Object.keys(dm)) { binSet.add(b); allDays += dm[b]; }
+      const md = data[String(y)]?.[String(m)];
+      if (md) for (const b of Object.keys(md)) { if (md[b][zone]) zoneTotal += md[b][zone]; }
+    }
+  }
+  const prior = allDays > 0 ? zoneTotal / allDays : 0;
+
+  const results = [];
+  binSet.forEach(binStr => {
+    const bin = parseInt(binStr);
+    const center = binZoneStats(binStr);
+    const lower  = binZoneStats(String(bin - 5));
+    const upper  = binZoneStats(String(bin + 5));
+    const poolDays = wC*center.days + (lower.days > 0 ? wN*lower.days : 0) + (upper.days > 0 ? wN*upper.days : 0);
+    if (poolDays === 0) return;
+    const effDays = poolDays / wC;
+    const vol = center.catches[zone] || 0;
+    const pooled = wC*vol + (lower.days > 0 ? wN*(lower.catches[zone]||0) : 0) + (upper.days > 0 ? wN*(upper.catches[zone]||0) : 0);
+    const smRate = pooled / poolDays;
+    const shrunk = (smRate * effDays + C * prior) / (effDays + C);
+    const score = Math.round(
+      scaleScore(shrunk, p90Rate, maxRate) * SCORE_CFG.rate +
+      scaleScore(vol,    p90Vol,  maxVol)  * SCORE_CFG.vol
+    );
+    results.push({ bin, score, catches: vol, days: center.days });
+  });
+
+  results.sort((a,b) => b.score - a.score || b.catches - a.catches);
+  return results.slice(0,1);
 }
 
 // ── RENDER ────────────────────────────────────────────────────────────────
@@ -728,6 +797,12 @@ function updateMap(scores) {
     l.endMk.setIcon(makeEndIcon(col));
     l.endMk.setOpacity(isSelected ? 1 : 0);
     if (l.endMk._icon) l.endMk._icon.style.pointerEvents = isSelected ? 'auto' : 'none';
+    const priceInfo = PRICES[zone];
+    const priceLbl = priceInfo && priceInfo.dogn ? priceInfo.dogn + ' kr' : null;
+    const tipHtml = isSelected && priceLbl
+      ? zone + '<br><span style="font-weight:400;opacity:.8">' + priceLbl + '</span>'
+      : zone;
+    l.startMk.setTooltipContent(tipHtml);
   });
   // Show photo markers only when their zone is active
   photoMarkers.forEach(({ mk, zone }) => {
@@ -770,17 +845,44 @@ function showZoneInfo(zone, scrollTo = true) {
   const yrLbl = yLo===yHi ? String(yLo) : yLo+'–'+yHi;
   const moLbl = mLo===mHi ? MONTH_NAMES[mLo] : MONTH_NAMES[mLo]+'–'+MONTH_NAMES[mHi];
 
+  const topBins = computeZoneBinScores(zone);
+  let topBinsHtml = '';
+  if (topBins.length) {
+    const tb = topBins[0];
+    const bc = scoreColor(tb.score);
+    const label = tb.bin >= 150 ? '150+' : tb.bin + '–' + (tb.bin + 5);
+    const perDay = tb.days > 0 ? (tb.catches / tb.days).toFixed(2).replace('.', ',') : '–';
+    topBinsHtml = '<div class="zi-topbins-hdr">Beste vannføring for sonen</div>'
+      + '<div class="zi-topbin-row">' + drawMiniRing(tb.score, bc)
+      + '<span class="zi-topbin-txt">' + label + ' m³/s</span></div>'
+      + '<div class="zi-topbin-stats">'
+      + tb.catches + (tb.catches === 1 ? ' fangst' : ' fangster')
+      + ' · ' + tb.days + (tb.days === 1 ? ' dag' : ' dager')
+      + ' · ' + perDay + ' per dag</div>';
+  }
+
+  const priceInfo = PRICES[zone];
+  let priceHtml = '';
+  if (priceInfo) {
+    const parts = [];
+    if (priceInfo.dogn) parts.push(priceInfo.dogn + ' kr døgnkort');
+    if (priceInfo.sesong) parts.push(priceInfo.sesong + ' kr sesongkort');
+    if (parts.length) priceHtml = '<div class="zi-price">' + parts.join(' · ') + '</div>';
+  }
+
   document.getElementById('ziTitle').textContent = '📍 ' + info.name;
   document.getElementById('ziBody').innerHTML = `
     <div class="zi-score-row">
       <div class="zi-score-num" style="color:${col}">${score}</div>
       <div class="zi-score-label">Score (${yrLbl} · ${moLbl} · ${currentFlow >= 150 ? '150+' : currentFlow + '–' + (currentFlow+5)} m³/s)<br>${catches === 1 ? '1 fangst' : catches + ' fangster'} i utvalget</div>
+      <div class="zi-topbins">${topBinsHtml}</div>
     </div>
     <div class="zi-desc">${info.desc}</div>
     <div class="zi-row"><span class="zi-label">Redskap</span><span class="zi-val">${info.redskap}</span></div>
     <div class="zi-row"><span class="zi-label">Sesong</span><span class="zi-val">${info.sesong}</span></div>
     <div class="zi-row"><span class="zi-label">Merknader</span><span class="zi-val">${info.merknader}</span></div>
     <a class="zi-link" href="https://www.google.com/maps/dir/?api=1&destination=${ZONE_COORDS[zone]?.s[0]},${ZONE_COORDS[zone]?.s[1]}&travelmode=driving" target="_blank">🗺 Veibeskrivelse hit ↗</a>
+    ${priceHtml}
     <a class="zi-link" href="${info.kortUrl}" target="_blank">🎫 Kjøp fiskekort ↗</a>
     <div class="zi-sources">Kilder: <a href="https://www.inatur.no/laksefiske/61e7f536529f1503929e8eb0" target="_blank">inatur.no</a> · <a href="https://www.mandalselva.no" target="_blank">mandalselva.no</a></div>
   `;
@@ -1063,7 +1165,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div class="vp-info" id="vpInfo"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.018</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.020</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
