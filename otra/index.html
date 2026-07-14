@@ -140,8 +140,10 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .zi-topbin-row svg { display:block; flex-shrink:0; }
 .zi-topbin-txt { font-size:.62rem; color:#64748b; white-space:nowrap; }
 .zi-topbin-empty { font-size:.62rem; color:#94a3b8; font-style:italic; }
+.zi-topbin-stats { font-size:.6rem; color:#94a3b8; margin-top:2px; white-space:nowrap; }
 .zi-link { display:inline-block; margin-top:8px; font-size:.7rem; color:#276749; text-decoration:none; border:1px solid #c6f6d5; border-radius:6px; padding:4px 10px; }
 .zi-link:hover { background:#f0fff4; }
+.zi-price { font-size:.78rem; font-weight:700; color:#1a202c; text-align:center; padding:6px 4px; background:#f8fafc; border-radius:6px; margin-top:2px; }
 .zi-sources { margin-top:10px; font-size:.62rem; color:#94a3b8; border-top:1px solid #f1f5f9; padding-top:7px; }
 .zi-sources a { color:#94a3b8; text-decoration:underline; }
 
@@ -275,6 +277,7 @@ const BILDE_BASE = 'https://timon70-lab.github.io/elvedata/bilder/otra/';
 const PHOTOS_URL = 'https://timon70-lab.github.io/elvedata/data/photos_otra.json';
 
 /* ---------- Sentral konfig (data/config.json) — scoringsparametre ---------- */
+const PRICES = {"Sone 1":{"dogn":200,"sesong":1250},"Sone 2":{"dogn":300,"sesong":2550},"Sone 3A":{"dogn":300,"sesong":3050},"Sone 3B Hageodden":{"dogn":300},"Sone 3C Mosby":{"dogn":300},"Sone 4A":{"dogn":300,"sesong":3050},"Sone 4B Ravnås":{"dogn":400},"Sone 4C Holmane":{"dogn":400},"Sone 5A Blå":{"dogn":350,"sesong":3650}};
 let SCORE_CFG = { rate: 0.8, vol: 0.2, shrinkC: 15, knee: 80 };   // fallback hvis config.json ikke kan hentes
 let SPARK_CFG = { max: 150, normal: 94 };   // fallback: P75 / median sesongvannføring
 fetch('https://timon70-lab.github.io/elvedata/data/config.json', { cache: 'no-cache' })
@@ -534,7 +537,7 @@ function computeZoneBinScores(zone) {
   });
 
   results.sort((a,b) => b.score - a.score || b.catches - a.catches);
-  return results.slice(0,3);
+  return results.slice(0,1);
 }
 
 // ── RENDER ────────────────────────────────────────────────────────────────
@@ -811,6 +814,12 @@ function updateMap(scores) {
     l.endMk.setIcon(makeEndIcon(col));
     l.endMk.setOpacity(isSelected ? 1 : 0);
     if (l.endMk._icon) l.endMk._icon.style.pointerEvents = isSelected ? 'auto' : 'none';
+    const priceInfo = PRICES[zone];
+    const priceLbl = priceInfo && priceInfo.dogn ? priceInfo.dogn + ' kr' : null;
+    const tipHtml = isSelected && priceLbl
+      ? zone + '<br><span style="font-weight:400;opacity:.8">' + priceLbl + '</span>'
+      : zone;
+    l.startMk.setTooltipContent(tipHtml);
   });
   // Show photo markers only when their zone is active
   photoMarkers.forEach(({ mk, zone }) => {
@@ -854,14 +863,29 @@ function showZoneInfo(zone, scrollTo = true) {
   const moLbl = mLo===mHi ? MONTH_NAMES[mLo] : MONTH_NAMES[mLo]+'–'+MONTH_NAMES[mHi];
 
   const topBins = computeZoneBinScores(zone);
-  const topBinsHtml = topBins.length
-    ? '<div class="zi-topbins-hdr">Beste vannføring for sonen</div>' + topBins.map(tb => {
-        const bc = scoreColor(tb.score);
-        const label = tb.bin >= 300 ? '300+' : tb.bin + '–' + (tb.bin + FLOW_STEP);
-        return '<div class="zi-topbin-row">' + drawMiniRing(tb.score, bc)
-          + '<span class="zi-topbin-txt">' + label + ' m³/s</span></div>';
-      }).join('')
-    : '';
+  let topBinsHtml = '';
+  if (topBins.length) {
+    const tb = topBins[0];
+    const bc = scoreColor(tb.score);
+    const label = tb.bin >= 300 ? '300+' : tb.bin + '\u2013' + (tb.bin + FLOW_STEP);
+    const perDay = tb.days > 0 ? (tb.catches / tb.days).toFixed(2).replace('.', ',') : '\u2013';
+    topBinsHtml = '<div class="zi-topbins-hdr">Beste vannf\u00f8ring for sonen</div>'
+      + '<div class="zi-topbin-row">' + drawMiniRing(tb.score, bc)
+      + '<span class="zi-topbin-txt">' + label + ' m\u00b3/s</span></div>'
+      + '<div class="zi-topbin-stats">'
+      + tb.catches + (tb.catches === 1 ? ' fangst' : ' fangster')
+      + ' \u00b7 ' + tb.days + (tb.days === 1 ? ' dag' : ' dager')
+      + ' \u00b7 ' + perDay + ' per dag</div>';
+  }
+
+  const priceInfo = PRICES[zone];
+  let priceHtml = '';
+  if (priceInfo) {
+    const parts = [];
+    if (priceInfo.dogn) parts.push(priceInfo.dogn + ' kr døgnkort');
+    if (priceInfo.sesong) parts.push(priceInfo.sesong + ' kr sesongkort');
+    if (parts.length) priceHtml = '<div class="zi-price">' + parts.join(' · ') + '</div>';
+  }
 
   document.getElementById('ziTitle').textContent = '📍 ' + info.name;
   document.getElementById('ziBody').innerHTML = `
@@ -875,6 +899,7 @@ function showZoneInfo(zone, scrollTo = true) {
     <div class="zi-row"><span class="zi-label">Sesong</span><span class="zi-val">${info.sesong}</span></div>
     <div class="zi-row"><span class="zi-label">Merknader</span><span class="zi-val">${info.merknader}</span></div>
     <a class="zi-link" href="https://www.google.com/maps/dir/?api=1&destination=${ZONE_COORDS[zone]?.s[0]},${ZONE_COORDS[zone]?.s[1]}&travelmode=driving" target="_blank">🗺 Veibeskrivelse hit ↗</a>
+    ${priceHtml}
     <a class="zi-link" href="${info.kortUrl}" target="_blank">🎫 Kjøp fiskekort ↗</a>
     <div class="zi-sources">Kilder: <a href="https://lakseelver.no/nb/elver/otra" target="_blank">lakseelver.no/otra</a> · <a href="https://www.scanatura.no/webshop?id=6" target="_blank">scanatura.no</a></div>
   `;
@@ -1157,7 +1182,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div class="vp-info" id="vpInfo"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.007</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.009</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
