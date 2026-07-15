@@ -29,6 +29,12 @@
       "volWeight": 0.2,
       "shrinkC": 15,
       "knee": 80
+    },
+    "sygna": {
+      "rateWeight": 0.8,
+      "volWeight": 0.2,
+      "shrinkC": 15,
+      "knee": 80
     }
   },
   "sparkline": {
@@ -51,6 +57,10 @@
     "otra": {
       "max": 150,
       "normal": 94
+    },
+    "sygna": {
+      "max": 5.2,
+      "normal": 2.3
     }
   }
 }
