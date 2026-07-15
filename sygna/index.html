@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sygna – Dynamisk oversikt</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f4f8; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px 12px 40px; }
+h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #94a3b8; margin-bottom: 16px; text-align: center; }
+.banner { width: 100%; max-width: 480px; background: #0f2d4a; border-radius: 14px; padding: 14px 18px; margin-bottom: 14px; position: relative; }
+.fiskemelding { position: absolute; top: 10px; right: 12px; max-width: 200px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 8px 10px; display: none; }
+.fiskemelding .fm-title { font-size: 0.7rem; font-weight: 600; color: #e2e8f0; display: flex; align-items: center; gap: 5px; }
+.fiskemelding .fm-text { font-size: 0.62rem; color: #94a3b8; margin-top: 3px; line-height: 1.4; }
+.rname { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #9ae6b4; margin-bottom: 6px; }
+.flow-row { display: flex; align-items: baseline; gap: 5px; margin-bottom: 3px; }
+.flow-num { font-size: 1.8rem; font-weight: 800; color: #68d391; line-height: 1; }
+.flow-unit { font-size: 0.7rem; color: #94a3b8; }
+.live-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #68d391; margin-right: 4px; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.station-lbl { font-size: 0.6rem; color: #4a6fa5; margin-bottom: 3px; }
+.flow-status { font-size: 0.6rem; }
+.quota-box { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; gap: 14px; flex-wrap: wrap; }
+.quota-item { font-size: 0.67rem; color: #94a3b8; line-height: 1.5; }
+.quota-item strong { color: #cbd5e1; }
+.ctrl-col { display: flex; flex-direction: column; gap: 11px; padding: 12px 14px 14px; border-left: 2px solid #f0fff4; justify-content: center; min-width: 0; }
+.ctrl-row { display: flex; align-items: center; gap: 8px; }
+.ctrl-row label { font-size: 0.65rem; font-weight: 700; color: #4a5568; white-space: nowrap; min-width: 44px; }
+.ctrl-val { font-size: 0.72rem; font-weight: 700; color: #276749; min-width: 88px; text-align: right; white-space: nowrap; }
+/* Single range */
+.ctrl-row > input[type=range] { width: 90px; flex: 0 0 90px; accent-color: #276749; cursor: pointer; }
+/* Dual-handle slider */
+.dual-slider { position: relative; width: 90px; flex: 0 0 90px; height: 20px; display: flex; align-items: center; }
+.dual-slider::before { content: ''; position: absolute; left: 0; right: 0; height: 4px; background: #e2e8f0; border-radius: 2px; }
+.dual-fill { position: absolute; height: 4px; background: #276749; border-radius: 2px; pointer-events: none; z-index: 1; }
+.dual-slider input[type=range] {
+  position: absolute; width: 100%; left: 0; pointer-events: none;
+  -webkit-appearance: none; appearance: none;
+  height: 4px; background: transparent; outline: none; margin: 0; padding: 0;
+}
+.dual-slider input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+  background: #276749; border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2); cursor: pointer; pointer-events: all;
+}
+.dual-slider input[type=range]::-moz-range-thumb {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #276749; border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2); cursor: pointer; pointer-events: all; border: none;
+}
+/* Fly pill */
+.fly-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 6px; border: 1.5px solid #e2e8f0; background: white; color: #94a3b8; font-size: 0.72rem; font-weight: 700; cursor: pointer; transition: all 0.18s; user-select: none; }
+.fly-pill .pip { width: 7px; height: 7px; border-radius: 50%; background: #e2e8f0; transition: background 0.18s; flex-shrink: 0; }
+.fly-pill.active { background: #276749; color: white; border-color: #276749; }
+.fly-pill.active .pip { background: #9ae6b4; }
+/* Zone panel */
+.panel { width: 100%; max-width: 480px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 14px; }
+.panel-body { display: grid; grid-template-columns: 1fr auto; align-items: start; }
+@media (max-width: 520px) {
+  .fiskemelding { position: static; max-width: none; margin-top: 10px; }
+  .panel-body { grid-template-columns: 1fr; }
+  .ctrl-col { border-left: none; border-top: 2px solid #f0fff4; justify-content: flex-start; }
+  .ctrl-row > input[type=range], .dual-slider { width: auto; flex: 1 1 auto; }
+}
+.panel-header { padding: 11px 14px 9px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; display: flex; flex-direction: column; gap: 1px; min-height: 64px; }
+.panel-name { font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #276749; }
+.panel-sub { font-size: 0.58rem; color: #94a3b8; }
+.zone-list { padding: 10px 12px 14px; display: flex; flex-direction: column; gap: 9px; min-height: 160px; }
+.zone-row { display: flex; align-items: center; gap: 10px; cursor: pointer; border-radius: 8px; padding: 4px 6px; transition: background 0.15s; }
+.zone-row:hover { background: #f0fff4; }
+.zone-row.active { background: #c6f6d5; }
+.mini-ring { position: relative; flex-shrink: 0; }
+.mini-ring svg { display: block; }
+.mini-ring .mnum { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 0.68rem; font-weight: 800; line-height: 1; }
+.zone-info { flex: 1; min-width: 0; }
+.zone-name { font-size: 0.76rem; font-weight: 700; color: #1a202c; }
+.zone-catches { font-size: 0.6rem; color: #94a3b8; margin-top: 1px; }
+.zone-map-hint { font-size: 0.58rem; color: #68d391; margin-top: 1px; }
+.no-data { font-size: 0.72rem; color: #94a3b8; padding: 8px 4px; font-style: italic; }
+/* Map */
+.map-panel { width: 100%; max-width: 480px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+.map-header { padding: 10px 14px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; display: flex; justify-content: space-between; align-items: center; }
+.map-header .map-title { font-size: 0.78rem; font-weight: 700; color: #276749; }
+.map-header .map-hint { font-size: 0.62rem; color: #94a3b8; }
+#map { height: 320px; width: 100%; }
+.leaflet-tooltip.mtip { background: #1a202c; color: #e2e8f0; border: 1px solid #4a5568; font-size: .72rem; font-weight: 700; padding: 2px 7px; border-radius: 5px; box-shadow: none; }
+.leaflet-tooltip.mtip::before { display: none; }
+
+.photo-panel { width: 100%; max-width: 480px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-top: 14px; display: none; }
+.photo-panel.visible { display: block; }
+.photo-header { padding: 10px 14px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; display: flex; justify-content: space-between; align-items: center; }
+.photo-header .photo-title { font-size: 0.78rem; font-weight: 700; color: #276749; }
+.photo-grid { display: flex; flex-direction: column; gap: 0; }
+.photo-item { position: relative; cursor: pointer; }
+.photo-item img { width: 100%; display: block; max-height: 260px; object-fit: cover; }
+.photo-caption { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.45); color: white; font-size: 0.65rem; padding: 5px 9px; }
+.photo-fullscreen { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; gap: 10px; }
+.photo-fullscreen.open { display: flex; }
+.photo-fullscreen img { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 6px; }
+.photo-fullscreen .close-btn { color: white; font-size: 1.5rem; cursor: pointer; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
+.photo-fullscreen .photo-fs-caption { color: #cbd5e0; font-size: 0.72rem; }
+
+.photo-panel { width: 100%; max-width: 480px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-top: 14px; display: none; }
+.photo-panel.visible { display: block; }
+.photo-hdr { padding: 10px 14px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; display: flex; justify-content: space-between; align-items: center; }
+.photo-hdr span { font-size: 0.78rem; font-weight: 700; color: #276749; }
+.photo-hdr button { background: none; border: none; color: #94a3b8; font-size: 1rem; cursor: pointer; line-height: 1; }
+.pg-nav-btn { background:none; border:1px solid #c6f6d5; border-radius:4px; color:#276749; font-size:0.85rem; cursor:pointer; padding:2px 7px; line-height:1.4; }
+.pg-nav-btn:disabled { color:#cbd5e0; border-color:#e2e8f0; cursor:not-allowed; }
+.photo-img { width: 100%; display: block; max-height: 280px; object-fit: cover; cursor: pointer; }
+.photo-cap { padding: 7px 14px 10px; font-size: 0.68rem; color: #64748b; }
+.photo-fs { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
+.photo-fs.open { display: flex; }
+.photo-fs img { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 6px; }
+.photo-fs .fs-cap { color: #cbd5e0; font-size: 0.72rem; }
+.photo-fs .fs-close { color: white; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+.zone-info-panel { width:100%; max-width:480px; background:white; border-radius:14px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,.07); margin-top:14px; display:none; }
+.zone-info-panel.visible { display:block; }
+.zi-hdr { padding:10px 14px; background:#f0fff4; border-bottom:2px solid #c6f6d5; display:flex; justify-content:space-between; align-items:center; }
+.zi-hdr-title { font-size:.78rem; font-weight:700; color:#276749; }
+.zi-hdr button { background:none; border:none; color:#94a3b8; font-size:1rem; cursor:pointer; line-height:1; }
+.zi-body { padding:12px 14px 14px; display:flex; flex-direction:column; gap:6px; }
+.zi-desc { font-size:.73rem; color:#374151; line-height:1.5; border-bottom:1px solid #f1f5f9; padding-bottom:8px; margin-bottom:2px; }
+.zi-row { display:flex; justify-content:space-between; align-items:baseline; font-size:.72rem; padding:2px 0; border-bottom:1px solid #f8fafc; }
+.zi-row:last-child { border-bottom:none; }
+.zi-label { color:#64748b; }
+.zi-val { color:#1a202c; font-weight:600; text-align:right; max-width:60%; }
+.zi-score-row { display:flex; align-items:center; gap:8px; padding:6px 0 4px; border-bottom:1px solid #f1f5f9; margin-bottom:4px; }
+.zi-score-num { font-size:1.6rem; font-weight:800; line-height:1; }
+.zi-score-label { font-size:.68rem; color:#64748b; }
+.zi-topbins { margin-left:auto; display:flex; flex-direction:column; gap:3px; align-items:flex-start; }
+.zi-topbins-hdr { font-size:.62rem; font-weight:700; color:#276749; margin-bottom:1px; }
+.zi-topbin-row { display:flex; align-items:center; gap:5px; }
+.zi-topbin-row svg { display:block; flex-shrink:0; }
+.zi-topbin-txt { font-size:.62rem; color:#64748b; white-space:nowrap; }
+.zi-topbin-stats { font-size:.6rem; color:#94a3b8; margin-top:2px; white-space:nowrap; }
+.zi-link { display:inline-block; margin-top:8px; font-size:.7rem; color:#276749; text-decoration:none; border:1px solid #c6f6d5; border-radius:6px; padding:4px 10px; }
+.zi-link:hover { background:#f0fff4; }
+.zi-price { font-size:.78rem; font-weight:700; color:#1a202c; text-align:center; padding:6px 4px; background:#f8fafc; border-radius:6px; margin-top:2px; }
+.zi-sources { margin-top:10px; font-size:.62rem; color:#94a3b8; border-top:1px solid #f1f5f9; padding-top:7px; }
+.zi-sources a { color:#94a3b8; text-decoration:underline; }
+
+.total-score-box { display:flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0; position:relative; }
+.total-score-box .mnum { position:absolute; font-size:0.85rem; font-weight:800; line-height:1; }
+.total-score-lbl { font-size:0.54rem; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; margin-top:2px; }
+.stat-box { display:flex; gap:10px; align-items:flex-start; flex-shrink:0; }
+.stat-item { display:flex; flex-direction:column; align-items:center; background:rgba(255,255,255,0.55); border-radius:8px; padding:4px 8px; min-width:44px; }
+.stat-num { font-size:1.05rem; font-weight:800; color:#276749; line-height:1.1; }
+.stat-lbl { font-size:0.54rem; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; text-align:center; margin-top:1px; }
+
+.video-panel { width:100%; max-width:480px; background:white; border-radius:14px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,.07); margin-top:14px; display:none; }
+.video-panel.visible { display:block; }
+.vp-hdr { padding:10px 14px; background:#fff5f5; border-bottom:2px solid #fed7d7; display:flex; justify-content:space-between; align-items:center; }
+.vp-hdr-title { font-size:.78rem; font-weight:700; color:#c53030; }
+.vp-hdr button { background:none; border:none; color:#94a3b8; font-size:1rem; cursor:pointer; }
+.vp-iframe-wrap { position:relative; padding-bottom:56.25%; height:0; overflow:hidden; }
+.vp-iframe-wrap iframe { position:absolute; top:0; left:0; width:100%; height:100%; border:none; }
+.vp-info { padding:12px 14px 14px; font-size:.71rem; color:#374151; }
+.vp-yt-btn { display:inline-block; margin-top:8px; background:#c53030; color:white; text-decoration:none; border-radius:6px; padding:7px 14px; font-size:.75rem; font-weight:700; }
+.vp-yt-btn:hover { background:#9b2c2c; }
+
+.zi-boom { display:flex; gap:8px; align-items:center; margin-top:8px; padding:8px 10px; background:#fffbea; border:1px solid #fbd38d; border-radius:8px; }
+.zi-boom-icon { font-size:1.1rem; line-height:1; flex-shrink:0; }
+.zi-boom-hdr { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#975a16; }
+.zi-boom-txt { font-size:0.68rem; color:#744210; margin-top:1px; }
+.sparkline-row { display:flex; align-items:center; gap:8px; margin-top:4px; }
+.sparkline-wrap { flex:1; height:32px; }
+.sparkline-wrap svg { width:100%; height:32px; }
+.trend-badge { font-size:1.2rem; line-height:1; flex-shrink:0; }
+.trend-label { font-size:0.6rem; color:#94a3b8; line-height:1.2; flex-shrink:0; }
+</style>
+</head>
+<body>
+
+<h1>Sygna · Dynamisk oversikt</h1>
+
+<div class="banner">
+  <div class="rname">🌿 Sygna</div>
+  <div class="flow-row"><span class="live-dot"></span><span class="flow-num" id="sygnaFlow">…</span><span class="flow-unit">m³/s</span><span class="trend-badge" id="trendBadge" style="font-size:1.2rem;margin-left:6px;"></span><span class="trend-label" id="trendLabel" style="font-size:0.6rem;color:#94a3b8;margin-left:2px;align-self:center;"></span></div>
+  <div class="station-lbl">Søgne · 22.22.0</div>
+  <div class="flow-status" id="sygnaStatus"></div>
+  <div class="sparkline-row">
+    <div class="sparkline-wrap"><svg id="sparkSvg" viewBox="0 0 200 32" preserveAspectRatio="none"></svg></div>
+  </div>
+  <div style="font-size:0.55rem; color:#4a6741; text-align:right; margin-top:1px; opacity:0.7;">Vannføring siste 7 dager</div>
+  <div class="quota-box">
+    <div class="quota-item"><strong>Døgn:</strong> 2 fisk (laks/sjøørret)</div>
+    <div class="quota-item"><strong>Sesong 2026:</strong> 15. juli – 31. aug</div>
+    <div class="quota-item"><strong>Sesongkvote:</strong> ikke fastsatt</div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+      <div>
+        <span class="panel-name">Sygna · Sone</span>
+      </div>
+      <div class="stat-box" id="statBox"></div>
+    </div>
+  </div>
+  <div class="panel-body">
+    <div class="zone-list" id="zoneList"></div>
+    <div class="ctrl-col">
+      <div class="ctrl-row">
+        <label>Vannføring</label>
+        <input type="range" id="flowSlider" min="0" max="18" step="2" value="2" oninput="onFlowChange(this.value)">
+        <span class="ctrl-val" id="flowVal">2–4 m³/s</span>
+      </div>
+      <div class="ctrl-row">
+        <label>År</label>
+        <div class="dual-slider">
+          <div class="dual-fill" id="yearFill"></div>
+          <input type="range" id="yearLo" min="2016" max="2025" step="1" value="2016" oninput="onYearChange()">
+          <input type="range" id="yearHi" min="2016" max="2025" step="1" value="2025" oninput="onYearChange()">
+        </div>
+        <span class="ctrl-val" id="yearVal">2016–2025</span>
+      </div>
+      <div class="ctrl-row">
+        <label>Måned</label>
+        <div class="dual-slider">
+          <div class="dual-fill" id="monthFill"></div>
+          <input type="range" id="monthLo" min="6" max="9" step="1" value="6" oninput="onMonthChange()">
+          <input type="range" id="monthHi" min="6" max="9" step="1" value="9" oninput="onMonthChange()">
+        </div>
+        <span class="ctrl-val" id="monthVal">Jun–Sep</span>
+      </div>
+      <div class="ctrl-row">
+        <div class="fly-pill" id="flyPill" onclick="toggleFly()">
+          <span class="pip"></span> Kun flue
+        </div>
+        <div class="fly-pill" id="laksPill" onclick="toggleLaks()">
+          <span class="pip"></span> Kun laks
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="map-panel">
+  <div class="map-header">
+    <span class="map-title" id="mapTitle">🗺 Kart</span>
+    <span class="map-hint">Klikk en sone for å zoome inn</span>
+  </div>
+  <div id="map"></div>
+</div>
+
+<script>
+const NVE_CACHE_URL = 'https://timon70-lab.github.io/elvedata/data/vannforing_sygna.json';
+
+const ZONE_INFO = {
+  'Alle åpne soner': {
+    name: 'Alle åpne soner',
+    desc: 'Hele elva fiskes på ett kort — Søgne- og Songdalselva er ikke delt inn i soner eller vald. Typisk flomelv med lite nedbørsfelt: elva stiger og synker svært raskt, og forholdene er normalt best på 10–25 m³/s. Ved høy vannføring i august/september kan oppgangen av sjøørret være svært god.',
+    redskap: 'Flue, sluk, mark (markforbud i deler av sesongen)',
+    sesong: '15. juli – 31. august',
+    kortUrl: 'http://www.scanatura.no/webshop/?lang=1',
+    merknader: 'Kort fra Søgne- og Songdalen Elveeigarlag. Ikke lov å fiske overalt — tillatte fiskeplasser er merket i eget kart. Båtfiske kun for rettighetshavere. Se lakseelver.no for gjeldende regler.'
+  },
+};
+
+const FLOW_LOOKUP = {"2025-06-01": 2, "2025-06-02": 2, "2025-06-03": 2, "2025-06-04": 2, "2025-06-05": 3, "2025-06-06": 3, "2025-06-07": 7, "2025-06-08": 4, "2025-06-09": 3, "2025-06-10": 2, "2025-06-11": 3, "2025-06-12": 2, "2025-06-13": 2, "2025-06-14": 1, "2025-06-15": 1, "2025-06-16": 1, "2025-06-17": 1, "2025-06-18": 1, "2025-06-19": 1, "2025-06-20": 1, "2025-06-21": 1, "2025-06-22": 1, "2025-06-23": 1, "2025-06-24": 1, "2025-06-25": 1, "2025-06-26": 1, "2025-06-27": 1, "2025-06-28": 1, "2025-06-29": 1, "2025-06-30": 1, "2025-07-01": 1, "2025-07-02": 1, "2025-07-03": 1, "2025-07-04": 1, "2025-07-05": 1, "2025-07-06": 2, "2025-07-07": 2, "2025-07-08": 1, "2025-07-09": 1, "2025-07-10": 1, "2025-07-11": 1, "2025-07-12": 1, "2025-07-13": 1, "2025-07-14": 1, "2025-07-15": 1, "2025-07-16": 1, "2025-07-17": 1, "2025-07-18": 1, "2025-07-19": 1, "2025-07-20": 1, "2025-07-21": 1, "2025-07-22": 1, "2025-07-23": 2, "2025-07-24": 2, "2025-07-25": 1, "2025-07-26": 1, "2025-07-27": 1, "2025-07-28": 1, "2025-07-29": 1, "2025-07-30": 1, "2025-07-31": 1, "2025-08-01": 1, "2025-08-02": 1, "2025-08-03": 2, "2025-08-04": 5, "2025-08-05": 13, "2025-08-06": 10, "2025-08-07": 6, "2025-08-08": 5, "2025-08-09": 4, "2025-08-10": 3, "2025-08-11": 3, "2025-08-12": 2, "2025-08-13": 2, "2025-08-14": 2, "2025-08-15": 2, "2025-08-16": 1, "2025-08-17": 1, "2025-08-18": 1, "2025-08-19": 1, "2025-08-20": 1, "2025-08-21": 1, "2025-08-22": 1, "2025-08-23": 1, "2025-08-24": 1, "2025-08-25": 1, "2025-08-26": 1, "2025-08-27": 1, "2025-08-28": 1, "2025-08-29": 1, "2025-08-30": 2, "2025-08-31": 2, "2025-09-01": 6, "2025-09-02": 19, "2025-09-03": 22, "2025-09-04": 58, "2025-09-05": 43, "2025-09-06": 22, "2025-09-07": 13, "2025-09-08": 9, "2025-09-09": 7, "2025-09-10": 6, "2025-09-11": 13, "2025-09-12": 15, "2025-09-13": 26, "2025-09-14": 37, "2025-09-15": 42, "2025-09-16": 51, "2025-09-17": 25, "2025-09-18": 15, "2025-09-19": 11, "2025-09-20": 9, "2025-09-21": 8, "2025-09-22": 6, "2025-09-23": 5, "2025-09-24": 4, "2025-09-25": 4, "2025-09-26": 3, "2025-09-27": 3, "2025-09-28": 3, "2025-09-29": 2, "2025-09-30": 3};
+const MONTH_NAMES = {6:'Jun', 7:'Jul', 8:'Aug', 9:'Sep'};
+const MONTH_NAMES_FULL = ['januar','februar','mars','april','mai','juni','juli','august','september','oktober','november','desember'];
+// Normalisering: 90-persentil av rate og volum (ikke absolutt maks)
+const P90_RATE_ALL = 7.0,  P90_VOL_ALL = 301.0; const P90_RATE_FLY = 5.25,  P90_VOL_FLY = 218.1; const MAX_RATE_ALL = 7.02,  MAX_VOL_ALL = 418; const MAX_RATE_FLY = 5.55,  MAX_VOL_FLY = 255;
+const P90_RATE_LAKS = 2.68,  P90_VOL_LAKS = 103.2; const P90_RATE_LAKS_FLY = 1.63,  P90_VOL_LAKS_FLY = 54.5; const MAX_RATE_LAKS = 2.87,  MAX_VOL_LAKS = 186; const MAX_RATE_LAKS_FLY = 2.07,  MAX_VOL_LAKS_FLY = 104;
+
+const ZONE_COORDS = {
+  'Alle åpne soner': {s:[58.076907,7.816012], e:[58.218747,7.759384]},
+};
+
+
+const ALL_DATA = {"2016": {"6": {"0": {"Alle åpne soner": 1}, "10": {"Alle åpne soner": 1}, "12": {"Alle åpne soner": 1}, "4": {"Alle åpne soner": 3}}, "7": {"0": {"Alle åpne soner": 3}, "14": {"Alle åpne soner": 3}, "16": {"Alle åpne soner": 6}, "18": {"Alle åpne soner": 4}, "2": {"Alle åpne soner": 3}, "6": {"Alle åpne soner": 3}, "8": {"Alle åpne soner": 10}}, "8": {"0": {"Alle åpne soner": 2}, "10": {"Alle åpne soner": 9}, "2": {"Alle åpne soner": 22}, "4": {"Alle åpne soner": 6}, "6": {"Alle åpne soner": 12}, "8": {"Alle åpne soner": 10}}, "9": {"0": {"Alle åpne soner": 6}, "2": {"Alle åpne soner": 37}, "4": {"Alle åpne soner": 36}}}, "2017": {"6": {"4": {"Alle åpne soner": 1}}, "7": {"0": {"Alle åpne soner": 4}, "2": {"Alle åpne soner": 4}, "6": {"Alle åpne soner": 2}, "8": {"Alle åpne soner": 4}}, "8": {"10": {"Alle åpne soner": 20}, "12": {"Alle åpne soner": 29}, "14": {"Alle åpne soner": 11}, "18": {"Alle åpne soner": 19}, "2": {"Alle åpne soner": 13}, "4": {"Alle åpne soner": 14}, "6": {"Alle åpne soner": 9}, "8": {"Alle åpne soner": 26}}, "9": {"10": {"Alle åpne soner": 15}, "12": {"Alle åpne soner": 63}, "14": {"Alle åpne soner": 22}, "18": {"Alle åpne soner": 55}, "2": {"Alle åpne soner": 2}, "4": {"Alle åpne soner": 4}, "6": {"Alle åpne soner": 17}, "8": {"Alle åpne soner": 81}}}, "2018": {"8": {"2": {"Alle åpne soner": 5}, "4": {"Alle åpne soner": 1}}, "9": {"12": {"Alle åpne soner": 49}, "16": {"Alle åpne soner": 37}, "18": {"Alle åpne soner": 95}, "2": {"Alle åpne soner": 4}, "4": {"Alle åpne soner": 3}, "6": {"Alle åpne soner": 9}, "8": {"Alle åpne soner": 9}}}, "2019": {"6": {"10": {"Alle åpne soner": 5}, "8": {"Alle åpne soner": 3}}, "7": {"0": {"Alle åpne soner": 1}, "2": {"Alle åpne soner": 2}, "6": {"Alle åpne soner": 2}, "8": {"Alle åpne soner": 4}}, "8": {"12": {"Alle åpne soner": 14}, "14": {"Alle åpne soner": 39}, "18": {"Alle åpne soner": 63}, "2": {"Alle åpne soner": 3}, "4": {"Alle åpne soner": 13}, "6": {"Alle åpne soner": 3}, "8": {"Alle åpne soner": 29}}, "9": {"10": {"Alle åpne soner": 46}, "18": {"Alle åpne soner": 53}, "2": {"Alle åpne soner": 13}, "4": {"Alle åpne soner": 16}, "6": {"Alle åpne soner": 22}, "8": {"Alle åpne soner": 9}}}, "2020": {"6": {"12": {"Alle åpne soner": 2}}, "7": {"10": {"Alle åpne soner": 1}, "12": {"Alle åpne soner": 8}, "14": {"Alle åpne soner": 11}, "16": {"Alle åpne soner": 5}, "18": {"Alle åpne soner": 27}, "2": {"Alle åpne soner": 12}, "4": {"Alle åpne soner": 2}, "6": {"Alle åpne soner": 16}, "8": {"Alle åpne soner": 3}}, "8": {"10": {"Alle åpne soner": 9}, "2": {"Alle åpne soner": 8}, "4": {"Alle åpne soner": 6}, "6": {"Alle åpne soner": 15}, "8": {"Alle åpne soner": 4}}, "9": {"0": {"Alle åpne soner": 1}, "12": {"Alle åpne soner": 15}, "18": {"Alle åpne soner": 49}, "2": {"Alle åpne soner": 10}, "4": {"Alle åpne soner": 28}, "6": {"Alle åpne soner": 81}, "8": {"Alle åpne soner": 57}}}, "2021": {"6": {"0": {"Alle åpne soner": 3}, "4": {"Alle åpne soner": 1}}, "7": {"0": {"Alle åpne soner": 3}, "10": {"Alle åpne soner": 5}, "4": {"Alle åpne soner": 2}, "6": {"Alle åpne soner": 7}, "8": {"Alle åpne soner": 1}}, "8": {"0": {"Alle åpne soner": 1}, "2": {"Alle åpne soner": 3}, "4": {"Alle åpne soner": 4}, "6": {"Alle åpne soner": 5}, "8": {"Alle åpne soner": 10}}, "9": {"0": {"Alle åpne soner": 3}}}, "2022": {"7": {"0": {"Alle åpne soner": 1}}, "8": {"0": {"Alle åpne soner": 1}, "12": {"Alle åpne soner": 1}, "2": {"Alle åpne soner": 9}, "4": {"Alle åpne soner": 3}}, "9": {"4": {"Alle åpne soner": 4}, "8": {"Alle åpne soner": 11}}}, "2023": {"6": {"0": {"Alle åpne soner": 1}}, "7": {"10": {"Alle åpne soner": 3}, "16": {"Alle åpne soner": 1}, "18": {"Alle åpne soner": 6}, "4": {"Alle åpne soner": 2}}, "8": {"0": {"Alle åpne soner": 1}, "10": {"Alle åpne soner": 2}, "16": {"Alle åpne soner": 2}, "2": {"Alle åpne soner": 1}, "4": {"Alle åpne soner": 4}}, "9": {"0": {"Alle åpne soner": 1}}}, "2024": {"6": {"14": {"Alle åpne soner": 1}, "18": {"Alle åpne soner": 2}, "8": {"Alle åpne soner": 1}}, "7": {"12": {"Alle åpne soner": 1}, "14": {"Alle åpne soner": 1}, "6": {"Alle åpne soner": 4}, "8": {"Alle åpne soner": 3}}, "8": {"10": {"Alle åpne soner": 3}, "12": {"Alle åpne soner": 7}, "14": {"Alle åpne soner": 7}, "18": {"Alle åpne soner": 23}, "4": {"Alle åpne soner": 4}, "6": {"Alle åpne soner": 2}}, "9": {"10": {"Alle åpne soner": 13}, "16": {"Alle åpne soner": 5}, "4": {"Alle åpne soner": 8}, "8": {"Alle åpne soner": 8}}}, "2025": {"7": {"2": {"Alle åpne soner": 1}}, "8": {"12": {"Alle åpne soner": 6}, "6": {"Alle åpne soner": 1}, "8": {"Alle åpne soner": 3}}, "9": {"12": {"Alle åpne soner": 7}, "14": {"Alle åpne soner": 1}, "18": {"Alle åpne soner": 22}, "6": {"Alle åpne soner": 2}, "8": {"Alle åpne soner": 2}}}};
+const DAYS_DATA = {"2016": {"6": {"0": 13, "10": 1, "12": 1, "2": 8, "4": 5, "6": 2}, "7": {"0": 11, "14": 1, "16": 1, "18": 1, "2": 13, "4": 2, "6": 1, "8": 1}, "8": {"0": 7, "10": 1, "2": 15, "4": 4, "6": 3, "8": 1}, "9": {"0": 24, "2": 4, "4": 2}}, "2017": {"6": {"0": 17, "10": 1, "16": 1, "2": 4, "4": 4, "6": 3}, "7": {"0": 24, "2": 5, "6": 1, "8": 1}, "8": {"10": 3, "12": 3, "14": 1, "18": 2, "2": 10, "4": 5, "6": 4, "8": 3}, "9": {"0": 3, "10": 1, "12": 4, "14": 1, "18": 7, "2": 2, "4": 2, "6": 3, "8": 7}}, "2018": {"6": {"0": 29, "2": 1}, "7": {"0": 31}, "8": {"0": 22, "2": 8, "4": 1}, "9": {"0": 5, "12": 5, "16": 3, "18": 9, "2": 2, "4": 2, "6": 3, "8": 1}}, "2019": {"6": {"0": 2, "10": 2, "12": 1, "14": 1, "18": 2, "2": 11, "4": 8, "6": 1, "8": 2}, "7": {"0": 23, "2": 4, "4": 1, "6": 2, "8": 1}, "8": {"0": 1, "12": 2, "14": 3, "18": 9, "2": 7, "4": 5, "6": 1, "8": 3}, "9": {"10": 5, "18": 4, "2": 11, "4": 3, "6": 5, "8": 2}}, "2020": {"6": {"0": 17, "12": 2, "16": 1, "2": 7, "4": 2, "6": 1}, "7": {"10": 1, "12": 2, "14": 1, "16": 1, "18": 5, "2": 13, "4": 4, "6": 3, "8": 1}, "8": {"0": 7, "10": 1, "2": 13, "4": 5, "6": 4, "8": 1}, "9": {"0": 8, "12": 2, "18": 1, "2": 11, "4": 4, "6": 3, "8": 1}}, "2021": {"6": {"0": 10, "2": 16, "4": 2, "6": 1, "8": 1}, "7": {"0": 17, "10": 2, "2": 4, "4": 3, "6": 4, "8": 1}, "8": {"0": 13, "2": 8, "4": 7, "6": 2, "8": 1}, "9": {"0": 27, "4": 1, "6": 2}}, "2022": {"6": {"0": 30}, "7": {"0": 31}, "8": {"0": 21, "12": 1, "2": 8, "4": 1}, "9": {"0": 18, "10": 1, "12": 1, "18": 2, "2": 4, "4": 2, "8": 2}}, "2023": {"6": {"0": 30}, "7": {"0": 12, "10": 3, "14": 1, "16": 1, "18": 1, "2": 7, "4": 4, "6": 2}, "8": {"0": 14, "10": 1, "16": 1, "2": 8, "4": 6, "6": 1}, "9": {"0": 12, "10": 2, "14": 1, "16": 1, "18": 7, "2": 4, "4": 1, "6": 1, "8": 1}}, "2024": {"6": {"0": 2, "14": 1, "18": 3, "2": 16, "4": 6, "6": 1, "8": 1}, "7": {"0": 4, "12": 1, "14": 1, "16": 1, "2": 5, "4": 11, "6": 5, "8": 3}, "8": {"0": 6, "10": 1, "12": 1, "14": 1, "18": 7, "2": 7, "4": 5, "6": 2, "8": 1}, "9": {"10": 2, "16": 1, "2": 12, "4": 9, "6": 4, "8": 2}}, "2025": {"6": {"0": 21, "2": 7, "4": 1, "6": 1}, "7": {"0": 30, "2": 1}, "8": {"0": 21, "12": 1, "2": 5, "4": 2, "6": 1, "8": 1}, "9": {"10": 1, "12": 2, "14": 2, "18": 10, "2": 6, "4": 3, "6": 4, "8": 2}}};
+const FLY_DATA = {"2016": {"6": {"10": {"Alle åpne soner": 1}, "12": {"Alle åpne soner": 1}, "4": {"Alle åpne soner": 1}}, "7": {"14": {"Alle åpne soner": 3}, "16": {"Alle åpne soner": 2}, "18": {"Alle åpne soner": 1}, "2": {"Alle åpne soner": 1}, "6": {"Alle åpne soner": 2}, "8": {"Alle åpne soner": 7}}, "8": {"10": {"Alle åpne soner": 1}, "2": {"Alle åpne soner": 10}, "4": {"Alle åpne soner": 1}, "6": {"Alle åpne soner": 5}, "8": {"Alle åpne soner": 4}}, "9": {"0": {"Alle åpne soner": 5}, "2": {"Alle åpne soner": 13}, "4": {"Alle åpne soner": 28}}}, "2017": {"7": {"0": {"Alle åpne soner": 1}, "2": {"Alle åpne soner": 2}, "8": {"Alle åpne soner": 2}}, "8": {"10": {"Alle åpne soner": 13}, "12": {"Alle åpne soner": 17}, "14": {"Alle åpne soner": 6}, "18": {"Alle åpne soner": 4}, "2": {"Alle åpne soner": 7}, "4": {"Alle åpne soner": 7}, "6": {"Alle åpne soner": 2}, "8": {"Alle åpne soner": 15}}, "9": {"10": {"Alle åpne soner": 14}, "12": {"Alle åpne soner": 61}, "14": {"Alle åpne soner": 20}, "18": {"Alle åpne soner": 32}, "2": {"Alle åpne soner": 1}, "4": {"Alle åpne soner": 4}, "6": {"Alle åpne soner": 9}, "8": {"Alle åpne soner": 70}}}, "2018": {"8": {"2": {"Alle åpne soner": 2}, "4": {"Alle åpne soner": 1}}, "9": {"12": {"Alle åpne soner": 39}, "16": {"Alle åpne soner": 26}, "18": {"Alle åpne soner": 71}, "2": {"Alle åpne soner": 3}, "4": {"Alle åpne soner": 3}, "6": {"Alle åpne soner": 7}, "8": {"Alle åpne soner": 7}}}, "2019": {"6": {"8": {"Alle åpne soner": 2}}, "7": {"2": {"Alle åpne soner": 1}, "6": {"Alle åpne soner": 2}, "8": {"Alle åpne soner": 3}}, "8": {"12": {"Alle åpne soner": 8}, "14": {"Alle åpne soner": 27}, "18": {"Alle åpne soner": 27}, "2": {"Alle åpne soner": 3}, "4": {"Alle åpne soner": 10}, "6": {"Alle åpne soner": 2}, "8": {"Alle åpne soner": 12}}, "9": {"10": {"Alle åpne soner": 35}, "18": {"Alle åpne soner": 34}, "2": {"Alle åpne soner": 11}, "4": {"Alle åpne soner": 15}, "6": {"Alle åpne soner": 21}, "8": {"Alle åpne soner": 9}}}, "2020": {"6": {"12": {"Alle åpne soner": 1}}, "7": {"12": {"Alle åpne soner": 5}, "14": {"Alle åpne soner": 8}, "16": {"Alle åpne soner": 5}, "18": {"Alle åpne soner": 10}, "2": {"Alle åpne soner": 2}, "6": {"Alle åpne soner": 7}, "8": {"Alle åpne soner": 1}}, "8": {"10": {"Alle åpne soner": 3}, "2": {"Alle åpne soner": 3}, "4": {"Alle åpne soner": 1}, "6": {"Alle åpne soner": 7}, "8": {"Alle åpne soner": 2}}, "9": {"0": {"Alle åpne soner": 1}, "12": {"Alle åpne soner": 14}, "18": {"Alle åpne soner": 47}, "2": {"Alle åpne soner": 10}, "4": {"Alle åpne soner": 24}, "6": {"Alle åpne soner": 69}, "8": {"Alle åpne soner": 50}}}, "2021": {"7": {"0": {"Alle åpne soner": 1}, "10": {"Alle åpne soner": 3}, "6": {"Alle åpne soner": 4}}, "8": {"2": {"Alle åpne soner": 2}, "4": {"Alle åpne soner": 1}, "6": {"Alle åpne soner": 1}, "8": {"Alle åpne soner": 7}}, "9": {"0": {"Alle åpne soner": 3}}}, "2022": {"7": {"0": {"Alle åpne soner": 1}}, "8": {"0": {"Alle åpne soner": 1}, "12": {"Alle åpne soner": 1}, "2": {"Alle åpne soner": 6}, "4": {"Alle åpne soner": 3}}, "9": {"4": {"Alle åpne soner": 4}, "8": {"Alle åpne soner": 11}}}, "2023": {"6": {"0": {"Alle åpne soner": 1}}, "7": {"10": {"Alle åpne soner": 2}, "16": {"Alle åpne soner": 1}, "18": {"Alle åpne soner": 5}, "4": {"Alle åpne soner": 1}}, "8": {"10": {"Alle åpne soner": 2}, "16": {"Alle åpne soner": 2}, "2": {"Alle åpne soner": 1}, "4": {"Alle åpne soner": 4}}, "9": {"0": {"Alle åpne soner": 1}}}, "2024": {"6": {"14": {"Alle åpne soner": 1}, "18": {"Alle åpne soner": 1}, "8": {"Alle åpne soner": 1}}, "7": {"12": {"Alle åpne soner": 1}, "14": {"Alle åpne soner": 1}, "6": {"Alle åpne soner": 3}, "8": {"Alle åpne soner": 3}}, "8": {"10": {"Alle åpne soner": 3}, "12": {"Alle åpne soner": 3}, "14": {"Alle åpne soner": 6}, "18": {"Alle åpne soner": 10}}, "9": {"10": {"Alle åpne soner": 12}, "16": {"Alle åpne soner": 3}, "4": {"Alle åpne soner": 7}, "8": {"Alle åpne soner": 3}}}, "2025": {"7": {"2": {"Alle åpne soner": 1}}, "8": {"12": {"Alle åpne soner": 4}, "6": {"Alle åpne soner": 1}, "8": {"Alle åpne soner": 3}}, "9": {"12": {"Alle åpne soner": 6}, "14": {"Alle åpne soner": 1}, "18": {"Alle åpne soner": 13}, "6": {"Alle åpne soner": 2}, "8": {"Alle åpne soner": 2}}}};
+const LAKS_DATA = {"2016": {"7": {"0": {"Alle åpne soner": 2}, "16": {"Alle åpne soner": 3}, "18": {"Alle åpne soner": 2}, "2": {"Alle åpne soner": 3}, "6": {"Alle åpne soner": 2}, "8": {"Alle åpne soner": 6}}, "8": {"10": {"Alle åpne soner": 6}, "2": {"Alle åpne soner": 6}, "4": {"Alle åpne soner": 2}, "6": {"Alle åpne soner": 6}, "8": {"Alle åpne soner": 5}}, "9": {"0": {"Alle åpne soner": 1}, "2": {"Alle åpne soner": 10}, "4": {"Alle åpne soner": 5}}}, "2017": {"7": {"0": {"Alle åpne soner": 3}, "2": {"Alle åpne soner": 2}, "6": {"Alle åpne soner": 1}, "8": {"Alle åpne soner": 2}}, "8": {"10": {"Alle åpne soner": 12}, "12": {"Alle åpne soner": 15}, "14": {"Alle åpne soner": 8}, "18": {"Alle åpne soner": 11}, "2": {"Alle åpne soner": 9}, "4": {"Alle åpne soner": 4}, "6": {"Alle åpne soner": 6}, "8": {"Alle åpne soner": 17}}, "9": {"10": {"Alle åpne soner": 3}, "12": {"Alle åpne soner": 8}, "14": {"Alle åpne soner": 9}, "18": {"Alle åpne soner": 20}, "2": {"Alle åpne soner": 1}, "4": {"Alle åpne soner": 1}, "6": {"Alle åpne soner": 7}, "8": {"Alle åpne soner": 13}}}, "2018": {"8": {"2": {"Alle åpne soner": 1}, "4": {"Alle åpne soner": 1}}, "9": {"12": {"Alle åpne soner": 21}, "16": {"Alle åpne soner": 15}, "18": {"Alle åpne soner": 49}, "2": {"Alle åpne soner": 2}, "6": {"Alle åpne soner": 2}, "8": {"Alle åpne soner": 4}}}, "2019": {"6": {"10": {"Alle åpne soner": 1}, "8": {"Alle åpne soner": 3}}, "7": {"0": {"Alle åpne soner": 1}, "2": {"Alle åpne soner": 1}, "6": {"Alle åpne soner": 1}}, "8": {"12": {"Alle åpne soner": 4}, "14": {"Alle åpne soner": 15}, "18": {"Alle åpne soner": 22}, "8": {"Alle åpne soner": 10}}, "9": {"10": {"Alle åpne soner": 7}, "18": {"Alle åpne soner": 17}, "4": {"Alle åpne soner": 2}, "6": {"Alle åpne soner": 6}, "8": {"Alle åpne soner": 2}}}, "2020": {"6": {"12": {"Alle åpne soner": 1}}, "7": {"12": {"Alle åpne soner": 2}, "14": {"Alle åpne soner": 7}, "16": {"Alle åpne soner": 4}, "18": {"Alle åpne soner": 17}, "2": {"Alle åpne soner": 7}, "4": {"Alle åpne soner": 2}, "6": {"Alle åpne soner": 11}, "8": {"Alle åpne soner": 2}}, "8": {"10": {"Alle åpne soner": 6}, "2": {"Alle åpne soner": 4}, "4": {"Alle åpne soner": 4}, "6": {"Alle åpne soner": 7}, "8": {"Alle åpne soner": 4}}, "9": {"12": {"Alle åpne soner": 7}, "18": {"Alle åpne soner": 27}, "4": {"Alle åpne soner": 3}, "6": {"Alle åpne soner": 18}, "8": {"Alle åpne soner": 14}}}, "2021": {"6": {"0": {"Alle åpne soner": 1}}, "7": {"0": {"Alle åpne soner": 2}, "10": {"Alle åpne soner": 3}, "4": {"Alle åpne soner": 2}, "6": {"Alle åpne soner": 3}, "8": {"Alle åpne soner": 1}}, "8": {"2": {"Alle åpne soner": 1}, "4": {"Alle åpne soner": 3}, "6": {"Alle åpne soner": 3}, "8": {"Alle åpne soner": 4}}}, "2022": {"8": {"12": {"Alle åpne soner": 1}, "2": {"Alle åpne soner": 2}, "4": {"Alle åpne soner": 1}}}, "2023": {"7": {"10": {"Alle åpne soner": 1}, "18": {"Alle åpne soner": 4}, "4": {"Alle åpne soner": 2}}, "8": {"10": {"Alle åpne soner": 2}, "16": {"Alle åpne soner": 2}, "2": {"Alle åpne soner": 1}, "4": {"Alle åpne soner": 3}}}, "2024": {"6": {"14": {"Alle åpne soner": 1}, "18": {"Alle åpne soner": 1}}, "7": {"8": {"Alle åpne soner": 2}}, "8": {"12": {"Alle åpne soner": 4}, "14": {"Alle åpne soner": 3}, "18": {"Alle åpne soner": 14}, "4": {"Alle åpne soner": 3}, "6": {"Alle åpne soner": 2}}, "9": {"10": {"Alle åpne soner": 3}, "4": {"Alle åpne soner": 2}, "8": {"Alle åpne soner": 5}}}, "2025": {"9": {"12": {"Alle åpne soner": 2}, "18": {"Alle åpne soner": 2}}}};
+const LAKS_FLY_DATA = {"2016": {"7": {"16": {"Alle åpne soner": 1}, "2": {"Alle åpne soner": 1}, "6": {"Alle åpne soner": 2}, "8": {"Alle åpne soner": 4}}, "8": {"10": {"Alle åpne soner": 1}, "2": {"Alle åpne soner": 1}, "6": {"Alle åpne soner": 2}}, "9": {"0": {"Alle åpne soner": 1}, "2": {"Alle åpne soner": 1}, "4": {"Alle åpne soner": 4}}}, "2017": {"7": {"0": {"Alle åpne soner": 1}, "2": {"Alle åpne soner": 1}, "8": {"Alle åpne soner": 1}}, "8": {"10": {"Alle åpne soner": 8}, "12": {"Alle åpne soner": 9}, "14": {"Alle åpne soner": 4}, "18": {"Alle åpne soner": 2}, "2": {"Alle åpne soner": 4}, "4": {"Alle åpne soner": 1}, "6": {"Alle åpne soner": 1}, "8": {"Alle åpne soner": 8}}, "9": {"10": {"Alle åpne soner": 2}, "12": {"Alle åpne soner": 8}, "14": {"Alle åpne soner": 7}, "18": {"Alle åpne soner": 9}, "2": {"Alle åpne soner": 1}, "4": {"Alle åpne soner": 1}, "6": {"Alle åpne soner": 2}, "8": {"Alle åpne soner": 9}}}, "2018": {"8": {"2": {"Alle åpne soner": 1}, "4": {"Alle åpne soner": 1}}, "9": {"12": {"Alle åpne soner": 16}, "16": {"Alle åpne soner": 11}, "18": {"Alle åpne soner": 35}, "2": {"Alle åpne soner": 2}, "6": {"Alle åpne soner": 2}, "8": {"Alle åpne soner": 3}}}, "2019": {"6": {"8": {"Alle åpne soner": 2}}, "7": {"6": {"Alle åpne soner": 1}}, "8": {"12": {"Alle åpne soner": 1}, "14": {"Alle åpne soner": 11}, "18": {"Alle åpne soner": 8}, "8": {"Alle åpne soner": 2}}, "9": {"10": {"Alle åpne soner": 5}, "18": {"Alle åpne soner": 8}, "4": {"Alle åpne soner": 1}, "6": {"Alle åpne soner": 6}, "8": {"Alle åpne soner": 2}}}, "2020": {"6": {"12": {"Alle åpne soner": 1}}, "7": {"12": {"Alle åpne soner": 1}, "14": {"Alle åpne soner": 6}, "16": {"Alle åpne soner": 4}, "18": {"Alle åpne soner": 5}, "2": {"Alle åpne soner": 1}, "6": {"Alle åpne soner": 5}, "8": {"Alle åpne soner": 1}}, "8": {"10": {"Alle åpne soner": 2}, "2": {"Alle åpne soner": 1}, "6": {"Alle åpne soner": 3}, "8": {"Alle åpne soner": 2}}, "9": {"12": {"Alle åpne soner": 6}, "18": {"Alle åpne soner": 27}, "4": {"Alle åpne soner": 2}, "6": {"Alle åpne soner": 11}, "8": {"Alle åpne soner": 10}}}, "2021": {"7": {"10": {"Alle åpne soner": 2}}, "8": {"8": {"Alle åpne soner": 2}}}, "2022": {"8": {"12": {"Alle åpne soner": 1}, "2": {"Alle åpne soner": 1}, "4": {"Alle åpne soner": 1}}}, "2023": {"7": {"18": {"Alle åpne soner": 3}, "4": {"Alle åpne soner": 1}}, "8": {"10": {"Alle åpne soner": 2}, "16": {"Alle åpne soner": 2}, "2": {"Alle åpne soner": 1}, "4": {"Alle åpne soner": 3}}}, "2024": {"6": {"14": {"Alle åpne soner": 1}}, "7": {"8": {"Alle åpne soner": 2}}, "8": {"12": {"Alle åpne soner": 1}, "14": {"Alle åpne soner": 2}, "18": {"Alle åpne soner": 6}}, "9": {"10": {"Alle åpne soner": 2}, "4": {"Alle åpne soner": 2}, "8": {"Alle åpne soner": 1}}}, "2025": {"9": {"12": {"Alle åpne soner": 2}, "18": {"Alle åpne soner": 1}}}};
+const ZONES = ['Alle åpne soner'];
+
+function zoneLabel(zone) {
+  return 'S';
+}
+
+
+const BILDE_BASE = 'https://timon70-lab.github.io/elvedata/bilder/sygna/';
+const PHOTOS_URL = 'https://timon70-lab.github.io/elvedata/data/photos_sygna.json';
+
+/* ---------- Sentral konfig (data/config.json) — scoringsparametre ---------- */
+const PRICES = {"Alle åpne soner": {"dogn": 100, "sesong": 800}};
+const BOOM_DAYS = {"Alle åpne soner": {"date": "2020-09-26", "count": 57, "flow": 9}};
+let SCORE_CFG = { rate: 0.8, vol: 0.2, shrinkC: 15, knee: 80 };   // fallback hvis config.json ikke kan hentes
+let SPARK_CFG = { max: 5.2, normal: 2.3 };   // fallback: P75 / median sesongvannføring
+fetch('https://timon70-lab.github.io/elvedata/data/config.json', { cache: 'no-cache' })
+  .then(r => r.ok ? r.json() : null)
+  .then(cfg => {
+    const w = cfg && cfg.score && (cfg.score.sygna || cfg.score.default);
+    if (w && isFinite(w.rateWeight) && isFinite(w.volWeight)) {
+      SCORE_CFG = {
+        rate: w.rateWeight,
+        vol: w.volWeight,
+        shrinkC: isFinite(w.shrinkC) ? w.shrinkC : 15,
+        knee: isFinite(w.knee) ? w.knee : 80
+      };
+      const sp = cfg && cfg.sparkline && (cfg.sparkline.sygna || cfg.sparkline.default);
+      if (sp && isFinite(sp.max) && isFinite(sp.normal)) SPARK_CFG = { max: sp.max, normal: sp.normal };
+      try { update(); } catch (e) {}
+    }
+  })
+  .catch(() => {});
+let PHOTOS = [];
+let photoMarkers = [];
+
+const VIDEOS = [];
+let videoMarkers = [];
+
+let activePhoto = null;
+let currentFlow = 2;
+let yearLo = 2016, yearHi = 2025;
+let monthLo = 6, monthHi = 9;
+let flyOnly = false;
+let laksOnly = false;
+function activeData() {
+  return laksOnly ? (flyOnly ? LAKS_FLY_DATA : LAKS_DATA)
+                  : (flyOnly ? FLY_DATA : ALL_DATA);
+}
+function activeConsts() {
+  return laksOnly
+    ? (flyOnly ? {p90Rate:P90_RATE_LAKS_FLY, p90Vol:P90_VOL_LAKS_FLY, maxRate:MAX_RATE_LAKS_FLY, maxVol:MAX_VOL_LAKS_FLY}
+               : {p90Rate:P90_RATE_LAKS, p90Vol:P90_VOL_LAKS, maxRate:MAX_RATE_LAKS, maxVol:MAX_VOL_LAKS})
+    : (flyOnly ? {p90Rate:P90_RATE_FLY, p90Vol:P90_VOL_FLY, maxRate:MAX_RATE_FLY, maxVol:MAX_VOL_FLY}
+               : {p90Rate:P90_RATE_ALL, p90Vol:P90_VOL_ALL, maxRate:MAX_RATE_ALL, maxVol:MAX_VOL_ALL});
+}
+let activeZone = null;
+let map = null;
+let mapLayers = {};
+
+// ── CONTROLS ──────────────────────────────────────────────────────────────
+function onFlowChange(val) {
+  currentFlow = parseInt(val);
+  document.getElementById('flowVal').textContent = (currentFlow >= 18 ? '18+' : currentFlow + '–' + (currentFlow+2)) + ' m³/s';
+  update();
+}
+
+function updateDualFill(loId, hiId, fillId, min, max) {
+  const lo = parseInt(document.getElementById(loId).value);
+  const hi = parseInt(document.getElementById(hiId).value);
+  const pLo = (Math.min(lo,hi) - min) / (max - min) * 100;
+  const pHi = (Math.max(lo,hi) - min) / (max - min) * 100;
+  const f = document.getElementById(fillId);
+  f.style.left = pLo + '%';
+  f.style.width = (pHi - pLo) + '%';
+}
+
+function onYearChange() {
+  yearLo = parseInt(document.getElementById('yearLo').value);
+  yearHi = parseInt(document.getElementById('yearHi').value);
+  const lo = Math.min(yearLo,yearHi), hi = Math.max(yearLo,yearHi);
+  document.getElementById('yearVal').textContent = lo === hi ? String(lo) : lo + '–' + hi;
+  updateDualFill('yearLo','yearHi','yearFill',2016,2025);
+  update();
+}
+
+function onMonthChange() {
+  monthLo = parseInt(document.getElementById('monthLo').value);
+  monthHi = parseInt(document.getElementById('monthHi').value);
+  const lo = Math.min(monthLo,monthHi), hi = Math.max(monthLo,monthHi);
+  document.getElementById('monthVal').textContent = lo === hi ? MONTH_NAMES[lo] : MONTH_NAMES[lo] + '–' + MONTH_NAMES[hi];
+  updateDualFill('monthLo','monthHi','monthFill',6,9);
+  update();
+}
+
+function toggleFly() {
+  flyOnly = !flyOnly;
+  document.getElementById('flyPill').classList.toggle('active', flyOnly);
+  update();
+}
+function toggleLaks() {
+  laksOnly = !laksOnly;
+  document.getElementById('laksPill').classList.toggle('active', laksOnly);
+  update();
+}
+
+// ── SCORES ────────────────────────────────────────────────────────────────
+function computeStats() {
+  const yLo = Math.min(yearLo,yearHi), yHi = Math.max(yearLo,yearHi);
+  const mLo = Math.min(monthLo,monthHi), mHi = Math.max(monthLo,monthHi);
+  const bin = String(currentFlow);
+  const data = activeData();
+
+  let totalCatches = 0, totalDays = 0;
+  for (let y = yLo; y <= yHi; y++) {
+    const yd = data[y], dy = DAYS_DATA[y];
+    for (let m = mLo; m <= mHi; m++) {
+      const ym = yd?.[m], dm = dy?.[m];
+      if (ym?.[bin]) {
+        Object.values(ym[bin]).forEach(v => totalCatches += v);
+      }
+      if (dm?.[bin]) totalDays += dm[bin];
+    }
+  }
+  const perDay = totalDays > 0 ? (totalCatches / totalDays) : 0;
+  return { totalCatches, totalDays, perDay };
+}
+
+function binZoneStats(bin) {
+  // Fangster per sone og antall dager for én bin innenfor valgt år/måned-vindu
+  const data = activeData();
+  const catches = {};
+  ZONES.forEach(z => catches[z] = 0);
+  let days = 0;
+  for (let y = Math.min(yearLo,yearHi); y <= Math.max(yearLo,yearHi); y++) {
+    for (let m = Math.min(monthLo,monthHi); m <= Math.max(monthLo,monthHi); m++) {
+      days += DAYS_DATA[String(y)]?.[String(m)]?.[bin] || 0;
+      const bd = data[String(y)]?.[String(m)]?.[bin];
+      if (!bd) continue;
+      for (const [zone, cnt] of Object.entries(bd)) {
+        if (catches.hasOwnProperty(zone)) catches[zone] += cnt;
+      }
+    }
+  }
+  return { catches, days };
+}
+
+function scaleScore(x, p90, xmax) {
+  // To-segments skala: lineær 0→knee opp til P90, log-komprimert knee→100 mot historisk maks
+  if (x <= 0 || p90 <= 0) return 0;
+  const knee = SCORE_CFG.knee;
+  if (x <= p90) return knee * x / p90;
+  return Math.min(100, knee + (100 - knee) * Math.log(x / p90) / Math.log(Math.max(xmax / p90, 1.001)));
+}
+
+function computeScores() {
+  // Rørledning: glatting (nabobins, vekter 1-2-1) → shrinkage (mot sonens
+  // snittrate i vinduet, styrke shrinkC pseudo-dager) → to-segments skala.
+  // Justerbare parametre (vekting, shrinkC, knee) hentes fra data/config.json.
+  const {p90Rate, p90Vol, maxRate, maxVol} = activeConsts();
+  const data = activeData();
+
+  // Senterbin + nabobins (glatting)
+  const center = binZoneStats(String(currentFlow));
+  const lower  = binZoneStats(String(currentFlow - 2));
+  const upper  = binZoneStats(String(currentFlow + 2));
+  const wC = 2, wN = 1;
+  const poolDays = wC*center.days + (lower.days > 0 ? wN*lower.days : 0) + (upper.days > 0 ? wN*upper.days : 0);
+  if (poolDays === 0) return null;   // ingen observerte dager nær denne vannføringen i vinduet
+  const effDays = poolDays / wC;
+
+  // Prior: sonens snittrate over ALLE vannføringer i valgt vindu
+  const totals = {};
+  ZONES.forEach(z => totals[z] = 0);
+  let allDays = 0;
+  for (let y = Math.min(yearLo,yearHi); y <= Math.max(yearLo,yearHi); y++) {
+    for (let m = Math.min(monthLo,monthHi); m <= Math.max(monthLo,monthHi); m++) {
+      const dm = DAYS_DATA[String(y)]?.[String(m)];
+      if (dm) for (const b of Object.keys(dm)) allDays += dm[b];
+      const md = data[String(y)]?.[String(m)];
+      if (!md) continue;
+      for (const b of Object.keys(md)) {
+        for (const [zone, cnt] of Object.entries(md[b])) {
+          if (totals.hasOwnProperty(zone)) totals[zone] += cnt;
+        }
+      }
+    }
+  }
+
+  const C = SCORE_CFG.shrinkC;
+  const scores = {};
+  ZONES.forEach(z => {
+    const vol    = center.catches[z];
+    const pooled = wC*center.catches[z] + (lower.days > 0 ? wN*lower.catches[z] : 0) + (upper.days > 0 ? wN*upper.catches[z] : 0);
+    const smRate = pooled / poolDays;
+    const prior  = allDays > 0 ? totals[z] / allDays : 0;
+    const shrunk = (smRate * effDays + C * prior) / (effDays + C);
+    const combined = Math.round(
+      scaleScore(shrunk, p90Rate, maxRate) * SCORE_CFG.rate +
+      scaleScore(vol,    p90Vol,  maxVol)  * SCORE_CFG.vol
+    );
+    scores[z] = { score: combined, catches: vol, winTotal: totals[z] };
+  });
+  return scores;
+}
+
+function scoreColor(s) {
+  const k = SCORE_CFG.knee / 100;   // terskler skalert til knee (80 => 56/36/20)
+  if (s >= 70*k) return '#38a169';
+  if (s >= 45*k) return '#3182ce';
+  if (s >= 25*k) return '#ed8936';
+  return '#e53e3e';
+}
+
+function drawRing(score, color) {
+  const r=20, c=24, circ=+(2*Math.PI*r).toFixed(1), off=+(circ-(score/100)*circ).toFixed(1);
+  return '<svg width="48" height="48" viewBox="0 0 48 48">'
+    +'<circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="none" stroke="#e2e8f0" stroke-width="5"/>'
+    +'<circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="5"'
+    +' stroke-linecap="round" stroke-dasharray="'+circ+'" stroke-dashoffset="'+off+'"'
+    +' transform="rotate(-90 '+c+' '+c+')"/></svg>';
+}
+
+function drawMiniRing(score, color) {
+  const r=12, c=16, circ=+(2*Math.PI*r).toFixed(1), off=+(circ-(score/100)*circ).toFixed(1);
+  return '<svg width="32" height="32" viewBox="0 0 32 32">'
+    +'<circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="none" stroke="#e2e8f0" stroke-width="4"/>'
+    +'<circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="4"'
+    +' stroke-linecap="round" stroke-dasharray="'+circ+'" stroke-dashoffset="'+off+'"'
+    +' transform="rotate(-90 '+c+' '+c+')"/>'
+    +'<text x="'+c+'" y="'+(c+3.5)+'" text-anchor="middle" font-size="10" font-weight="800" fill="'+color+'">'+score+'</text>'
+    +'</svg>';
+}
+
+function computeZoneBinScores(zone) {
+  // Beregner sonens score for HVER vannføringsbin i valgt år/måned-vindu.
+  // Brukes til «beste vannføring for denne sonen»-visningen i infopanelet —
+  // avhenger bevisst KUN av år/måned-sliderne, ikke av vannførings-slideren.
+  const {p90Rate, p90Vol, maxRate, maxVol} = activeConsts();
+  const data = activeData();
+  const C = SCORE_CFG.shrinkC;
+  const wC = 2, wN = 1;
+  const yLo = Math.min(yearLo,yearHi), yHi = Math.max(yearLo,yearHi);
+  const mLo = Math.min(monthLo,monthHi), mHi = Math.max(monthLo,monthHi);
+
+  const binSet = new Set();
+  let allDays = 0, zoneTotal = 0;
+  for (let y = yLo; y <= yHi; y++) {
+    for (let m = mLo; m <= mHi; m++) {
+      const dm = DAYS_DATA[String(y)]?.[String(m)];
+      if (dm) for (const b of Object.keys(dm)) { binSet.add(b); allDays += dm[b]; }
+      const md = data[String(y)]?.[String(m)];
+      if (md) for (const b of Object.keys(md)) { if (md[b][zone]) zoneTotal += md[b][zone]; }
+    }
+  }
+  const prior = allDays > 0 ? zoneTotal / allDays : 0;
+
+  const results = [];
+  binSet.forEach(binStr => {
+    const bin = parseInt(binStr);
+    const center = binZoneStats(binStr);
+    const lower  = binZoneStats(String(bin - 2));
+    const upper  = binZoneStats(String(bin + 2));
+    const poolDays = wC*center.days + (lower.days > 0 ? wN*lower.days : 0) + (upper.days > 0 ? wN*upper.days : 0);
+    if (poolDays === 0) return;
+    const effDays = poolDays / wC;
+    const vol = center.catches[zone] || 0;
+    const pooled = wC*vol + (lower.days > 0 ? wN*(lower.catches[zone]||0) : 0) + (upper.days > 0 ? wN*(upper.catches[zone]||0) : 0);
+    const smRate = pooled / poolDays;
+    const shrunk = (smRate * effDays + C * prior) / (effDays + C);
+    const score = Math.round(
+      scaleScore(shrunk, p90Rate, maxRate) * SCORE_CFG.rate +
+      scaleScore(vol,    p90Vol,  maxVol)  * SCORE_CFG.vol
+    );
+    results.push({ bin, score, catches: vol, days: center.days });
+  });
+
+  results.sort((a,b) => b.score - a.score || b.catches - a.catches);
+  return results.slice(0,1);
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────
+function update() {
+  const scores = computeScores();
+  const container = document.getElementById('zoneList');
+  container.innerHTML = '';
+
+  if (!scores) {
+    const placeholderRing = '<div class="zone-row" style="opacity:0.35;pointer-events:none">'
+      + '<div class="mini-ring">' + drawRing(0,'#e2e8f0') + '<div class="mnum" style="color:#e2e8f0">–</div></div>'
+      + '<div class="zone-info"><div class="zone-name" style="color:#cbd5e0">–</div><div class="zone-catches">–</div></div>'
+      + '</div>';
+    container.innerHTML = placeholderRing + placeholderRing + placeholderRing;
+    document.getElementById('statBox').innerHTML =
+      '<div class="stat-item"><span class="stat-num">–</span><span class="stat-lbl">Fangster</span></div>' +
+      '<div class="stat-item"><span class="stat-num">–</span><span class="stat-lbl">Dager</span></div>' +
+      '<div class="stat-item"><span class="stat-num">–</span><span class="stat-lbl">Per dag</span></div>';
+    updateMap(null);
+    return;
+  }
+
+  const top3 = ZONES.slice().sort((a,b) => {
+    const scoreDiff = scores[b].score - scores[a].score;
+    if (scoreDiff !== 0) return scoreDiff;
+    return scores[b].catches - scores[a].catches;
+  }).slice(0,3);
+  const st = computeStats();
+  top3.forEach(zone => {
+    const {score, catches} = scores[zone];
+    const col = scoreColor(score);
+    const perDay = st.totalDays > 0 ? (catches / st.totalDays).toFixed(2) : '–';
+    const row = document.createElement('div');
+    row.className = 'zone-row' + (zone === activeZone ? ' active' : '');
+    row.innerHTML =
+      '<div class="mini-ring">'+drawRing(score,col)+'<div class="mnum" style="color:'+col+'">'+score+'</div></div>'
+      +'<div class="zone-info">'
+      +'<div class="zone-name">'+zone+'</div>'
+      +'<div class="zone-catches">'+perDay+' fangster/dag</div>'
+      +(ZONE_COORDS[zone] ? '<div class="zone-map-hint">📍 Klikk for å vise på kart</div>' : '')
+      +'</div>';
+    if (ZONE_COORDS[zone]) {
+      row.addEventListener('click', () => selectZone(zone));
+    }
+    container.appendChild(row);
+  });
+
+  const fly = flyOnly ? 'Kun flue · ' : '';
+  const yLo = Math.min(yearLo,yearHi), yHi = Math.max(yearLo,yearHi);
+  const mLo = Math.min(monthLo,monthHi), mHi = Math.max(monthLo,monthHi);
+  const yrLbl = yLo === yHi ? String(yLo) : yLo + '–' + yHi;
+  const moLbl = mLo === mHi ? MONTH_NAMES[mLo] : MONTH_NAMES[mLo] + '–' + MONTH_NAMES[mHi];
+
+  updateMap(scores);
+  if (activeZone) showZoneInfo(activeZone, false); // kun oppdater innhold, ikke scroll (kalles ved hver slider-endring)
+
+  // Oppdater statistikk-boks
+  const perDayStr = st.perDay > 0 ? st.perDay.toFixed(2) : '\u2013';
+  document.getElementById('statBox').innerHTML =
+    '<div class="stat-item"><span class="stat-num">' + st.totalCatches + '</span><span class="stat-lbl">Fangster</span></div>' +
+    '<div class="stat-item"><span class="stat-num">' + st.totalDays + '</span><span class="stat-lbl">Dager</span></div>' +
+    '<div class="stat-item"><span class="stat-num">' + perDayStr + '</span><span class="stat-lbl">Per dag</span></div>';
+
+}
+
+// ── MAP ───────────────────────────────────────────────────────────────────
+function initMap() {
+  if (map) return;
+  const container = document.getElementById('map');
+  container.style.height = '320px';
+  map = L.map('map', {zoomControl: true}).setView([58.148, 7.788], 11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap', maxZoom: 17
+  }).addTo(map);
+
+  setTimeout(() => map.invalidateSize(), 50);
+  setTimeout(() => map.invalidateSize(), 300);
+
+  // "Hvor er jeg?"-kontroll oppe til høyre
+  const LocControl = L.Control.extend({
+    options: { position: 'topright' },
+    onAdd: function() {
+      const btn = L.DomUtil.create('button', '');
+      btn.innerHTML = '📍 Hvor er jeg?';
+      btn.style.cssText = 'background:#fff;color:#333;border:2px solid rgba(0,0,0,0.2);border-radius:4px;padding:5px 10px;font-size:0.75rem;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:none;';
+      btn.title = 'Vis min posisjon på kartet';
+      L.DomEvent.on(btn, 'click', L.DomEvent.stopPropagation);
+      L.DomEvent.on(btn, 'click', () => {
+        btn.innerHTML = '⏳ Søker...';
+        btn.disabled = true;
+        map.locate({ setView: true, maxZoom: 14 });
+      });
+      return btn;
+    }
+  });
+  new LocControl().addTo(map);
+
+  let _myLocMarker = null;
+  map.on('locationfound', (e) => {
+    if (_myLocMarker) _myLocMarker.remove();
+    _myLocMarker = L.circleMarker(e.latlng, {
+      radius: 8, color: '#e53e3e', fillColor: '#e53e3e',
+      fillOpacity: 0.9, weight: 2
+    }).addTo(map).bindTooltip('📍 Du er her', { permanent: false, direction: 'top', className: 'mtip' });
+    document.querySelector('.leaflet-control button') && (document.querySelectorAll('.leaflet-control button')[document.querySelectorAll('.leaflet-control button').length - 1].innerHTML = '📍 Hvor er jeg?');
+    const locBtn = document.querySelector('[title="Vis min posisjon på kartet"]');
+    if (locBtn) { locBtn.innerHTML = '📍 Hvor er jeg?'; locBtn.disabled = false; }
+  });
+  map.on('locationerror', () => {
+    const locBtn = document.querySelector('[title="Vis min posisjon på kartet"]');
+    if (locBtn) { locBtn.innerHTML = '📍 Hvor er jeg?'; locBtn.disabled = false; }
+    alert('Posisjon ikke tilgjengelig. Sjekk at du har gitt tilgang til posisjon i nettleseren.');
+  });
+
+  ZONES.forEach(zone => {
+    const zc = ZONE_COORDS[zone]; if (!zc) return;
+    const label = zoneLabel(zone);
+
+    const startMk = L.marker(zc.s, {icon: makeStartIcon(label, '#94a3b8', false, false), zIndexOffset: 10}).addTo(map);
+    startMk.bindTooltip(zone, {permanent: false, direction: 'top', className: 'mtip'});
+    startMk.on('click', () => { selectZone(zone); if (activeZone === zone) showZoneInfo(zone); });
+
+    const endMk = L.marker(zc.e, {icon: makeEndIcon(), opacity: 0, zIndexOffset: 5, interactive: false}).addTo(map);
+    endMk.bindTooltip(zone + ' · slutt', {permanent: false, direction: 'top', className: 'mtip'});
+
+    mapLayers[zone] = {startMk, endMk};
+  });
+
+  // Video markers
+  VIDEOS.forEach((video, idx) => {
+    const mk = L.marker([video.lat, video.lon], { icon: makeVideoIcon(), zIndexOffset: 250, opacity: 0 }).addTo(map);
+    mk.bindTooltip('🎣 Vis fangstvideo', { permanent: false, direction: 'top', className: 'mtip' });
+    mk.on('click', (e) => { L.DomEvent.stopPropagation(e); window.open('https://www.youtube.com/watch?v=' + video.youtubeId, '_blank'); });
+    videoMarkers.push({ mk, zone: video.zone });
+  });
+
+}
+
+function addPhotoMarkers() {
+  if (!map) return;
+  photoMarkers.forEach(({ mk }) => mk.remove());
+  photoMarkers = [];
+  PHOTOS.forEach((photo, idx) => {
+    const icon = makePhotoIcon(false);
+    const mk = L.marker([photo.lat, photo.lon], { icon, zIndexOffset: 200, opacity: 0 }).addTo(map);
+    mk.bindTooltip('📷 Vis bilde', { permanent: false, direction: 'top', className: 'mtip' });
+    mk.on('click', (e) => { L.DomEvent.stopPropagation(e); openZonePhotos(photo.zone, idx); });
+    photoMarkers.push({ mk, zone: photo.zone, photosIdx: idx });
+  });
+}
+
+async function fetchPhotos() {
+  try {
+    const res = await fetch(PHOTOS_URL);
+    if (!res.ok) return;
+    PHOTOS = await res.json();
+    addPhotoMarkers();
+    updateMap(computeScores());
+  } catch(e) { /* bilder er valgfrie – feiler stille */ }
+}
+
+
+function makeVideoIcon() {
+  return L.divIcon({
+    html: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+      <circle cx="10" cy="10" r="9" fill="#c53030" stroke="white" stroke-width="1.5"/>
+      <polygon points="8,6 8,14 15,10" fill="white"/>
+    </svg>`,
+    className: '',
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+    tooltipAnchor: [0, -12],
+  });
+}
+function makePhotoIcon(active) {
+  const size = active ? 24 : 16;
+  const r = active ? 11 : 7;
+  const stroke = active ? 2.5 : 1.5;
+  const fs = active ? 12 : 8;
+  const y = active ? 17 : 11.5;
+  const fill = active ? '#276749' : '#0f2d4a';
+  const ring = active ? `<circle cx="${size/2}" cy="${size/2}" r="${r+3}" fill="none" stroke="white" stroke-width="2.5" opacity="0.6"/>` : '';
+  return L.divIcon({
+    html: `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+      ${ring}
+      <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="${fill}" stroke="white" stroke-width="${stroke}"/>
+      <text x="${size/2}" y="${y}" text-anchor="middle" fill="white" font-size="${fs}">📷</text>
+    </svg>`,
+    className: '',
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2],
+    tooltipAnchor: [0, -10],
+  });
+}
+function makeStartIcon(label, color, isSelected, isDimmed) {
+  const size = isSelected ? 36 : 30;
+  const fs = isSelected ? 11 : 9;
+  const opacity = isDimmed ? 0.50 : 1;
+  const stroke = isSelected ? '#fff' : 'rgba(0,0,0,0.15)';
+  const sw = isSelected ? 2.5 : 1.5;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" opacity="${opacity}">
+    <circle cx="${size/2}" cy="${size/2}" r="${size/2-2}" fill="${color}" stroke="${stroke}" stroke-width="${sw}"/>
+    <text x="${size/2}" y="${size/2+fs*0.38}" text-anchor="middle" fill="#fff" font-size="${fs}" font-weight="700" font-family="Segoe UI,sans-serif">${label}</text>
+  </svg>`;
+  return L.divIcon({html: svg, className: '', iconSize: [size,size], iconAnchor: [size/2,size/2], tooltipAnchor: [0,-size/2]});
+}
+
+function makeEndIcon(color) {
+  const col = color || '#475569';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21">
+    <circle cx="10.5" cy="10.5" r="8.5" fill="${col}" stroke="#fff" stroke-width="2"/>
+    <line x1="6.5" y1="10.5" x2="14.5" y2="10.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+  </svg>`;
+  return L.divIcon({html: svg, className: '', iconSize: [21,21], iconAnchor: [10.5,10.5]});
+}
+
+function updateMap(scores) {
+  if (!map) return;
+  ZONES.forEach(zone => {
+    const l = mapLayers[zone]; if (!l) return;
+    const isSelected = zone === activeZone;
+    const isDimmed = activeZone !== null && !isSelected;
+    const sc = scores ? (scores[zone]?.score || 0) : 0;
+    const col = isDimmed ? '#94a3b8' : (scores ? scoreColor(sc) : '#94a3b8');
+    const label = zoneLabel(zone);
+    l.startMk.setIcon(makeStartIcon(label, col, isSelected, isDimmed));
+    l.startMk.setZIndexOffset(isSelected ? 100 : 10);
+    l.endMk.setIcon(makeEndIcon(col));
+    l.endMk.setOpacity(isSelected ? 1 : 0);
+    if (l.endMk._icon) l.endMk._icon.style.pointerEvents = isSelected ? 'auto' : 'none';
+    const priceInfo = PRICES[zone];
+    const priceLbl = priceInfo && priceInfo.dogn ? priceInfo.dogn + ' kr' : null;
+    const tipHtml = isSelected && priceLbl
+      ? zone + '<br><span style="font-weight:400;opacity:.75;font-size:.9em">' + priceLbl + '</span>'
+      : zone;
+    l.startMk.unbindTooltip();
+    l.startMk.bindTooltip(tipHtml, {permanent: isSelected, direction: 'top', className: 'mtip'});
+    if (isSelected) l.startMk.openTooltip();
+  });
+  // Show photo markers only when their zone is active
+  photoMarkers.forEach(({ mk, zone }) => {
+    mk.setOpacity(activeZone === zone ? 1 : 0);
+    if (mk._icon) mk._icon.style.pointerEvents = activeZone === zone ? 'auto' : 'none';
+  });
+  videoMarkers.forEach(({ mk, zone }) => {
+    mk.setOpacity(activeZone === zone ? 1 : 0);
+    if (mk._icon) mk._icon.style.pointerEvents = activeZone === zone ? 'auto' : 'none';
+  });
+}
+
+function selectZone(zone) {
+  if (activeZone === zone) {
+    activeZone = null;
+    document.getElementById('mapTitle').textContent = '🗺 Kart';
+    // Behold kartets posisjon/zoom som den var for den lukkede sonen - ikke zoom ut.
+    closePhoto();
+    closeZoneInfo();
+    closeVideo();
+  } else {
+    activeZone = zone;
+    document.getElementById('mapTitle').textContent = '🗺 ' + zone;
+    const zc = ZONE_COORDS[zone];
+    if (zc) map.fitBounds([zc.s, zc.e], {padding: [50,50], animate: true, maxZoom: 14});
+  }
+  update();
+}
+
+function showZoneInfo(zone, scrollTo = true) {
+  const info = ZONE_INFO[zone];
+  if (!info) return;
+  const scores = computeScores();
+  const score = scores ? (scores[zone]?.score ?? 0) : 0;
+  const catches = scores ? (scores[zone]?.catches ?? 0) : 0;
+  const col = scoreColor(score);
+
+  const yLo = Math.min(yearLo,yearHi), yHi = Math.max(yearLo,yearHi);
+  const mLo = Math.min(monthLo,monthHi), mHi = Math.max(monthLo,monthHi);
+  const yrLbl = yLo===yHi ? String(yLo) : yLo+'–'+yHi;
+  const moLbl = mLo===mHi ? MONTH_NAMES[mLo] : MONTH_NAMES[mLo]+'–'+MONTH_NAMES[mHi];
+
+  const topBins = computeZoneBinScores(zone);
+  let topBinsHtml = '';
+  if (topBins.length) {
+    const tb = topBins[0];
+    const bc = scoreColor(tb.score);
+    const label = tb.bin >= 18 ? '18+' : tb.bin + '–' + (tb.bin + 2);
+    const perDay = tb.days > 0 ? (tb.catches / tb.days).toFixed(2).replace('.', ',') : '–';
+    topBinsHtml = '<div class="zi-topbins-hdr">Beste vannføring for sonen</div>'
+      + '<div class="zi-topbin-row">' + drawMiniRing(tb.score, bc)
+      + '<span class="zi-topbin-txt">' + label + ' m³/s</span></div>'
+      + '<div class="zi-topbin-stats">'
+      + tb.catches + (tb.catches === 1 ? ' fangst' : ' fangster')
+      + ' · ' + tb.days + (tb.days === 1 ? ' dag' : ' dager')
+      + ' · ' + perDay + ' per dag</div>';
+  }
+
+  const boom = BOOM_DAYS[zone];
+  let boomHtml = '';
+  if (boom) {
+    const bd = new Date(boom.date + 'T00:00:00');
+    const dateLbl = bd.getDate() + '. ' + MONTH_NAMES_FULL[bd.getMonth()] + ' ' + bd.getFullYear();
+    boomHtml = '<div class="zi-boom">'
+      + '<span class="zi-boom-icon">🏆</span>'
+      + '<div><div class="zi-boom-hdr">Rekorddag</div>'
+      + '<div class="zi-boom-txt">' + dateLbl + ' — ' + boom.count + ' fangster'
+      + (boom.flow != null ? ' (' + boom.flow + ' m³/s)' : '') + '</div></div>'
+      + '</div>';
+  }
+
+  const priceInfo = PRICES[zone];
+  let priceHtml = '';
+  if (priceInfo) {
+    const parts = [];
+    if (priceInfo.dogn) parts.push(priceInfo.dogn + ' kr døgnkort');
+    if (priceInfo.sesong) parts.push(priceInfo.sesong + ' kr sesongkort');
+    if (parts.length) priceHtml = '<div class="zi-price">' + parts.join(' · ') + '</div>';
+  }
+
+  document.getElementById('ziTitle').textContent = '📍 ' + info.name;
+  document.getElementById('ziBody').innerHTML = `
+    <div class="zi-score-row">
+      <div class="zi-score-num" style="color:${col}">${score}</div>
+      <div class="zi-score-label">Score (${yrLbl} · ${moLbl} · ${currentFlow >= 18 ? '18+' : currentFlow + '–' + (currentFlow+2)} m³/s)<br>${catches === 1 ? '1 fangst' : catches + ' fangster'} i utvalget</div>
+      <div class="zi-topbins">${topBinsHtml}</div>
+    </div>
+    ${boomHtml}
+    <div class="zi-desc">${info.desc}</div>
+    <div class="zi-row"><span class="zi-label">Redskap</span><span class="zi-val">${info.redskap}</span></div>
+    <div class="zi-row"><span class="zi-label">Sesong</span><span class="zi-val">${info.sesong}</span></div>
+    <div class="zi-row"><span class="zi-label">Merknader</span><span class="zi-val">${info.merknader}</span></div>
+    <a class="zi-link" href="https://www.google.com/maps/dir/?api=1&destination=${ZONE_COORDS[zone]?.s[0]},${ZONE_COORDS[zone]?.s[1]}&travelmode=driving" target="_blank">🗺 Veibeskrivelse hit ↗</a>
+    ${priceHtml}
+    <a class="zi-link" href="${info.kortUrl}" target="_blank">🎫 Kjøp fiskekort ↗</a>
+    <div class="zi-sources">Kilder: <a href="https://lakseelver.no/nb/elver/sogne-og-songdalselva/about" target="_blank">lakseelver.no</a> · <a href="https://laksebors.inatur.no/bors/717" target="_blank">laksebørs</a></div>
+  `;
+  const panel = document.getElementById('zoneInfoPanel');
+  panel.classList.add('visible');
+  if (scrollTo) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeZoneInfo() {
+  document.getElementById('zoneInfoPanel').classList.remove('visible');
+}
+
+let _activePhotoIdx = 0;
+let _activeZonePhotos = [];
+
+function openZonePhotos(zone, photosIdx) {
+  _activeZonePhotos = PHOTOS.filter(p => p.zone === zone)
+    .sort((a, b) => a.lat - b.lat);
+  // Find position of clicked photo within zone group
+  const clickedPhoto = PHOTOS[photosIdx];
+  const posInGroup = clickedPhoto ? _activeZonePhotos.findIndex(p => p === clickedPhoto) : 0;
+  _activePhotoIdx = posInGroup >= 0 ? posInGroup : 0;
+  _renderPhoto();
+  document.getElementById('photoPanel').classList.add('visible');
+  document.getElementById('photoPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function openVideo(idx) {
+  const v = VIDEOS[idx];
+  const dateStr = v.dateISO ? new Date(v.dateISO).toLocaleDateString('nb-NO', {day:'numeric', month:'long', year:'numeric'}) : '';
+  document.getElementById('vpTitle').textContent = '🎣 ' + v.caption;
+  document.getElementById('vpInfo').innerHTML = (dateStr ? '<span>' + dateStr + '</span><br>' : '')
+    + '<a href="https://www.youtube.com/watch?v=' + v.youtubeId + '" target="_blank" class="vp-yt-btn">▶ Se video på YouTube ↗</a>';
+  const panel = document.getElementById('videoPanel');
+  panel.classList.add('visible');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeVideo() {
+  document.getElementById('videoPanel').classList.remove('visible');
+}
+
+function showPhoto(idx) {
+  if (idx < 0 || idx >= _activeZonePhotos.length) return;
+  _activePhotoIdx = idx;
+  _renderPhoto();
+}
+
+function _renderPhoto() {
+  const p = _activeZonePhotos[_activePhotoIdx];
+  const n = _activeZonePhotos.length;
+  if (!p) return;
+
+  document.getElementById('photoImg').src = BILDE_BASE + p.file;
+  document.getElementById('photoTitle').textContent = '📷 ' + p.zone + (p.id ? ' · ' + p.id : '');
+  document.getElementById('photoCounter').textContent = n > 1 ? (_activePhotoIdx + 1) + ' / ' + n : '';
+
+  const flowVal = (p.vannforing !== undefined && p.vannforing !== null) ? p.vannforing : FLOW_LOOKUP[p.dateISO];
+  const flowStr = flowVal !== undefined ? flowVal + ' m³/s' : 'Vannstand ukjent';
+  const dateStr = p.dateISO ? new Date(p.dateISO).toLocaleDateString('nb-NO', {day:'numeric', month:'long', year:'numeric'}) : '';
+  document.getElementById('photoCap').textContent = p.caption + (dateStr ? ' · ' + dateStr : '') + ' · ' + flowStr;
+
+  const prevBtn = document.getElementById('photoPrev');
+  const nextBtn = document.getElementById('photoNext');
+  prevBtn.disabled = _activePhotoIdx === 0;
+  prevBtn.style.opacity = _activePhotoIdx === 0 ? '0.3' : '1';
+  nextBtn.disabled = _activePhotoIdx >= n - 1;
+  nextBtn.style.opacity = _activePhotoIdx >= n - 1 ? '0.3' : '1';
+
+  // Highlight active photo marker on map
+  const activePhoto = _activeZonePhotos[_activePhotoIdx];
+  photoMarkers.forEach(({ mk, zone, photosIdx }) => {
+    if (activeZone !== zone) return; // only update visible markers
+    const isActive = PHOTOS[photosIdx] === activePhoto;
+    mk.setIcon(makePhotoIcon(isActive));
+    mk.setZIndexOffset(isActive ? 300 : 200);
+  });
+
+  // Sentrer kartet på aktiv markør
+  if (activePhoto) {
+    map.panTo([activePhoto.lat, activePhoto.lon], { animate: true, duration: 0.4 });
+  }
+}
+function closePhoto() {
+  document.getElementById('photoPanel').classList.remove('visible');
+  _activeZonePhotos = [];
+  photoMarkers.forEach(({ mk }) => mk.setIcon(makePhotoIcon(false)));
+}
+function openFullscreen() {
+  if (!_activeZonePhotos.length) return;
+  const p = _activeZonePhotos[_activePhotoIdx];
+  if (!p) return;
+  document.getElementById('fsImg').src = BILDE_BASE + p.file;
+  document.getElementById('fsCap').textContent = p.caption;
+  document.getElementById('photoFs').classList.add('open');
+}
+function closeFullscreen() {
+  document.getElementById('photoFs').classList.remove('open');
+}
+
+// ── NVE ───────────────────────────────────────────────────────────────────
+async function fetchNVE() {
+  try {
+    const res = await fetch(NVE_CACHE_URL);
+    if (!res.ok) throw new Error('cache ikke tilgjengelig');
+    const json = await res.json();
+    const obs = json.data[0].observations.filter(o => o.value !== null);
+    if (!obs.length) throw new Error('no data');
+
+    // Current value
+    const val = obs[obs.length - 1].value;
+    document.getElementById('sygnaFlow').textContent = val.toFixed(1);
+    document.getElementById('sygnaStatus').innerHTML = '<span style="color:#68d391">✅ Live NVE</span>';
+    const bin = Math.floor(val/2)*2;
+    currentFlow = Math.max(0, Math.min(18, bin));
+    document.getElementById('flowSlider').value = currentFlow;
+    onFlowChange(currentFlow);
+
+    // Trend: compare to 3 hours ago
+    const val3h = obs.length >= 4 ? obs[obs.length - 4].value : null;
+    const trendEl = document.getElementById('trendBadge');
+    const lblEl   = document.getElementById('trendLabel');
+    if (val3h !== null) {
+      const diff = val - val3h;
+      if (diff > 0.5)       { trendEl.textContent = '↑'; trendEl.style.color = '#68d391'; lblEl.textContent = 'Stigende siste 3t'; }
+      else if (diff < -0.5) { trendEl.textContent = '↓'; trendEl.style.color = '#fc8181'; lblEl.textContent = 'Synkende siste 3t'; }
+      else                  { trendEl.textContent = '→'; trendEl.style.color = '#94a3b8'; lblEl.textContent = 'Stabil siste 3t'; }
+    }
+
+    // Sparkline
+    drawSparkline(obs.map(o => o.value));
+    return;
+  } catch(e) {
+    document.getElementById('sygnaFlow').textContent = '–';
+    document.getElementById('sygnaStatus').innerHTML = '<span style="color:#fc8181">⚠️ NVE ikke tilgjengelig</span>';
+  }
+}
+
+
+function drawSparkline(values) {
+  const svg = document.getElementById('sparkSvg');
+  if (!svg || !values.length) return;
+  const W = 200, H = 32, pad = 2;
+  // 0-forankret y-akse med fast minimumstak (SPARK_CFG.max): lav uke ser lav ut,
+  // en flomuke løfter taket dynamisk. Skala-taket vises som tall på y-aksen,
+  // og median sesongvannføring (SPARK_CFG.normal) som stiplet referanselinje.
+  const min = 0;
+  const max = Math.max(SPARK_CFG.max, ...values);
+  const range = max || 1;
+  const pts = values.map((v, i) => {
+    const x = pad + (i / (values.length - 1)) * (W - pad * 2);
+    const y = H - pad - ((v - min) / range) * (H - pad * 2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+  // Area fill
+  const areaPoints = `${pad},${H} ` + pts.join(' ') + ` ${W-pad},${H}`;
+  const yNorm = (H - pad - ((SPARK_CFG.normal - min) / range) * (H - pad * 2)).toFixed(1);
+  svg.innerHTML =
+    `<defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">` +
+    `<stop offset="0%" stop-color="#68d391" stop-opacity="0.4"/>` +
+    `<stop offset="100%" stop-color="#68d391" stop-opacity="0.05"/>` +
+    `</linearGradient></defs>` +
+    `<line x1="${pad}" y1="${yNorm}" x2="${W-pad}" y2="${yNorm}" stroke="#9ae6b4" stroke-opacity="0.45" stroke-width="0.8" stroke-dasharray="3,3"/>` +
+    `<polygon points="${areaPoints}" fill="url(#sg)"/>` +
+    `<polyline points="${pts.join(' ')}" fill="none" stroke="#68d391" stroke-width="1.5" stroke-linejoin="round"/>` +
+    `<text x="${pad+1}" y="7" font-size="6.5" fill="#9ae6b4" fill-opacity="0.65" font-family="inherit">${Math.round(max)}</text>`;
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+initMap();
+onFlowChange(2);
+onYearChange();
+onMonthChange();
+// Init stat boxes with placeholders so header never collapses
+document.getElementById('statBox').innerHTML =
+  '<div class="stat-item"><span class="stat-num">–</span><span class="stat-lbl">Fangster</span></div>' +
+  '<div class="stat-item"><span class="stat-num">–</span><span class="stat-lbl">Dager</span></div>' +
+  '<div class="stat-item"><span class="stat-num">–</span><span class="stat-lbl">Per dag</span></div>';
+fetchNVE().then(() => update());
+fetchPhotos();
+window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
+</script>
+
+
+
+
+
+
+<div class="photo-panel" id="photoPanel">
+  <div class="photo-hdr">
+    <span id="photoTitle">📷 Bilde</span>
+    <div style="display:flex; align-items:center; gap:6px;">
+      <button class="pg-nav-btn" id="photoPrev" onclick="showPhoto(_activePhotoIdx-1)" title="Forrige (sør)">&#8595;</button>
+      <span id="photoCounter" style="font-size:0.65rem; color:#94a3b8;"></span>
+      <button class="pg-nav-btn" id="photoNext" onclick="showPhoto(_activePhotoIdx+1)" title="Neste (nord)">&#8593;</button>
+      <button onclick="closePhoto()" style="background:none;border:none;color:#94a3b8;font-size:1rem;cursor:pointer;margin-left:4px;">×</button>
+    </div>
+  </div>
+  <img class="photo-img" id="photoImg" src="" alt="" onclick="openFullscreen()" style="cursor:zoom-in">
+  <div class="photo-cap" id="photoCap"></div>
+</div>
+
+<div class="photo-fs" id="photoFs" onclick="closeFullscreen()">
+  <button class="fs-close" onclick="closeFullscreen()">×</button>
+  <img id="fsImg" src="" alt="">
+  <div class="fs-cap" id="fsCap"></div>
+</div>
+
+
+
+<div class="zone-info-panel" id="zoneInfoPanel">
+  <div class="zi-hdr">
+    <span class="zi-hdr-title" id="ziTitle">Soneinfo</span>
+    <button onclick="closeZoneInfo()">×</button>
+  </div>
+  <div class="zi-body" id="ziBody"></div>
+</div>
+
+<div class="video-panel" id="videoPanel">
+  <div class="vp-hdr">
+    <span class="vp-hdr-title" id="vpTitle">🎣 Fangstvideo</span>
+    <button onclick="closeVideo()">×</button>
+  </div>
+  <div class="vp-info" id="vpInfo"></div>
+</div>
+<div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.001</span><br>
+  <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
+</div>
+
+</body>
+</html>
