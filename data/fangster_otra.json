@@ -2,6 +2,12 @@
  {
   "dato": "2026-07-15",
   "sone": "Sone 5B Rød",
+  "vekt": 2,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-15",
+  "sone": "Sone 5B Rød",
   "vekt": 2.1,
   "agn": "Flue"
  },
