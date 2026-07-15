@@ -5,12 +5,14 @@ Henter "siste fangster" for Audna, Lygna, Mandalselva og Otra fra Inaturs lakseb
 til data/fangster_<elv>.json.
 
 Filtrering:
-  - Kun ART == "Laks" (etter avtale — sjøørret o.a. tas ikke med)
+  - Standard: kun ART == "Laks" (etter avtale — sjøørret o.a. tas ikke med).
+    Unntak: Sygna, der dashboardets scoring bruker laks OG sjøørret samlet
+    (elva domineres av sjøørret) — der beholdes derfor begge artene.
   - Kun fangster siste 72 timer (rullende, ikke kalenderdager)
   - NAVN-feltet fjernes fullstendig før noe skrives til disk (personvern —
     Inatur anonymiserer ikke selv konsekvent, så vi må gjøre det)
 
-Feltene som beholdes per fangst: dato, sone, vekt, agn.
+Feltene som beholdes per fangst: dato, sone, vekt, agn, art.
 
 Dette er et UTESTET førsteutkast — det interne GraphQL-endepunktet er ikke
 offentlig dokumentert av Inatur. Kjør med workflow_dispatch og sjekk loggen
@@ -26,10 +28,11 @@ GRAPHQL_URL = "https://laksebors.inatur.no/graphql"
 LOOKBACK_HOURS = 72
 
 RIVERS = {
-    "audna":       {"river_id": 621,  "out": "data/fangster_audna.json"},
-    "lygna":       {"river_id": 25,   "out": "data/fangster_lygna.json"},
-    "mandalselva": {"river_id": 1542, "out": "data/fangster_mandalselva.json"},
-    "otra":        {"river_id": 6,    "out": "data/fangster_otra.json"},
+    "audna":       {"river_id": 621,  "out": "data/fangster_audna.json",       "arter": {"Laks"}},
+    "lygna":       {"river_id": 25,   "out": "data/fangster_lygna.json",       "arter": {"Laks"}},
+    "mandalselva": {"river_id": 1542, "out": "data/fangster_mandalselva.json", "arter": {"Laks"}},
+    "otra":        {"river_id": 6,    "out": "data/fangster_otra.json",        "arter": {"Laks"}},
+    "sygna":       {"river_id": 717,  "out": "data/fangster_sygna.json",       "arter": {"Laks", "Sjøørret"}},
 }
 
 QUERY = """
@@ -69,11 +72,11 @@ def fetch_river(key, river_id):
     return body["data"]["catches"]
 
 
-def process(catches):
+def process(catches, arter):
     cutoff_ms = (datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_HOURS)).timestamp() * 1000
     out = []
     for c in catches:
-        if c.get("ART") != "Laks":
+        if c.get("ART") not in arter:
             continue
         try:
             dato_ms = int(c["DATO"])
@@ -87,6 +90,7 @@ def process(catches):
             "sone": c.get("SONE"),
             "vekt": c.get("KG"),
             "agn": c.get("Redskap"),
+            "art": c.get("ART"),
         })
     # Nyeste først
     out.sort(key=lambda x: x["dato"], reverse=True)
@@ -99,11 +103,12 @@ def main():
         print(f"=== {key} (riverId={cfg['river_id']}) ===")
         try:
             catches = fetch_river(key, cfg["river_id"])
-            recent = process(catches)
+            recent = process(catches, cfg["arter"])
             os.makedirs(os.path.dirname(cfg["out"]), exist_ok=True)
             with open(cfg["out"], "w", encoding="utf-8") as f:
                 json.dump(recent, f, ensure_ascii=False, indent=1)
-            print(f"  OK: {len(catches)} hentet totalt, {len(recent)} siste {LOOKBACK_HOURS}t (laks) -> {cfg['out']}")
+            arter_lbl = "+".join(sorted(cfg["arter"]))
+            print(f"  OK: {len(catches)} hentet totalt, {len(recent)} siste {LOOKBACK_HOURS}t ({arter_lbl}) -> {cfg['out']}")
             any_ok = True
         except Exception as e:
             print(f"  FEIL for {key}: {e}")
