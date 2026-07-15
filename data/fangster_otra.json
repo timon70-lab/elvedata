@@ -1,6 +1,12 @@
 [
  {
   "dato": "2026-07-15",
+  "sone": "Sone 3C Mosby",
+  "vekt": 2.3,
+  "agn": "Sluk"
+ },
+ {
+  "dato": "2026-07-15",
   "sone": "Sone 5B Rød",
   "vekt": 1.9,
   "agn": "Flue"
@@ -88,6 +94,12 @@
   "sone": "Sone 5B Rød",
   "vekt": 1.3,
   "agn": "Meitemark"
+ },
+ {
+  "dato": "2026-07-13",
+  "sone": "Sone 5A Blå",
+  "vekt": 4.2,
+  "agn": "Sluk"
  },
  {
   "dato": "2026-07-13",
