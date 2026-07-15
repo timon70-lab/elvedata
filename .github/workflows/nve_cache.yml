@@ -55,18 +55,23 @@ jobs:
             -H "User-Agent: audna-dashboard github.com/timon70-lab/audna" \
             "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=58.27&lon=7.40" \
             -o data/nedbor.json
+          curl -s \
+            -H "User-Agent: audna-dashboard github.com/timon70-lab/audna" \
+            "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=58.155136&lon=7.835791" \
+            -o data/nedbor_sygna.json
           python3 -c "
           import json
-          with open('data/nedbor.json') as f:
-              d = json.load(f)
-          ts = d['properties']['timeseries']
-          print(f'MET OK: {len(ts)} tidspunkter')
+          for fn, navn in [('data/nedbor.json','Audna/Lygna-punkt'), ('data/nedbor_sygna.json','Sygna/Nodeland-punkt')]:
+              with open(fn) as f:
+                  d = json.load(f)
+              ts = d['properties']['timeseries']
+              print(f'MET OK ({navn}): {len(ts)} tidspunkter')
           "
 
       - name: Commit og push JSON-filene
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/vannforing.json data/vannforing_lygna.json data/vannforing_mandalselva.json data/vannforing_otra.json data/vannforing_sygna.json data/nedbor.json
+          git add data/vannforing.json data/vannforing_lygna.json data/vannforing_mandalselva.json data/vannforing_otra.json data/vannforing_sygna.json data/nedbor.json data/nedbor_sygna.json
           git diff --staged --quiet || git commit -m "Data oppdatert $(date -u '+%Y-%m-%d %H:%M UTC')"
           git push
