@@ -1,5 +1,23 @@
 [
  {
+  "dato": "2026-07-15",
+  "sone": "Sone 4A",
+  "vekt": 1.5,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-15",
+  "sone": "Sone 5A Blå",
+  "vekt": 2.4,
+  "agn": "Flue"
+ },
+ {
+  "dato": "2026-07-15",
+  "sone": "Sone 4A",
+  "vekt": 1.5,
+  "agn": "Sluk"
+ },
+ {
   "dato": "2026-07-14",
   "sone": "Sone 3C Mosby",
   "vekt": 3.1,
