@@ -1,6 +1,13 @@
 [
  {
   "dato": "2026-07-15",
+  "sone": "Delomr2, Åsefoss",
+  "vekt": 1.6,
+  "agn": "Mark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-15",
   "sone": "Sone 3",
   "vekt": 2.2,
   "agn": "Flue",
