@@ -43,12 +43,19 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
 .save-row { display: flex; gap: 8px; margin-top: 14px; align-items: center; }
 .warn { font-size: 0.7rem; color: #92400e; background: #fef3c7; border-radius: 6px;
         padding: 8px 10px; margin-top: 12px; line-height: 1.4; }
+.vid-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+.vid-grid label { font-size: 0.75rem; }
+.vid-grid input, .vid-grid select { width: 100%; padding: 6px 8px; border: 1px solid #cbd5e1;
+        border-radius: 6px; font-size: 0.82rem; margin-top: 3px; }
+#vidStatus { font-size: 0.8rem; margin-top: 10px; min-height: 1.2em; }
+#vidStatus.ok { color: #276749; }
+#vidStatus.err { color: #c53030; }
 </style>
 </head>
 <body>
 
 <h1>⚙️ Elvedata · Admin</h1>
-<div class="sub">Scoringsparametre (vekting · shrinkage · knekkpunkt) · skriver til <code>data/config.json</code></div>
+<div class="sub">Scoringsparametre · skriver til <code>data/config.json</code> · videoregistrering · skriver til <code>data/videoer_&lt;elv&gt;.json</code></div>
 
 <div class="card">
   <h2>🔑 GitHub-token</h2>
@@ -58,6 +65,12 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
     <button class="secondary" onclick="saveToken()">Lagre</button>
   </div>
   <div class="hint">Lagres kun i localStorage i denne nettleseren — aldri i repoet.</div>
+  <label for="nveInput" style="margin-top:10px">NVE HydAPI-nøkkel (for vannføringsoppslag ved videoregistrering)</label>
+  <div class="token-row">
+    <input type="password" id="nveInput" placeholder="NVE API-key ...">
+    <button class="secondary" onclick="saveNveKey()">Lagre</button>
+  </div>
+  <div class="hint">Lagres kun i localStorage — aldri i repoet.</div>
 </div>
 
 <div class="card">
@@ -70,6 +83,42 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
   <div id="status"></div>
   <div class="warn">⚠️ Denne siden ligger åpent på GitHub Pages, men er ubrukelig uten ditt
   personlige token. Ikke lenk til den fra dashbordene eller oversiktskartet.</div>
+</div>
+
+<div class="card">
+  <h2>🎬 Registrer video</h2>
+  <div class="vid-grid">
+    <label>Elv
+      <select id="vidElv">
+        <option value="audna" selected>Audna (pilot)</option>
+        <option value="lygna">Lygna</option>
+        <option value="mandalselva">Mandalselva</option>
+        <option value="otra">Otra</option>
+        <option value="sygna">Sygna</option>
+      </select>
+    </label>
+    <label>Sone <input type="text" id="vidSone" placeholder="f.eks. Sone 5A"></label>
+    <label style="grid-column:1/-1">YouTube-lenke eller video-ID
+      <input type="text" id="vidYt" placeholder="https://youtu.be/… eller 11-tegns ID"></label>
+    <label>Dato <input type="date" id="vidDato"></label>
+    <label>Klokkeslett (valgfritt) <input type="time" id="vidTid"></label>
+    <label style="grid-column:1/-1">Koordinater (lat, lon)
+      <input type="text" id="vidKoord" placeholder="58.129927, 7.363705"></label>
+    <label style="grid-column:1/-1">Beskrivelse
+      <input type="text" id="vidCaption" placeholder="f.eks. Sone 5A · Fangst"></label>
+    <label>Vannføring (m³/s)
+      <div class="token-row">
+        <input type="number" id="vidFlow" step="1" min="0" placeholder="—">
+        <button class="secondary" onclick="hentVannforing()" title="Slår opp timesverdier (ResolutionTime=60) hos NVE HydAPI for valgt elv/dato">💧 Hent fra NVE</button>
+      </div>
+    </label>
+  </div>
+  <div class="save-row">
+    <button id="vidBtn" onclick="leggTilVideo()">➕ Legg til video</button>
+  </div>
+  <div id="vidStatus"></div>
+  <div class="hint" style="margin-top:8px">Videoen må være lastet opp som <b>Unlisted</b> på YouTube.
+  Koordinater: høyreklikk i Google Maps → klikk på tallene for å kopiere. Dashbordvisning finnes foreløpig kun for Audna (pilot).</div>
 </div>
 
 <script>
@@ -218,7 +267,135 @@ async function saveConfig() {
   }
 }
 
+/* ---------- Videoregistrering ---------- */
+const NVE_KEY = 'elvedata_nve_key';
+const STATIONS = { audna: '23.8.0', lygna: '24.9.0', mandalselva: '22.4.0', otra: '21.11.0', sygna: '22.22.0' };
+
+function saveNveKey() {
+  const t = document.getElementById('nveInput').value.trim();
+  if (!t) { setVidStatus('Tom nøkkel — ikke lagret.', true); return; }
+  localStorage.setItem(NVE_KEY, t);
+  document.getElementById('nveInput').value = '';
+  document.getElementById('nveInput').placeholder = 'NVE-nøkkel er lagret ✓';
+  setVidStatus('NVE-nøkkel lagret i denne nettleseren. ✓', false);
+}
+
+function setVidStatus(msg, isErr) {
+  const el = document.getElementById('vidStatus');
+  el.textContent = msg;
+  el.className = isErr ? 'err' : 'ok';
+}
+
+function parseYouTubeId(input) {
+  const t = input.trim();
+  if (/^[A-Za-z0-9_-]{11}$/.test(t)) return t;
+  const m = t.match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+async function hentVannforing() {
+  const key = localStorage.getItem(NVE_KEY);
+  if (!key) { setVidStatus('Lagre NVE-nøkkel først (øverst på siden).', true); return; }
+  const dato = document.getElementById('vidDato').value;
+  if (!dato) { setVidStatus('Velg dato først.', true); return; }
+  const st = STATIONS[document.getElementById('vidElv').value];
+  const d = new Date(dato + 'T00:00:00Z');
+  const next = new Date(d.getTime() + 86400000).toISOString().slice(0, 10);
+  setVidStatus('Henter vannføring fra NVE …', false);
+  try {
+    const url = 'https://hydapi.nve.no/api/v1/Observations?StationId=' + st
+      + '&Parameter=1001&ResolutionTime=60&ReferenceTime=' + dato + '/' + next;
+    const res = await fetch(url, { headers: { 'X-API-Key': key } });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const obs = (data.data && data.data[0] && data.data[0].observations) || [];
+    const vals = obs.filter(o => o.value !== null && o.value !== undefined);
+    if (!vals.length) throw new Error('ingen observasjoner for datoen');
+    const tid = document.getElementById('vidTid').value;
+    let v;
+    if (tid) {
+      const target = new Date(dato + 'T' + tid + ':00Z').getTime();
+      vals.sort((a, b) => Math.abs(new Date(a.time) - target) - Math.abs(new Date(b.time) - target));
+      v = vals[0].value;
+    } else {
+      v = vals.reduce((s, o) => s + o.value, 0) / vals.length;
+    }
+    document.getElementById('vidFlow').value = Math.round(v);
+    setVidStatus('Vannføring: ' + Math.round(v) + ' m³/s (' + (tid ? 'timesverdi nærmest ' + tid : 'døgnmiddel av timesverdier') + '). ✓', false);
+  } catch (e) {
+    setVidStatus('NVE-oppslag feilet: ' + e.message, true);
+  }
+}
+
+async function leggTilVideo() {
+  if (!getToken()) { setVidStatus('Lagre GitHub-token først.', true); return; }
+  const elv = document.getElementById('vidElv').value;
+  const zone = document.getElementById('vidSone').value.trim();
+  const ytId = parseYouTubeId(document.getElementById('vidYt').value);
+  const dato = document.getElementById('vidDato').value;
+  const tid = document.getElementById('vidTid').value;
+  const koord = document.getElementById('vidKoord').value.split(',').map(x => parseFloat(x.trim()));
+  const caption = document.getElementById('vidCaption').value.trim();
+  const flow = parseFloat(document.getElementById('vidFlow').value);
+  if (!zone) { setVidStatus('Sone mangler.', true); return; }
+  if (!ytId) { setVidStatus('Ugyldig YouTube-lenke/ID.', true); return; }
+  if (!dato) { setVidStatus('Dato mangler.', true); return; }
+  if (koord.length !== 2 || !isFinite(koord[0]) || !isFinite(koord[1])) { setVidStatus('Ugyldige koordinater — bruk formatet «58.1299, 7.3637».', true); return; }
+  if (!isFinite(flow)) { setVidStatus('Vannføring mangler — bruk «Hent fra NVE» eller skriv inn manuelt.', true); return; }
+  document.getElementById('vidBtn').disabled = true;
+  setVidStatus('Lagrer …', false);
+  try {
+    const vidApi = 'https://api.github.com/repos/' + OWNER + '/' + REPO + '/contents/data/videoer_' + elv + '.json';
+    let list = [], vidSha = null;
+    const getRes = await fetch(vidApi, { headers: headers(), cache: 'no-cache' });
+    if (getRes.ok) {
+      const gd = await getRes.json();
+      vidSha = gd.sha;
+      list = JSON.parse(decodeURIComponent(escape(atob(gd.content.replace(/\n/g, '')))));
+    } else if (getRes.status !== 404) {
+      throw new Error('HTTP ' + getRes.status + ' ved henting');
+    }
+    let maxN = 0;
+    list.forEach(v => { const m = /^V-(\d+)$/.exec(v.id || ''); if (m) maxN = Math.max(maxN, parseInt(m[1], 10)); });
+    const entry = {
+      id: 'V-' + String(maxN + 1).padStart(3, '0'),
+      zone: zone,
+      lat: koord[0],
+      lon: koord[1],
+      youtubeId: ytId,
+      caption: caption || (zone + ' · Video'),
+      dateISO: dato,
+      timeUTC: tid || null,
+      vannforing: Math.round(flow)
+    };
+    list.push(entry);
+    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(list, null, 2) + '\n')));
+    const body = { message: 'Legg til video ' + entry.id + ' (' + elv + ') via admin', content: b64 };
+    if (vidSha) body.sha = vidSha;
+    const putRes = await fetch(vidApi, {
+      method: 'PUT',
+      headers: { ...headers(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!putRes.ok) {
+      const err = await putRes.json().catch(() => ({}));
+      throw new Error('HTTP ' + putRes.status + (err.message ? ' — ' + err.message : ''));
+    }
+    setVidStatus('Lagret ' + entry.id + ' til videoer_' + elv + '.json ✓ (synlig i dashbordet etter Pages-cache, ~10 min).', false);
+    document.getElementById('vidYt').value = '';
+    document.getElementById('vidCaption').value = '';
+    document.getElementById('vidFlow').value = '';
+  } catch (e) {
+    setVidStatus('Lagring feilet: ' + e.message, true);
+  } finally {
+    document.getElementById('vidBtn').disabled = false;
+  }
+}
+
 // Init
+if (localStorage.getItem(NVE_KEY)) {
+  document.getElementById('nveInput').placeholder = 'NVE-nøkkel er lagret ✓ (lim inn ny for å bytte)';
+}
 if (getToken()) {
   document.getElementById('tokenInput').placeholder = 'Token er lagret ✓ (lim inn nytt for å bytte)';
 }
