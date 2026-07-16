@@ -1,6 +1,13 @@
 [
  {
   "dato": "2026-07-16",
+  "sone": "Sone 3",
+  "vekt": 2.5,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-16",
   "sone": "Delomr2, Sone Hauge C",
   "vekt": 2.5,
   "agn": "Flue",
