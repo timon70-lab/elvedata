@@ -1155,9 +1155,18 @@ function closeMedia() {
 }
 function playVideo(el, ytId) {
   el.outerHTML = '<iframe class="video-frame" src="https://www.youtube-nocookie.com/embed/' + ytId
-    + '?autoplay=1&rel=0" title="Fangstvideo" loading="lazy" '
+    + '?autoplay=1&rel=0&enablejsapi=1" title="Fangstvideo" loading="lazy" '
     + 'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
 }
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'hidden') return;
+  document.querySelectorAll('iframe.video-frame').forEach(f => {
+    try {
+      f.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":[]}', 'https://www.youtube-nocookie.com');
+    } catch (e) { /* ignorer */ }
+  });
+});
 
 function openFullscreen() {
   if (!_activeZoneMedia.length) return;
@@ -1349,7 +1358,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.130</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.131</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
