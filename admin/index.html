@@ -89,7 +89,7 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
   <h2>🎬 Registrer video</h2>
   <div class="vid-grid">
     <label>Elv
-      <select id="vidElv">
+      <select id="vidElv" onchange="fyllSoner()">
         <option value="audna" selected>Audna (pilot)</option>
         <option value="lygna">Lygna</option>
         <option value="mandalselva">Mandalselva</option>
@@ -97,7 +97,7 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
         <option value="sygna">Sygna</option>
       </select>
     </label>
-    <label>Sone <input type="text" id="vidSone" placeholder="f.eks. Sone 5A"></label>
+    <label>Sone <select id="vidSone"><option value="">— laster soner … —</option></select></label>
     <label style="grid-column:1/-1">YouTube-lenke eller video-ID
       <input type="text" id="vidYt" placeholder="https://youtu.be/… eller 11-tegns ID"></label>
     <label>Dato <input type="date" id="vidDato"></label>
@@ -270,6 +270,34 @@ async function saveConfig() {
 /* ---------- Videoregistrering ---------- */
 const NVE_KEY = 'elvedata_nve_key';
 const STATIONS = { audna: '23.8.0', lygna: '24.9.0', mandalselva: '22.4.0', otra: '21.11.0', sygna: '22.22.0' };
+const SONER_URL = 'https://timon70-lab.github.io/elvedata/data/soner.json';
+let SONER = null;
+
+async function lastSoner() {
+  try {
+    const res = await fetch(SONER_URL, { cache: 'no-cache' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    SONER = await res.json();
+    fyllSoner();
+  } catch (e) {
+    // Fallback: bytt til fritekstfelt så registrering ikke blokkeres
+    const sel = document.getElementById('vidSone');
+    const inp = document.createElement('input');
+    inp.type = 'text'; inp.id = 'vidSone'; inp.placeholder = 'soner.json utilgjengelig — skriv sonenavn EKSAKT';
+    sel.replaceWith(inp);
+    setVidStatus('Kunne ikke laste soneliste (' + e.message + ') — sonefeltet er fritekst. Vær nøye med eksakt navn.', true);
+  }
+}
+
+function fyllSoner() {
+  if (!SONER) return;
+  const elv = document.getElementById('vidElv').value;
+  const sel = document.getElementById('vidSone');
+  if (sel.tagName !== 'SELECT') return;
+  const soner = SONER[elv] || [];
+  sel.innerHTML = '<option value="">— velg sone —</option>'
+    + soner.map(z => '<option value="' + z.replace(/"/g, '&quot;') + '">' + z + '</option>').join('');
+}
 
 function saveNveKey() {
   const t = document.getElementById('nveInput').value.trim();
@@ -337,7 +365,7 @@ async function leggTilVideo() {
   const koord = document.getElementById('vidKoord').value.split(',').map(x => parseFloat(x.trim()));
   const caption = document.getElementById('vidCaption').value.trim();
   const flow = parseFloat(document.getElementById('vidFlow').value);
-  if (!zone) { setVidStatus('Sone mangler.', true); return; }
+  if (!zone) { setVidStatus('Velg sone.', true); return; }
   if (!ytId) { setVidStatus('Ugyldig YouTube-lenke/ID.', true); return; }
   if (!dato) { setVidStatus('Dato mangler.', true); return; }
   if (koord.length !== 2 || !isFinite(koord[0]) || !isFinite(koord[1])) { setVidStatus('Ugyldige koordinater — bruk formatet «58.1299, 7.3637».', true); return; }
@@ -393,6 +421,7 @@ async function leggTilVideo() {
 }
 
 // Init
+lastSoner();
 if (localStorage.getItem(NVE_KEY)) {
   document.getElementById('nveInput').placeholder = 'NVE-nøkkel er lagret ✓ (lim inn ny for å bytte)';
 }
