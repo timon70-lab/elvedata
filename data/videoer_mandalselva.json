@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "id": "V-001",
+    "zone": "Sone 3",
+    "lat": 58.1748,
+    "lon": 7.5476,
+    "youtubeId": "F-WxrQf_XOY",
+    "caption": "Fra østsiden",
+    "dateISO": "2021-06-05",
+    "timeUTC": "10:56",
+    "vannforing": 70
+  }
+]
