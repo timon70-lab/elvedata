@@ -844,28 +844,28 @@
   "lat": 58.116596,
   "lon": 7.529694,
   "file": "BringsdalC_20210708_0806.jpg",
-  "caption": "Bringsdal C",
-  "zone": "Bringsdal C",
+  "caption": "Grimefossen A",
+  "zone": "Grimefossen A",
   "dateISO": "2021-07-08",
   "timeUTC": "06:06",
-  "locId": "Bringsdal C",
+  "locId": "Grimefossen A",
   "vannforing": 124.4,
-  "autoSone": true,
-  "soneAvstandM": 39
+  "autoSone": false,
+  "soneAvstandM": 62
  },
  {
   "id": "M-062",
   "lat": 58.116596,
   "lon": 7.529694,
   "file": "BringsdalC_20210708_0806_2.jpg",
-  "caption": "Bringsdal C",
-  "zone": "Bringsdal C",
+  "caption": "Grimefossen A",
+  "zone": "Grimefossen A",
   "dateISO": "2021-07-08",
   "timeUTC": "06:06",
-  "locId": "Bringsdal C",
+  "locId": "Grimefossen A",
   "vannforing": 124.4,
-  "autoSone": true,
-  "soneAvstandM": 39
+  "autoSone": false,
+  "soneAvstandM": 62
  },
  {
   "id": "M-063",
@@ -900,27 +900,27 @@
   "lat": 58.117629,
   "lon": 7.527396,
   "file": "Fossefjellenesyd_20210708_0814.jpg",
-  "caption": "Fossefjellene syd",
-  "zone": "Fossefjellene syd",
+  "caption": "Grimefossen A",
+  "zone": "Grimefossen A",
   "dateISO": "2021-07-08",
   "timeUTC": "06:14",
-  "locId": "Fossefjellene syd",
+  "locId": "Grimefossen A",
   "vannforing": 124.4,
-  "autoSone": true,
-  "soneAvstandM": 40
+  "autoSone": false,
+  "soneAvstandM": 111
  },
  {
   "id": "M-066",
   "lat": 58.117629,
   "lon": 7.527396,
   "file": "Fossefjellenesyd_20210708_0814_2.jpg",
-  "caption": "Fossefjellene syd",
-  "zone": "Fossefjellene syd",
+  "caption": "Grimefossen A",
+  "zone": "Grimefossen A",
   "dateISO": "2021-07-08",
   "timeUTC": "06:14",
-  "locId": "Fossefjellene syd",
+  "locId": "Grimefossen A",
   "vannforing": 124.4,
-  "autoSone": true,
-  "soneAvstandM": 40
+  "autoSone": false,
+  "soneAvstandM": 111
  }
 ]
