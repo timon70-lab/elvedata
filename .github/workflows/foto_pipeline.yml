@@ -6,6 +6,8 @@ on:
       - 'bilder/innboks/audna/**'
       - 'bilder/innboks/mandalselva/**'
       - 'bilder/innboks/lygna/**'
+      - 'bilder/innboks/otra/**'
+      - 'bilder/innboks/sygna/**'
   workflow_dispatch:
 
 permissions:

@@ -1,0 +1,74 @@
+name: Bulk foto-pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release-tag med zip-vedlegg (undermapper per elv: audna/, lygna/, mandalselva/, otra/, sygna/)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: foto-pipeline
+  cancel-in-progress: false
+
+jobs:
+  bulk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sjekk ut repo
+        uses: actions/checkout@v4
+
+      - name: Sett opp Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Installer avhengigheter
+        run: pip install pillow requests
+
+      - name: Last ned release-zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/bulk
+          gh release download "${{ inputs.release_tag }}" --pattern '*.zip' --dir /tmp/bulk --repo "${{ github.repository }}"
+          ls -la /tmp/bulk
+
+      - name: Pakk ut til innbokser
+        run: python scripts/bulk_unpack.py /tmp/bulk
+
+      - name: Kjør foto-pipeline
+        env:
+          NVE_API_KEY: ${{ secrets.NVE_API_KEY }}
+        run: python scripts/foto_pipeline.py
+
+      - name: Oppsummering og opprydding
+        run: |
+          echo "## Bulk foto-pipeline — ${{ inputs.release_tag }}" >> "$GITHUB_STEP_SUMMARY"
+          for elv in audna lygna mandalselva otra sygna; do
+            if [ -f "data/photos_${elv}.json" ] && ! git diff --quiet -- "data/photos_${elv}.json"; then
+              antall=$(git diff -- "data/photos_${elv}.json" | grep -c '^+    "id":' || true)
+              echo "- **${elv}**: ${antall} nye bilder publisert" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+          if [ -d bilder/innboks/manuell ] && [ -n "$(ls -A bilder/innboks/manuell 2>/dev/null)" ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "### ⚠️ Ikke publisert (mangler GPS/EXIF) — last opp manuelt via foto-issue:" >> "$GITHUB_STEP_SUMMARY"
+            ls bilder/innboks/manuell | sed 's/^/- /' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Alle bilder med GPS ble publisert. ✓" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          rm -rf bilder/innboks
+
+      - name: Commit og push resultat
+        run: |
+          git config user.name "bulk-foto-pipeline"
+          git config user.email "actions@users.noreply.github.com"
+          git add bilder data
+          git diff --cached --quiet || git commit -m "Bulk foto-pipeline: ${{ inputs.release_tag }} [skip ci]"
+          git push
