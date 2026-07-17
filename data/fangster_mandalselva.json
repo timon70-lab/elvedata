@@ -1,6 +1,27 @@
 [
  {
   "dato": "2026-07-17",
+  "sone": "Delomr 2, Sone Fuskeland under Nødingfossen",
+  "vekt": 4.7,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-17",
+  "sone": "Sone 3",
+  "vekt": 2.6,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-17",
+  "sone": "Laksehylen",
+  "vekt": 6,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-17",
   "sone": "Hauge D",
   "vekt": 1.8,
   "agn": "Flue",
