@@ -98,7 +98,7 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
   <div class="vid-grid">
     <label>Elv
       <select id="vidElv" onchange="fyllSoner(); listVideos();">
-        <option value="audna" selected>Audna (pilot)</option>
+        <option value="audna" selected>Audna</option>
         <option value="lygna">Lygna</option>
         <option value="mandalselva">Mandalselva</option>
         <option value="otra">Otra</option>
@@ -461,6 +461,20 @@ async function leggTilVideo() {
       list = JSON.parse(decodeURIComponent(escape(atob(gd.content.replace(/\n/g, '')))));
     } else if (getRes.status !== 404) {
       throw new Error('HTTP ' + getRes.status + ' ved henting');
+    }
+    // Duplikatvern
+    const dupYt = list.find(v => v.youtubeId === ytId);
+    if (dupYt) {
+      throw new Error('Denne videoen er allerede registrert som ' + dupYt.id + ' (' + dupYt.zone + ', ' + dupYt.dateISO + '). Slett den først hvis den skal erstattes.');
+    }
+    const dupTid = list.find(v => v.dateISO === dato && (v.timeUTC || null) === (tid || null));
+    if (dupTid) {
+      if (!confirm('⚠️ ' + dupTid.id + ' (' + dupTid.zone + ') er allerede registrert med samme opptakstidspunkt ('
+          + dato + (tid ? ' ' + tid : '') + ').\n\nDette kan være samme videofil lastet opp på nytt til YouTube (som gir ny video-ID).\n\nRegistrere likevel?')) {
+        setVidStatus('Avbrutt — ikke lagret.', false);
+        document.getElementById('vidBtn').disabled = false;
+        return;
+      }
     }
     let maxN = 0;
     list.forEach(v => { const m = /^V-(\d+)$/.exec(v.id || ''); if (m) maxN = Math.max(maxN, parseInt(m[1], 10)); });
