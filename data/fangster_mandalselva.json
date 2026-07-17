@@ -1,6 +1,13 @@
 [
  {
   "dato": "2026-07-17",
+  "sone": "Hauge D",
+  "vekt": 1.8,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-17",
   "sone": "Sone 3",
   "vekt": 5.5,
   "agn": "Flue",
