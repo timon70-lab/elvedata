@@ -98,6 +98,8 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
       </select>
     </label>
     <label>Sone <select id="vidSone"><option value="">— laster soner … —</option></select></label>
+    <label style="grid-column:1/-1">📂 Autoutfyll fra videofil — leses kun lokalt i nettleseren, lastes ikke opp
+      <input type="file" id="vidFil" accept="video/mp4,video/quicktime,.mp4,.mov" onchange="lesVideofil(event)"></label>
     <label style="grid-column:1/-1">YouTube-lenke eller video-ID
       <input type="text" id="vidYt" placeholder="https://youtu.be/… eller 11-tegns ID"></label>
     <label>Dato <input type="date" id="vidDato"></label>
@@ -319,6 +321,69 @@ function parseYouTubeId(input) {
   if (/^[A-Za-z0-9_-]{11}$/.test(t)) return t;
   const m = t.match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([A-Za-z0-9_-]{11})/);
   return m ? m[1] : null;
+}
+
+async function lesVideofil(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  setVidStatus('Leser metadata fra ' + file.name + ' …', false);
+  try {
+    const buf = new Uint8Array(await file.arrayBuffer());
+    const dv = new DataView(buf.buffer);
+    // Finn toppnivå-atomet moov (metadata skal kun søkes der, ikke i mdat)
+    let pos = 0, moovStart = -1, moovEnd = -1;
+    while (pos + 8 <= buf.length) {
+      let size = dv.getUint32(pos);
+      const typ = String.fromCharCode(buf[pos+4], buf[pos+5], buf[pos+6], buf[pos+7]);
+      let hdr = 8;
+      if (size === 1) { size = Number(dv.getBigUint64(pos + 8)); hdr = 16; }
+      if (size < hdr) break;
+      if (typ === 'moov') { moovStart = pos; moovEnd = pos + size; break; }
+      pos += size;
+    }
+    if (moovStart < 0) throw new Error('fant ikke moov-atom (er dette en MP4/MOV?)');
+
+    // ©xyz (0xA9,'x','y','z') med ISO6709-streng: [2 byte lengde][2 byte språk][streng]
+    let lat = null, lon = null;
+    for (let i = moovStart; i < moovEnd - 4; i++) {
+      if (buf[i] === 0xA9 && buf[i+1] === 0x78 && buf[i+2] === 0x79 && buf[i+3] === 0x7A) {
+        const len = dv.getUint16(i + 4);
+        const str = new TextDecoder().decode(buf.slice(i + 8, i + 8 + len));
+        const m = str.match(/([+-]\d+(?:\.\d+)?)([+-]\d+(?:\.\d+)?)/);
+        if (m) { lat = parseFloat(m[1]); lon = parseFloat(m[2]); }
+        break;
+      }
+    }
+
+    // mvhd: creation_time (sekunder siden 1904-01-01 UTC)
+    let dtUTC = null;
+    for (let i = moovStart; i < moovEnd - 4; i++) {
+      if (buf[i] === 0x6D && buf[i+1] === 0x76 && buf[i+2] === 0x68 && buf[i+3] === 0x64) {
+        const ver = buf[i + 4];
+        const secs = ver === 0 ? dv.getUint32(i + 8) : Number(dv.getBigUint64(i + 8));
+        if (secs > 0) dtUTC = new Date((secs - 2082844800) * 1000);   // 1904→1970-offset
+        break;
+      }
+    }
+
+    const deler = [];
+    if (lat !== null && lon !== null) {
+      document.getElementById('vidKoord').value = lat + ', ' + lon;
+      deler.push('posisjon ' + lat + ', ' + lon);
+    }
+    if (dtUTC && !isNaN(dtUTC)) {
+      document.getElementById('vidDato').value = dtUTC.toISOString().slice(0, 10);
+      document.getElementById('vidTid').value = dtUTC.toISOString().slice(11, 16);
+      deler.push('tidspunkt ' + dtUTC.toISOString().slice(0, 16).replace('T', ' ') + ' UTC');
+    }
+    if (!deler.length) throw new Error('ingen posisjons- eller tidsdata funnet i filen — sjekk at posisjonslagring er på i kameraappen');
+    setVidStatus('Autoutfylt: ' + deler.join(' · ') + '. ✓', false);
+    if (dtUTC && localStorage.getItem(NVE_KEY)) hentVannforing();
+  } catch (e) {
+    setVidStatus('Kunne ikke lese videofil: ' + e.message, true);
+  } finally {
+    ev.target.value = '';
+  }
 }
 
 async function hentVannforing() {
