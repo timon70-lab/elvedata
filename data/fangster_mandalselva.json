@@ -1,6 +1,27 @@
 [
  {
   "dato": "2026-07-17",
+  "sone": "Delomr 2, Strømmen",
+  "vekt": 2.7,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-17",
+  "sone": "Fuskeland A",
+  "vekt": 2.1,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-17",
+  "sone": "Fuskeland A",
+  "vekt": 1.5,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-17",
   "sone": "Fuskeland B",
   "vekt": 3.5,
   "agn": "Sluk",
@@ -46,6 +67,13 @@
   "sone": "Sone 3",
   "vekt": 5.5,
   "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-16",
+  "sone": "Fuskeland A",
+  "vekt": 1.7,
+  "agn": "Meitemark",
   "art": "Laks"
  },
  {
