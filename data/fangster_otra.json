@@ -1,6 +1,13 @@
 [
  {
   "dato": "2026-07-17",
+  "sone": "Sone 3C Mosby",
+  "vekt": 3.23,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-17",
   "sone": "Sone 5A Blå",
   "vekt": 2.2,
   "agn": "Flue",
