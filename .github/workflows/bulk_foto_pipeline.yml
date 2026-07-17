@@ -49,19 +49,29 @@ jobs:
       - name: Oppsummering og opprydding
         run: |
           echo "## Bulk foto-pipeline — ${{ inputs.release_tag }}" >> "$GITHUB_STEP_SUMMARY"
+          NYE_MANUELL=""
           for elv in audna lygna mandalselva otra sygna; do
             if [ -f "data/photos_${elv}.json" ] && ! git diff --quiet -- "data/photos_${elv}.json"; then
-              antall=$(git diff -- "data/photos_${elv}.json" | grep -c '^+    "id":' || true)
+              # Innrykk (indent=1) gir 2 mellomrom foran "id" - mønsteret er bevisst
+              # mellomrom-uavhengig ('^+ *"id":') så det tåler fremtidige formatendringer.
+              antall=$(git diff -- "data/photos_${elv}.json" | grep -c '^+ *"id":' || true)
               echo "- **${elv}**: ${antall} nye bilder publisert" >> "$GITHUB_STEP_SUMMARY"
+            fi
+            if [ -d "bilder/innboks/${elv}" ] && [ -n "$(ls -A "bilder/innboks/${elv}" 2>/dev/null)" ]; then
+              NYE_MANUELL="ja"
             fi
           done
           if [ -d bilder/innboks/manuell ] && [ -n "$(ls -A bilder/innboks/manuell 2>/dev/null)" ]; then
             echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "### ⚠️ Ikke publisert (mangler GPS/EXIF) — last opp manuelt via foto-issue:" >> "$GITHUB_STEP_SUMMARY"
+            echo "### ⚠️ Ikke publisert i denne kjøringen (mangler GPS/EXIF, sonetilordning eller bildeprosessering feilet) — se rå logg under «Kjør foto-pipeline» for eksakt årsak per fil, last opp manuelt via foto-issue:" >> "$GITHUB_STEP_SUMMARY"
             ls bilder/innboks/manuell | sed 's/^/- /' >> "$GITHUB_STEP_SUMMARY"
           else
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo "Alle bilder med GPS ble publisert. ✓" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -n "$NYE_MANUELL" ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "⚠️ Noen elve-innbokser har fortsatt filer liggende (bør være tomme etter en vellykket kjøring) - sjekk rå logg." >> "$GITHUB_STEP_SUMMARY"
           fi
           rm -rf bilder/innboks
 
