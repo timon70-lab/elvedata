@@ -177,6 +177,13 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .zi-boom-icon { font-size:1.1rem; line-height:1; flex-shrink:0; }
 .zi-boom-hdr { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#975a16; }
 .zi-boom-txt { font-size:0.68rem; color:#744210; margin-top:1px; }
+.zi-boom-cols { display:flex; gap:14px; width:100%; }
+.zi-boom-col { flex:1; min-width:0; }
+.zi-boom-col + .zi-boom-col { border-left:1px solid #fbd38d; padding-left:14px; }
+.zi-tool-hdr { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#975a16; margin-bottom:3px; }
+.zi-tool-row { display:flex; width:100%; align-items:center; justify-content:space-between; line-height:1.3; }
+.zi-tool-name { font-size:0.68rem; color:#744210; }
+.zi-tool-stars { letter-spacing:1px; color:#d69e2e; font-size:0.75rem; text-shadow:0 1px 1.5px rgba(0,0,0,0.3); }
 .sparkline-row { display:flex; align-items:center; gap:8px; margin-top:4px; }
 .sparkline-wrap { flex:1; height:32px; }
 .sparkline-wrap svg { width:100%; height:32px; }
@@ -291,6 +298,7 @@ const VIDEOS_URL = 'https://timon70-lab.github.io/elvedata/data/videoer_mandalse
 
 /* ---------- Sentral konfig (data/config.json) — scoringsparametre ---------- */
 const PRICES = {"Bjåhylen":{"dogn":800},"Bjørkenes":{"dogn":300},"Bringsdal A":{"dogn":250},"Bringsdal B":{"dogn":250},"Bringsdal C":{"dogn":250},"Fossefjellene":{"dogn":500},"Fossefjellene syd":{"dogn":450},"Furuholmen":{"dogn":300,"sesong":1000},"Fuskeland A":{"dogn":450},"Fuskeland B":{"dogn":450},"Fuskeland C":{"dogn":400},"Fuskeland D":{"dogn":450},"Fuskeland E":{"dogn":400},"Fuskeland under Nødingfossen":{"dogn":900},"Grimefossen A":{"dogn":400},"Grimefossen B":{"dogn":400},"Hauge A":{"dogn":450},"Hauge B1":{"dogn":450},"Hauge B2":{"dogn":425},"Hauge C":{"dogn":650},"Hauge D":{"dogn":350},"Heia":{"dogn":100},"Holmegård":{"dogn":150,"sesong":1250},"Holmesland A":{"dogn":590},"Holmesland B":{"dogn":375},"Holmesland C":{"dogn":325},"Holmesland P":{"dogn":670},"Klevelandsfossen":{"dogn":500},"Laksehylen":{"dogn":1000},"Møll":{"dogn":100,"sesong":500},"Nedre Holum":{"dogn":50,"sesong":500},"Nedre Nøding":{"dogn":350},"Nodehylen":{"dogn":1000},"Smeland":{"dogn":250,"sesong":1000},"Sone 1":{"dogn":150,"sesong":800},"Sone 3":{"dogn":455,"sesong":7980},"Sone 4":{"dogn":300,"sesong":3000},"Steinshylen":{"dogn":1000},"Stoveland":{"dogn":200,"sesong":1000},"Strædethylen":{"dogn":600}};
+const ZONE_TOOL_RATING = {"Holmesland B":[{"name":"Sluk","stars":3},{"name":"Flue","stars":2},{"name":"Mark","stars":1}],"Strømmen":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Holmesland P":[{"name":"Sluk","stars":3},{"name":"Mark","stars":2},{"name":"Flue","stars":1}],"Sone 3":[{"name":"Flue","stars":3},{"name":"Mark","stars":2},{"name":"Sluk","stars":1}],"Fuskeland Øvre":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2}],"Hauge C":[{"name":"Sluk","stars":3},{"name":"Flue","stars":2},{"name":"Mark","stars":1}],"Åsefoss":[{"name":"Mark","stars":3},{"name":"Flue","stars":2},{"name":"Sluk","stars":1}],"Fuskeland Nedre":[{"name":"Sluk","stars":3},{"name":"Flue","stars":2},{"name":"Mark","stars":1}],"Fossefjellene":[{"name":"Mark","stars":3},{"name":"Sluk","stars":2},{"name":"Flue","stars":1}],"Fuskeland A":[{"name":"Mark","stars":3},{"name":"Sluk","stars":2},{"name":"Flue","stars":1}],"Holmesland A":[{"name":"Flue","stars":3},{"name":"Mark","stars":2},{"name":"Sluk","stars":1}],"Hauge B":[{"name":"Sluk","stars":3},{"name":"Mark","stars":2},{"name":"Flue","stars":1}],"Nedre Holum":[{"name":"Sluk","stars":3},{"name":"Flue","stars":2}],"Møll":[{"name":"Sluk","stars":3},{"name":"Flue","stars":2}],"Haugefossen":[{"name":"Mark","stars":3}],"Hauge A":[{"name":"Flue","stars":3},{"name":"Mark","stars":2},{"name":"Sluk","stars":1}],"Holmesland C":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 4":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 1":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Grimefossen B":[{"name":"Sluk","stars":3},{"name":"Mark","stars":2},{"name":"Flue","stars":1}],"Nødingfossen":[{"name":"Mark","stars":3},{"name":"Sluk","stars":2}],"Grimefossen A":[{"name":"Mark","stars":3},{"name":"Sluk","stars":2},{"name":"Flue","stars":1}],"Holmegård":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Fossefjellene syd":[{"name":"Sluk","stars":3},{"name":"Mark","stars":2},{"name":"Flue","stars":1}],"Haugefossen Øst":[{"name":"Mark","stars":3},{"name":"Sluk","stars":2}],"Stoveland":[{"name":"Sluk","stars":3},{"name":"Mark","stars":2},{"name":"Flue","stars":1}],"Fuskeland D":[{"name":"Flue","stars":3},{"name":"Mark","stars":2},{"name":"Sluk","stars":1}],"Bringsdal A":[{"name":"Mark","stars":3},{"name":"Flue","stars":2},{"name":"Sluk","stars":1}],"Nedre Nøding":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Fuskeland B":[{"name":"Flue","stars":3},{"name":"Mark","stars":2},{"name":"Sluk","stars":1}],"Heia":[{"name":"Sluk","stars":3},{"name":"Mark","stars":2},{"name":"Flue","stars":1}],"Bringsdal C":[{"name":"Mark","stars":3},{"name":"Flue","stars":2},{"name":"Sluk","stars":1}],"Fuskeland Revestien":[{"name":"Flue","stars":3},{"name":"Mark","stars":2},{"name":"Sluk","stars":1}],"Smeland":[{"name":"Mark","stars":3},{"name":"Sluk","stars":2},{"name":"Flue","stars":1}],"Bjørkenes":[{"name":"Sluk","stars":3},{"name":"Mark","stars":2},{"name":"Flue","stars":1}],"Lakseøya":[{"name":"Sluk","stars":3},{"name":"Flue","stars":2},{"name":"Mark","stars":1}],"Fuskeland E":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2}],"Øvre Holum":[{"name":"Sluk","stars":3}],"Laksehylen":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Nodehylen":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Furuholmen":[{"name":"Flue","stars":3},{"name":"Mark","stars":2},{"name":"Sluk","stars":1}],"Bjåhylen":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Steinshylen":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Fuskeland C":[{"name":"Sluk","stars":3},{"name":"Mark","stars":2},{"name":"Flue","stars":1}],"Bringsdal B":[{"name":"Mark","stars":3},{"name":"Sluk","stars":2}],"Strædethylen":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Haugefossen Vest":[{"name":"Mark","stars":3}],"Fuskeland privat":[{"name":"Sluk","stars":3},{"name":"Flue","stars":2}],"Hauge D":[{"name":"Sluk","stars":3},{"name":"Flue","stars":2},{"name":"Mark","stars":1}],"Fuskeland under Nødingfossen":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Klevelandsfossen":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Øvre Nøding":[{"name":"Mark","stars":3},{"name":"Sluk","stars":2},{"name":"Flue","stars":1}],"Båtkort":[{"name":"Sluk","stars":3},{"name":"Flue","stars":2}],"Hauge B2":[{"name":"Sluk","stars":3},{"name":"Mark","stars":2},{"name":"Flue","stars":1}],"Hauge B1":[{"name":"Sluk","stars":3},{"name":"Flue","stars":2},{"name":"Mark","stars":1}],"Sandnes fiskeri":[{"name":"Sluk","stars":3}]};
 const BOOM_DAYS = {"Holmesland B":{"date":"2023-08-15","count":4,"flow":73},"Strømmen":{"date":"2023-06-01","count":12,"flow":76},"Holmesland P":{"date":"2021-06-01","count":16,"flow":86},"Sone 3":{"date":"2018-08-13","count":85,"flow":54},"Fuskeland Øvre":{"date":"2016-06-01","count":7,"flow":68},"Hauge C":{"date":"2017-06-03","count":7,"flow":37},"Åsefoss":{"date":"2019-08-07","count":11,"flow":68},"Fuskeland Nedre":{"date":"2017-06-01","count":6,"flow":35},"Fossefjellene":{"date":"2019-08-01","count":7,"flow":70},"Fuskeland A":{"date":"2022-07-02","count":6,"flow":25},"Holmesland A":{"date":"2021-06-03","count":12,"flow":64},"Hauge B":{"date":"2020-08-01","count":6,"flow":171},"Nedre Holum":{"date":"2022-06-01","count":3,"flow":33},"Møll":{"date":"2020-08-02","count":8,"flow":116},"Sone 1":{"date":"2017-09-04","count":23,"flow":26},"Haugefossen":{"date":"2023-07-25","count":6,"flow":72},"Hauge A":{"date":"2021-07-12","count":7,"flow":64},"Holmesland C":{"date":"2023-06-10","count":3,"flow":24},"Sone 4":{"date":"2017-09-14","count":13,"flow":182},"Grimefossen B":{"date":"2022-08-04","count":3,"flow":28},"Grimefossen A":{"date":"2019-08-20","count":4,"flow":134},"Holmegård":{"date":"2020-07-05","count":9,"flow":110},"Haugefossen Øst":{"date":"2019-08-01","count":8,"flow":70},"Stoveland":{"date":"2020-07-11","count":4,"flow":74},"Fuskeland D":{"date":"2018-09-14","count":5,"flow":133},"Bringsdal A":{"date":"2022-08-19","count":4,"flow":25},"Nedre Nøding":{"date":"2017-08-05","count":13,"flow":211},"Fuskeland B":{"date":"2022-08-19","count":6,"flow":25},"Bringsdal C":{"date":"2018-09-01","count":3,"flow":55},"Smeland":{"date":"2022-08-26","count":4,"flow":28},"Bjørkenes":{"date":"2024-07-26","count":3,"flow":74},"Lakseøya":{"date":"2023-07-17","count":6,"flow":134},"Laksehylen":{"date":"2018-09-14","count":9,"flow":133},"Nodehylen":{"date":"2022-09-10","count":7,"flow":18},"Furuholmen":{"date":"2021-08-10","count":4,"flow":51},"Bjåhylen":{"date":"2018-08-11","count":14,"flow":71},"Steinshylen":{"date":"2018-09-14","count":11,"flow":133},"Fuskeland C":{"date":"2022-08-10","count":3,"flow":25},"Bringsdal B":{"date":"2022-07-24","count":3,"flow":24},"Strædethylen":{"date":"2018-09-09","count":4,"flow":356},"Haugefossen Vest":{"date":"2018-07-09","count":3,"flow":39},"Fuskeland privat":{"date":"2018-06-01","count":6,"flow":45},"Hauge D":{"date":"2022-08-04","count":4,"flow":28},"Fuskeland under Nødingfossen":{"date":"2021-06-01","count":12,"flow":86},"Klevelandsfossen":{"date":"2018-08-18","count":4,"flow":43},"Båtkort":{"date":"2023-07-10","count":7,"flow":79},"Hauge B2":{"date":"2023-07-01","count":3,"flow":25},"Hauge B1":{"date":"2024-08-20","count":4,"flow":107}};
 let SCORE_CFG = { rate: 0.8, vol: 0.2, shrinkC: 15, knee: 80 };   // fallback hvis config.json ikke kan hentes
 let SPARK_CFG = { max: 75, normal: 52 };   // fallback: P75 / median sesongvannføring
@@ -895,17 +903,34 @@ function showZoneInfo(zone, scrollTo = true) {
   }
 
   const boom = BOOM_DAYS[zone];
-  let boomHtml = '';
+  let boomTxt;
   if (boom) {
     const bd = new Date(boom.date + 'T00:00:00');
     const dateLbl = bd.getDate() + '. ' + MONTH_NAMES_FULL[bd.getMonth()] + ' ' + bd.getFullYear();
-    boomHtml = '<div class="zi-boom">'
-      + '<span class="zi-boom-icon">🏆</span>'
-      + '<div><div class="zi-boom-hdr">Rekorddag</div>'
-      + '<div class="zi-boom-txt">' + dateLbl + ' — ' + boom.count + ' fangster'
-      + (boom.flow != null ? ' (' + boom.flow + ' m³/s)' : '') + '</div></div>'
+    boomTxt = dateLbl + ' — ' + boom.count + ' fangster'
+      + (boom.flow != null ? ' (' + boom.flow + ' m³/s)' : '');
+  } else {
+    boomTxt = 'Ingen rekorddag verdt å nevne';
+  }
+  const boomColHtml = '<div style="display:flex;gap:8px;align-items:center;">'
+    + '<span class="zi-boom-icon">🏆</span>'
+    + '<div><div class="zi-boom-hdr">Rekorddag</div>'
+    + '<div class="zi-boom-txt">' + boomTxt + '</div></div>'
+    + '</div>';
+
+  const toolRating = ZONE_TOOL_RATING[zone];
+  let toolColHtml = '';
+  if (toolRating && toolRating.length) {
+    toolColHtml = '<div><div class="zi-tool-hdr">Beste redskap</div>'
+      + toolRating.map(t => '<div class="zi-tool-row"><span class="zi-tool-name">' + t.name
+        + '</span><span class="zi-tool-stars">' + '★'.repeat(t.stars) + '</span></div>').join('')
       + '</div>';
   }
+
+  let boomHtml = '<div class="zi-boom"><div class="zi-boom-cols">'
+    + '<div class="zi-boom-col" style="flex:1.6">' + boomColHtml + '</div>'
+    + (toolColHtml ? '<div class="zi-boom-col">' + toolColHtml + '</div>' : '')
+    + '</div></div>';
 
   const priceInfo = PRICES[zone];
   let priceHtml = '';
@@ -1277,7 +1302,11 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
+<<<<<<< Updated upstream
   © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.025</span><br>
+=======
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.026</span><br>
+>>>>>>> Stashed changes
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
