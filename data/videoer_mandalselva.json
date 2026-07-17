@@ -31,5 +31,16 @@
     "dateISO": "2021-06-05",
     "timeUTC": "12:25",
     "vannforing": 67
+  },
+  {
+    "id": "V-004",
+    "zone": "Sone 3",
+    "lat": 58.2332,
+    "lon": 7.5127,
+    "youtubeId": "ExcSoIvQ9eY",
+    "caption": "Sone 3 · Video",
+    "dateISO": "2021-07-08",
+    "timeUTC": "03:18",
+    "vannforing": 103
   }
 ]
