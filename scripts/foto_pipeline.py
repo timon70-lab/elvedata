@@ -65,6 +65,24 @@ RIVERS = {
         "date_rule": None,
         "zones": {"Gysfossen til Lygne": [[58.30483, 7.21033], [58.39585, 7.22089]], "Kvåsfossen til Gysfossen": [[58.26817, 7.18861], [58.30419, 7.20943]], "Sone 1 Bjerga og Fidja": [[58.14148, 7.01938], [58.14107, 7.03934]], "Sone 10 Grøvan og Foss": [[58.18731, 7.10734], [58.19597, 7.11697]], "Sone 11 Foss øvre": [[58.19641, 7.1173], [58.21209, 7.13638]], "Sone 13 Gitlestad": [[58.21788, 7.14613], [58.22142, 7.15094]], "Sone 14 Rudjord": [[58.22181, 7.15119], [58.23157, 7.16139]], "Sone 15 Vemestad ytre": [[58.23211, 7.16125], [58.23642, 7.17249]], "Sone 16 Vemestad øvre": [[58.2368, 7.17284], [58.24428, 7.17885]], "Sone 17 Moi": [[58.24471, 7.1788], [58.25733, 7.1904]], "Sone 18 Kvås": [[58.25792, 7.19041], [58.26308, 7.19369]], "Sone 2 Årnes": [[58.13953, 7.03994], [58.14298, 7.05089]], "Sone 3 Kvavik": [[58.1435, 7.05079], [58.14539, 7.05901]], "Sone 4 Berge øvre": [[58.14558, 7.06007], [58.14238, 7.06307]], "Sone 5 Bringsjord": [[58.14184, 7.06384], [58.14381, 7.07018]], "Sone 6 Bergsaker": [[58.14411, 7.07086], [58.14776, 7.07779]], "Sone 7": [[58.14797, 7.07895], [58.14917, 7.08637]], "Sone 8 Prestegården": [[58.14944, 7.08678], [58.16698, 7.08765]], "Sone 9 Kvelland": [[58.16748, 7.08782], [58.18692, 7.10662]], "Sone12 Vegge": [[58.21253, 7.1366], [58.21737, 7.14569]]},
     },
+    "otra": {
+        "inbox": "bilder/innboks/otra",
+        "out": "bilder/otra",
+        "json": "data/photos_otra.json",
+        "station": "21.11.0",
+        "id_prefix": "O",
+        "date_rule": None,
+        "zones": {"Sone 1": [[58.142762, 8.013436], [58.164603, 7.988782]], "Sone 2": [[58.164787, 7.988607], [58.208332, 7.930266]], "Sone 3A": [[58.208123, 7.929707], [58.226027, 7.937619]], "Sone 3B Hageodden": [[58.209974, 7.926544], [58.211917, 7.9308]], "Sone 3C Mosby": [[58.223008, 7.934099], [58.226191, 7.935972]], "Sone 4A": [[58.226213, 7.937501], [58.243502, 7.947615]], "Sone 4B Ravn\u00e5s": [[58.235168, 7.931351], [58.240403, 7.93666]], "Sone 4C Holmane": [[58.24119, 7.938655], [58.24238, 7.942274]], "Sone 5A Bl\u00e5": [[58.24365, 7.947759], [58.251304, 7.954163]], "Sone 5B R\u00f8d": [[58.251312, 7.954414], [58.253048, 7.954224]]},
+    },
+    "sygna": {
+        "inbox": "bilder/innboks/sygna",
+        "out": "bilder/sygna",
+        "json": "data/photos_sygna.json",
+        "station": "22.22.0",
+        "id_prefix": "S",
+        "date_rule": None,
+        "zones": {"Alle \u00e5pne soner": [[58.076907, 7.816012], [58.218747, 7.759384]]},
+    },
 }
 
 
@@ -156,8 +174,11 @@ def assign_zone(lat, lon, local_dt, zone_segments, date_rule=None):
 
 
 # ── NVE-vannføring ─────────────────────────────────────────────────────────
+_NVE_DAY_CACHE = {}
+
 def fetch_vannforing(local_dt, station_id):
-    """Timesverdi nærmest bildets tidspunkt. Returnerer None ved feil."""
+    """Timesverdi nærmest bildets tidspunkt. Returnerer None ved feil.
+    Dagens observasjoner caches per (stasjon, dag) - viktig ved bulk-kjøringer."""
     api_key = os.environ.get("NVE_API_KEY", "")
     if not api_key or not local_dt:
         return None
@@ -168,9 +189,14 @@ def fetch_vannforing(local_dt, station_id):
         f"&ReferenceTime={day}T00:00:00Z/{day}T23:59:59Z"
     )
     try:
-        r = requests.get(url, headers={"X-API-Key": api_key}, timeout=30)
-        r.raise_for_status()
-        obs = [o for o in r.json()["data"][0]["observations"] if o["value"] is not None]
+        cache_key = (station_id, day)
+        if cache_key in _NVE_DAY_CACHE:
+            obs = _NVE_DAY_CACHE[cache_key]
+        else:
+            r = requests.get(url, headers={"X-API-Key": api_key}, timeout=30)
+            r.raise_for_status()
+            obs = [o for o in r.json()["data"][0]["observations"] if o["value"] is not None]
+            _NVE_DAY_CACHE[cache_key] = obs
         if not obs:
             return None
         target = local_dt.astimezone(timezone.utc)
