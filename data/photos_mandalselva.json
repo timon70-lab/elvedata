@@ -68,5 +68,47 @@
   "vannforing": 62.5,
   "autoSone": true,
   "soneAvstandM": 403
+ },
+ {
+  "id": "M-006",
+  "lat": 58.174793,
+  "lon": 7.547611,
+  "file": "Sone3_20210605_1257.jpg",
+  "caption": "Sone 3",
+  "zone": "Sone 3",
+  "dateISO": "2021-06-05",
+  "timeUTC": "10:57",
+  "locId": "Sone 3",
+  "vannforing": 70.4,
+  "autoSone": true,
+  "soneAvstandM": 215
+ },
+ {
+  "id": "M-007",
+  "lat": 58.178081,
+  "lon": 7.541725,
+  "file": "Sone3_20210605_1312.jpg",
+  "caption": "Sone 3",
+  "zone": "Sone 3",
+  "dateISO": "2021-06-05",
+  "timeUTC": "11:12",
+  "locId": "Sone 3",
+  "vannforing": 70.4,
+  "autoSone": true,
+  "soneAvstandM": 58
+ },
+ {
+  "id": "M-008",
+  "lat": 58.178081,
+  "lon": 7.541725,
+  "file": "Sone3_20210605_1312_2.jpg",
+  "caption": "Sone 3",
+  "zone": "Sone 3",
+  "dateISO": "2021-06-05",
+  "timeUTC": "11:12",
+  "locId": "Sone 3",
+  "vannforing": 70.4,
+  "autoSone": true,
+  "soneAvstandM": 58
  }
 ]
