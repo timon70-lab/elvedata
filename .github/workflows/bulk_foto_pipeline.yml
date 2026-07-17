@@ -73,7 +73,12 @@ jobs:
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo "⚠️ Noen elve-innbokser har fortsatt filer liggende (bør være tomme etter en vellykket kjøring) - sjekk rå logg." >> "$GITHUB_STEP_SUMMARY"
           fi
-          rm -rf bilder/innboks
+          # Slett KUN de tomme per-elv-arbeidsmappene - bilder/innboks/manuell/
+          # (GPS-/sone-/prosesseringsfeil) skal IKKE slettes, slik at feilede
+          # bilder overlever i git og kan rettes/lastes opp på nytt manuelt.
+          for elv in audna lygna mandalselva otra sygna; do
+            rm -rf "bilder/innboks/${elv}"
+          done
 
       - name: Commit og push resultat
         run: |
