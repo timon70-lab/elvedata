@@ -56,6 +56,19 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
         text-overflow: ellipsis; white-space: nowrap; }
 .vid-list-row button { background: #fee2e2; color: #b91c1c; padding: 5px 10px; font-size: 0.78rem; }
 .vid-list-row button:hover { background: #fecaca; }
+.vid-list-row button.edit-btn { background: #e0e7ff; color: #3730a3; }
+.vid-list-row button.edit-btn:hover { background: #c7d2fe; }
+.vid-edit-form { grid-column: 1 / -1; width: 100%; background: #f8fafc; border: 1px solid #e2e8f0;
+        border-radius: 6px; padding: 10px; margin-top: 6px; display: grid;
+        grid-template-columns: 1fr 1fr; gap: 8px 12px; }
+.vid-edit-form label { font-size: 0.72rem; }
+.vid-edit-form input, .vid-edit-form select { width: 100%; padding: 5px 7px; border: 1px solid #cbd5e1;
+        border-radius: 5px; font-size: 0.78rem; margin-top: 2px; }
+.vid-edit-actions { grid-column: 1 / -1; display: flex; gap: 8px; }
+.vid-edit-actions button { padding: 5px 12px; font-size: 0.78rem; border-radius: 5px; }
+.vid-edit-actions .save { background: #dcfce7; color: #166534; }
+.vid-edit-actions .save:hover { background: #bbf7d0; }
+.vid-edit-actions .cancel { background: #f1f5f9; color: #475569; }
 .vid-type-badge { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; padding: 2px 6px;
         border-radius: 999px; white-space: nowrap; }
 .vid-type-badge.foto { background: #dbeafe; color: #1d4ed8; }
@@ -628,12 +641,18 @@ async function listMedia() {
       meta.innerHTML = '<div><b>' + m.id + '</b> · ' + m.zone + ' · ' + (m.dateISO || '?')
         + (m.vannforing != null ? ' · ' + m.vannforing + ' m³/s' : '') + '</div>'
         + '<div class="vid-cap">' + (m.caption || '') + '</div>';
+      const editBtn = document.createElement('button');
+      editBtn.textContent = '✏️ Endre';
+      editBtn.className = 'edit-btn';
+      editBtn.onclick = () => toggleEditForm(row, elv, m);
       const btn = document.createElement('button');
       btn.textContent = '🗑 Slett';
       btn.onclick = () => m.mtype === 'video' ? deleteVideo(elv, m.id) : deletePhoto(elv, m.id, m.file);
       row.appendChild(badge);
       row.appendChild(meta);
+      row.appendChild(editBtn);
       row.appendChild(btn);
+      row.style.flexWrap = 'wrap';
       wrap.appendChild(row);
     });
   } catch (e) {
@@ -1069,6 +1088,82 @@ async function leggTilBilde() {
     setFotoStatus('Feilet: ' + e.message, true);
   } finally {
     document.getElementById('fotoBtn').disabled = false;
+  }
+}
+
+function toggleEditForm(row, elv, m) {
+  const existing = row.querySelector('.vid-edit-form');
+  if (existing) { existing.remove(); return; }
+  document.querySelectorAll('.vid-edit-form').forEach(f => f.remove()); // maks ett åpent skjema
+  const soner = (SONER && SONER[elv]) || [];
+  const form = document.createElement('div');
+  form.className = 'vid-edit-form';
+  form.innerHTML =
+    '<label>Sone<select class="ef-sone">'
+      + soner.map(z => '<option value="' + z.replace(/"/g, '&quot;') + '"' + (z === m.zone ? ' selected' : '') + '>' + z + '</option>').join('')
+      + '</select></label>'
+    + '<label>Vannføring (m³/s)<input type="number" step="1" min="0" class="ef-flow" value="' + (m.vannforing != null ? m.vannforing : '') + '"></label>'
+    + '<label style="grid-column:1/-1">Beskrivelse<input type="text" class="ef-caption" value="' + (m.caption || '').replace(/"/g, '&quot;') + '"></label>'
+    + '<div class="vid-edit-actions">'
+      + '<button class="save">💾 Lagre</button>'
+      + '<button class="cancel">Avbryt</button>'
+    + '</div>';
+  form.querySelector('.save').onclick = () => saveEdit(form, elv, m);
+  form.querySelector('.cancel').onclick = () => form.remove();
+  row.appendChild(form);
+}
+
+async function saveEdit(form, elv, m) {
+  if (!getToken()) { setVidStatus('Lagre GitHub-token først.', true); return; }
+  const nyZone = form.querySelector('.ef-sone').value;
+  const nyCaption = form.querySelector('.ef-caption').value.trim();
+  const flowRaw = form.querySelector('.ef-flow').value;
+  const nyFlow = flowRaw === '' ? null : Math.round(parseFloat(flowRaw));
+  if (!nyZone) { setVidStatus('Velg sone.', true); return; }
+  if (flowRaw !== '' && !isFinite(nyFlow)) { setVidStatus('Ugyldig vannføring.', true); return; }
+  form.querySelector('.save').disabled = true;
+  setVidStatus('Lagrer endringer for ' + m.id + ' …', false);
+  try {
+    const path = m.mtype === 'video' ? 'data/videoer_' + elv + '.json' : 'data/photos_' + elv + '.json';
+    const api = 'https://api.github.com/repos/' + OWNER + '/' + REPO + '/contents/' + path;
+    const res = await fetch(api, { headers: headers(), cache: 'no-cache' });
+    if (!res.ok) throw new Error('HTTP ' + res.status + ' ved henting');
+    const gd = await res.json();
+    const list = JSON.parse(decodeURIComponent(escape(atob(gd.content.replace(/\n/g, '')))));
+    const entry = list.find(x => x.id === m.id);
+    if (!entry) throw new Error(m.id + ' ble ikke funnet — last listen på nytt');
+
+    const zoneEndret = entry.zone !== nyZone;
+    entry.zone = nyZone;
+    entry.caption = nyCaption || nyZone;
+    entry.vannforing = nyFlow;
+    if (m.mtype === 'foto') {
+      entry.locId = nyZone;
+      if (zoneEndret) {
+        entry.autoSone = false; // manuell korreksjon
+        const seg = ALL_RIVER_ZONES[elv] && ALL_RIVER_ZONES[elv][nyZone];
+        entry.soneAvstandM = (seg && entry.lat != null && entry.lon != null)
+          ? Math.round(distPointSegmentM([entry.lat, entry.lon], seg[0], seg[1]))
+          : null;
+      }
+    }
+
+    const indent = m.mtype === 'video' ? 2 : 1;
+    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(list, null, indent) + '\n')));
+    const putRes = await fetch(api, {
+      method: 'PUT',
+      headers: { ...headers(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'Endre ' + (m.mtype === 'video' ? 'video ' : 'bilde ') + m.id + ' (' + elv + ') via admin', content: b64, sha: gd.sha })
+    });
+    if (!putRes.ok) {
+      const err = await putRes.json().catch(() => ({}));
+      throw new Error('HTTP ' + putRes.status + (err.message ? ' — ' + err.message : ''));
+    }
+    setVidStatus(m.id + ' oppdatert. ✓ Synlig i dashbordet etter Pages-cache (~10 min).', false);
+    listMedia();
+  } catch (e) {
+    setVidStatus('Endring feilet: ' + e.message, true);
+    form.querySelector('.save').disabled = false;
   }
 }
 
