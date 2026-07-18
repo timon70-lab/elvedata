@@ -23,7 +23,7 @@
   "dateISO": "2026-06-02",
   "timeUTC": "17:18",
   "locId": "Sone 3",
-  "vannforing": 52.0,
+  "vannforing": 52,
   "autoSone": true,
   "soneAvstandM": 566
  },
@@ -303,7 +303,7 @@
   "dateISO": "2021-06-13",
   "timeUTC": "06:10",
   "locId": "Sone 3",
-  "vannforing": 31.0,
+  "vannforing": 31,
   "autoSone": true,
   "soneAvstandM": 144
  },
@@ -317,7 +317,7 @@
   "dateISO": "2021-06-13",
   "timeUTC": "06:10",
   "locId": "Sone 3",
-  "vannforing": 31.0,
+  "vannforing": 31,
   "autoSone": true,
   "soneAvstandM": 144
  },
@@ -331,7 +331,7 @@
   "dateISO": "2021-06-13",
   "timeUTC": "06:11",
   "locId": "Sone 3",
-  "vannforing": 31.0,
+  "vannforing": 31,
   "autoSone": true,
   "soneAvstandM": 144
  },
@@ -345,7 +345,7 @@
   "dateISO": "2021-06-13",
   "timeUTC": "06:22",
   "locId": "Sone 3",
-  "vannforing": 31.0,
+  "vannforing": 31,
   "autoSone": true,
   "soneAvstandM": 237
  },
@@ -359,7 +359,7 @@
   "dateISO": "2021-06-13",
   "timeUTC": "06:22",
   "locId": "Sone 3",
-  "vannforing": 31.0,
+  "vannforing": 31,
   "autoSone": true,
   "soneAvstandM": 237
  },
@@ -373,7 +373,7 @@
   "dateISO": "2021-06-13",
   "timeUTC": "06:22",
   "locId": "Sone 3",
-  "vannforing": 31.0,
+  "vannforing": 31,
   "autoSone": true,
   "soneAvstandM": 237
  },
@@ -471,7 +471,7 @@
   "dateISO": "2021-07-02",
   "timeUTC": "11:09",
   "locId": "Sone 3",
-  "vannforing": 63.0,
+  "vannforing": 63,
   "autoSone": true,
   "soneAvstandM": 531
  },
@@ -779,7 +779,7 @@
   "dateISO": "2021-08-03",
   "timeUTC": "18:01",
   "locId": "Sone 3",
-  "vannforing": 34.0,
+  "vannforing": 34,
   "autoSone": true,
   "soneAvstandM": 236
  },
@@ -922,5 +922,19 @@
   "vannforing": 124.4,
   "autoSone": false,
   "soneAvstandM": 111
+ },
+ {
+  "id": "M-067",
+  "lat": 58.14663397222222,
+  "lon": 7.5495619722222225,
+  "file": "HaugeD_20220803_2048.jpg",
+  "caption": "Hauge D",
+  "zone": "Hauge D",
+  "dateISO": "2022-08-03",
+  "timeUTC": "18:48",
+  "locId": "Hauge D",
+  "vannforing": 29,
+  "autoSone": false,
+  "soneAvstandM": 14
  }
 ]
