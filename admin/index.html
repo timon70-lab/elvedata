@@ -56,6 +56,11 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
         text-overflow: ellipsis; white-space: nowrap; }
 .vid-list-row button { background: #fee2e2; color: #b91c1c; padding: 5px 10px; font-size: 0.78rem; }
 .vid-list-row button:hover { background: #fecaca; }
+.vid-type-badge { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; padding: 2px 6px;
+        border-radius: 999px; white-space: nowrap; }
+.vid-type-badge.foto { background: #dbeafe; color: #1d4ed8; }
+.vid-type-badge.video { background: #ede9fe; color: #6d28d9; }
+#vidFilter { padding: 4px 8px; font-size: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; }
 #vidStatus.ok { color: #276749; }
 #vidStatus.err { color: #c53030; }
 </style>
@@ -97,7 +102,7 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
   <h2>🎬 Registrer video</h2>
   <div class="vid-grid">
     <label>Elv
-      <select id="vidElv" onchange="fyllSoner(); listVideos();">
+      <select id="vidElv" onchange="fyllSoner(); listMedia();">
         <option value="audna" selected>Audna</option>
         <option value="lygna">Lygna</option>
         <option value="mandalselva">Mandalselva</option>
@@ -132,8 +137,15 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
 </div>
 
 <div class="card">
-  <h2>📋 Registrerte videoer</h2>
-  <div class="hint" style="margin-bottom:8px">Viser innholdet i <code>videoer_&lt;elv&gt;.json</code> for elva valgt i skjemaet over. Sletting fjerner kun oppføringen — selve videoen på YouTube må du fjerne selv etterpå.</div>
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+    <h2 style="margin:0">📋 Registrert innhold</h2>
+    <select id="vidFilter" onchange="listMedia()">
+      <option value="alle">Alle</option>
+      <option value="video">Videoer</option>
+      <option value="foto">Bilder</option>
+    </select>
+  </div>
+  <div class="hint" style="margin:8px 0">Viser <code>videoer_&lt;elv&gt;.json</code> og <code>photos_&lt;elv&gt;.json</code> for elva valgt i skjemaet over. Video-sletting fjerner kun oppføringen (videoen på YouTube må fjernes manuelt). Bilde-sletting fjerner både oppføringen <b>og</b> selve bildefilen fra repoet.</div>
   <div id="vidList"><div class="hint">Laster …</div></div>
 </div>
 
@@ -514,36 +526,53 @@ async function leggTilVideo() {
   }
 }
 
-async function listVideos() {
+async function fetchJsonFile(path) {
+  const api = 'https://api.github.com/repos/' + OWNER + '/' + REPO + '/contents/' + path;
+  const res = await fetch(api, { headers: headers(), cache: 'no-cache' });
+  if (res.status === 404) return { list: [], sha: null };
+  if (!res.ok) throw new Error('HTTP ' + res.status + ' ved henting av ' + path);
+  const gd = await res.json();
+  const list = JSON.parse(decodeURIComponent(escape(atob(gd.content.replace(/\n/g, '')))));
+  return { list, sha: gd.sha };
+}
+
+async function listMedia() {
   const elv = document.getElementById('vidElv').value;
+  const filter = document.getElementById('vidFilter').value;
   const wrap = document.getElementById('vidList');
   wrap.innerHTML = '<div class="hint">Laster …</div>';
   try {
-    const api = 'https://api.github.com/repos/' + OWNER + '/' + REPO + '/contents/data/videoer_' + elv + '.json';
-    const res = await fetch(api, { headers: headers(), cache: 'no-cache' });
-    if (res.status === 404) { wrap.innerHTML = '<div class="hint">Ingen videofil for ' + elv + ' ennå.</div>'; return; }
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const gd = await res.json();
-    const list = JSON.parse(decodeURIComponent(escape(atob(gd.content.replace(/\n/g, '')))));
-    if (!list.length) { wrap.innerHTML = '<div class="hint">Ingen videoer registrert for ' + elv + '.</div>'; return; }
+    const [vidData, fotoData] = await Promise.all([
+      fetchJsonFile('data/videoer_' + elv + '.json'),
+      fetchJsonFile('data/photos_' + elv + '.json'),
+    ]);
+    let items = [];
+    if (filter !== 'foto') items = items.concat(vidData.list.map(v => ({ ...v, mtype: 'video' })));
+    if (filter !== 'video') items = items.concat(fotoData.list.map(p => ({ ...p, mtype: 'foto' })));
+    if (!items.length) { wrap.innerHTML = '<div class="hint">Ingen registreringer for ' + elv + ' med gjeldende filter.</div>'; return; }
+    items.sort((a, b) => (a.id || '').localeCompare(b.id || '', undefined, { numeric: true }));
     wrap.innerHTML = '';
-    list.forEach(v => {
+    items.forEach(m => {
       const row = document.createElement('div');
       row.className = 'vid-list-row';
+      const badge = document.createElement('span');
+      badge.className = 'vid-type-badge ' + m.mtype;
+      badge.textContent = m.mtype === 'video' ? 'Video' : 'Foto';
       const meta = document.createElement('div');
       meta.className = 'vid-meta';
-      meta.innerHTML = '<div><b>' + v.id + '</b> · ' + v.zone + ' · ' + (v.dateISO || '?')
-        + (v.vannforing != null ? ' · ' + v.vannforing + ' m³/s' : '') + '</div>'
-        + '<div class="vid-cap">' + (v.caption || '') + '</div>';
+      meta.innerHTML = '<div><b>' + m.id + '</b> · ' + m.zone + ' · ' + (m.dateISO || '?')
+        + (m.vannforing != null ? ' · ' + m.vannforing + ' m³/s' : '') + '</div>'
+        + '<div class="vid-cap">' + (m.caption || '') + '</div>';
       const btn = document.createElement('button');
       btn.textContent = '🗑 Slett';
-      btn.onclick = () => deleteVideo(elv, v.id);
+      btn.onclick = () => m.mtype === 'video' ? deleteVideo(elv, m.id) : deletePhoto(elv, m.id, m.file);
+      row.appendChild(badge);
       row.appendChild(meta);
       row.appendChild(btn);
       wrap.appendChild(row);
     });
   } catch (e) {
-    wrap.innerHTML = '<div class="hint">Kunne ikke hente videolisten: ' + e.message + '</div>';
+    wrap.innerHTML = '<div class="hint">Kunne ikke hente listen: ' + e.message + '</div>';
   }
 }
 
@@ -570,7 +599,55 @@ async function deleteVideo(elv, id) {
       throw new Error('HTTP ' + putRes.status + (err.message ? ' — ' + err.message : ''));
     }
     setVidStatus(id + ' slettet. ✓ Husk å fjerne/privatisere videoen på YouTube. Dashbordet oppdateres etter Pages-cache (~10 min).', false);
-    listVideos();
+    listMedia();
+  } catch (e) {
+    setVidStatus('Sletting feilet: ' + e.message, true);
+  }
+}
+
+async function deletePhoto(elv, id, file) {
+  if (!getToken()) { setVidStatus('Lagre GitHub-token først.', true); return; }
+  if (!confirm('Slette ' + id + ' fra photos_' + elv + '.json?\n\nDette fjerner BÅDE oppføringen og selve bildefilen (bilder/' + elv + '/' + file + ') fra repoet. Kan ikke angres uten å laste bildet opp på nytt.')) return;
+  setVidStatus('Sletter ' + id + ' …', false);
+  try {
+    const jsonApi = 'https://api.github.com/repos/' + OWNER + '/' + REPO + '/contents/data/photos_' + elv + '.json';
+    const res = await fetch(jsonApi, { headers: headers(), cache: 'no-cache' });
+    if (!res.ok) throw new Error('HTTP ' + res.status + ' ved henting av foto-liste');
+    const gd = await res.json();
+    const list = JSON.parse(decodeURIComponent(escape(atob(gd.content.replace(/\n/g, '')))));
+    const nyListe = list.filter(p => p.id !== id);
+    if (nyListe.length === list.length) throw new Error(id + ' ble ikke funnet — last listen på nytt');
+    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(nyListe, null, 1) + '\n')));
+    const putRes = await fetch(jsonApi, {
+      method: 'PUT',
+      headers: { ...headers(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'Fjern bilde ' + id + ' (' + elv + ') via admin', content: b64, sha: gd.sha })
+    });
+    if (!putRes.ok) {
+      const err = await putRes.json().catch(() => ({}));
+      throw new Error('HTTP ' + putRes.status + (err.message ? ' — ' + err.message : ''));
+    }
+    // Slett selve bildefilen (finnes ikke tilsvarende steg for video, som kun lenker til YouTube)
+    let filStatus = '';
+    try {
+      const fileApi = 'https://api.github.com/repos/' + OWNER + '/' + REPO + '/contents/bilder/' + elv + '/' + file;
+      const fRes = await fetch(fileApi, { headers: headers(), cache: 'no-cache' });
+      if (fRes.ok) {
+        const fd = await fRes.json();
+        const delRes = await fetch(fileApi, {
+          method: 'DELETE',
+          headers: { ...headers(), 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: 'Fjern bildefil ' + file + ' (' + elv + ') via admin', sha: fd.sha })
+        });
+        if (!delRes.ok) filStatus = ' (advarsel: selve bildefilen kunne ikke slettes automatisk)';
+      } else if (fRes.status !== 404) {
+        filStatus = ' (advarsel: kunne ikke sjekke bildefilen)';
+      }
+    } catch (e) {
+      filStatus = ' (advarsel: bildefil-sletting feilet: ' + e.message + ')';
+    }
+    setVidStatus(id + ' slettet. ✓' + filStatus + ' Dashbordet oppdateres etter Pages-cache (~10 min).', !!filStatus);
+    listMedia();
   } catch (e) {
     setVidStatus('Sletting feilet: ' + e.message, true);
   }
@@ -578,7 +655,7 @@ async function deleteVideo(elv, id) {
 
 // Init
 lastSoner();
-listVideos();
+listMedia();
 if (localStorage.getItem(NVE_KEY)) {
   document.getElementById('nveInput').placeholder = 'NVE-nøkkel er lagret ✓ (lim inn ny for å bytte)';
 }
