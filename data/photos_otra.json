@@ -200,14 +200,14 @@
   "lat": 58.233039,
   "lon": 7.931285,
   "file": "Sone4BRavnaas_20210807_1259.jpg",
-  "caption": "Sone 4B Ravnås",
-  "zone": "Sone 4B Ravnås",
+  "caption": "Sone 4A",
+  "zone": "Sone 4A",
   "dateISO": "2021-08-07",
   "timeUTC": "10:59",
-  "locId": "Sone 4B Ravnås",
+  "locId": "Sone 4A",
   "vannforing": 100,
-  "autoSone": true,
-  "soneAvstandM": 235
+  "autoSone": false,
+  "soneAvstandM": 571
  },
  {
   "id": "O-016",
