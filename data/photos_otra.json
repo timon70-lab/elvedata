@@ -186,14 +186,14 @@
   "lat": 58.241663,
   "lon": 7.937142,
   "file": "Sone4CHolmane_20210807_1255_2.jpg",
-  "caption": "Sone 4C Holmane",
-  "zone": "Sone 4C Holmane",
+  "caption": "Sone 4A",
+  "zone": "Sone 4A",
   "dateISO": "2021-08-07",
   "timeUTC": "10:55",
-  "locId": "Sone 4C Holmane",
+  "locId": "Sone 4A",
   "vannforing": 100,
-  "autoSone": true,
-  "soneAvstandM": 103
+  "autoSone": false,
+  "soneAvstandM": 526
  },
  {
   "id": "O-015",
