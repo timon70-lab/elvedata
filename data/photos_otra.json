@@ -107,7 +107,7 @@
   "dateISO": "2021-08-07",
   "timeUTC": "10:32",
   "locId": "Sone 5A Blå",
-  "vannforing": 100.0,
+  "vannforing": 100,
   "autoSone": true,
   "soneAvstandM": 3
  },
@@ -121,7 +121,7 @@
   "dateISO": "2021-08-07",
   "timeUTC": "10:33",
   "locId": "Sone 5A Blå",
-  "vannforing": 100.0,
+  "vannforing": 100,
   "autoSone": true,
   "soneAvstandM": 3
  },
@@ -135,7 +135,7 @@
   "dateISO": "2021-08-07",
   "timeUTC": "10:36",
   "locId": "Sone 5A Blå",
-  "vannforing": 100.0,
+  "vannforing": 100,
   "autoSone": true,
   "soneAvstandM": 74
  },
@@ -149,7 +149,7 @@
   "dateISO": "2021-08-07",
   "timeUTC": "10:37",
   "locId": "Sone 5A Blå",
-  "vannforing": 100.0,
+  "vannforing": 100,
   "autoSone": true,
   "soneAvstandM": 74
  },
@@ -163,7 +163,7 @@
   "dateISO": "2021-08-07",
   "timeUTC": "10:54",
   "locId": "Sone 4C Holmane",
-  "vannforing": 100.0,
+  "vannforing": 100,
   "autoSone": true,
   "soneAvstandM": 103
  },
@@ -177,7 +177,7 @@
   "dateISO": "2021-08-07",
   "timeUTC": "10:55",
   "locId": "Sone 4C Holmane",
-  "vannforing": 100.0,
+  "vannforing": 100,
   "autoSone": true,
   "soneAvstandM": 103
  },
@@ -191,7 +191,7 @@
   "dateISO": "2021-08-07",
   "timeUTC": "10:55",
   "locId": "Sone 4C Holmane",
-  "vannforing": 100.0,
+  "vannforing": 100,
   "autoSone": true,
   "soneAvstandM": 103
  },
@@ -205,7 +205,7 @@
   "dateISO": "2021-08-07",
   "timeUTC": "10:59",
   "locId": "Sone 4B Ravnås",
-  "vannforing": 100.0,
+  "vannforing": 100,
   "autoSone": true,
   "soneAvstandM": 235
  },
@@ -214,14 +214,14 @@
   "lat": 58.233039,
   "lon": 7.931285,
   "file": "Sone4BRavnaas_20210807_1259_2.jpg",
-  "caption": "Sone 4B Ravnås",
-  "zone": "Sone 4B Ravnås",
+  "caption": "Sone 4A",
+  "zone": "Sone 4A",
   "dateISO": "2021-08-07",
   "timeUTC": "10:59",
-  "locId": "Sone 4B Ravnås",
-  "vannforing": 100.0,
-  "autoSone": true,
-  "soneAvstandM": 235
+  "locId": "Sone 4A",
+  "vannforing": 100,
+  "autoSone": false,
+  "soneAvstandM": 571
  },
  {
   "id": "O-017",
@@ -233,7 +233,7 @@
   "dateISO": "2021-08-10",
   "timeUTC": "17:37",
   "locId": "Sone 4C Holmane",
-  "vannforing": 98.0,
+  "vannforing": 98,
   "autoSone": true,
   "soneAvstandM": 141
  },
@@ -247,7 +247,7 @@
   "dateISO": "2021-08-10",
   "timeUTC": "17:37",
   "locId": "Sone 4C Holmane",
-  "vannforing": 98.0,
+  "vannforing": 98,
   "autoSone": true,
   "soneAvstandM": 141
  },
@@ -261,7 +261,7 @@
   "dateISO": "2021-08-10",
   "timeUTC": "17:39",
   "locId": "Sone 4A",
-  "vannforing": 98.0,
+  "vannforing": 98,
   "autoSone": true,
   "soneAvstandM": 132
  },
@@ -275,7 +275,7 @@
   "dateISO": "2021-08-10",
   "timeUTC": "17:39",
   "locId": "Sone 4A",
-  "vannforing": 98.0,
+  "vannforing": 98,
   "autoSone": true,
   "soneAvstandM": 132
  },
@@ -289,7 +289,7 @@
   "dateISO": "2021-08-10",
   "timeUTC": "17:43",
   "locId": "Sone 4C Holmane",
-  "vannforing": 98.0,
+  "vannforing": 98,
   "autoSone": true,
   "soneAvstandM": 107
  },
@@ -303,7 +303,7 @@
   "dateISO": "2021-08-10",
   "timeUTC": "17:58",
   "locId": "Sone 3C Mosby",
-  "vannforing": 98.0,
+  "vannforing": 98,
   "autoSone": true,
   "soneAvstandM": 91
  },
@@ -317,7 +317,7 @@
   "dateISO": "2021-08-10",
   "timeUTC": "17:58",
   "locId": "Sone 3C Mosby",
-  "vannforing": 98.0,
+  "vannforing": 98,
   "autoSone": true,
   "soneAvstandM": 91
  },
@@ -331,7 +331,7 @@
   "dateISO": "2021-08-10",
   "timeUTC": "17:58",
   "locId": "Sone 3C Mosby",
-  "vannforing": 98.0,
+  "vannforing": 98,
   "autoSone": true,
   "soneAvstandM": 91
  },
