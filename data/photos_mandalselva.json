@@ -936,5 +936,19 @@
   "vannforing": 29,
   "autoSone": false,
   "soneAvstandM": 14
+ },
+ {
+  "id": "M-068",
+  "lat": 58.146633899722225,
+  "lon": 7.549562199722222,
+  "file": "HaugeD_20220803_2048_2.jpg",
+  "caption": "Hauge D",
+  "zone": "Hauge D",
+  "dateISO": "2022-08-03",
+  "timeUTC": "18:48",
+  "locId": "Hauge D",
+  "vannforing": 29,
+  "autoSone": false,
+  "soneAvstandM": 14
  }
 ]
