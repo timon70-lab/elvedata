@@ -722,6 +722,7 @@ const ALL_RIVER_ZONES = {"audna":{"Sone 5A":[[58.12663,7.33986],[58.15179,7.3663
 const RIVER_NAMES = {audna:'Audna',lygna:'Lygna',mandalselva:'Mandalselva',otra:'Otra',sygna:'Sygna'};
 const ID_PREFIX = {audna:'A',lygna:'L',mandalselva:'M',otra:'O',sygna:'S'};
 let fotoParsed = null; // { lat, lon, dateISO, timeUTC (lokal), orientation }
+let fotoFileRef = null; // selve filen - input-feltet nullstilles etter lesing, så filen må huskes separat
 
 /* ---------- Avstand punkt-til-linjesegment (speiler Python _dist_point_segment_m) ---------- */
 function distPointSegmentM(p, a, b) {
@@ -848,6 +849,7 @@ function parseJpegExif(buf) {
 async function lesBildeFil(ev) {
   const file = ev.target.files[0];
   if (!file) return;
+  fotoFileRef = file;
   setFotoStatus('Leser bilde …', false);
   document.getElementById('fotoForslag').style.display = 'none';
   try {
@@ -857,6 +859,7 @@ async function lesBildeFil(ev) {
       setFotoStatus('Fant ingen GPS-data i bildet — hopp over dette bildet (ingen manuell posisjon støttes her).', true);
       ['fotoElv','fotoSone','fotoDato','fotoTid','fotoBeskrivelse','fotoVannforing','fotoNveBtn','fotoBtn'].forEach(id => document.getElementById(id).disabled = true);
       fotoParsed = null;
+      fotoFileRef = null;
       return;
     }
     fotoParsed = exif;
@@ -974,14 +977,14 @@ function blobToBase64(blob) {
 
 async function leggTilBilde() {
   if (!getToken()) { setFotoStatus('Lagre GitHub-token først.', true); return; }
-  if (!fotoParsed) { setFotoStatus('Velg en bildefil med GPS først.', true); return; }
+  if (!fotoParsed || !fil) { setFotoStatus('Velg en bildefil med GPS først.', true); return; }
   const elv = document.getElementById('fotoElv').value;
   const zone = document.getElementById('fotoSone').value;
   const dato = document.getElementById('fotoDato').value;
   const tid = document.getElementById('fotoTid').value;
   const caption = document.getElementById('fotoBeskrivelse').value.trim();
   const flow = parseFloat(document.getElementById('fotoVannforing').value);
-  const fil = document.getElementById('fotoFil').files[0];
+  const fil = fotoFileRef;
   if (!zone) { setFotoStatus('Velg sone.', true); return; }
   if (!dato) { setFotoStatus('Dato mangler.', true); return; }
   document.getElementById('fotoBtn').disabled = true;
@@ -1057,6 +1060,8 @@ async function leggTilBilde() {
     setFotoStatus('Lagret ' + id + ' (' + outName + ') til ' + elv + '. ✓ Synlig i dashbordet etter Pages-cache (~10 min).', false);
     document.getElementById('fotoForslag').style.display = 'none';
     fotoParsed = null;
+    fotoFileRef = null;
+    document.getElementById('fotoFil').value = '';
     document.getElementById('listElv').value = elv;
     fyllListSoner();
     listMedia();
