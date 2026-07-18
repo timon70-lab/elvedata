@@ -3,6 +3,20 @@
   "dato": "2026-07-18",
   "sone": "Sone 3",
   "vekt": 2,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-18",
+  "sone": "Sone 3",
+  "vekt": 3.3,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-18",
+  "sone": "Sone 3",
+  "vekt": 2,
   "agn": "Flue",
   "art": "Laks"
  },
