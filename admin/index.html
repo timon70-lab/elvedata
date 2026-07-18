@@ -977,6 +977,7 @@ function blobToBase64(blob) {
 
 async function leggTilBilde() {
   if (!getToken()) { setFotoStatus('Lagre GitHub-token først.', true); return; }
+  const fil = fotoFileRef;
   if (!fotoParsed || !fil) { setFotoStatus('Velg en bildefil med GPS først.', true); return; }
   const elv = document.getElementById('fotoElv').value;
   const zone = document.getElementById('fotoSone').value;
@@ -984,7 +985,6 @@ async function leggTilBilde() {
   const tid = document.getElementById('fotoTid').value;
   const caption = document.getElementById('fotoBeskrivelse').value.trim();
   const flow = parseFloat(document.getElementById('fotoVannforing').value);
-  const fil = fotoFileRef;
   if (!zone) { setFotoStatus('Velg sone.', true); return; }
   if (!dato) { setFotoStatus('Dato mangler.', true); return; }
   document.getElementById('fotoBtn').disabled = true;
