@@ -1,6 +1,13 @@
 [
  {
   "dato": "2026-07-19",
+  "sone": "Sone 4A",
+  "vekt": 2.7,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-19",
   "sone": "Sone 5B Rød",
   "vekt": 1.5,
   "agn": "Sluk",
