@@ -12,8 +12,38 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
        align-items: center; padding: 20px 12px 60px; min-height: 100vh; }
 h1 { font-size: 1.25rem; margin-bottom: 4px; }
 .sub { font-size: 0.75rem; color: #64748b; margin-bottom: 20px; }
+.page { width: 100%; max-width: 1080px; }
 .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-        padding: 16px; width: 100%; max-width: 480px; margin-bottom: 14px; }
+        padding: 16px; width: 100%; margin-bottom: 14px; }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        padding: 10px 16px; margin-bottom: 14px; }
+.topbar-title { font-weight: 600; font-size: 1rem; }
+.topbar-chips { display: flex; align-items: center; gap: 8px; }
+.chip { font-size: 0.7rem; font-weight: 600; border-radius: 999px; padding: 3px 10px; }
+.chip.ok { background: #dcfce7; color: #166534; }
+.chip.mangler { background: #fee2e2; color: #b91c1c; }
+.topbar-settings { background: none; border: 1px solid #cbd5e1; border-radius: 6px;
+        padding: 4px 10px; font-size: 0.72rem; color: #475569; cursor: pointer; }
+.topbar-settings:hover { background: #f1f5f9; }
+.layout { display: flex; gap: 14px; align-items: flex-start; }
+.col-left { flex: 1; min-width: 0; }
+.col-right { flex: 1.2; min-width: 0; }
+@media (max-width: 760px) { .layout { flex-direction: column; } .col-left, .col-right { width: 100%; } }
+.tab-card { padding: 0; overflow: hidden; }
+.tab-bar { display: flex; border-bottom: 1px solid #e2e8f0; }
+.tab-btn { flex: 0 0 auto; background: none; border: none; border-bottom: 2px solid transparent;
+        padding: 10px 16px; font-size: 0.85rem; color: #64748b; cursor: pointer; }
+.tab-btn.active { color: #1a202c; font-weight: 600; border-bottom-color: #4f46e5; }
+.tab-pane { padding: 14px 16px; }
+.tab-pane > div { margin-bottom: 0; }
+.card-details { width: 100%; margin-bottom: 10px; }
+.card-details summary { cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #475569;
+        background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        padding: 10px 16px; list-style-position: inside; }
+.card-details[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.card-details .card { border-radius: 0 0 12px 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 0; }
+.sum-hint { font-weight: 400; font-size: 0.7rem; color: #94a3b8; }
 .card h2 { font-size: 0.95rem; margin-bottom: 10px; color: #2d3748; }
 label { font-size: 0.8rem; color: #475569; display: block; margin-bottom: 4px; }
 input[type="password"] { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1;
@@ -83,39 +113,26 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
 </head>
 <body>
 
-<h1>⚙️ Elvedata · Admin</h1>
-<div class="sub">Scoringsparametre · skriver til <code>data/config.json</code> · videoregistrering · skriver til <code>data/videoer_&lt;elv&gt;.json</code></div>
+<div class="page">
 
-<div class="card">
-  <h2>🔑 GitHub-token</h2>
-  <label for="tokenInput">Fine-grained PAT (kun elvedata-repo, contents: read/write)</label>
-  <div class="token-row">
-    <input type="password" id="tokenInput" placeholder="github_pat_...">
-    <button class="secondary" onclick="saveToken()">Lagre</button>
+<div class="topbar">
+  <span class="topbar-title">⚙️ Elvedata · Admin</span>
+  <div class="topbar-chips">
+    <span id="chipToken" class="chip">GitHub-token</span>
+    <span id="chipNve" class="chip">NVE-nøkkel</span>
+    <button class="topbar-settings" onclick="openSettings()">Innstillinger ▾</button>
   </div>
-  <div class="hint">Lagres kun i localStorage i denne nettleseren — aldri i repoet.</div>
-  <label for="nveInput" style="margin-top:10px">NVE HydAPI-nøkkel (for vannføringsoppslag ved videoregistrering)</label>
-  <div class="token-row">
-    <input type="password" id="nveInput" placeholder="NVE API-key ...">
-    <button class="secondary" onclick="saveNveKey()">Lagre</button>
-  </div>
-  <div class="hint">Lagres kun i localStorage — aldri i repoet.</div>
 </div>
 
-<div class="card">
-  <h2>⚖️ Scoringsparametre per elv</h2>
-  <div id="rivers"><div class="hint">Laster config …</div></div>
-  <div class="save-row">
-    <button id="saveBtn" onclick="saveConfig()" disabled>💾 Lagre til GitHub</button>
-    <button class="secondary" onclick="loadConfig()">↺ Last på nytt</button>
-  </div>
-  <div id="status"></div>
-  <div class="warn">⚠️ Denne siden ligger åpent på GitHub Pages, men er ubrukelig uten ditt
-  personlige token. Ikke lenk til den fra dashbordene eller oversiktskartet.</div>
-</div>
-
-<div class="card">
-  <h2>🎬 Registrer video</h2>
+<div class="layout">
+  <div class="col-left">
+    <div class="card tab-card">
+      <div class="tab-bar">
+        <button id="tabBtnVideo" class="tab-btn active" onclick="switchTab('video')">🎬 Video</button>
+        <button id="tabBtnBilde" class="tab-btn" onclick="switchTab('bilde')">🖼️ Bilde</button>
+      </div>
+      <div id="tabPaneVideo" class="tab-pane">
+<div>
   <div class="vid-grid">
     <label>Elv
       <select id="vidElv" onchange="fyllSoner();">
@@ -151,9 +168,9 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
   <div class="hint" style="margin-top:8px">Videoen må være lastet opp som <b>Unlisted</b> på YouTube.
   Koordinater: høyreklikk i Google Maps → klikk på tallene for å kopiere.</div>
 </div>
-
-<div class="card">
-  <h2>🖼️ Registrer bilde (finn elv/sone automatisk)</h2>
+      </div>
+      <div id="tabPaneBilde" class="tab-pane" style="display:none">
+<div>
   <div class="vid-grid">
     <label style="grid-column:1/-1">📂 Velg bildefil — leser GPS/dato lokalt, finner nærmeste sone på tvers av alle elver
       <input type="file" id="fotoFil" accept="image/jpeg,.jpg,.jpeg" onchange="lesBildeFil(event)"></label>
@@ -185,11 +202,16 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
   <div id="fotoStatus"></div>
   <div class="hint" style="margin-top:8px">Bilder uten GPS kan ikke registreres her — hopp over dem. Bildet komprimeres til maks 1600px bredde og EXIF fjernes automatisk før opplasting, som i den vanlige foto-pipelinen.</div>
 </div>
+      </div>
+    </div>
+  </div>
 
+  <div class="col-right">
 <div class="card">
   <h2 style="margin:0 0 8px">📋 Registrert innhold</h2>
   <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
     <select id="listElv" onchange="fyllListSoner(); listMedia();">
+      <option value="" selected>Alle elver</option>
       <option value="audna">Audna</option>
       <option value="lygna">Lygna</option>
       <option value="mandalselva">Mandalselva</option>
@@ -208,6 +230,44 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
   </div>
   <div class="hint" style="margin:8px 0">Viser <code>videoer_&lt;elv&gt;.json</code> og <code>photos_&lt;elv&gt;.json</code> for elva valgt over (uavhengig av skjemaene for registrering). Video-sletting fjerner kun oppføringen (videoen på YouTube må fjernes manuelt). Bilde-sletting fjerner både oppføringen <b>og</b> selve bildefilen fra repoet.</div>
   <div id="vidList"><div class="hint">Laster …</div></div>
+</div>
+  </div>
+</div>
+
+<details class="card-details">
+  <summary>⚖️ Scoringsparametre per elv <span class="sum-hint">(sjelden brukt)</span></summary>
+<div class="card">
+  <h2>⚖️ Scoringsparametre per elv</h2>
+  <div id="rivers"><div class="hint">Laster config …</div></div>
+  <div class="save-row">
+    <button id="saveBtn" onclick="saveConfig()" disabled>💾 Lagre til GitHub</button>
+    <button class="secondary" onclick="loadConfig()">↺ Last på nytt</button>
+  </div>
+  <div id="status"></div>
+  <div class="warn">⚠️ Denne siden ligger åpent på GitHub Pages, men er ubrukelig uten ditt
+  personlige token. Ikke lenk til den fra dashbordene eller oversiktskartet.</div>
+</div>
+</details>
+
+<details class="card-details" id="settingsDetails">
+  <summary>🔑 Nøkler og tilgang <span class="sum-hint">(GitHub-token · NVE-nøkkel)</span></summary>
+<div class="card">
+  <h2>🔑 GitHub-token</h2>
+  <label for="tokenInput">Fine-grained PAT (kun elvedata-repo, contents: read/write)</label>
+  <div class="token-row">
+    <input type="password" id="tokenInput" placeholder="github_pat_...">
+    <button class="secondary" onclick="saveToken()">Lagre</button>
+  </div>
+  <div class="hint">Lagres kun i localStorage i denne nettleseren — aldri i repoet.</div>
+  <label for="nveInput" style="margin-top:10px">NVE HydAPI-nøkkel (for vannføringsoppslag ved videoregistrering)</label>
+  <div class="token-row">
+    <input type="password" id="nveInput" placeholder="NVE API-key ...">
+    <button class="secondary" onclick="saveNveKey()">Lagre</button>
+  </div>
+  <div class="hint">Lagres kun i localStorage — aldri i repoet.</div>
+</div>
+</details>
+
 </div>
 
 <script>
@@ -229,6 +289,7 @@ function saveToken() {
   document.getElementById('tokenInput').value = '';
   setStatus('Token lagret i denne nettleseren. ✓', false);
   loadConfig();
+  updateChips();
 }
 
 function setStatus(msg, isErr) {
@@ -393,6 +454,12 @@ function fyllListSoner() {
   if (!SONER) return;
   const elv = document.getElementById('listElv').value;
   const sel = document.getElementById('listSone');
+  if (!elv) {
+    sel.innerHTML = '<option value="">Alle soner</option>';
+    sel.disabled = true;
+    return;
+  }
+  sel.disabled = false;
   const soner = SONER[elv] || [];
   sel.innerHTML = '<option value="">Alle soner</option>'
     + soner.map(z => '<option value="' + z.replace(/"/g, '&quot;') + '">' + z + '</option>').join('');
@@ -405,6 +472,7 @@ function saveNveKey() {
   document.getElementById('nveInput').value = '';
   document.getElementById('nveInput').placeholder = 'NVE-nøkkel er lagret ✓';
   setVidStatus('NVE-nøkkel lagret i denne nettleseren. ✓', false);
+  updateChips();
 }
 
 function setVidStatus(msg, isErr) {
@@ -618,16 +686,20 @@ async function listMedia() {
   countEl.textContent = '';
   wrap.innerHTML = '<div class="hint">Laster …</div>';
   try {
-    const [vidData, fotoData] = await Promise.all([
-      fetchJsonFile('data/videoer_' + elv + '.json'),
-      fetchJsonFile('data/photos_' + elv + '.json'),
-    ]);
+    const elver = elv ? [elv] : ['audna', 'lygna', 'mandalselva', 'otra', 'sygna'];
+    const alleData = await Promise.all(elver.map(e => Promise.all([
+      fetchJsonFile('data/videoer_' + e + '.json'),
+      fetchJsonFile('data/photos_' + e + '.json'),
+    ])));
     let items = [];
-    if (filter !== 'foto') items = items.concat(vidData.list.map(v => ({ ...v, mtype: 'video' })));
-    if (filter !== 'video') items = items.concat(fotoData.list.map(p => ({ ...p, mtype: 'foto' })));
+    elver.forEach((e, i) => {
+      const [vidData, fotoData] = alleData[i];
+      if (filter !== 'foto') items = items.concat(vidData.list.map(v => ({ ...v, mtype: 'video', elv: e })));
+      if (filter !== 'video') items = items.concat(fotoData.list.map(p => ({ ...p, mtype: 'foto', elv: e })));
+    });
     if (sone) items = items.filter(m => m.zone === sone);
-    if (!items.length) { wrap.innerHTML = '<div class="hint">Ingen registreringer for ' + elv + ' med gjeldende filter.</div>'; countEl.textContent = '0 enheter'; return; }
-    items.sort((a, b) => (a.id || '').localeCompare(b.id || '', undefined, { numeric: true }));
+    if (!items.length) { wrap.innerHTML = '<div class="hint">Ingen registreringer med gjeldende filter.</div>'; countEl.textContent = '0 enheter'; return; }
+    items.sort((a, b) => (a.elv + '|' + (a.id || '')).localeCompare(b.elv + '|' + (b.id || ''), undefined, { numeric: true }));
     countEl.textContent = items.length + (items.length === 1 ? ' enhet i utvalget' : ' enheter i utvalget');
     wrap.innerHTML = '';
     items.forEach(m => {
@@ -638,16 +710,16 @@ async function listMedia() {
       badge.textContent = m.mtype === 'video' ? 'Video' : 'Foto';
       const meta = document.createElement('div');
       meta.className = 'vid-meta';
-      meta.innerHTML = '<div><b>' + m.id + '</b> · ' + m.zone + ' · ' + (m.dateISO || '?')
+      meta.innerHTML = '<div><b>' + m.id + '</b>' + (elv ? '' : ' · ' + RIVER_NAMES[m.elv]) + ' · ' + m.zone + ' · ' + (m.dateISO || '?')
         + (m.vannforing != null ? ' · ' + m.vannforing + ' m³/s' : '') + '</div>'
         + '<div class="vid-cap">' + (m.caption || '') + '</div>';
       const editBtn = document.createElement('button');
       editBtn.textContent = '✏️ Endre';
       editBtn.className = 'edit-btn';
-      editBtn.onclick = () => toggleEditForm(row, elv, m);
+      editBtn.onclick = () => toggleEditForm(row, m.elv, m);
       const btn = document.createElement('button');
       btn.textContent = '🗑 Slett';
-      btn.onclick = () => m.mtype === 'video' ? deleteVideo(elv, m.id) : deletePhoto(elv, m.id, m.file);
+      btn.onclick = () => m.mtype === 'video' ? deleteVideo(m.elv, m.id) : deletePhoto(m.elv, m.id, m.file);
       row.appendChild(badge);
       row.appendChild(meta);
       row.appendChild(editBtn);
@@ -1177,9 +1249,34 @@ async function saveEdit(form, elv, m) {
   }
 }
 
+function switchTab(which) {
+  document.getElementById('tabPaneVideo').style.display = which === 'video' ? '' : 'none';
+  document.getElementById('tabPaneBilde').style.display = which === 'bilde' ? '' : 'none';
+  document.getElementById('tabBtnVideo').classList.toggle('active', which === 'video');
+  document.getElementById('tabBtnBilde').classList.toggle('active', which === 'bilde');
+}
+
+function updateChips() {
+  const tokOk = !!getToken();
+  const nveOk = !!localStorage.getItem(NVE_KEY);
+  const ct = document.getElementById('chipToken');
+  const cn = document.getElementById('chipNve');
+  ct.textContent = 'GitHub-token ' + (tokOk ? '✓' : '✗');
+  ct.className = 'chip ' + (tokOk ? 'ok' : 'mangler');
+  cn.textContent = 'NVE-nøkkel ' + (nveOk ? '✓' : '✗');
+  cn.className = 'chip ' + (nveOk ? 'ok' : 'mangler');
+}
+
+function openSettings() {
+  const d = document.getElementById('settingsDetails');
+  d.open = true;
+  d.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 // Init
 lastSoner();
 listMedia();
+updateChips();
 if (localStorage.getItem(NVE_KEY)) {
   document.getElementById('nveInput').placeholder = 'NVE-nøkkel er lagret ✓ (lim inn ny for å bytte)';
 }
