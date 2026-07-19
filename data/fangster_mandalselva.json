@@ -50,6 +50,13 @@
  },
  {
   "dato": "2026-07-18",
+  "sone": "Klevlandsfossen",
+  "vekt": 1.6,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-18",
   "sone": "Sone 3",
   "vekt": 2,
   "agn": "Flue",
