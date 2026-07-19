@@ -2,6 +2,27 @@
  {
   "dato": "2026-07-19",
   "sone": "Sone 3",
+  "vekt": 4.2,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-19",
+  "sone": "Delomr2, Sone Hauge B",
+  "vekt": 2.4,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-19",
+  "sone": "Delomr2, Sone Hauge C",
+  "vekt": 1.5,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-19",
+  "sone": "Sone 3",
   "vekt": 0.4,
   "agn": "Flue",
   "art": "Laks"
