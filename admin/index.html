@@ -86,6 +86,8 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
         text-overflow: ellipsis; white-space: nowrap; }
 .vid-list-row button { background: #fee2e2; color: #b91c1c; padding: 5px 10px; font-size: 0.78rem; }
 .vid-list-row button:hover { background: #fecaca; }
+.vid-list-row button.preview-btn { background: #f1f5f9; color: #334155; padding: 5px 8px; }
+.vid-list-row button.preview-btn:hover { background: #e2e8f0; }
 .vid-list-row button.edit-btn { background: #e0e7ff; color: #3730a3; }
 .vid-list-row button.edit-btn:hover { background: #c7d2fe; }
 .vid-edit-form { grid-column: 1 / -1; width: 100%; background: #f8fafc; border: 1px solid #e2e8f0;
@@ -99,6 +101,12 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
 .vid-edit-actions .save { background: #dcfce7; color: #166534; }
 .vid-edit-actions .save:hover { background: #bbf7d0; }
 .vid-edit-actions .cancel { background: #f1f5f9; color: #475569; }
+#previewOverlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.8);
+        z-index: 1000; align-items: center; justify-content: center; cursor: zoom-out; padding: 24px; }
+#previewOverlay.open { display: flex; }
+#previewOverlay img { max-width: 90vw; max-height: 90vh; border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); }
+#previewOverlay .pv-cap { position: absolute; bottom: 24px; color: #fff; font-size: 0.8rem; text-align: center;
+        background: rgba(0,0,0,0.5); padding: 4px 12px; border-radius: 6px; }
 .vid-type-badge { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; padding: 2px 6px;
         border-radius: 999px; white-space: nowrap; }
 .vid-type-badge.foto { background: #dbeafe; color: #1d4ed8; }
@@ -713,6 +721,11 @@ async function listMedia() {
       meta.innerHTML = '<div><b>' + m.id + '</b>' + (elv ? '' : ' · ' + RIVER_NAMES[m.elv]) + ' · ' + m.zone + ' · ' + (m.dateISO || '?')
         + (m.vannforing != null ? ' · ' + m.vannforing + ' m³/s' : '') + '</div>'
         + '<div class="vid-cap">' + (m.caption || '') + '</div>';
+      const previewBtn = document.createElement('button');
+      previewBtn.textContent = '🖼️';
+      previewBtn.title = 'Forhåndsvis';
+      previewBtn.className = 'preview-btn';
+      previewBtn.onclick = () => showPreview(m);
       const editBtn = document.createElement('button');
       editBtn.textContent = '✏️ Endre';
       editBtn.className = 'edit-btn';
@@ -722,6 +735,7 @@ async function listMedia() {
       btn.onclick = () => m.mtype === 'video' ? deleteVideo(m.elv, m.id) : deletePhoto(m.elv, m.id, m.file);
       row.appendChild(badge);
       row.appendChild(meta);
+      row.appendChild(previewBtn);
       row.appendChild(editBtn);
       row.appendChild(btn);
       row.style.flexWrap = 'wrap';
@@ -1249,6 +1263,19 @@ async function saveEdit(form, elv, m) {
   }
 }
 
+function showPreview(m) {
+  const url = m.mtype === 'foto'
+    ? 'https://timon70-lab.github.io/elvedata/bilder/' + m.elv + '/' + m.file
+    : 'https://i.ytimg.com/vi/' + m.youtubeId + '/hqdefault.jpg';
+  document.getElementById('previewImg').src = url;
+  document.getElementById('previewCap').textContent = m.id + ' · ' + RIVER_NAMES[m.elv] + ' · ' + m.zone;
+  document.getElementById('previewOverlay').classList.add('open');
+}
+function closePreview() {
+  document.getElementById('previewOverlay').classList.remove('open');
+  document.getElementById('previewImg').src = '';
+}
+
 function switchTab(which) {
   document.getElementById('tabPaneVideo').style.display = which === 'video' ? '' : 'none';
   document.getElementById('tabPaneBilde').style.display = which === 'bilde' ? '' : 'none';
@@ -1285,6 +1312,11 @@ if (getToken()) {
 }
 loadConfig();
 </script>
+
+<div id="previewOverlay" onclick="closePreview()">
+  <img id="previewImg" src="" alt="">
+  <div class="pv-cap" id="previewCap"></div>
+</div>
 
 </body>
 </html>
