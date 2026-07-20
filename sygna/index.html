@@ -116,6 +116,11 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .photo-fs img { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 6px; }
 .photo-fs .fs-cap { color: #cbd5e0; font-size: 0.72rem; }
 .photo-fs .fs-close { color: white; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.photo-fs .fs-nav { position: absolute; top: 50%; transform: translateY(-50%); color: white; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 44px; height: 44px; font-size: 1.6rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.photo-fs .fs-nav:hover { background: rgba(255,255,255,0.28); }
+.photo-fs .fs-nav:disabled { opacity: 0.25; cursor: default; }
+.photo-fs .fs-nav-prev { left: 12px; }
+.photo-fs .fs-nav-next { right: 12px; }
 
 .zone-info-panel { width:100%; max-width:480px; background:white; border-radius:14px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,.07); margin-top:14px; display:none; }
 .zone-info-panel.visible { display:block; }
@@ -1010,6 +1015,18 @@ function closePhoto() {
   _activeZonePhotos = [];
   photoMarkers.forEach(({ mk }) => mk.setIcon(makePhotoIcon(false)));
 }
+function _fsNeighborIdx(delta) {
+  const idx = _activePhotoIdx + delta;
+  if (idx < 0 || idx >= _activeZonePhotos.length) return -1;
+  return idx;
+}
+function _updateFsNav() {
+  const prevBtn = document.getElementById('fsPrev');
+  const nextBtn = document.getElementById('fsNext');
+  if (!prevBtn || !nextBtn) return;
+  prevBtn.disabled = _fsNeighborIdx(-1) === -1;
+  nextBtn.disabled = _fsNeighborIdx(1) === -1;
+}
 function openFullscreen() {
   if (!_activeZonePhotos.length) return;
   const p = _activeZonePhotos[_activePhotoIdx];
@@ -1017,10 +1034,24 @@ function openFullscreen() {
   document.getElementById('fsImg').src = BILDE_BASE + p.file;
   document.getElementById('fsCap').textContent = p.caption;
   document.getElementById('photoFs').classList.add('open');
+  _updateFsNav();
 }
 function closeFullscreen() {
   document.getElementById('photoFs').classList.remove('open');
 }
+function fsNav(delta) {
+  const idx = _fsNeighborIdx(delta);
+  if (idx === -1) return;
+  showPhoto(idx);
+  openFullscreen();
+}
+document.addEventListener('keydown', (e) => {
+  const fs = document.getElementById('photoFs');
+  if (!fs || !fs.classList.contains('open')) return;
+  if (e.key === 'ArrowLeft') fsNav(-1);
+  else if (e.key === 'ArrowRight') fsNav(1);
+  else if (e.key === 'Escape') closeFullscreen();
+});
 
 // ── NVE ───────────────────────────────────────────────────────────────────
 async function fetchNedbor() {
@@ -1179,7 +1210,9 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 
 <div class="photo-fs" id="photoFs" onclick="closeFullscreen()">
   <button class="fs-close" onclick="closeFullscreen()">×</button>
+  <button class="fs-nav fs-nav-prev" id="fsPrev" onclick="event.stopPropagation(); fsNav(-1)" title="Forrige (sør)">‹</button>
   <img id="fsImg" src="" alt="">
+  <button class="fs-nav fs-nav-next" id="fsNext" onclick="event.stopPropagation(); fsNav(1)" title="Neste (nord)">›</button>
   <div class="fs-cap" id="fsCap"></div>
 </div>
 
@@ -1201,7 +1234,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div class="vp-info" id="vpInfo"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.005</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.006</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
