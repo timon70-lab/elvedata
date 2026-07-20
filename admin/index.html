@@ -108,6 +108,13 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
 #previewOverlay img { max-width: 90vw; max-height: 90vh; border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); }
 #previewOverlay .pv-cap { position: absolute; bottom: 24px; color: #fff; font-size: 0.8rem; text-align: center;
         background: rgba(0,0,0,0.5); padding: 4px 12px; border-radius: 6px; }
+#previewOverlay .pv-nav { position: absolute; top: 50%; transform: translateY(-50%); color: white;
+        background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 44px; height: 44px;
+        font-size: 1.6rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#previewOverlay .pv-nav:hover { background: rgba(255,255,255,0.28); }
+#previewOverlay .pv-nav:disabled { opacity: 0.25; cursor: default; }
+#previewOverlay .pv-nav-prev { left: 12px; }
+#previewOverlay .pv-nav-next { right: 12px; }
 .vid-type-badge { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; padding: 2px 6px;
         border-radius: 999px; white-space: nowrap; }
 .vid-type-badge.foto { background: #dbeafe; color: #1d4ed8; }
@@ -686,6 +693,8 @@ async function fetchJsonFile(path) {
   return { list, sha: gd.sha };
 }
 
+let _listItems = [];
+let _previewIdx = -1;
 async function listMedia(focusMid) {
   const elv = document.getElementById('listElv').value;
   const sone = document.getElementById('listSone').value;
@@ -710,8 +719,9 @@ async function listMedia(focusMid) {
       if (filter !== 'video') items = items.concat(fotoData.list.map(p => ({ ...p, mtype: 'foto', elv: e })));
     });
     if (sone) items = items.filter(m => m.zone === sone);
-    if (!items.length) { wrap.innerHTML = '<div class="hint">Ingen registreringer med gjeldende filter.</div>'; countEl.textContent = '0 enheter'; return; }
+    if (!items.length) { _listItems = []; wrap.innerHTML = '<div class="hint">Ingen registreringer med gjeldende filter.</div>'; countEl.textContent = '0 enheter'; return; }
     items.sort((a, b) => (a.elv + '|' + (a.id || '')).localeCompare(b.elv + '|' + (b.id || ''), undefined, { numeric: true }));
+    _listItems = items;
     countEl.textContent = items.length + (items.length === 1 ? ' enhet i utvalget' : ' enheter i utvalget');
     wrap.innerHTML = '';
     items.forEach(m => {
@@ -1283,11 +1293,35 @@ function showPreview(m) {
   document.getElementById('previewImg').src = url;
   document.getElementById('previewCap').textContent = m.id + ' · ' + RIVER_NAMES[m.elv] + ' · ' + m.zone;
   document.getElementById('previewOverlay').classList.add('open');
+  _previewIdx = _listItems.findIndex(x => x.mtype === m.mtype && x.elv === m.elv && x.id === m.id);
+  _updatePreviewNav();
 }
 function closePreview() {
   document.getElementById('previewOverlay').classList.remove('open');
   document.getElementById('previewImg').src = '';
+  _previewIdx = -1;
 }
+function _updatePreviewNav() {
+  const prevBtn = document.getElementById('pvPrev');
+  const nextBtn = document.getElementById('pvNext');
+  if (!prevBtn || !nextBtn) return;
+  const found = _previewIdx !== -1;
+  prevBtn.disabled = !found || _previewIdx <= 0;
+  nextBtn.disabled = !found || _previewIdx >= _listItems.length - 1;
+}
+function previewNav(delta) {
+  if (_previewIdx === -1) return;
+  const idx = _previewIdx + delta;
+  if (idx < 0 || idx >= _listItems.length) return;
+  showPreview(_listItems[idx]);
+}
+document.addEventListener('keydown', (e) => {
+  const ov = document.getElementById('previewOverlay');
+  if (!ov || !ov.classList.contains('open')) return;
+  if (e.key === 'ArrowLeft') previewNav(-1);
+  else if (e.key === 'ArrowRight') previewNav(1);
+  else if (e.key === 'Escape') closePreview();
+});
 
 function switchTab(which) {
   document.getElementById('tabPaneVideo').style.display = which === 'video' ? '' : 'none';
@@ -1327,7 +1361,9 @@ loadConfig();
 </script>
 
 <div id="previewOverlay" onclick="closePreview()">
+  <button class="pv-nav pv-nav-prev" id="pvPrev" onclick="event.stopPropagation(); previewNav(-1)" title="Forrige">‹</button>
   <img id="previewImg" src="" alt="">
+  <button class="pv-nav pv-nav-next" id="pvNext" onclick="event.stopPropagation(); previewNav(1)" title="Neste">›</button>
   <div class="pv-cap" id="previewCap"></div>
 </div>
 
