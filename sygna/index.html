@@ -198,7 +198,7 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
   <div style="font-size:0.55rem; color:#4a6741; text-align:right; margin-top:1px; opacity:0.7;">Vannføring siste 7 dager</div>
   <div class="quota-box">
     <div class="quota-item"><strong>Døgn:</strong> 2 fisk (laks/sjøørret)</div>
-    <div class="quota-item"><strong>Sesong 2026:</strong> 15. juli – 31. aug</div>
+    <div class="quota-item"><strong>Sesong 2026:</strong> 15. juli – 15. sept</div>
     <div class="quota-item"><strong>Sesongkvote:</strong> ikke fastsatt</div>
   </div>
   <div class="fiskemelding" id="fiskemelding">
@@ -271,7 +271,7 @@ const ZONE_INFO = {
     name: 'Alle åpne soner',
     desc: 'Hele elva fiskes på ett kort — Søgne- og Songdalselva er ikke delt inn i soner eller vald. Typisk flomelv med lite nedbørsfelt: elva stiger og synker svært raskt, og forholdene er normalt best på 10–25 m³/s. Ved høy vannføring i august/september kan oppgangen av sjøørret være svært god.',
     redskap: 'Flue, sluk, mark (markforbud i deler av sesongen)',
-    sesong: '15. juli – 31. august',
+    sesong: '15. juli – 15. september',
     kortUrl: 'http://www.scanatura.no/webshop/?lang=1',
     merknader: 'Kort fra Søgne- og Songdalen Elveeigarlag. Ikke lov å fiske overalt — tillatte fiskeplasser er merket i eget kart. Båtfiske kun for rettighetshavere. Se lakseelver.no for gjeldende regler.'
   },
@@ -305,7 +305,7 @@ const BILDE_BASE = 'https://timon70-lab.github.io/elvedata/bilder/sygna/';
 const PHOTOS_URL = 'https://timon70-lab.github.io/elvedata/data/photos_sygna.json';
 
 /* ---------- Sentral konfig (data/config.json) — scoringsparametre ---------- */
-const PRICES = {"Alle åpne soner": {"dogn": 100, "sesong": 800}};
+const PRICES = {"Alle åpne soner": {"dogn": 150, "sesong": 1000}};
 const ZONE_TOOL_RATING = {"Alle åpne soner":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}]};
 const BOOM_DAYS = {"Alle åpne soner": {"date": "2020-09-26", "count": 57, "flow": 9}};
 let SCORE_CFG = { rate: 0.8, vol: 0.2, shrinkC: 15, knee: 80 };   // fallback hvis config.json ikke kan hentes
@@ -1201,7 +1201,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div class="vp-info" id="vpInfo"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.004</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.005</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
