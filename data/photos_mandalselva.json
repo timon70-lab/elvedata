@@ -3238,14 +3238,14 @@
   "lat": 58.149171,
   "lon": 7.553055,
   "file": "HaugeD_20230525_2026.jpg",
-  "caption": "Hauge D",
-  "zone": "Hauge D",
+  "caption": "Sone 3",
+  "zone": "Sone 3",
   "dateISO": "2023-05-25",
   "timeUTC": "18:26",
-  "locId": "Hauge D",
-  "vannforing": 104.5,
-  "autoSone": true,
-  "soneAvstandM": 3
+  "locId": "Sone 3",
+  "vannforing": 105,
+  "autoSone": false,
+  "soneAvstandM": 10
  },
  {
   "id": "M-235",
