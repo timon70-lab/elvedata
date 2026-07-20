@@ -62,14 +62,16 @@
  {
   "id": "A-006",
   "file": "Sone7_20230727_1555.jpg",
-  "caption": "Sone 7 · Stryk og høl",
-  "zone": "Sone7",
+  "caption": "Sone 8 · Stryk og høl",
+  "zone": "Sone8",
   "dateISO": "2023-07-27",
   "timeUTC": "15:55",
-  "locId": "Sone7",
+  "locId": "Sone8",
   "lat": 58.242163,
   "lon": 7.345708,
-  "vannforing": 11
+  "vannforing": 11,
+  "autoSone": false,
+  "soneAvstandM": 28
  },
  {
   "id": "A-007",
