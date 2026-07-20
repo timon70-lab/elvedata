@@ -3056,14 +3056,14 @@
   "lat": 58.282592,
   "lon": 7.526161,
   "file": "Straedethylen_20220918_1333_2.jpg",
-  "caption": "Strædethylen",
-  "zone": "Strædethylen",
+  "caption": "Laksehylen",
+  "zone": "Laksehylen",
   "dateISO": "2022-09-18",
   "timeUTC": "11:33",
-  "locId": "Strædethylen",
-  "vannforing": 21.9,
-  "autoSone": true,
-  "soneAvstandM": 47
+  "locId": "Laksehylen",
+  "vannforing": 22,
+  "autoSone": false,
+  "soneAvstandM": 56
  },
  {
   "id": "M-220",
