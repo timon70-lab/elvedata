@@ -76,14 +76,16 @@
  {
   "id": "A-007",
   "file": "Sone7_20230727_1556.jpg",
-  "caption": "Sone 7 · Stor stein i elva",
-  "zone": "Sone7",
+  "caption": "Sone 8 · Stor stein i elva",
+  "zone": "Sone8",
   "dateISO": "2023-07-27",
   "timeUTC": "15:56",
-  "locId": "Sone7",
+  "locId": "Sone8",
   "lat": 58.242172,
   "lon": 7.345722,
-  "vannforing": 11
+  "vannforing": 11,
+  "autoSone": false,
+  "soneAvstandM": 27
  },
  {
   "id": "A-008",
