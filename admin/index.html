@@ -81,6 +81,7 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
 .vid-list-row { display: flex; align-items: center; gap: 10px; padding: 8px 0;
         border-bottom: 1px solid #f1f5f9; font-size: 0.78rem; }
 .vid-list-row:last-child { border-bottom: none; }
+.vid-list-row.just-saved { background: #ecfdf5; transition: background 1.4s ease; }
 .vid-list-row .vid-meta { flex: 1; min-width: 0; }
 .vid-list-row .vid-meta .vid-cap { color: #64748b; font-size: 0.72rem; overflow: hidden;
         text-overflow: ellipsis; white-space: nowrap; }
@@ -685,14 +686,17 @@ async function fetchJsonFile(path) {
   return { list, sha: gd.sha };
 }
 
-async function listMedia() {
+async function listMedia(focusMid) {
   const elv = document.getElementById('listElv').value;
   const sone = document.getElementById('listSone').value;
   const filter = document.getElementById('vidFilter').value;
   const wrap = document.getElementById('vidList');
   const countEl = document.getElementById('vidCount');
   countEl.textContent = '';
-  wrap.innerHTML = '<div class="hint">Laster …</div>';
+  // Ikke kollaps listen mens vi laster på nytt (unngår at siden hopper opp fordi
+  // innholdet midlertidig blir kortere enn gjeldende scroll-posisjon).
+  const hadContent = wrap.children.length && !wrap.querySelector('.hint');
+  if (!hadContent) wrap.innerHTML = '<div class="hint">Laster …</div>';
   try {
     const elver = elv ? [elv] : ['audna', 'lygna', 'mandalselva', 'otra', 'sygna'];
     const alleData = await Promise.all(elver.map(e => Promise.all([
@@ -713,6 +717,7 @@ async function listMedia() {
     items.forEach(m => {
       const row = document.createElement('div');
       row.className = 'vid-list-row';
+      row.dataset.mid = m.mtype + '::' + m.elv + '::' + m.id;
       const badge = document.createElement('span');
       badge.className = 'vid-type-badge ' + m.mtype;
       badge.textContent = m.mtype === 'video' ? 'Video' : 'Foto';
@@ -741,6 +746,14 @@ async function listMedia() {
       row.style.flexWrap = 'wrap';
       wrap.appendChild(row);
     });
+    if (focusMid) {
+      const focusRow = wrap.querySelector('[data-mid="' + CSS.escape(focusMid) + '"]');
+      if (focusRow) {
+        focusRow.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+        focusRow.classList.add('just-saved');
+        setTimeout(() => focusRow.classList.remove('just-saved'), 1500);
+      }
+    }
   } catch (e) {
     wrap.innerHTML = '<div class="hint">Kunne ikke hente listen: ' + e.message + '</div>';
   }
@@ -1256,7 +1269,7 @@ async function saveEdit(form, elv, m) {
       throw new Error('HTTP ' + putRes.status + (err.message ? ' — ' + err.message : ''));
     }
     setVidStatus(m.id + ' oppdatert. ✓ Synlig i dashbordet etter Pages-cache (~10 min).', false);
-    listMedia();
+    listMedia(m.mtype + '::' + elv + '::' + m.id);
   } catch (e) {
     setVidStatus('Endring feilet: ' + e.message, true);
     form.querySelector('.save').disabled = false;
