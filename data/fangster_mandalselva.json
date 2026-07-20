@@ -1,5 +1,26 @@
 [
  {
+  "dato": "2026-07-20",
+  "sone": "Holmesland A",
+  "vekt": 1.2,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-20",
+  "sone": "Holmesland A",
+  "vekt": 1.5,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-19",
+  "sone": "Holmesland A",
+  "vekt": 5.5,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
   "dato": "2026-07-19",
   "sone": "Sone 3",
   "vekt": 4.2,
