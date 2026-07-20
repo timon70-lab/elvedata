@@ -280,20 +280,6 @@
   "soneAvstandM": 639
  },
  {
-  "id": "M-021",
-  "lat": 58.171944,
-  "lon": 7.553056,
-  "file": "Sone3_20210612_2154.jpg",
-  "caption": "Sone 3",
-  "zone": "Sone 3",
-  "dateISO": "2021-06-12",
-  "timeUTC": "19:54",
-  "locId": "Sone 3",
-  "vannforing": 36.9,
-  "autoSone": true,
-  "soneAvstandM": 471
- },
- {
   "id": "M-022",
   "lat": 58.160285,
   "lon": 7.551475,
