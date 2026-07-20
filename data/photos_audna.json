@@ -90,14 +90,16 @@
  {
   "id": "A-008",
   "file": "Sone7_20230727_1556_2.jpg",
-  "caption": "Sone 7 · Rolige partier",
-  "zone": "Sone7",
+  "caption": "Sone 8 · Rolige partier",
+  "zone": "Sone8",
   "dateISO": "2023-07-27",
   "timeUTC": "15:56",
-  "locId": "Sone7",
+  "locId": "Sone8",
   "lat": 58.242172,
   "lon": 7.345722,
-  "vannforing": 11
+  "vannforing": 11,
+  "autoSone": false,
+  "soneAvstandM": 27
  },
  {
   "id": "A-009",
