@@ -112,7 +112,7 @@ const RIVERS = [
   { id: 'nidelva', regulation: 'heavy',     name: 'Nidelva (Arendal)',          lat: 58.4471, lon: 8.60796, hasData: false, seasonStart: '06-15', seasonEnd: '09-15' },
   { id: 'tovdalselva', regulation: 'moderate', name: 'Tovdalselva',                lat: 58.31994, lon: 8.19338, hasData: false, seasonStart: '06-01', seasonEnd: '08-31' },
   {
-    id: 'otra', regulation: 'heavy', name: 'Otra', lat: 58.20162, lon: 7.93629, hasData: true,
+    id: 'otra', regulation: 'heavy', name: 'Otra', lat: 58.24628, lon: 7.952091, hasData: true,
     dashboardUrl: 'https://timon70-lab.github.io/elvedata/otra/',
     flowUrl: 'https://timon70-lab.github.io/elvedata/data/vannforing_otra.json',
     catchUrl: 'https://timon70-lab.github.io/elvedata/data/fangster_otra.json',
@@ -130,7 +130,7 @@ const RIVERS = [
     maxBin: 18, binStep: 2, seasonStart: '07-15', seasonEnd: '08-31'
   },
   {
-    id: 'mandalselva', regulation: 'moderate', name: 'Mandalselva', lat: 58.22845, lon: 7.51148, hasData: true,
+    id: 'mandalselva', regulation: 'moderate', name: 'Mandalselva', lat: 58.268685, lon: 7.521004, hasData: true,
     dashboardUrl: 'https://timon70-lab.github.io/elvedata/mandalselva/',
     flowUrl: 'https://timon70-lab.github.io/elvedata/data/vannforing_mandalselva.json',
     catchUrl: 'https://timon70-lab.github.io/elvedata/data/fangster_mandalselva.json',
@@ -202,7 +202,7 @@ function riverState(river, now) {
   return { phase: 'nodata' };
 }
 
-const map = L.map('map', { zoomControl: true }).setView([58.35, 7.55], 8);
+const map = L.map('map', { zoomControl: true }).setView([58.35, 7.55], 9);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap-bidragsytere',
   maxZoom: 18
@@ -233,7 +233,7 @@ RIVERS.forEach((river) => {
   }
 
   // --- Elver med dashboard: score / åpner-dato / stengt ---
-  const mainSize = 44;
+  const mainSize = 40;
   const icon = L.divIcon({
     className: '',
     html: wrapWithBadge('<div class="river-marker" style="width:' + mainSize + 'px;height:' + mainSize + 'px;background:#718096">…</div>', mainSize, river.regulation),
@@ -366,7 +366,7 @@ RIVERS.forEach((river) => {
 </script>
 
 <div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.023</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.027</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
