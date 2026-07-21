@@ -625,7 +625,7 @@
   "dateISO": "2024-09-14",
   "timeUTC": "07:50",
   "locId": "Sone 2",
-  "vannforing": 95.0,
+  "vannforing": 95,
   "autoSone": true,
   "soneAvstandM": 44
  },
@@ -639,7 +639,7 @@
   "dateISO": "2024-09-14",
   "timeUTC": "07:50",
   "locId": "Sone 2",
-  "vannforing": 95.0,
+  "vannforing": 95,
   "autoSone": true,
   "soneAvstandM": 44
  },
@@ -653,7 +653,7 @@
   "dateISO": "2024-09-14",
   "timeUTC": "08:06",
   "locId": "Sone 3A",
-  "vannforing": 95.0,
+  "vannforing": 95,
   "autoSone": true,
   "soneAvstandM": 170
  },
@@ -667,7 +667,7 @@
   "dateISO": "2024-09-14",
   "timeUTC": "08:06",
   "locId": "Sone 3A",
-  "vannforing": 95.0,
+  "vannforing": 95,
   "autoSone": true,
   "soneAvstandM": 170
  },
@@ -681,7 +681,7 @@
   "dateISO": "2024-09-14",
   "timeUTC": "08:24",
   "locId": "Sone 3A",
-  "vannforing": 95.0,
+  "vannforing": 95,
   "autoSone": true,
   "soneAvstandM": 12
  },
@@ -695,7 +695,7 @@
   "dateISO": "2024-09-14",
   "timeUTC": "08:24",
   "locId": "Sone 3A",
-  "vannforing": 95.0,
+  "vannforing": 95,
   "autoSone": true,
   "soneAvstandM": 12
  },
@@ -810,5 +810,19 @@
   "vannforing": 199.9,
   "autoSone": true,
   "soneAvstandM": 29
+ },
+ {
+  "id": "O-059",
+  "lat": 58.232708333333335,
+  "lon": 7.931594444444444,
+  "file": "Sone4A_20250809_1437.jpg",
+  "caption": "Sone 4A",
+  "zone": "Sone 4A",
+  "dateISO": "2025-08-09",
+  "timeUTC": "12:37",
+  "locId": "Sone 4A",
+  "vannforing": 56,
+  "autoSone": false,
+  "soneAvstandM": 543
  }
 ]
