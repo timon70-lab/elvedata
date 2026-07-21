@@ -114,6 +114,9 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .pg-nav-btn:disabled { color:#cbd5e0; border-color:#e2e8f0; cursor:not-allowed; }
 .photo-img { width: 100%; display: block; max-height: 280px; object-fit: cover; cursor: pointer; }
 .photo-cap { padding: 7px 14px 10px; font-size: 0.68rem; color: #64748b; }
+.dir-link { display: inline-block; margin: 0 14px 10px; font-size: 0.68rem; color: #276749; background: #f0fff4;
+        border: 1px solid #c6f6d5; border-radius: 999px; padding: 3px 11px; text-decoration: none; }
+.dir-link:hover { background: #c6f6d5; }
 .photo-fs { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
 .photo-fs.open { display: flex; }
 .photo-fs img { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 6px; }
@@ -1014,6 +1017,9 @@ function _renderPhoto() {
   const flowStr = flowVal !== undefined ? flowVal + ' m³/s' : 'Vannstand ukjent';
   const dateStr = p.dateISO ? new Date(p.dateISO).toLocaleDateString('nb-NO', {day:'numeric', month:'long', year:'numeric'}) : '';
   document.getElementById('photoCap').textContent = p.caption + (dateStr ? ' · ' + dateStr : '') + ' · ' + flowStr;
+  const dirLink = document.getElementById('dirLink');
+  dirLink.href = 'https://www.google.com/maps/dir/?api=1&destination=' + p.lat + ',' + p.lon + '&travelmode=driving';
+  dirLink.style.display = 'inline-block';
 
   const prevBtn = document.getElementById('photoPrev');
   const nextBtn = document.getElementById('photoNext');
@@ -1235,6 +1241,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   </div>
   <img class="photo-img" id="photoImg" src="" alt="" onclick="openFullscreen()" style="cursor:zoom-in">
   <div class="photo-cap" id="photoCap"></div>
+  <a class="dir-link" id="dirLink" href="#" target="_blank" rel="noopener" style="display:none">🚗 Ta meg dit ↗</a>
 </div>
 
 <div class="photo-fs" id="photoFs" onclick="closeFullscreen()">
@@ -1263,7 +1270,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div class="vp-info" id="vpInfo"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.014</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.015</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 

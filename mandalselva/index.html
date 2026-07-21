@@ -122,6 +122,9 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .flow-chip.on { background:#276749; border-color:#276749; color:white; }
 .photo-img { width: 100%; display: block; max-height: 280px; object-fit: cover; cursor: pointer; }
 .photo-cap { padding: 7px 14px 10px; font-size: 0.68rem; color: #64748b; }
+.dir-link { display: inline-block; margin: 0 14px 10px; font-size: 0.68rem; color: #276749; background: #f0fff4;
+        border: 1px solid #c6f6d5; border-radius: 999px; padding: 3px 11px; text-decoration: none; }
+.dir-link:hover { background: #c6f6d5; }
 .photo-fs { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
 .photo-fs.open { display: flex; }
 .photo-fs img { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 6px; }
@@ -1046,6 +1049,7 @@ function _renderMedia() {
     document.getElementById('photoTitle').textContent = '📷 ' + (_activeMediaZone || '');
     document.getElementById('photoCounter').textContent = '0';
     document.getElementById('photoCap').textContent = 'Ingen bilder eller videoer ved denne vannføringen i denne sonen.';
+    document.getElementById('dirLink').style.display = 'none';
     const pb = document.getElementById('photoPrev'), nb = document.getElementById('photoNext');
     pb.disabled = nb.disabled = true;
     pb.style.opacity = nb.style.opacity = '0.3';
@@ -1072,6 +1076,9 @@ function _renderMedia() {
   const flowStr = flowVal !== undefined ? flowVal + ' m³/s' : 'Vannstand ukjent';
   const dateStr = p.dateISO ? new Date(p.dateISO).toLocaleDateString('nb-NO', {day:'numeric', month:'long', year:'numeric'}) : '';
   document.getElementById('photoCap').textContent = p.caption + (dateStr ? ' · ' + dateStr : '') + ' · ' + flowStr;
+  const dirLink = document.getElementById('dirLink');
+  dirLink.href = 'https://www.google.com/maps/dir/?api=1&destination=' + p.lat + ',' + p.lon + '&travelmode=driving';
+  dirLink.style.display = 'inline-block';
 
   const prevBtn = document.getElementById('photoPrev');
   const nextBtn = document.getElementById('photoNext');
@@ -1320,6 +1327,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <img class="photo-img" id="photoImg" src="" alt="" onclick="openFullscreen()" style="cursor:zoom-in">
   <div id="videoBox" style="display:none"></div>
   <div class="photo-cap" id="photoCap"></div>
+  <a class="dir-link" id="dirLink" href="#" target="_blank" rel="noopener" style="display:none">🚗 Ta meg dit ↗</a>
 </div>
 
 <div class="photo-fs" id="photoFs" onclick="closeFullscreen()">
@@ -1341,7 +1349,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.028</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.029</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
