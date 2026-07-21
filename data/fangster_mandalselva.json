@@ -8,6 +8,20 @@
  },
  {
   "dato": "2026-07-20",
+  "sone": "Sone 4",
+  "vekt": 2.5,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-20",
+  "sone": "Sone 4",
+  "vekt": 5,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-20",
   "sone": "Sone 3",
   "vekt": 2.5,
   "agn": "Flue",
