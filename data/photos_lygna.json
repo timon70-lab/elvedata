@@ -1,1 +1,16 @@
-[]
+[
+ {
+  "id": "L-001",
+  "lat": 58.18467777777777,
+  "lon": 7.1006277777777775,
+  "file": "Sone9Kvelland_20250723_1204.jpg",
+  "caption": "Sone 9 Kvelland",
+  "zone": "Sone 9 Kvelland",
+  "dateISO": "2025-07-23",
+  "timeUTC": "10:04",
+  "locId": "Sone 9 Kvelland",
+  "vannforing": 11,
+  "autoSone": true,
+  "soneAvstandM": 200
+ }
+]
