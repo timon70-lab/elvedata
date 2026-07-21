@@ -3,6 +3,20 @@
   "dato": "2026-07-21",
   "sone": "Sone 3",
   "vekt": 2.5,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-21",
+  "sone": "Delomr 2, Laksøya",
+  "vekt": 2,
+  "agn": "Mark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-21",
+  "sone": "Sone 3",
+  "vekt": 2.5,
   "agn": "Sluk",
   "art": "Laks"
  },
