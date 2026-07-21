@@ -199,7 +199,7 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
       </select>
     </label>
     <label>Sone
-      <select id="fotoSone" disabled><option value="">— velg elv først —</option></select>
+      <select id="fotoSone" disabled onchange="onFotoSoneChange()"><option value="">— velg elv først —</option></select>
     </label>
     <label>Dato <input type="date" id="fotoDato" disabled></label>
     <label>Klokkeslett (norsk tid, valgfritt) <input type="time" id="fotoTid" disabled></label>
@@ -851,6 +851,7 @@ const RIVER_NAMES = {audna:'Audna',lygna:'Lygna',mandalselva:'Mandalselva',otra:
 const ID_PREFIX = {audna:'A',lygna:'L',mandalselva:'M',otra:'O',sygna:'S'};
 let fotoParsed = null; // { lat, lon, dateISO, timeUTC (lokal), orientation }
 let fotoFileRef = null; // selve filen - input-feltet nullstilles etter lesing, så filen må huskes separat
+let _fotoSonePrevValue = ''; // forrige sone-verdi, brukes til å avgjøre om Beskrivelse kan oppdateres trygt
 
 /* ---------- Avstand punkt-til-linjesegment (speiler Python _dist_point_segment_m) ---------- */
 function distPointSegmentM(p, a, b) {
@@ -978,6 +979,7 @@ async function lesBildeFil(ev) {
   const file = ev.target.files[0];
   if (!file) return;
   fotoFileRef = file;
+  document.getElementById('fotoVannforing').value = '';
   setFotoStatus('Leser bilde …', false);
   document.getElementById('fotoForslag').style.display = 'none';
   try {
@@ -999,6 +1001,7 @@ async function lesBildeFil(ev) {
     document.getElementById('fotoDato').value = exif.dateISO || '';
     document.getElementById('fotoTid').value = exif.timeLocal || '';
     document.getElementById('fotoBeskrivelse').value = best.zone;
+    _fotoSonePrevValue = best.zone;
     ['fotoElv','fotoSone','fotoDato','fotoTid','fotoBeskrivelse','fotoVannforing','fotoNveBtn','fotoBtn'].forEach(id => document.getElementById(id).disabled = false);
     const fb = document.getElementById('fotoForslag');
     fb.style.display = 'block';
@@ -1017,6 +1020,17 @@ function fyllSonerFoto(preselect) {
   const soner = (SONER && SONER[elv]) || [];
   sel.innerHTML = soner.map(z => '<option value="'+z.replace(/"/g,'&quot;')+'"'+(z===preselect?' selected':'')+'>'+z+'</option>').join('');
   sel.disabled = false;
+}
+
+function onFotoSoneChange() {
+  const sel = document.getElementById('fotoSone');
+  const desc = document.getElementById('fotoBeskrivelse');
+  // Oppdater kun Beskrivelse automatisk hvis den fortsatt matcher forrige sonenavn
+  // (dvs. brukeren har ikke skrevet inn en egen, tilpasset tekst).
+  if (desc.value.trim() === '' || desc.value === _fotoSonePrevValue) {
+    desc.value = sel.value;
+  }
+  _fotoSonePrevValue = sel.value;
 }
 
 function setFotoStatus(msg, isErr) {
@@ -1187,6 +1201,7 @@ async function leggTilBilde() {
     }
     setFotoStatus('Lagret ' + id + ' (' + outName + ') til ' + elv + '. ✓ Synlig i dashbordet etter Pages-cache (~10 min).', false);
     document.getElementById('fotoForslag').style.display = 'none';
+    document.getElementById('fotoVannforing').value = '';
     fotoParsed = null;
     fotoFileRef = null;
     document.getElementById('fotoFil').value = '';
