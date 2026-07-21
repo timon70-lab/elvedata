@@ -1,6 +1,20 @@
 [
  {
   "dato": "2026-07-21",
+  "sone": "Holmesland C",
+  "vekt": 1.3,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-21",
+  "sone": "Delomr 2, Strømmen",
+  "vekt": 1.6,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-21",
   "sone": "Delomr2, Sone Hauge A",
   "vekt": 5,
   "agn": "Flue",
