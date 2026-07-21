@@ -31,5 +31,16 @@
     "dateISO": "2024-08-24",
     "timeUTC": "16:06",
     "vannforing": 34
+  },
+  {
+    "id": "V-004",
+    "zone": "Alle åpne soner",
+    "lat": 58.0816,
+    "lon": 7.83,
+    "youtubeId": "znBw_hpjbW0",
+    "caption": "Alle åpne soner",
+    "dateISO": "2024-06-21",
+    "timeUTC": "17:27",
+    "vannforing": 6
   }
 ]
