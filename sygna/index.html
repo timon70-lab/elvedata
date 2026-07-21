@@ -162,16 +162,12 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .stat-num { font-size:1.05rem; font-weight:800; color:#276749; line-height:1.1; }
 .stat-lbl { font-size:0.54rem; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; text-align:center; margin-top:1px; }
 
-.video-panel { width:100%; max-width:480px; background:white; border-radius:14px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,.07); margin-top:14px; display:none; }
-.video-panel.visible { display:block; }
-.vp-hdr { padding:10px 14px; background:#fff5f5; border-bottom:2px solid #fed7d7; display:flex; justify-content:space-between; align-items:center; }
-.vp-hdr-title { font-size:.78rem; font-weight:700; color:#c53030; }
-.vp-hdr button { background:none; border:none; color:#94a3b8; font-size:1rem; cursor:pointer; }
-.vp-iframe-wrap { position:relative; padding-bottom:56.25%; height:0; overflow:hidden; }
-.vp-iframe-wrap iframe { position:absolute; top:0; left:0; width:100%; height:100%; border:none; }
-.vp-info { padding:12px 14px 14px; font-size:.71rem; color:#374151; }
-.vp-yt-btn { display:inline-block; margin-top:8px; background:#c53030; color:white; text-decoration:none; border-radius:6px; padding:7px 14px; font-size:.75rem; font-weight:700; }
-.vp-yt-btn:hover { background:#9b2c2c; }
+.video-thumb { position:relative; cursor:pointer; }
+.video-thumb img { width:100%; display:block; max-height:280px; object-fit:cover; }
+.video-play { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:2.4rem; color:white; background:rgba(0,0,0,0.35); text-shadow:0 2px 8px rgba(0,0,0,.6); }
+.video-thumb:hover .video-play { background:rgba(0,0,0,0.5); }
+.video-frame { width:100%; aspect-ratio:16/9; display:block; border:0; }
 
 .zi-boom { display:flex; gap:8px; align-items:center; margin-top:8px; padding:8px 10px; background:#fffbea; border:1px solid #fbd38d; border-radius:8px; }
 .zi-boom-icon { font-size:1.1rem; line-height:1; flex-shrink:0; }
@@ -314,6 +310,7 @@ function zoneLabel(zone) {
 
 const BILDE_BASE = 'https://timon70-lab.github.io/elvedata/bilder/sygna/';
 const PHOTOS_URL = 'https://timon70-lab.github.io/elvedata/data/photos_sygna.json';
+const VIDEOS_URL = 'https://timon70-lab.github.io/elvedata/data/videoer_sygna.json';
 
 /* ---------- Sentral konfig (data/config.json) — scoringsparametre ---------- */
 const PRICES = {"Alle åpne soner": {"dogn": 150, "sesong": 1000}};
@@ -341,7 +338,7 @@ fetch('https://timon70-lab.github.io/elvedata/data/config.json', { cache: 'no-ca
 let PHOTOS = [];
 let photoMarkers = [];
 
-const VIDEOS = [];
+let VIDEOS = [];
 let videoMarkers = [];
 
 let activePhoto = null;
@@ -370,7 +367,7 @@ function onFlowChange(val) {
   currentFlow = parseInt(val);
   document.getElementById('flowVal').textContent = (currentFlow >= 18 ? '18+' : currentFlow + '–' + (currentFlow+2)) + ' m³/s';
   update();
-  if (flowFilterOn) _rebuildZonePhotos();
+  if (flowFilterOn) _rebuildZoneMedia();
 }
 
 function updateDualFill(loId, hiId, fillId, min, max) {
@@ -715,15 +712,29 @@ function initMap() {
 
     mapLayers[zone] = {startMk, endMk};
   });
+}
 
-  // Video markers
-  VIDEOS.forEach((video, idx) => {
+function addVideoMarkers() {
+  if (!map) return;
+  videoMarkers.forEach(({ mk }) => mk.remove());
+  videoMarkers = [];
+  VIDEOS.forEach((video) => {
     const mk = L.marker([video.lat, video.lon], { icon: makeVideoIcon(), zIndexOffset: 250, opacity: 0 }).addTo(map);
     mk.bindTooltip('🎣 Vis fangstvideo', { permanent: false, direction: 'top', className: 'mtip' });
-    mk.on('click', (e) => { L.DomEvent.stopPropagation(e); window.open('https://www.youtube.com/watch?v=' + video.youtubeId, '_blank'); });
-    videoMarkers.push({ mk, zone: video.zone });
+    mk.on('click', (e) => { L.DomEvent.stopPropagation(e); openZoneMedia(video.zone, video); });
+    videoMarkers.push({ mk, zone: video.zone, video });
   });
+}
 
+async function fetchVideos() {
+  try {
+    const res = await fetch(VIDEOS_URL);
+    if (!res.ok) return;
+    VIDEOS = await res.json();
+    VIDEOS.forEach(v => v.mtype = 'video');
+    addVideoMarkers();
+    updateMap(computeScores());
+  } catch(e) { /* videoer er valgfrie – feiler stille */ }
 }
 
 function addPhotoMarkers() {
@@ -734,7 +745,7 @@ function addPhotoMarkers() {
     const icon = makePhotoIcon(false);
     const mk = L.marker([photo.lat, photo.lon], { icon, zIndexOffset: 200, opacity: 0 }).addTo(map);
     mk.bindTooltip('📷 Vis bilde', { permanent: false, direction: 'top', className: 'mtip' });
-    mk.on('click', (e) => { L.DomEvent.stopPropagation(e); openZonePhotos(photo.zone, idx); });
+    mk.on('click', (e) => { L.DomEvent.stopPropagation(e); openZoneMedia(photo.zone, photo); });
     photoMarkers.push({ mk, zone: photo.zone, photosIdx: idx });
   });
 }
@@ -744,6 +755,7 @@ async function fetchPhotos() {
     const res = await fetch(PHOTOS_URL);
     if (!res.ok) return;
     PHOTOS = await res.json();
+    PHOTOS.forEach(p => p.mtype = 'photo');
     addPhotoMarkers();
     updateMap(computeScores());
   } catch(e) { /* bilder er valgfrie – feiler stille */ }
@@ -844,14 +856,12 @@ function selectZone(zone) {
     activeZone = null;
     document.getElementById('mapTitle').textContent = '🗺 Kart';
     // Behold kartets posisjon/zoom som den var for den lukkede sonen - ikke zoom ut.
-    closePhoto();
+    closeMedia();
     closeZoneInfo();
-    closeVideo();
   } else {
     activeZone = zone;
     document.getElementById('mapTitle').textContent = '🗺 ' + zone;
-    closePhoto(); // lukk ev. åpent bilde fra forrige sone
-    closeVideo(); // lukk ev. åpen video fra forrige sone
+    closeMedia(); // lukk ev. åpent bilde/video fra forrige sone
     const zc = ZONE_COORDS[zone];
     if (zc) map.fitBounds([zc.s, zc.e], {padding: [50,50], animate: true, maxZoom: 14});
   }
@@ -952,17 +962,17 @@ function closeZoneInfo() {
   document.getElementById('zoneInfoPanel').classList.remove('visible');
 }
 
-let _activePhotoIdx = 0;
-let _activeZonePhotos = [];
-let _activePhotoZone = null;
+let _activeMediaIdx = 0;
+let _activeZoneMedia = [];
+let _activeMediaZone = null;
 let flowFilterOn = false;
 
-function mediaFlow(p) {
-  return (p.vannforing !== undefined && p.vannforing !== null) ? p.vannforing : FLOW_LOOKUP[p.dateISO];
+function mediaFlow(m) {
+  return (m.vannforing !== undefined && m.vannforing !== null) ? m.vannforing : FLOW_LOOKUP[m.dateISO];
 }
-function mediaPassesFilter(p) {
+function mediaPassesFilter(m) {
   if (!flowFilterOn) return true;
-  const f = mediaFlow(p);
+  const f = mediaFlow(m);
   if (f === undefined || f === null) return false;
   const bin = f >= 18 ? 18 : Math.floor(f / 2) * 2;
   return bin === currentFlow;
@@ -975,64 +985,51 @@ function flowChipLabel() {
 function toggleFlowFilter() {
   flowFilterOn = !flowFilterOn;
   update();               // oppdaterer markørsynlighet på kartet
-  _rebuildZonePhotos();
+  _rebuildZoneMedia();
 }
-function _rebuildZonePhotos() {
+function _rebuildZoneMedia() {
   const chip = document.getElementById('flowChip');
   chip.textContent = flowChipLabel();
   chip.classList.toggle('on', flowFilterOn);
   if (!document.getElementById('photoPanel').classList.contains('visible')) return;
-  const cur = _activeZonePhotos[_activePhotoIdx];
-  _activeZonePhotos = PHOTOS.filter(p => p.zone === _activePhotoZone && mediaPassesFilter(p))
+  const cur = _activeZoneMedia[_activeMediaIdx];
+  _activeZoneMedia = [...PHOTOS, ...VIDEOS]
+    .filter(m => m.zone === _activeMediaZone && mediaPassesFilter(m))
     .sort((a, b) => a.lat - b.lat);
-  const pos = cur ? _activeZonePhotos.indexOf(cur) : -1;
-  _activePhotoIdx = pos >= 0 ? pos : 0;
-  _renderPhoto();
+  const pos = cur ? _activeZoneMedia.indexOf(cur) : -1;
+  _activeMediaIdx = pos >= 0 ? pos : 0;
+  _renderMedia();
 }
 
-function openZonePhotos(zone, photosIdx) {
-  _activePhotoZone = zone;
+function openZoneMedia(zone, target) {
+  _activeMediaZone = zone;
   const chip = document.getElementById('flowChip');
   chip.textContent = flowChipLabel();
   chip.classList.toggle('on', flowFilterOn);
-  _activeZonePhotos = PHOTOS.filter(p => p.zone === zone && mediaPassesFilter(p))
+  _activeZoneMedia = [...PHOTOS, ...VIDEOS]
+    .filter(m => m.zone === zone && mediaPassesFilter(m))
     .sort((a, b) => a.lat - b.lat);
-  // Find position of clicked photo within zone group
-  const clickedPhoto = PHOTOS[photosIdx];
-  const posInGroup = clickedPhoto ? _activeZonePhotos.findIndex(p => p === clickedPhoto) : 0;
-  _activePhotoIdx = posInGroup >= 0 ? posInGroup : 0;
-  _renderPhoto();
+  const posInGroup = target ? _activeZoneMedia.indexOf(target) : 0;
+  _activeMediaIdx = posInGroup >= 0 ? posInGroup : 0;
+  _renderMedia();
   document.getElementById('photoPanel').classList.add('visible');
   document.getElementById('photoPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-function openVideo(idx) {
-  const v = VIDEOS[idx];
-  const dateStr = v.dateISO ? new Date(v.dateISO).toLocaleDateString('nb-NO', {day:'numeric', month:'long', year:'numeric'}) : '';
-  document.getElementById('vpTitle').textContent = '🎣 ' + v.caption;
-  document.getElementById('vpInfo').innerHTML = (dateStr ? '<span>' + dateStr + '</span><br>' : '')
-    + '<a href="https://www.youtube.com/watch?v=' + v.youtubeId + '" target="_blank" class="vp-yt-btn">▶ Se video på YouTube ↗</a>';
-  const panel = document.getElementById('videoPanel');
-  panel.classList.add('visible');
-  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+function showMedia(idx) {
+  if (idx < 0 || idx >= _activeZoneMedia.length) return;
+  _activeMediaIdx = idx;
+  _renderMedia();
 }
 
-function closeVideo() {
-  document.getElementById('videoPanel').classList.remove('visible');
-}
-
-function showPhoto(idx) {
-  if (idx < 0 || idx >= _activeZonePhotos.length) return;
-  _activePhotoIdx = idx;
-  _renderPhoto();
-}
-
-function _renderPhoto() {
-  const p = _activeZonePhotos[_activePhotoIdx];
-  const n = _activeZonePhotos.length;
+function _renderMedia() {
+  const p = _activeZoneMedia[_activeMediaIdx];
+  const n = _activeZoneMedia.length;
   if (!p) {
     document.getElementById('photoImg').style.display = 'none';
-    document.getElementById('photoTitle').textContent = '📷 ' + (_activePhotoZone || '');
+    const vb = document.getElementById('videoBox');
+    vb.innerHTML = ''; vb.style.display = 'none';
+    document.getElementById('photoTitle').textContent = '📷 ' + (_activeMediaZone || '');
     document.getElementById('photoCounter').textContent = '0';
     document.getElementById('photoCap').textContent = 'Ingen bilder eller videoer ved denne vannføringen i denne sonen.';
     document.getElementById('dirLink').style.display = 'none';
@@ -1042,11 +1039,22 @@ function _renderPhoto() {
     photoMarkers.forEach(({ mk, zone }) => { if (activeZone === zone) mk.setIcon(makePhotoIcon(false)); });
     return;
   }
-  document.getElementById('photoImg').style.display = 'block';
 
-  document.getElementById('photoImg').src = BILDE_BASE + p.file;
-  document.getElementById('photoTitle').textContent = '📷 ' + p.zone + (p.id ? ' · ' + p.id : '');
-  document.getElementById('photoCounter').textContent = n > 1 ? (_activePhotoIdx + 1) + ' / ' + n : '';
+  const img = document.getElementById('photoImg');
+  const vbox = document.getElementById('videoBox');
+  vbox.innerHTML = '';   // stopper ev. pågående avspilling
+  const isVideo = p.mtype === 'video';
+  img.style.display = isVideo ? 'none' : 'block';
+  vbox.style.display = isVideo ? 'block' : 'none';
+  if (isVideo) {
+    vbox.innerHTML = '<div class="video-thumb" onclick="playVideo(this, \'' + p.youtubeId + '\')">'
+      + '<img src="https://i.ytimg.com/vi/' + p.youtubeId + '/hqdefault.jpg" alt="" loading="lazy">'
+      + '<div class="video-play">▶</div></div>';
+  } else {
+    img.src = BILDE_BASE + p.file;
+  }
+  document.getElementById('photoTitle').textContent = (isVideo ? '🎬 ' : '📷 ') + p.zone + (p.id ? ' · ' + p.id : '');
+  document.getElementById('photoCounter').textContent = n > 1 ? (_activeMediaIdx + 1) + ' / ' + n : '';
 
   const flowVal = (p.vannforing !== undefined && p.vannforing !== null) ? p.vannforing : FLOW_LOOKUP[p.dateISO];
   const flowStr = flowVal !== undefined ? flowVal + ' m³/s' : 'Vannstand ukjent';
@@ -1058,18 +1066,22 @@ function _renderPhoto() {
 
   const prevBtn = document.getElementById('photoPrev');
   const nextBtn = document.getElementById('photoNext');
-  prevBtn.disabled = _activePhotoIdx === 0;
-  prevBtn.style.opacity = _activePhotoIdx === 0 ? '0.3' : '1';
-  nextBtn.disabled = _activePhotoIdx >= n - 1;
-  nextBtn.style.opacity = _activePhotoIdx >= n - 1 ? '0.3' : '1';
+  prevBtn.disabled = _activeMediaIdx === 0;
+  prevBtn.style.opacity = _activeMediaIdx === 0 ? '0.3' : '1';
+  nextBtn.disabled = _activeMediaIdx >= n - 1;
+  nextBtn.style.opacity = _activeMediaIdx >= n - 1 ? '0.3' : '1';
 
   // Highlight active photo marker on map
-  const activePhoto = _activeZonePhotos[_activePhotoIdx];
+  const activePhoto = _activeZoneMedia[_activeMediaIdx];
   photoMarkers.forEach(({ mk, zone, photosIdx }) => {
     if (activeZone !== zone) return; // only update visible markers
     const isActive = PHOTOS[photosIdx] === activePhoto;
     mk.setIcon(makePhotoIcon(isActive));
     mk.setZIndexOffset(isActive ? 300 : 200);
+  });
+  videoMarkers.forEach(({ mk, zone, video }) => {
+    if (activeZone !== zone) return;
+    mk.setZIndexOffset(video === activePhoto ? 300 : 250);
   });
 
   // Sentrer kartet på aktiv markør
@@ -1077,15 +1089,35 @@ function _renderPhoto() {
     map.panTo([activePhoto.lat, activePhoto.lon], { animate: true, duration: 0.4 });
   }
 }
-function closePhoto() {
+function closeMedia() {
   document.getElementById('photoPanel').classList.remove('visible');
-  _activeZonePhotos = [];
+  const vbox = document.getElementById('videoBox');
+  vbox.innerHTML = ''; vbox.style.display = 'none';
+  _activeZoneMedia = [];
   photoMarkers.forEach(({ mk }) => mk.setIcon(makePhotoIcon(false)));
 }
+function playVideo(el, ytId) {
+  el.outerHTML = '<iframe class="video-frame" src="https://www.youtube-nocookie.com/embed/' + ytId
+    + '?autoplay=1&rel=0&enablejsapi=1" title="Fangstvideo" loading="lazy" '
+    + 'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'hidden') return;
+  document.querySelectorAll('iframe.video-frame').forEach(f => {
+    try {
+      f.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":[]}', 'https://www.youtube-nocookie.com');
+    } catch (e) { /* ignorer */ }
+  });
+});
+
 function _fsNeighborIdx(delta) {
-  const idx = _activePhotoIdx + delta;
-  if (idx < 0 || idx >= _activeZonePhotos.length) return -1;
-  return idx;
+  let idx = _activeMediaIdx;
+  while (true) {
+    idx += delta;
+    if (idx < 0 || idx >= _activeZoneMedia.length) return -1;
+    if (_activeZoneMedia[idx].mtype !== 'video') return idx;
+  }
 }
 function _updateFsNav() {
   const prevBtn = document.getElementById('fsPrev');
@@ -1095,9 +1127,9 @@ function _updateFsNav() {
   nextBtn.disabled = _fsNeighborIdx(1) === -1;
 }
 function openFullscreen() {
-  if (!_activeZonePhotos.length) return;
-  const p = _activeZonePhotos[_activePhotoIdx];
-  if (!p) return;
+  if (!_activeZoneMedia.length) return;
+  const p = _activeZoneMedia[_activeMediaIdx];
+  if (!p || p.mtype === 'video') return;
   document.getElementById('fsImg').src = BILDE_BASE + p.file;
   document.getElementById('fsCap').textContent = p.caption;
   document.getElementById('photoFs').classList.add('open');
@@ -1109,7 +1141,7 @@ function closeFullscreen() {
 function fsNav(delta) {
   const idx = _fsNeighborIdx(delta);
   if (idx === -1) return;
-  showPhoto(idx);
+  showMedia(idx);
   openFullscreen();
 }
 document.addEventListener('keydown', (e) => {
@@ -1253,6 +1285,7 @@ document.getElementById('statBox').innerHTML =
 fetchNVE().then(() => update());
 fetchNedbor();
 fetchPhotos();
+fetchVideos();
 window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </script>
 
@@ -1265,14 +1298,15 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div class="photo-hdr">
     <span id="photoTitle">📷 Bilde</span>
     <div style="display:flex; align-items:center; gap:6px;">
-      <button id="flowChip" class="flow-chip" onclick="toggleFlowFilter()" title="Vis kun bilder tatt ved vannføringen valgt i slideren">💧 Alle vannføringer</button>
-      <button class="pg-nav-btn" id="photoPrev" onclick="showPhoto(_activePhotoIdx-1)" title="Forrige (sør)">&#8595;</button>
+      <button id="flowChip" class="flow-chip" onclick="toggleFlowFilter()" title="Vis kun bilder/videoer tatt ved vannføringen valgt i slideren">💧 Alle vannføringer</button>
+      <button class="pg-nav-btn" id="photoPrev" onclick="showMedia(_activeMediaIdx-1)" title="Forrige (sør)">&#8595;</button>
       <span id="photoCounter" style="font-size:0.65rem; color:#94a3b8;"></span>
-      <button class="pg-nav-btn" id="photoNext" onclick="showPhoto(_activePhotoIdx+1)" title="Neste (nord)">&#8593;</button>
-      <button onclick="closePhoto()" style="background:none;border:none;color:#94a3b8;font-size:1rem;cursor:pointer;margin-left:4px;">×</button>
+      <button class="pg-nav-btn" id="photoNext" onclick="showMedia(_activeMediaIdx+1)" title="Neste (nord)">&#8593;</button>
+      <button onclick="closeMedia()" style="background:none;border:none;color:#94a3b8;font-size:1rem;cursor:pointer;margin-left:4px;">×</button>
     </div>
   </div>
   <img class="photo-img" id="photoImg" src="" alt="" onclick="openFullscreen()" style="cursor:zoom-in">
+  <div id="videoBox" style="display:none"></div>
   <div class="photo-cap" id="photoCap"></div>
   <a class="dir-link" id="dirLink" href="#" target="_blank" rel="noopener" style="display:none">🚗 Ta meg dit ↗</a>
 </div>
@@ -1294,16 +1328,8 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   </div>
   <div class="zi-body" id="ziBody"></div>
 </div>
-
-<div class="video-panel" id="videoPanel">
-  <div class="vp-hdr">
-    <span class="vp-hdr-title" id="vpTitle">🎣 Fangstvideo</span>
-    <button onclick="closeVideo()">×</button>
-  </div>
-  <div class="vp-info" id="vpInfo"></div>
-</div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.012</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.014</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
