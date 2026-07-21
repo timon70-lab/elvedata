@@ -26,5 +26,19 @@
   "vannforing": 11,
   "autoSone": true,
   "soneAvstandM": 577
+ },
+ {
+  "id": "L-003",
+  "lat": 58.25980277777778,
+  "lon": 7.194625,
+  "file": "Sone18Kvaas_20250723_1421.jpg",
+  "caption": "Sone 18 Kvås",
+  "zone": "Sone 18 Kvås",
+  "dateISO": "2025-07-23",
+  "timeUTC": "12:21",
+  "locId": "Sone 18 Kvås",
+  "vannforing": 11,
+  "autoSone": true,
+  "soneAvstandM": 168
  }
 ]
