@@ -111,6 +111,9 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .pg-nav-btn:disabled { color:#cbd5e0; border-color:#e2e8f0; cursor:not-allowed; }
 .photo-img { width: 100%; display: block; max-height: 280px; object-fit: cover; cursor: pointer; }
 .photo-cap { padding: 7px 14px 10px; font-size: 0.68rem; color: #64748b; }
+.flow-chip { background:#f0fff4; border:1px solid #c6f6d5; border-radius:999px; color:#276749;
+  font-size:0.6rem; font-weight:700; cursor:pointer; padding:3px 8px; line-height:1.3; white-space:nowrap; }
+.flow-chip.on { background:#276749; border-color:#276749; color:white; }
 .dir-link { display: inline-block; margin: 0 14px 10px; font-size: 0.68rem; color: #276749; background: #f0fff4;
         border: 1px solid #c6f6d5; border-radius: 999px; padding: 3px 11px; text-decoration: none; }
 .dir-link:hover { background: #c6f6d5; }
@@ -367,6 +370,7 @@ function onFlowChange(val) {
   currentFlow = parseInt(val);
   document.getElementById('flowVal').textContent = (currentFlow >= 18 ? '18+' : currentFlow + '–' + (currentFlow+2)) + ' m³/s';
   update();
+  if (flowFilterOn) _rebuildZonePhotos();
 }
 
 function updateDualFill(loId, hiId, fillId, min, max) {
@@ -655,6 +659,9 @@ function initMap() {
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap', maxZoom: 17
   }).addTo(map);
+  // Sygna har kun én sone - senter kartet direkte på den i stedet for et generisk fast utsnitt.
+  const _zc = ZONE_COORDS['Alle åpne soner'];
+  if (_zc) map.fitBounds([_zc.s, _zc.e], { padding: [50, 50], maxZoom: 12 });
 
   setTimeout(() => map.invalidateSize(), 50);
   setTimeout(() => map.invalidateSize(), 300);
@@ -805,7 +812,7 @@ function updateMap(scores) {
     const isDimmed = activeZone !== null && !isSelected;
     const sc = scores ? (scores[zone]?.score || 0) : 0;
     const col = isDimmed ? '#94a3b8' : (scores ? scoreColor(sc) : '#94a3b8');
-    const label = zoneLabel(zone);
+    const label = String(sc);
     l.startMk.setIcon(makeStartIcon(label, col, isSelected, isDimmed));
     l.startMk.setZIndexOffset(isSelected ? 100 : 10);
     l.endMk.setIcon(makeEndIcon(col));
@@ -820,10 +827,11 @@ function updateMap(scores) {
     l.startMk.bindTooltip(tipHtml, {permanent: isSelected, direction: 'top', className: 'mtip'});
     if (isSelected) l.startMk.openTooltip();
   });
-  // Show photo markers only when their zone is active
-  photoMarkers.forEach(({ mk, zone }) => {
-    mk.setOpacity(activeZone === zone ? 1 : 0);
-    if (mk._icon) mk._icon.style.pointerEvents = activeZone === zone ? 'auto' : 'none';
+  // Show photo markers only when their zone is active (og passerer vannførings-filteret)
+  photoMarkers.forEach(({ mk, zone, photosIdx }) => {
+    const show = activeZone === zone && mediaPassesFilter(PHOTOS[photosIdx]);
+    mk.setOpacity(show ? 1 : 0);
+    if (mk._icon) mk._icon.style.pointerEvents = show ? 'auto' : 'none';
   });
   videoMarkers.forEach(({ mk, zone }) => {
     mk.setOpacity(activeZone === zone ? 1 : 0);
@@ -946,9 +954,48 @@ function closeZoneInfo() {
 
 let _activePhotoIdx = 0;
 let _activeZonePhotos = [];
+let _activePhotoZone = null;
+let flowFilterOn = false;
+
+function mediaFlow(p) {
+  return (p.vannforing !== undefined && p.vannforing !== null) ? p.vannforing : FLOW_LOOKUP[p.dateISO];
+}
+function mediaPassesFilter(p) {
+  if (!flowFilterOn) return true;
+  const f = mediaFlow(p);
+  if (f === undefined || f === null) return false;
+  const bin = f >= 18 ? 18 : Math.floor(f / 2) * 2;
+  return bin === currentFlow;
+}
+function flowChipLabel() {
+  return flowFilterOn
+    ? '💧 Kun ' + (currentFlow >= 18 ? '18+' : currentFlow + '–' + (currentFlow + 2)) + ' m³/s'
+    : '💧 Alle vannføringer';
+}
+function toggleFlowFilter() {
+  flowFilterOn = !flowFilterOn;
+  update();               // oppdaterer markørsynlighet på kartet
+  _rebuildZonePhotos();
+}
+function _rebuildZonePhotos() {
+  const chip = document.getElementById('flowChip');
+  chip.textContent = flowChipLabel();
+  chip.classList.toggle('on', flowFilterOn);
+  if (!document.getElementById('photoPanel').classList.contains('visible')) return;
+  const cur = _activeZonePhotos[_activePhotoIdx];
+  _activeZonePhotos = PHOTOS.filter(p => p.zone === _activePhotoZone && mediaPassesFilter(p))
+    .sort((a, b) => a.lat - b.lat);
+  const pos = cur ? _activeZonePhotos.indexOf(cur) : -1;
+  _activePhotoIdx = pos >= 0 ? pos : 0;
+  _renderPhoto();
+}
 
 function openZonePhotos(zone, photosIdx) {
-  _activeZonePhotos = PHOTOS.filter(p => p.zone === zone)
+  _activePhotoZone = zone;
+  const chip = document.getElementById('flowChip');
+  chip.textContent = flowChipLabel();
+  chip.classList.toggle('on', flowFilterOn);
+  _activeZonePhotos = PHOTOS.filter(p => p.zone === zone && mediaPassesFilter(p))
     .sort((a, b) => a.lat - b.lat);
   // Find position of clicked photo within zone group
   const clickedPhoto = PHOTOS[photosIdx];
@@ -983,7 +1030,19 @@ function showPhoto(idx) {
 function _renderPhoto() {
   const p = _activeZonePhotos[_activePhotoIdx];
   const n = _activeZonePhotos.length;
-  if (!p) return;
+  if (!p) {
+    document.getElementById('photoImg').style.display = 'none';
+    document.getElementById('photoTitle').textContent = '📷 ' + (_activePhotoZone || '');
+    document.getElementById('photoCounter').textContent = '0';
+    document.getElementById('photoCap').textContent = 'Ingen bilder eller videoer ved denne vannføringen i denne sonen.';
+    document.getElementById('dirLink').style.display = 'none';
+    const pb = document.getElementById('photoPrev'), nb = document.getElementById('photoNext');
+    pb.disabled = nb.disabled = true;
+    pb.style.opacity = nb.style.opacity = '0.3';
+    photoMarkers.forEach(({ mk, zone }) => { if (activeZone === zone) mk.setIcon(makePhotoIcon(false)); });
+    return;
+  }
+  document.getElementById('photoImg').style.display = 'block';
 
   document.getElementById('photoImg').src = BILDE_BASE + p.file;
   document.getElementById('photoTitle').textContent = '📷 ' + p.zone + (p.id ? ' · ' + p.id : '');
@@ -1206,6 +1265,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div class="photo-hdr">
     <span id="photoTitle">📷 Bilde</span>
     <div style="display:flex; align-items:center; gap:6px;">
+      <button id="flowChip" class="flow-chip" onclick="toggleFlowFilter()" title="Vis kun bilder tatt ved vannføringen valgt i slideren">💧 Alle vannføringer</button>
       <button class="pg-nav-btn" id="photoPrev" onclick="showPhoto(_activePhotoIdx-1)" title="Forrige (sør)">&#8595;</button>
       <span id="photoCounter" style="font-size:0.65rem; color:#94a3b8;"></span>
       <button class="pg-nav-btn" id="photoNext" onclick="showPhoto(_activePhotoIdx+1)" title="Neste (nord)">&#8593;</button>
@@ -1243,7 +1303,11 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div class="vp-info" id="vpInfo"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
+<<<<<<< Updated upstream
   © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.008</span><br>
+=======
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.012</span><br>
+>>>>>>> Stashed changes
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
