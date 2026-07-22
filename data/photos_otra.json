@@ -131,7 +131,9 @@
   "locId": "Sone 5A Blå",
   "vannforing": 100,
   "autoSone": true,
-  "soneAvstandM": 3
+  "soneAvstandM": 3,
+  "adkomstLat": 58.24775016486354,
+  "adkomstLon": 7.953587920133379
  },
  {
   "id": "O-010",
