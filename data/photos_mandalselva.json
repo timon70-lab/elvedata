@@ -4699,7 +4699,9 @@
   "locId": "Holmesland P",
   "vannforing": 38,
   "autoSone": true,
-  "soneAvstandM": 31
+  "soneAvstandM": 31,
+  "adkomstLat": 58.1450105594747,
+  "adkomstLon": 7.548613113096198
  },
  {
   "id": "M-331",
