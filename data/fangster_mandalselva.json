@@ -15,6 +15,20 @@
  },
  {
   "dato": "2026-07-21",
+  "sone": "Fuskeland D",
+  "vekt": 2,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-21",
+  "sone": "Fuskeland D",
+  "vekt": 4.5,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-21",
   "sone": "Sone 3",
   "vekt": 1.4,
   "agn": "Flue",
