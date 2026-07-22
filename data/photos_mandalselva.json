@@ -997,9 +997,11 @@
   "dateISO": "2021-08-09",
   "timeUTC": "19:42",
   "locId": "Sone 3",
-  "vannforing": 46.2,
+  "vannforing": 46,
   "autoSone": true,
-  "soneAvstandM": 544
+  "soneAvstandM": 544,
+  "adkomstLat": 58.224895870144984,
+  "adkomstLon": 7.513435044134495
  },
  {
   "id": "M-072",
