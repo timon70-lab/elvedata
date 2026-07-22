@@ -666,7 +666,9 @@
   "timeUTC": "19:27",
   "locId": "Sone 5A",
   "vannforing": 26,
-  "autoSone": false
+  "autoSone": false,
+  "adkomstLat": 58.1294724049944,
+  "adkomstLon": 7.3569436186717
  },
  {
   "id": "A-060",
