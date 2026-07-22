@@ -127,6 +127,13 @@
  },
  {
   "dato": "2026-07-20",
+  "sone": "Fossefjellene",
+  "vekt": 1.8,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-20",
   "sone": "Sone 4",
   "vekt": 2.5,
   "agn": "Flue",
