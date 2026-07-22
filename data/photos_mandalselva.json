@@ -4811,9 +4811,11 @@
   "dateISO": "2025-05-02",
   "timeUTC": "08:06",
   "locId": "Sone 3",
-  "vannforing": 37.5,
+  "vannforing": 38,
   "autoSone": true,
-  "soneAvstandM": 568
+  "soneAvstandM": 568,
+  "adkomstLat": 58.224895870144984,
+  "adkomstLon": 7.513435044134495
  },
  {
   "id": "M-334",
