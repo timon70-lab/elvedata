@@ -9,7 +9,9 @@
   "locId": "Sone 5A",
   "lat": 58.129878,
   "lon": 7.363481,
-  "vannforing": 26
+  "vannforing": 26,
+  "adkomstLat": 58.1294724049944,
+  "adkomstLon": 7.3569436186717
  },
  {
   "id": "A-002",
