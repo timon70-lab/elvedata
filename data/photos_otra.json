@@ -294,20 +294,6 @@
   "soneAvstandM": 207
  },
  {
-  "id": "O-023",
-  "lat": 58.222256,
-  "lon": 7.933482,
-  "file": "Sone3CMosby_20210810_1958_2.jpg",
-  "caption": "Sone 3C Mosby",
-  "zone": "Sone 3C Mosby",
-  "dateISO": "2021-08-10",
-  "timeUTC": "17:58",
-  "locId": "Sone 3C Mosby",
-  "vannforing": 98,
-  "autoSone": true,
-  "soneAvstandM": 91
- },
- {
   "id": "O-024",
   "lat": 58.222256,
   "lon": 7.933482,
