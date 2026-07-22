@@ -53,9 +53,11 @@
   "dateISO": "2026-07-13",
   "timeUTC": "17:32",
   "locId": "Sone 3",
-  "vannforing": 62.5,
+  "vannforing": 63,
   "autoSone": true,
-  "soneAvstandM": 553
+  "soneAvstandM": 553,
+  "adkomstLat": 58.224895870144984,
+  "adkomstLon": 7.513435044134495
  },
  {
   "id": "M-005",
