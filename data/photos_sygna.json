@@ -9,7 +9,7 @@
   "dateISO": "2024-06-21",
   "timeUTC": "17:23",
   "locId": "Alle åpne soner",
-  "vannforing": 6.0,
+  "vannforing": 6,
   "autoSone": true,
   "soneAvstandM": 912
  },
@@ -23,7 +23,7 @@
   "dateISO": "2024-06-21",
   "timeUTC": "17:27",
   "locId": "Alle åpne soner",
-  "vannforing": 6.0,
+  "vannforing": 6,
   "autoSone": true,
   "soneAvstandM": 912
  },
@@ -79,9 +79,11 @@
   "dateISO": "2024-06-21",
   "timeUTC": "18:11",
   "locId": "Alle åpne soner",
-  "vannforing": 5.9,
+  "vannforing": 6,
   "autoSone": true,
-  "soneAvstandM": 1512
+  "soneAvstandM": 1512,
+  "adkomstLat": 58.10729626103008,
+  "adkomstLon": 7.831603181595416
  },
  {
   "id": "S-007",
