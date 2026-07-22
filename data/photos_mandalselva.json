@@ -3274,14 +3274,14 @@
   "lat": 58.112665,
   "lon": 7.53665,
   "file": "BringsdalB_20230601_0947.jpg",
-  "caption": "Bringsdal B",
-  "zone": "Bringsdal B",
+  "caption": "Fuskeland B",
+  "zone": "Fuskeland B",
   "dateISO": "2023-06-01",
   "timeUTC": "07:47",
-  "locId": "Bringsdal B",
-  "vannforing": 76.2,
-  "autoSone": true,
-  "soneAvstandM": 15
+  "locId": "Fuskeland B",
+  "vannforing": 76,
+  "autoSone": false,
+  "soneAvstandM": 130
  },
  {
   "id": "M-236",
