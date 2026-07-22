@@ -2675,9 +2675,11 @@
   "dateISO": "2022-08-10",
   "timeUTC": "10:53",
   "locId": "Fossefjellene",
-  "vannforing": 25.1,
+  "vannforing": 25,
   "autoSone": true,
-  "soneAvstandM": 21
+  "soneAvstandM": 21,
+  "adkomstLat": 58.11910272234965,
+  "adkomstLon": 7.52749187708674
  },
  {
   "id": "M-189",
