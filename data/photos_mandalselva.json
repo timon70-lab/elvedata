@@ -2364,14 +2364,14 @@
   "lat": 58.111355,
   "lon": 7.535465,
   "file": "BringsdalB_20220810_1155_2.jpg",
-  "caption": "Bringsdal B",
-  "zone": "Bringsdal B",
+  "caption": "Bringsdal A",
+  "zone": "Bringsdal A",
   "dateISO": "2022-08-10",
   "timeUTC": "09:55",
-  "locId": "Bringsdal B",
-  "vannforing": 25.1,
-  "autoSone": true,
-  "soneAvstandM": 53
+  "locId": "Bringsdal A",
+  "vannforing": 25,
+  "autoSone": false,
+  "soneAvstandM": 54
  },
  {
   "id": "M-171",
