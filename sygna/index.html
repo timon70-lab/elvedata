@@ -1061,7 +1061,10 @@ function _renderMedia() {
   const dateStr = p.dateISO ? new Date(p.dateISO).toLocaleDateString('nb-NO', {day:'numeric', month:'long', year:'numeric'}) : '';
   document.getElementById('photoCap').textContent = p.caption + (dateStr ? ' · ' + dateStr : '') + ' · ' + flowStr;
   const dirLink = document.getElementById('dirLink');
-  dirLink.href = 'https://www.google.com/maps/dir/?api=1&destination=' + p.lat + ',' + p.lon + '&travelmode=driving';
+  const destLat = (p.adkomstLat !== undefined && p.adkomstLat !== null) ? p.adkomstLat : p.lat;
+  const destLon = (p.adkomstLon !== undefined && p.adkomstLon !== null) ? p.adkomstLon : p.lon;
+  dirLink.href = 'https://www.google.com/maps/dir/?api=1&destination=' + destLat + ',' + destLon + '&travelmode=driving';
+  dirLink.title = (p.adkomstLat !== undefined && p.adkomstLat !== null) ? 'Ruter til nærmeste adkomstpunkt (ikke bildets/videoens eksakte posisjon)' : '';
   dirLink.style.display = 'inline-block';
 
   const prevBtn = document.getElementById('photoPrev');
@@ -1329,7 +1332,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div class="zi-body" id="ziBody"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.014</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.015</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
