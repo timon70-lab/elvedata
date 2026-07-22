@@ -3569,9 +3569,11 @@
   "dateISO": "2023-06-23",
   "timeUTC": "09:32",
   "locId": "Nodehylen",
-  "vannforing": 23.7,
+  "vannforing": 24,
   "autoSone": true,
-  "soneAvstandM": 67
+  "soneAvstandM": 67,
+  "adkomstLat": 58.27699360914154,
+  "adkomstLon": 7.522176028041349
  },
  {
   "id": "M-247",
