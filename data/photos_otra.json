@@ -583,9 +583,11 @@
   "dateISO": "2024-08-03",
   "timeUTC": "10:32",
   "locId": "Sone 3A",
-  "vannforing": 61.9,
+  "vannforing": 62,
   "autoSone": true,
-  "soneAvstandM": 130
+  "soneAvstandM": 130,
+  "adkomstLat": 58.218839558256946,
+  "adkomstLon": 7.931854361959784
  },
  {
   "id": "O-043",
