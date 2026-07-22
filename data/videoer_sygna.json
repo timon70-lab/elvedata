@@ -34,7 +34,9 @@
     "caption": "Jenshølen",
     "dateISO": "2024-08-24",
     "timeUTC": "16:06",
-    "vannforing": 34
+    "vannforing": 34,
+    "adkomstLat": 58.10729626103008,
+    "adkomstLon": 7.831603181595416
   },
   {
     "id": "V-004",
