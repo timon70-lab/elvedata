@@ -4911,9 +4911,11 @@
   "dateISO": "2025-06-13",
   "timeUTC": "18:42",
   "locId": "Sone 4",
-  "vannforing": 29.9,
+  "vannforing": 30,
   "autoSone": true,
-  "soneAvstandM": 252
+  "soneAvstandM": 252,
+  "adkomstLat": 58.33333944695532,
+  "adkomstLon": 7.53060866744089
  },
  {
   "id": "M-339",
