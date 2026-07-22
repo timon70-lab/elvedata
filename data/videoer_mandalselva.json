@@ -8,7 +8,9 @@
     "caption": "Fra østsiden",
     "dateISO": "2021-06-05",
     "timeUTC": "10:56",
-    "vannforing": 70
+    "vannforing": 70,
+    "adkomstLat": 58.175100969425415,
+    "adkomstLon": 7.5492193797872185
   },
   {
     "id": "V-002",
