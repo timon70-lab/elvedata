@@ -1,9 +1,23 @@
 [
  {
   "dato": "2026-07-22",
+  "sone": "Sone 3",
+  "vekt": 1.8,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-22",
   "sone": "Sone 2 - Smeland",
   "vekt": 2,
   "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-21",
+  "sone": "Sone 3",
+  "vekt": 1.4,
+  "agn": "Flue",
   "art": "Laks"
  },
  {
