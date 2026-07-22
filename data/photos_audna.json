@@ -159,7 +159,9 @@
   "locId": "Sone2",
   "lat": 58.118597,
   "lon": 7.34134,
-  "vannforing": 20
+  "vannforing": 20,
+  "adkomstLat": 58.11890679091705,
+  "adkomstLon": 7.338873892278187
  },
  {
   "id": "A-014",
