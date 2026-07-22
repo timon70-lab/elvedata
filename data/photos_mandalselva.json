@@ -1866,14 +1866,14 @@
   "lat": 58.111955,
   "lon": 7.536427,
   "file": "BringsdalB_20220723_2041.jpg",
-  "caption": "Bringsdal B",
-  "zone": "Bringsdal B",
+  "caption": "Fuskeland B",
+  "zone": "Fuskeland B",
   "dateISO": "2022-07-23",
   "timeUTC": "18:41",
-  "locId": "Bringsdal B",
-  "vannforing": 24.9,
-  "autoSone": true,
-  "soneAvstandM": 3
+  "locId": "Fuskeland B",
+  "vannforing": 25,
+  "autoSone": false,
+  "soneAvstandM": 131
  },
  {
   "id": "M-137",
