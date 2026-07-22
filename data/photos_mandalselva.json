@@ -3677,9 +3677,11 @@
   "dateISO": "2023-07-10",
   "timeUTC": "15:04",
   "locId": "Sone 3",
-  "vannforing": 80.7,
+  "vannforing": 81,
   "autoSone": true,
-  "soneAvstandM": 754
+  "soneAvstandM": 754,
+  "adkomstLat": 58.228055602532024,
+  "adkomstLon": 7.510952923714119
  },
  {
   "id": "M-255",
