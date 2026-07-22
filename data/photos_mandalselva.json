@@ -2099,9 +2099,11 @@
   "dateISO": "2022-08-10",
   "timeUTC": "09:14",
   "locId": "Fuskeland under Nødingfossen",
-  "vannforing": 25.1,
+  "vannforing": 25,
   "autoSone": true,
-  "soneAvstandM": 68
+  "soneAvstandM": 68,
+  "adkomstLat": 58.10390255693724,
+  "adkomstLon": 7.533198122436037
  },
  {
   "id": "M-153",
