@@ -47,7 +47,9 @@
   "locId": "Sone8",
   "lat": 58.26664,
   "lon": 7.351889,
-  "vannforing": 11
+  "vannforing": 11,
+  "adkomstLat": 58.265334050459714,
+  "adkomstLon": 7.3515862031594965
  },
  {
   "id": "A-005",
