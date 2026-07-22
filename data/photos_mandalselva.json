@@ -3675,7 +3675,9 @@
   "locId": "Nodehylen",
   "vannforing": 25,
   "autoSone": true,
-  "soneAvstandM": 37
+  "soneAvstandM": 37,
+  "adkomstLat": 58.28091530161586,
+  "adkomstLon": 7.523307534803406
  },
  {
   "id": "M-254",
