@@ -4465,9 +4465,11 @@
   "dateISO": "2024-08-21",
   "timeUTC": "09:14",
   "locId": "Holmesland A",
-  "vannforing": 133.6,
+  "vannforing": 134,
   "autoSone": true,
-  "soneAvstandM": 4
+  "soneAvstandM": 4,
+  "adkomstLat": 58.13873654616802,
+  "adkomstLon": 7.536144420387367
  },
  {
   "id": "M-315",
