@@ -481,9 +481,11 @@
   "dateISO": "2023-06-04",
   "timeUTC": "12:36",
   "locId": "Sone 5A Blå",
-  "vannforing": 99.8,
+  "vannforing": 100,
   "autoSone": true,
-  "soneAvstandM": 111
+  "soneAvstandM": 111,
+  "adkomstLat": 58.24775016486354,
+  "adkomstLon": 7.953587920133379
  },
  {
   "id": "O-038",
