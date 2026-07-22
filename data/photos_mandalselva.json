@@ -4446,14 +4446,14 @@
   "lat": 58.138274,
   "lon": 7.541761,
   "file": "HaugeA_20240821_1113_3.jpg",
-  "caption": "Hauge A",
-  "zone": "Hauge A",
+  "caption": "Holmesland A",
+  "zone": "Holmesland A",
   "dateISO": "2024-08-21",
   "timeUTC": "09:13",
-  "locId": "Hauge A",
-  "vannforing": 133.6,
-  "autoSone": true,
-  "soneAvstandM": 28
+  "locId": "Holmesland A",
+  "vannforing": 134,
+  "autoSone": false,
+  "soneAvstandM": 73
  },
  {
   "id": "M-314",
