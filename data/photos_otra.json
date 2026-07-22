@@ -759,9 +759,11 @@
   "dateISO": "2024-10-10",
   "timeUTC": "16:04",
   "locId": "Sone 5B Rød",
-  "vannforing": 199.9,
+  "vannforing": 200,
   "autoSone": true,
-  "soneAvstandM": 6
+  "soneAvstandM": 6,
+  "adkomstLat": 58.25303406610295,
+  "adkomstLon": 7.951835494008137
  },
  {
   "id": "O-056",
