@@ -263,7 +263,9 @@
   "locId": "Sone 4A",
   "vannforing": 98,
   "autoSone": true,
-  "soneAvstandM": 132
+  "soneAvstandM": 132,
+  "adkomstLat": 58.24225947014511,
+  "adkomstLon": 7.948465708136386
  },
  {
   "id": "O-020",
