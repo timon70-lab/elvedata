@@ -802,14 +802,14 @@
   "lat": 58.118434,
   "lon": 7.531633,
   "file": "GrimefossenB_20210708_0800.jpg",
-  "caption": "Grimefossen B",
-  "zone": "Grimefossen B",
+  "caption": "Grimefossen A",
+  "zone": "Grimefossen A",
   "dateISO": "2021-07-08",
   "timeUTC": "06:00",
-  "locId": "Grimefossen B",
-  "vannforing": 124.4,
-  "autoSone": true,
-  "soneAvstandM": 84
+  "locId": "Grimefossen A",
+  "vannforing": 124,
+  "autoSone": false,
+  "soneAvstandM": 93
  },
  {
   "id": "M-061",
