@@ -71,7 +71,9 @@
   "lon": 7.345708,
   "vannforing": 11,
   "autoSone": false,
-  "soneAvstandM": 28
+  "soneAvstandM": 28,
+  "adkomstLat": 58.10729626103008,
+  "adkomstLon": 7.831603181595416
  },
  {
   "id": "A-007",
