@@ -86,7 +86,7 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .map-header .map-hint { font-size: 0.62rem; color: #94a3b8; }
 #map { height: 320px; width: 100%; }
 .leaflet-tooltip.mtip { background: #1a202c; color: #e2e8f0; border: 1px solid #4a5568; font-size: .72rem; font-weight: 700; padding: 2px 7px; border-radius: 5px; box-shadow: none; }
-.leaflet-tooltip.zone-label { background: rgba(255,255,255,0.92); color: #1a202c; border: 1px solid rgba(0,0,0,0.15); font-size: 0.58rem; font-weight: 700; padding: 1px 5px; border-radius: 4px; box-shadow: none; pointer-events: none; }
+.leaflet-tooltip.zone-label { background: #ffffff; color: #1a202c; border: 1px solid rgba(0,0,0,0.15); font-size: 0.58rem; font-weight: 700; padding: 1px 4px; border-radius: 4px; box-shadow: none; pointer-events: none; text-align: center; line-height: 1.2; }
 .leaflet-tooltip.zone-label::before { display: none; }
 .leaflet-tooltip.mtip::before { display: none; }
 
@@ -402,6 +402,18 @@ const VIDEOS_URL = 'https://timon70-lab.github.io/elvedata/data/videoer_audna.js
 
 /* ---------- Sentral konfig (data/config.json) — scoringsparametre ---------- */
 const PRICES = {"Sone 5A":{"dogn":400,"sesong":3500},"Sone 5B":{"dogn":350,"sesong":3000},"Sone1":{"dogn":250,"sesong":1200},"Sone2":{"dogn":350,"sesong":2900},"Sone3":{"dogn":250},"Sone4":{"dogn":1200},"Sone6":{"dogn":300,"sesong":3000},"Sone7":{"dogn":450},"Sone8":{"dogn":250,"sesong":1500}};
+// Prisfargeskala for sone-tooltip: billigst = grønn, dyrest = rød, basert på alle dagspriser i elva.
+// Prisfargeskala for sone-tooltip: felles skala for ALLE fem elver (ikke per elv),
+// slik at en gitt kr-pris alltid gir samme farge uansett hvilken elv du ser på.
+// Global bunn = 100 kr, global topp = 1000 kr. Priser utenfor dette clampes til endepunktfargen.
+const GLOBAL_PRICE_MIN = 100;
+const GLOBAL_PRICE_MAX = 1000;
+function priceColor(price) {
+  if (typeof price !== 'number') return '#374151';
+  const t = Math.min(1, Math.max(0, (price - GLOBAL_PRICE_MIN) / (GLOBAL_PRICE_MAX - GLOBAL_PRICE_MIN)));
+  const hue = 120 * (1 - t); // 120 = grønn (billigst), 0 = rød (dyrest)
+  return 'hsl(' + hue.toFixed(0) + ', 70%, 38%)';
+}
 const ZONE_TOOL_RATING = {"Sone4":[{"name":"Mark","stars":3},{"name":"Sluk","stars":2},{"name":"Flue","stars":1}],"Sone 5A":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone8":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone3":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone2":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone6":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 5B":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone7":[{"name":"Flue","stars":3},{"name":"Mark","stars":2},{"name":"Sluk","stars":1}],"Sone1":[{"name":"Sluk","stars":3},{"name":"Flue","stars":2},{"name":"Mark","stars":1}],"Sone5":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}]};
 const BOOM_DAYS = {"Sone4":{"date":"2016-07-30","count":25,"flow":10},"Sone 5A":{"date":"2024-08-24","count":18,"flow":36},"Sone8":{"date":"2021-08-16","count":16,"flow":8},"Sone3":{"date":"2020-07-26","count":16,"flow":32},"Sone2":{"date":"2020-07-27","count":22,"flow":30},"Sone6":{"date":"2023-07-31","count":9,"flow":10},"Sone 5B":{"date":"2024-08-24","count":16,"flow":36},"Sone7":{"date":"2019-08-22","count":10,"flow":46},"Sone1":{"date":"2023-07-22","count":3,"flow":12},"Sone5":{"date":"2021-07-29","count":29,"flow":14}};
 let SCORE_CFG = { rate: 0.8, vol: 0.2, shrinkC: 15, knee: 80 };   // fallback hvis config.json ikke kan hentes
@@ -942,8 +954,8 @@ function updateMap(scores) {
     if (l.endMk._icon) l.endMk._icon.style.pointerEvents = isSelected ? 'auto' : 'none';
     const priceInfo = PRICES[zone];
     const priceLbl = priceInfo && priceInfo.dogn ? priceInfo.dogn + ' kr' : null;
-    const tipHtml = isSelected && priceLbl
-      ? zone + '<br><span style="font-weight:400;opacity:.75;font-size:.9em">' + priceLbl + '</span>'
+    const tipHtml = priceLbl
+      ? zone + '<br><span style="color:' + priceColor(priceInfo.dogn) + '">' + priceLbl + '</span>'
       : zone;
     l.startMk.setTooltipContent(tipHtml);
   });
@@ -1444,7 +1456,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.138</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.141</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 

@@ -86,7 +86,7 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .map-header .map-hint { font-size: 0.62rem; color: #94a3b8; }
 #map { height: 320px; width: 100%; }
 .leaflet-tooltip.mtip { background: #1a202c; color: #e2e8f0; border: 1px solid #4a5568; font-size: .72rem; font-weight: 700; padding: 2px 7px; border-radius: 5px; box-shadow: none; }
-.leaflet-tooltip.zone-label { background: rgba(255,255,255,0.92); color: #1a202c; border: 1px solid rgba(0,0,0,0.15); font-size: 0.58rem; font-weight: 700; padding: 1px 5px; border-radius: 4px; box-shadow: none; pointer-events: none; }
+.leaflet-tooltip.zone-label { background: #ffffff; color: #1a202c; border: 1px solid rgba(0,0,0,0.15); font-size: 0.58rem; font-weight: 700; padding: 1px 4px; border-radius: 4px; box-shadow: none; pointer-events: none; text-align: center; line-height: 1.2; }
 .leaflet-tooltip.zone-label::before { display: none; }
 .leaflet-tooltip.mtip::before { display: none; }
 
@@ -490,6 +490,18 @@ const VIDEOS_URL = 'https://timon70-lab.github.io/elvedata/data/videoer_lygna.js
 
 /* ---------- Sentral konfig (data/config.json) — scoringsparametre ---------- */
 const PRICES = {"Gysfossen til Lygne":{"dogn":150,"sesong":400},"Kvåsfossen til Gysfossen":{"dogn":150,"sesong":400},"Sone 1 Bjerga og Fidja":{"dogn":250,"sesong":2200},"Sone 10 Grøvan og Foss":{"dogn":250,"sesong":2200},"Sone 11 Foss øvre":{"dogn":250,"sesong":2200},"Sone 13 Gitlestad":{"dogn":250,"sesong":2200},"Sone 14 Rudjord":{"dogn":250,"sesong":2200},"Sone 15 Vemestad ytre":{"dogn":250,"sesong":2200},"Sone 16 Vemestad øvre":{"dogn":250,"sesong":2200},"Sone 17 Moi":{"dogn":250,"sesong":2200},"Sone 18 Kvås":{"dogn":250,"sesong":2200},"Sone 2 Årnes":{"dogn":250,"sesong":2200},"Sone 3 Kvavik":{"dogn":250,"sesong":2200},"Sone 4 Berge øvre":{"dogn":250,"sesong":2200},"Sone 5 Bringsjord":{"dogn":250,"sesong":2200},"Sone 6 Bergsaker":{"dogn":250,"sesong":2200},"Sone 7":{"dogn":250,"sesong":2200},"Sone 8 Prestegården":{"dogn":100},"Sone 9 Kvelland":{"dogn":250,"sesong":2200},"Sone12 Vegge":{"dogn":250,"sesong":2200}};
+// Prisfargeskala for sone-tooltip: billigst = grønn, dyrest = rød, basert på alle dagspriser i elva.
+// Prisfargeskala for sone-tooltip: felles skala for ALLE fem elver (ikke per elv),
+// slik at en gitt kr-pris alltid gir samme farge uansett hvilken elv du ser på.
+// Global bunn = 100 kr, global topp = 1000 kr. Priser utenfor dette clampes til endepunktfargen.
+const GLOBAL_PRICE_MIN = 100;
+const GLOBAL_PRICE_MAX = 1000;
+function priceColor(price) {
+  if (typeof price !== 'number') return '#374151';
+  const t = Math.min(1, Math.max(0, (price - GLOBAL_PRICE_MIN) / (GLOBAL_PRICE_MAX - GLOBAL_PRICE_MIN)));
+  const hue = 120 * (1 - t); // 120 = grønn (billigst), 0 = rød (dyrest)
+  return 'hsl(' + hue.toFixed(0) + ', 70%, 38%)';
+}
 const ZONE_TOOL_RATING = {"Sone 9 Kvelland":[{"name":"Sluk","stars":3},{"name":"Flue","stars":2},{"name":"Mark","stars":1}],"Sone 5 Bringsjord":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 14 Rudjord":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 1 Bjerga og Fidja":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 8 Prestegården":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 15 Vemestad ytre":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 7":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 6 Bergsaker":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone12 Vegge":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 4 Berge øvre":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2}],"Sone 18 Kvås":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 17 Moi":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 16 Vemestad øvre":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 13 Gitlestad":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 2 Årnes":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 10 Grøvan og Foss":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 3 Kvavik":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 11 Foss øvre":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2}],"Kvåsfossen til Gysfossen":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Gysfossen til Lygne":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2}]};
 const BOOM_DAYS = {"Sone 9 Kvelland":{"date":"2022-08-03","count":41,"flow":5},"Sone 15 Vemestad ytre":{"date":"2024-08-11","count":9,"flow":13},"Sone 5 Bringsjord":{"date":"2021-08-15","count":10,"flow":14},"Sone 14 Rudjord":{"date":"2016-07-28","count":7,"flow":4},"Sone 1 Bjerga og Fidja":{"date":"2021-07-29","count":6,"flow":11},"Sone 8 Prestegården":{"date":"2018-08-11","count":26,"flow":10},"Sone 4 Berge øvre":{"date":"2019-08-28","count":6,"flow":13},"Sone 7":{"date":"2020-08-02","count":5,"flow":23},"Sone 6 Bergsaker":{"date":"2018-08-29","count":10,"flow":13},"Sone12 Vegge":{"date":"2022-08-03","count":8,"flow":5},"Sone 18 Kvås":{"date":"2018-08-17","count":18,"flow":21},"Sone 17 Moi":{"date":"2025-08-06","count":7,"flow":58},"Sone 16 Vemestad øvre":{"date":"2025-08-06","count":6,"flow":58},"Sone 2 Årnes":{"date":"2018-08-31","count":4,"flow":23},"Sone 10 Grøvan og Foss":{"date":"2023-07-19","count":7,"flow":46},"Sone 3 Kvavik":{"date":"2018-08-02","count":4,"flow":0},"Sone 11 Foss øvre":{"date":"2018-08-30","count":4,"flow":20},"Kvåsfossen til Gysfossen":{"date":"2021-08-19","count":8,"flow":10},"Gysfossen til Lygne":{"date":"2025-07-31","count":3,"flow":6}};
 let SCORE_CFG = { rate: 0.8, vol: 0.2, shrinkC: 15, knee: 80 };   // fallback hvis config.json ikke kan hentes
@@ -1029,8 +1041,8 @@ function updateMap(scores) {
     if (l.endMk._icon) l.endMk._icon.style.pointerEvents = showEndMk ? 'auto' : 'none';
     const priceInfo = PRICES[zone];
     const priceLbl = priceInfo && priceInfo.dogn ? priceInfo.dogn + ' kr' : null;
-    const tipHtml = isSelected && priceLbl
-      ? zone + '<br><span style="font-weight:400;opacity:.75;font-size:.9em">' + priceLbl + '</span>'
+    const tipHtml = priceLbl
+      ? zone + '<br><span style="color:' + priceColor(priceInfo.dogn) + '">' + priceLbl + '</span>'
       : zone;
     l.startMk.setTooltipContent(tipHtml);
   });
@@ -1532,7 +1544,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.037</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.040</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 

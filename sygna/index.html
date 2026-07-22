@@ -86,6 +86,8 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .map-header .map-hint { font-size: 0.62rem; color: #94a3b8; }
 #map { height: 320px; width: 100%; }
 .leaflet-tooltip.mtip { background: #1a202c; color: #e2e8f0; border: 1px solid #4a5568; font-size: .72rem; font-weight: 700; padding: 2px 7px; border-radius: 5px; box-shadow: none; }
+.leaflet-tooltip.zone-label { background: #ffffff; color: #1a202c; border: 1px solid rgba(0,0,0,0.15); font-size: 0.58rem; font-weight: 700; padding: 1px 4px; border-radius: 4px; box-shadow: none; pointer-events: none; text-align: center; line-height: 1.2; }
+.leaflet-tooltip.zone-label::before { display: none; }
 .leaflet-tooltip.mtip::before { display: none; }
 
 .photo-panel { width: 100%; max-width: 480px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-top: 14px; display: none; }
@@ -309,11 +311,25 @@ function zoneLabel(zone) {
 
 
 const BILDE_BASE = 'https://timon70-lab.github.io/elvedata/bilder/sygna/';
+const LABEL_ZOOM_THRESHOLD = 13; // Sonenavn-etiketter vises først fra dette zoomnivået
 const PHOTOS_URL = 'https://timon70-lab.github.io/elvedata/data/photos_sygna.json';
 const VIDEOS_URL = 'https://timon70-lab.github.io/elvedata/data/videoer_sygna.json';
 
 /* ---------- Sentral konfig (data/config.json) — scoringsparametre ---------- */
 const PRICES = {"Alle åpne soner": {"dogn": 150, "sesong": 1000}};
+
+// Prisfargeskala for sone-tooltip: billigst = grønn, dyrest = rød, basert på alle dagspriser i elva.
+// Prisfargeskala for sone-tooltip: felles skala for ALLE fem elver (ikke per elv),
+// slik at en gitt kr-pris alltid gir samme farge uansett hvilken elv du ser på.
+// Global bunn = 100 kr, global topp = 1000 kr. Priser utenfor dette clampes til endepunktfargen.
+const GLOBAL_PRICE_MIN = 100;
+const GLOBAL_PRICE_MAX = 1000;
+function priceColor(price) {
+  if (typeof price !== 'number') return '#374151';
+  const t = Math.min(1, Math.max(0, (price - GLOBAL_PRICE_MIN) / (GLOBAL_PRICE_MAX - GLOBAL_PRICE_MIN)));
+  const hue = 120 * (1 - t); // 120 = grønn (billigst), 0 = rød (dyrest)
+  return 'hsl(' + hue.toFixed(0) + ', 70%, 38%)';
+}
 const ZONE_TOOL_RATING = {"Alle åpne soner":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}]};
 const BOOM_DAYS = {"Alle åpne soner": {"date": "2020-09-26", "count": 57, "flow": 9}};
 let SCORE_CFG = { rate: 0.8, vol: 0.2, shrinkC: 15, knee: 80 };   // fallback hvis config.json ikke kan hentes
@@ -701,10 +717,10 @@ function initMap() {
 
   ZONES.forEach(zone => {
     const zc = ZONE_COORDS[zone]; if (!zc) return;
-    const label = zoneLabel(zone);
 
-    const startMk = L.marker(zc.s, {icon: makeStartIcon(label, '#94a3b8', false, false), zIndexOffset: 10}).addTo(map);
-    startMk.bindTooltip(zone, {permanent: false, direction: 'top', className: 'mtip'});
+    const startMk = L.marker(zc.s, {icon: makeStartIcon('–', '#94a3b8', false, false), zIndexOffset: 10}).addTo(map);
+    startMk.bindTooltip(zone, {permanent: true, direction: 'top', className: 'zone-label', offset: [0, 0]});
+    startMk.closeTooltip();
     startMk.on('click', () => { selectZone(zone); if (activeZone === zone) showZoneInfo(zone); });
 
     const endMk = L.marker(zc.e, {icon: makeEndIcon(), opacity: 0, zIndexOffset: 5, interactive: false}).addTo(map);
@@ -712,6 +728,15 @@ function initMap() {
 
     mapLayers[zone] = {startMk, endMk};
   });
+
+  function updateLabelVisibility() {
+    const show = map.getZoom() >= LABEL_ZOOM_THRESHOLD;
+    Object.values(mapLayers).forEach(({ startMk }) => {
+      if (show) startMk.openTooltip(); else startMk.closeTooltip();
+    });
+  }
+  updateLabelVisibility();
+  map.on('zoomend', updateLabelVisibility);
 }
 
 function addVideoMarkers() {
@@ -832,12 +857,10 @@ function updateMap(scores) {
     if (l.endMk._icon) l.endMk._icon.style.pointerEvents = isSelected ? 'auto' : 'none';
     const priceInfo = PRICES[zone];
     const priceLbl = priceInfo && priceInfo.dogn ? priceInfo.dogn + ' kr' : null;
-    const tipHtml = isSelected && priceLbl
-      ? zone + '<br><span style="font-weight:400;opacity:.75;font-size:.9em">' + priceLbl + '</span>'
+    const tipHtml = priceLbl
+      ? zone + '<br><span style="color:' + priceColor(priceInfo.dogn) + '">' + priceLbl + '</span>'
       : zone;
-    l.startMk.unbindTooltip();
-    l.startMk.bindTooltip(tipHtml, {permanent: isSelected, direction: 'top', className: 'mtip'});
-    if (isSelected) l.startMk.openTooltip();
+    l.startMk.setTooltipContent(tipHtml);
   });
   // Show photo markers only when their zone is active (og passerer vannførings-filteret)
   photoMarkers.forEach(({ mk, zone, photosIdx }) => {
@@ -1332,7 +1355,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div class="zi-body" id="ziBody"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.015</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.018</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
