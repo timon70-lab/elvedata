@@ -1,6 +1,62 @@
 [
  {
   "dato": "2026-07-22",
+  "sone": "Stoveland",
+  "vekt": 1.6,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-22",
+  "sone": "Sone 3",
+  "vekt": 5,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-22",
+  "sone": "Sone 3",
+  "vekt": 4.5,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-22",
+  "sone": "Delomr 2, Strømmen",
+  "vekt": 2,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-22",
+  "sone": "Sone 3",
+  "vekt": 3.5,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-22",
+  "sone": "Delomr2, Sone Hauge A",
+  "vekt": 3.5,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-22",
+  "sone": "Sone 3",
+  "vekt": 3.1,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-22",
+  "sone": "Stoveland",
+  "vekt": 1.8,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-22",
   "sone": "Sone 3",
   "vekt": 2.2,
   "agn": "Flue",
