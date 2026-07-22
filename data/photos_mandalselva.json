@@ -2764,14 +2764,14 @@
   "lat": 58.118826,
   "lon": 7.527594,
   "file": "Fossefjellene_20220810_1310.jpg",
-  "caption": "Fossefjellene",
-  "zone": "Fossefjellene",
+  "caption": "Fossefjellene syd",
+  "zone": "Fossefjellene syd",
   "dateISO": "2022-08-10",
   "timeUTC": "11:10",
-  "locId": "Fossefjellene",
-  "vannforing": 25.1,
-  "autoSone": true,
-  "soneAvstandM": 59
+  "locId": "Fossefjellene syd",
+  "vannforing": 25,
+  "autoSone": false,
+  "soneAvstandM": 64
  },
  {
   "id": "M-196",
