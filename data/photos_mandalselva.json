@@ -2031,7 +2031,9 @@
   "locId": "Fuskeland B",
   "vannforing": 24,
   "autoSone": false,
-  "soneAvstandM": 148
+  "soneAvstandM": 148,
+  "adkomstLat": 58.11400926437317,
+  "adkomstLon": 7.530455936026277
  },
  {
   "id": "M-146",
