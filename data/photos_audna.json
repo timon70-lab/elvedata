@@ -869,14 +869,16 @@
   "lat": 58.118707,
   "lon": 7.34146,
   "file": "Sone3_20240622_2019.jpg",
-  "caption": "Sone3",
-  "zone": "Sone3",
+  "caption": "Sone2",
+  "zone": "Sone2",
   "dateISO": "2024-06-22",
   "timeUTC": "18:19",
-  "locId": "Sone3",
-  "vannforing": 16.4,
-  "autoSone": true,
-  "soneAvstandM": 21
+  "locId": "Sone2",
+  "vannforing": 16,
+  "autoSone": false,
+  "soneAvstandM": 414,
+  "adkomstLat": 58.11890679091705,
+  "adkomstLon": 7.338873892278187
  },
  {
   "id": "A-075",
