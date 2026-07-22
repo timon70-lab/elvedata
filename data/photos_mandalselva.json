@@ -1915,9 +1915,11 @@
   "dateISO": "2022-07-23",
   "timeUTC": "19:03",
   "locId": "Fuskeland A",
-  "vannforing": 24.9,
+  "vannforing": 25,
   "autoSone": true,
-  "soneAvstandM": 26
+  "soneAvstandM": 26,
+  "adkomstLat": 58.11400926437317,
+  "adkomstLon": 7.530455936026277
  },
  {
   "id": "M-140",
