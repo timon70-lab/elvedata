@@ -4511,9 +4511,11 @@
   "dateISO": "2024-09-29",
   "timeUTC": "12:03",
   "locId": "Sone 3",
-  "vannforing": 69.1,
+  "vannforing": 69,
   "autoSone": true,
-  "soneAvstandM": 319
+  "soneAvstandM": 319,
+  "adkomstLat": 58.18761451417949,
+  "adkomstLon": 7.530482648459737
  },
  {
   "id": "M-316",
