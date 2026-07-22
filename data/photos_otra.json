@@ -671,7 +671,9 @@
   "locId": "Sone 3A",
   "vannforing": 95,
   "autoSone": true,
-  "soneAvstandM": 170
+  "soneAvstandM": 170,
+  "adkomstLat": 58.218839558256946,
+  "adkomstLon": 7.931854361959784
  },
  {
   "id": "O-049",
