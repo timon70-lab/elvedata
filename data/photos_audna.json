@@ -651,9 +651,11 @@
   "dateISO": "2026-06-04",
   "timeUTC": "18:45",
   "locId": "Sone 5A",
-  "vannforing": 26.6,
+  "vannforing": 27,
   "autoSone": true,
-  "soneAvstandM": 1014
+  "soneAvstandM": 1014,
+  "adkomstLat": 58.1294724049944,
+  "adkomstLon": 7.3569436186717
  },
  {
   "id": "A-059",
