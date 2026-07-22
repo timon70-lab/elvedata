@@ -82,6 +82,8 @@
     "caption": "Jenshølen",
     "dateISO": "2024-06-21",
     "timeUTC": "18:18",
-    "vannforing": 6
+    "vannforing": 6,
+    "adkomstLat": 58.10729626103008,
+    "adkomstLon": 7.831603181595416
   }
 ]
