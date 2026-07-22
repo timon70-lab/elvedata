@@ -86,6 +86,8 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .map-header .map-hint { font-size: 0.62rem; color: #94a3b8; }
 #map { height: 320px; width: 100%; }
 .leaflet-tooltip.mtip { background: #1a202c; color: #e2e8f0; border: 1px solid #4a5568; font-size: .72rem; font-weight: 700; padding: 2px 7px; border-radius: 5px; box-shadow: none; }
+.leaflet-tooltip.zone-label { background: rgba(255,255,255,0.92); color: #1a202c; border: 1px solid rgba(0,0,0,0.15); font-size: 0.58rem; font-weight: 700; padding: 1px 5px; border-radius: 4px; box-shadow: none; pointer-events: none; }
+.leaflet-tooltip.zone-label::before { display: none; }
 .leaflet-tooltip.mtip::before { display: none; }
 
 .photo-panel { width: 100%; max-width: 480px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-top: 14px; display: none; }
@@ -394,6 +396,7 @@ const ZONES = ['Sone1','Sone2','Sone3','Sone4','Sone 5A','Sone 5B','Sone5','Sone
 
 
 const BILDE_BASE = 'https://timon70-lab.github.io/elvedata/bilder/audna/';
+const LABEL_ZOOM_THRESHOLD = 13; // Sonenavn-etiketter vises først fra dette zoomnivået
 const PHOTOS_URL = 'https://timon70-lab.github.io/elvedata/data/photos_audna.json';
 const VIDEOS_URL = 'https://timon70-lab.github.io/elvedata/data/videoer_audna.json';
 
@@ -798,10 +801,10 @@ function initMap() {
 
   ZONES.forEach(zone => {
     const zc = ZONE_COORDS[zone]; if (!zc) return;
-    const label = zone.replace('Sone','').trim();
 
-    const startMk = L.marker(zc.s, {icon: makeStartIcon(label, '#94a3b8', false, false), zIndexOffset: 10}).addTo(map);
-    startMk.bindTooltip(zone, {permanent: false, direction: 'top', className: 'mtip'});
+    const startMk = L.marker(zc.s, {icon: makeStartIcon('–', '#94a3b8', false, false), zIndexOffset: 10}).addTo(map);
+    startMk.bindTooltip(zone, {permanent: true, direction: 'top', className: 'zone-label', offset: [0, 0]});
+    startMk.closeTooltip();
     startMk.on('click', () => { selectZone(zone); if (activeZone === zone) showZoneInfo(zone); });
 
     const endMk = L.marker(zc.e, {icon: makeEndIcon(), opacity: 0, zIndexOffset: 5, interactive: false}).addTo(map);
@@ -809,6 +812,15 @@ function initMap() {
 
     mapLayers[zone] = {startMk, endMk};
   });
+
+  function updateLabelVisibility() {
+    const show = map.getZoom() >= LABEL_ZOOM_THRESHOLD;
+    Object.values(mapLayers).forEach(({ startMk }) => {
+      if (show) startMk.openTooltip(); else startMk.closeTooltip();
+    });
+  }
+  updateLabelVisibility();
+  map.on('zoomend', updateLabelVisibility);
 
 }
 
@@ -922,8 +934,8 @@ function updateMap(scores) {
     const isDimmed = activeZone !== null && !isSelected;
     const sc = scores ? (scores[zone]?.score || 0) : 0;
     const col = isDimmed ? '#94a3b8' : (scores ? scoreColor(sc) : '#94a3b8');
-    const label = zone.replace('Sone','').trim();
-    l.startMk.setIcon(makeStartIcon(label, col, isSelected, isDimmed));
+    const scoreText = scores ? String(sc) : '–';
+    l.startMk.setIcon(makeStartIcon(scoreText, col, isSelected, isDimmed));
     l.startMk.setZIndexOffset(isSelected ? 100 : 10);
     l.endMk.setIcon(makeEndIcon(col));
     l.endMk.setOpacity(isSelected ? 1 : 0);
@@ -933,9 +945,7 @@ function updateMap(scores) {
     const tipHtml = isSelected && priceLbl
       ? zone + '<br><span style="font-weight:400;opacity:.75;font-size:.9em">' + priceLbl + '</span>'
       : zone;
-    l.startMk.unbindTooltip();
-    l.startMk.bindTooltip(tipHtml, {permanent: isSelected, direction: 'top', className: 'mtip'});
-    if (isSelected) l.startMk.openTooltip();
+    l.startMk.setTooltipContent(tipHtml);
   });
   // Show photo markers only when their zone is active
   photoMarkers.forEach(({ mk, zone, photosIdx }) => {
@@ -1434,7 +1444,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.137</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.138</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
