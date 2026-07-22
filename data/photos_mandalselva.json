@@ -2378,14 +2378,14 @@
   "lat": 58.110359,
   "lon": 7.534722,
   "file": "FuskelandA_20220810_1158_2.jpg",
-  "caption": "Fuskeland A",
-  "zone": "Fuskeland A",
+  "caption": "Bringsdal A",
+  "zone": "Bringsdal A",
   "dateISO": "2022-08-10",
   "timeUTC": "09:58",
-  "locId": "Fuskeland A",
-  "vannforing": 25.1,
-  "autoSone": true,
-  "soneAvstandM": 28
+  "locId": "Bringsdal A",
+  "vannforing": 25,
+  "autoSone": false,
+  "soneAvstandM": 38
  },
  {
   "id": "M-173",
