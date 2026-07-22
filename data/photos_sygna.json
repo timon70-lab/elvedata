@@ -95,9 +95,11 @@
   "dateISO": "2024-06-21",
   "timeUTC": "18:11",
   "locId": "Alle åpne soner",
-  "vannforing": 5.9,
+  "vannforing": 6,
   "autoSone": true,
-  "soneAvstandM": 1516
+  "soneAvstandM": 1516,
+  "adkomstLat": 58.10729626103008,
+  "adkomstLon": 7.831603181595416
  },
  {
   "id": "S-008",
