@@ -1228,6 +1228,8 @@ function toggleEditForm(row, elv, m) {
       + '</select></label>'
     + '<label>Vannføring (m³/s)<input type="number" step="1" min="0" class="ef-flow" value="' + (m.vannforing != null ? m.vannforing : '') + '"></label>'
     + '<label style="grid-column:1/-1">Beskrivelse<input type="text" class="ef-caption" value="' + (m.caption || '').replace(/"/g, '&quot;') + '"></label>'
+    + '<label style="grid-column:1/-1">Adkomstpunkt <span style="font-weight:400;opacity:.6;font-size:.85em">(valgfritt — lim inn "lat, lon" fra Google Maps)</span><input type="text" class="ef-adkomst" value="' + (m.adkomstLat != null && m.adkomstLon != null ? (m.adkomstLat + ', ' + m.adkomstLon) : '') + '" placeholder="f.eks. ' + m.lat + ', ' + m.lon + '"></label>'
+    + '<div style="grid-column:1/-1; font-size:.72rem; color:#94a3b8; margin-top:-4px;">Adkomstpunkt styrer hvor «Ta meg dit» i dashbordet ruter til (f.eks. nærmeste parkering/vei) — la stå tomt for å bruke bildets/videoens egne GPS-koordinater.</div>'
     + '<div class="vid-edit-actions">'
       + '<button class="save">💾 Lagre</button>'
       + '<button class="cancel">Avbryt</button>'
@@ -1253,8 +1255,20 @@ async function saveEdit(form, elv, m) {
   const nyCaption = form.querySelector('.ef-caption').value.trim();
   const flowRaw = form.querySelector('.ef-flow').value;
   const nyFlow = flowRaw === '' ? null : Math.round(parseFloat(flowRaw));
+  const adkRaw = form.querySelector('.ef-adkomst').value.trim();
+  let nyAdkLat = null, nyAdkLon = null, adkFeil = false;
+  if (adkRaw !== '') {
+    const deler = adkRaw.split(',').map(s => s.trim()).filter(s => s !== '');
+    if (deler.length === 2 && isFinite(parseFloat(deler[0])) && isFinite(parseFloat(deler[1]))) {
+      nyAdkLat = parseFloat(deler[0]);
+      nyAdkLon = parseFloat(deler[1]);
+    } else {
+      adkFeil = true;
+    }
+  }
   if (!nyZone) { setVidStatus('Velg sone.', true); return; }
   if (flowRaw !== '' && !isFinite(nyFlow)) { setVidStatus('Ugyldig vannføring.', true); return; }
+  if (adkFeil) { setVidStatus('Adkomstpunkt: bruk formatet "lat, lon" (kopiert fra Google Maps), f.eks. "58.112684, 7.940481".', true); return; }
   form.querySelector('.save').disabled = true;
   setVidStatus('Lagrer endringer for ' + m.id + ' …', false);
   try {
@@ -1271,6 +1285,13 @@ async function saveEdit(form, elv, m) {
     entry.zone = nyZone;
     entry.caption = nyCaption || nyZone;
     entry.vannforing = nyFlow;
+    if (nyAdkLat !== null && nyAdkLon !== null) {
+      entry.adkomstLat = nyAdkLat;
+      entry.adkomstLon = nyAdkLon;
+    } else {
+      delete entry.adkomstLat;
+      delete entry.adkomstLon;
+    }
     if (m.mtype === 'foto') {
       entry.locId = nyZone;
       if (zoneEndret) {
