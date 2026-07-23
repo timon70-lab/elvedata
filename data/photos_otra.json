@@ -952,5 +952,19 @@
   "vannforing": 67,
   "autoSone": true,
   "soneAvstandM": 161
+ },
+ {
+  "id": "O-069",
+  "lat": 58.21629166666667,
+  "lon": 7.931016666666667,
+  "file": "Sone3A_20260718_2225.jpg",
+  "caption": "Sone 3A",
+  "zone": "Sone 3A",
+  "dateISO": "2026-07-18",
+  "timeUTC": "20:25",
+  "locId": "Sone 3A",
+  "vannforing": 67,
+  "autoSone": true,
+  "soneAvstandM": 131
  }
 ]
