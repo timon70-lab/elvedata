@@ -109,7 +109,8 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .photo-hdr { padding: 10px 14px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; display: flex; justify-content: space-between; align-items: center; }
 .photo-hdr span { font-size: 0.78rem; font-weight: 700; color: #276749; }
 .photo-hdr button { background: none; border: none; color: #94a3b8; font-size: 1rem; cursor: pointer; line-height: 1; }
-.pg-nav-btn { background:none; border:1px solid #c6f6d5; border-radius:4px; color:#276749; font-size:0.85rem; cursor:pointer; padding:2px 7px; line-height:1.4; }
+.photo-nav-row { display: flex; justify-content: center; align-items: center; gap: 18px; padding: 8px 14px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; }
+.pg-nav-btn { background:none; border:1px solid #c6f6d5; border-radius:8px; color:#276749; font-size:1.35rem; cursor:pointer; padding:6px 20px; line-height:1; min-height:44px; }
 .pg-nav-btn:disabled { color:#cbd5e0; border-color:#e2e8f0; cursor:not-allowed; }
 .photo-img { width: 100%; display: block; max-height: 280px; object-fit: cover; cursor: pointer; }
 .photo-cap { padding: 7px 14px 10px; font-size: 0.68rem; color: #64748b; }
@@ -724,7 +725,7 @@ function initMap() {
     const startMk = L.marker(zc.s, {icon: makeStartIcon('–', '#94a3b8', false, false), zIndexOffset: 10}).addTo(map);
     startMk.bindTooltip(zone, {permanent: true, direction: 'top', className: 'zone-label', offset: [0, 0]});
     startMk.closeTooltip();
-    startMk.on('click', () => { selectZone(zone); if (activeZone === zone) showZoneInfo(zone); });
+    startMk.on('click', () => { selectZone(zone); if (activeZone === zone) showZoneInfo(zone, false); });
 
     const endMk = L.marker(zc.e, {icon: makeEndIcon(), opacity: 0, zIndexOffset: 5, interactive: false}).addTo(map);
     endMk.bindTooltip(zone + ' · slutt', {permanent: false, direction: 'top', className: 'mtip'});
@@ -1342,11 +1343,13 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
     <span id="photoTitle">📷 Bilde</span>
     <div style="display:flex; align-items:center; gap:6px;">
       <button id="flowChip" class="flow-chip" onclick="toggleFlowFilter()" title="Vis kun bilder/videoer tatt ved vannføringen valgt i slideren">💧 Alle vannføringer</button>
-      <button class="pg-nav-btn" id="photoPrev" onclick="showMedia(_activeMediaIdx-1)" title="Forrige (sør)">&#8595;</button>
-      <span id="photoCounter" style="font-size:0.65rem; color:#94a3b8;"></span>
-      <button class="pg-nav-btn" id="photoNext" onclick="showMedia(_activeMediaIdx+1)" title="Neste (nord)">&#8593;</button>
       <button onclick="closeMedia()" style="background:none;border:none;color:#94a3b8;font-size:1rem;cursor:pointer;margin-left:4px;">×</button>
     </div>
+  </div>
+  <div class="photo-nav-row">
+    <button class="pg-nav-btn" id="photoPrev" onclick="showMedia(_activeMediaIdx-1)" title="Forrige (sør)">&#8595;</button>
+    <span id="photoCounter" style="font-size:0.72rem; color:#64748b;"></span>
+    <button class="pg-nav-btn" id="photoNext" onclick="showMedia(_activeMediaIdx+1)" title="Neste (nord)">&#8593;</button>
   </div>
   <img class="photo-img" id="photoImg" src="" alt="" onclick="openFullscreen()" style="cursor:zoom-in">
   <div id="videoBox" style="display:none"></div>
@@ -1373,7 +1376,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div class="zi-body" id="ziBody"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.022</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.023</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
