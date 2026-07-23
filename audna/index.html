@@ -128,7 +128,7 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .photo-fs { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
 .photo-fs.open { display: flex; }
 .photo-fs img { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 6px; }
-.photo-fs .fs-cap { color: #cbd5e0; font-size: 0.72rem; }
+.photo-fs .fs-cap { color: #f1f5f9; font-size: 0.95rem; font-weight: 600; text-align: center; padding: 0 16px; }
 .photo-fs .fs-close { color: white; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .photo-fs .fs-nav { position: absolute; top: 50%; transform: translateY(-50%); color: white; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 44px; height: 44px; font-size: 1.6rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .photo-fs .fs-nav:hover { background: rgba(255,255,255,0.28); }
@@ -1254,7 +1254,9 @@ function openFullscreen() {
   const p = _activeZoneMedia[_activeMediaIdx];
   if (!p || p.mtype === 'video') return;
   document.getElementById('fsImg').src = BILDE_BASE + p.file;
-  document.getElementById('fsCap').textContent = p.caption;
+  const flowVal = (p.vannforing !== undefined && p.vannforing !== null) ? p.vannforing : FLOW_LOOKUP[p.dateISO];
+  const flowStr = flowVal !== undefined ? flowVal + ' m³/s' : 'Vannstand ukjent';
+  document.getElementById('fsCap').textContent = p.caption + ' · ' + flowStr;
   document.getElementById('photoFs').classList.add('open');
   _updateFsNav();
 }
@@ -1456,7 +1458,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.143</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.144</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
