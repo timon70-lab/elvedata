@@ -775,7 +775,7 @@ function addVideoMarkers() {
   videoMarkers = [];
   VIDEOS.forEach((video) => {
     const mk = L.marker([video.lat, video.lon], { icon: makeVideoIcon(), zIndexOffset: 250, opacity: 0 }).addTo(map);
-    mk.bindTooltip('🎣 Vis fangstvideo', { permanent: false, direction: 'top', className: 'mtip' });
+    mk.bindTooltip('Vis video', { permanent: false, direction: 'top', className: 'mtip' });
     mk.on('click', (e) => { L.DomEvent.stopPropagation(e); openZoneMedia(video.zone, video); });
     videoMarkers.push({ mk, zone: video.zone, video });
   });
@@ -1131,7 +1131,7 @@ function closeMedia() {
 }
 function playVideo(el, ytId) {
   el.outerHTML = '<iframe class="video-frame" src="https://www.youtube-nocookie.com/embed/' + ytId
-    + '?autoplay=1&rel=0&enablejsapi=1" title="Fangstvideo" loading="lazy" '
+    + '?autoplay=1&rel=0&enablejsapi=1" title="Video" loading="lazy" '
     + 'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
 }
 
@@ -1366,7 +1366,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.037</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.039</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
