@@ -15,6 +15,13 @@
  },
  {
   "dato": "2026-07-22",
+  "sone": "Sone 3",
+  "vekt": 2,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-22",
   "sone": "Holmesland P",
   "vekt": 2.5,
   "agn": "Flue",
