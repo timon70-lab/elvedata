@@ -840,5 +840,19 @@
   "vannforing": 80,
   "autoSone": true,
   "soneAvstandM": 154
+ },
+ {
+  "id": "O-061",
+  "lat": 58.24435555555556,
+  "lon": 7.950963888888889,
+  "file": "Sone5ABlaa_20260717_1432.jpg",
+  "caption": "Sone 5A Blå",
+  "zone": "Sone 5A Blå",
+  "dateISO": "2026-07-17",
+  "timeUTC": "12:32",
+  "locId": "Sone 5A Blå",
+  "vannforing": 81,
+  "autoSone": true,
+  "soneAvstandM": 140
  }
 ]
