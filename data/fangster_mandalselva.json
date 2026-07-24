@@ -1,9 +1,30 @@
 [
  {
   "dato": "2026-07-24",
+  "sone": "Delomr2, Sone Hauge A",
+  "vekt": 2.3,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-24",
+  "sone": "Delomr2, Sone Hauge A",
+  "vekt": 2.4,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-24",
   "sone": "Stoveland",
   "vekt": 1.5,
   "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-23",
+  "sone": "Sone 3",
+  "vekt": 3,
+  "agn": "Flue",
   "art": "Laks"
  },
  {
