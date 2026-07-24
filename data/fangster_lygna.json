@@ -1,6 +1,13 @@
 [
  {
   "dato": "2026-07-23",
+  "sone": "Sone 9 Kvelland",
+  "vekt": 3.6,
+  "agn": "Stang",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-23",
   "sone": "Sone 17 Moi",
   "vekt": 3,
   "agn": "Sluk",
