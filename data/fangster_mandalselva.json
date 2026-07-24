@@ -1,6 +1,13 @@
 [
  {
   "dato": "2026-07-24",
+  "sone": "Sone 3",
+  "vekt": 2.1,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-24",
   "sone": "Stoveland",
   "vekt": 1.9,
   "agn": "Meitemark",
