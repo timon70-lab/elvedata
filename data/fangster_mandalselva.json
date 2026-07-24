@@ -1,6 +1,13 @@
 [
  {
   "dato": "2026-07-24",
+  "sone": "Delomr 3",
+  "vekt": 8.8,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-24",
   "sone": "Sone 3",
   "vekt": 2.1,
   "agn": "Sluk",
@@ -32,6 +39,13 @@
   "sone": "Stoveland",
   "vekt": 1.5,
   "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-23",
+  "sone": "Steinshylen",
+  "vekt": 1.6,
+  "agn": "Flue",
   "art": "Laks"
  },
  {
