@@ -1,6 +1,34 @@
 [
  {
   "dato": "2026-07-25",
+  "sone": "Sone 3",
+  "vekt": 2,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-25",
+  "sone": "Sone 3",
+  "vekt": 1.9,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-25",
+  "sone": "Sone 3",
+  "vekt": 5.5,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-25",
+  "sone": "Sone 3",
+  "vekt": 2,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-25",
   "sone": "Nodehylen",
   "vekt": 5,
   "agn": "Flue",
