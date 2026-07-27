@@ -1,6 +1,13 @@
 [
  {
   "dato": "2026-07-27",
+  "sone": "Delomr2, Sone Møll",
+  "vekt": 2.7,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-27",
   "sone": "Sone 3",
   "vekt": 1.5,
   "agn": "Meitemark",
