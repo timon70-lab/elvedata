@@ -1,5 +1,19 @@
 [
  {
+  "dato": "2026-07-27",
+  "sone": "Sone 3",
+  "vekt": 3,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-26",
+  "sone": "Holmesland A",
+  "vekt": 1.7,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
   "dato": "2026-07-26",
   "sone": "Sone 3",
   "vekt": 2.3,
