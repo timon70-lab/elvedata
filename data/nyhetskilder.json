@@ -12,5 +12,12 @@
     "type": "side",
     "elv": "Otra",
     "url": "https://lakseelver.no/nb/elver/otra"
+  },
+  {
+    "id": "K-003",
+    "navn": "Laksefiskere i Mandalselva",
+    "type": "apen",
+    "elv": "Mandalselva",
+    "url": "https://www.facebook.com/share/g/17s6o5A5G3/"
   }
 ]
