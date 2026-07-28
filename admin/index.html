@@ -125,6 +125,30 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
 #vidStatus.err, #fotoStatus.err { color: #c53030; }
 .foto-forslag { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 8px 10px;
         font-size: 0.78rem; color: #1d4ed8; margin: 8px 0; }
+
+/* --- Nyheter / Kilder --- */
+.news-badge { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; padding: 2px 7px;
+        border-radius: 999px; white-space: nowrap; display:inline-block; margin-right:6px; }
+.news-badge.side { background: #dcfce7; color: #166534; }
+.news-badge.apen { background: #fef3c7; color: #92400e; }
+.news-badge.lukket { background: #fee2e2; color: #b91c1c; }
+.news-status-tag { font-size: 0.6rem; font-weight: 700; padding: 2px 7px; border-radius: 999px; margin-left:6px; }
+.news-status-tag.aktiv { background:#dbeafe; color:#1d4ed8; }
+.news-status-tag.kommende { background:#f1f5f9; color:#64748b; }
+.news-status-tag.utlopt { background:#f1f5f9; color:#94a3b8; }
+.news-list-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0;
+        border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; }
+.news-list-row:last-child { border-bottom: none; }
+.news-list-row .meta { flex: 1; min-width: 0; }
+.news-list-row .headline { font-weight: 600; color: #1a202c; margin-bottom: 2px; }
+.news-list-row .sub { font-size: 0.72rem; color: #64748b; word-break: break-all; }
+.news-list-row button.del { background: #fee2e2; color: #b91c1c; padding: 5px 10px; font-size: 0.75rem; flex-shrink:0; }
+.news-list-row button.del:hover { background: #fecaca; }
+.news-empty { font-size: 0.78rem; color: #94a3b8; font-style: italic; padding: 10px 0; }
+.news-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.news-grid label { grid-column: span 1; }
+#newsStatus.ok, #kildeStatus.ok { color: #276749; }
+#newsStatus.err, #kildeStatus.err { color: #c53030; }
 </style>
 </head>
 <body>
@@ -249,6 +273,84 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
 </div>
   </div>
 </div>
+
+<details class="card-details" open>
+  <summary>📰 Nyheter <span class="sum-hint">(rullerende banner på oversiktskartet)</span></summary>
+<div class="card tab-card" style="border-radius:0 0 12px 12px;">
+  <div class="tab-bar">
+    <button id="tabBtnNews" class="tab-btn active" onclick="switchNewsTab('news')">📰 Nyheter</button>
+    <button id="tabBtnKilder" class="tab-btn" onclick="switchNewsTab('kilder')">🔗 Kilder</button>
+  </div>
+
+  <!-- ---- NYHETER ---- -->
+  <div id="tabPaneNews" class="tab-pane">
+    <h2>Ny nyhet</h2>
+    <div class="news-grid">
+      <label>Kilde
+        <select id="newsKilde" onchange="onNewsKildeChange()">
+          <option value="">– velg kilde (valgfritt) –</option>
+        </select>
+      </label>
+      <label>Elv
+        <select id="newsElv">
+          <option>Audna</option><option>Lygna</option><option>Mandalselva</option><option>Otra</option><option>Sygna</option><option>Alle elver</option>
+        </select>
+      </label>
+      <label>Tilgangstype
+        <select id="newsType">
+          <option value="side">Side (nettside/Facebook-side)</option>
+          <option value="apen">Åpen Facebook-gruppe</option>
+          <option value="lukket">Lukket Facebook-gruppe</option>
+        </select>
+      </label>
+      <label style="grid-column:1/-1">Overskrift
+        <input type="text" id="newsHeadline" placeholder="F.eks. Ny bro sperrer adkomst til Sone 3"></label>
+      <label style="grid-column:1/-1">Lenke til artikkel/innlegg
+        <input type="url" id="newsLink" placeholder="https://facebook.com/..."></label>
+      <label>Vis fra dato <input type="date" id="newsStart"></label>
+      <label>Vis til dato (valgfritt) <input type="date" id="newsStop"></label>
+    </div>
+    <div class="save-row">
+      <button id="newsBtn" onclick="leggTilNyhet()">➕ Legg til nyhet</button>
+    </div>
+    <div id="newsStatus"></div>
+    <div class="hint" style="margin:10px 0">Banneret viser kun nyheter som er aktive i dag (mellom vis fra- og vis til-dato), uavhengig av hvilken elv de gjelder, sortert på vis fra-dato med eldste først.</div>
+
+    <h2 style="margin-top:16px">Alle nyheter</h2>
+    <div id="newsList"><div class="news-empty">Laster …</div></div>
+  </div>
+
+  <!-- ---- KILDER ---- -->
+  <div id="tabPaneKilder" class="tab-pane" style="display:none">
+    <h2>Ny kilde</h2>
+    <div class="news-grid">
+      <label style="grid-column:1/-1">Navn
+        <input type="text" id="kildeNavn" placeholder="F.eks. Mandalselva Elveeierlag"></label>
+      <label>Type
+        <select id="kildeType">
+          <option value="side">Side (nettside/Facebook-side)</option>
+          <option value="apen">Åpen Facebook-gruppe</option>
+          <option value="lukket">Lukket Facebook-gruppe</option>
+        </select>
+      </label>
+      <label>Elv
+        <select id="kildeElv">
+          <option>Audna</option><option>Lygna</option><option>Mandalselva</option><option>Otra</option><option>Sygna</option><option>Alle elver</option>
+        </select>
+      </label>
+      <label style="grid-column:1/-1">URL (grunnlenke til kilden)
+        <input type="url" id="kildeUrl" placeholder="https://mandalselva.no eller https://facebook.com/..."></label>
+    </div>
+    <div class="save-row">
+      <button id="kildeBtn" onclick="leggTilKilde()">➕ Legg til kilde</button>
+    </div>
+    <div id="kildeStatus"></div>
+
+    <h2 style="margin-top:16px">Registrerte kilder</h2>
+    <div id="kildeList"><div class="news-empty">Laster …</div></div>
+  </div>
+</div>
+</details>
 
 <details class="card-details">
   <summary>⚖️ Scoringsparametre per elv <span class="sum-hint">(sjelden brukt)</span></summary>
@@ -691,6 +793,232 @@ async function fetchJsonFile(path) {
   const gd = await res.json();
   const list = JSON.parse(decodeURIComponent(escape(atob(gd.content.replace(/\n/g, '')))));
   return { list, sha: gd.sha };
+}
+
+async function putJsonFile(path, list, message, sha) {
+  const api = 'https://api.github.com/repos/' + OWNER + '/' + REPO + '/contents/' + path;
+  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(list, null, 2) + '\n')));
+  const body = { message: message, content: b64 };
+  if (sha) body.sha = sha;
+  const res = await fetch(api, {
+    method: 'PUT',
+    headers: { ...headers(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error('HTTP ' + res.status + (err.message ? ' — ' + err.message : ''));
+  }
+  const data = await res.json();
+  return data.content.sha;
+}
+
+/* ---- NYHETER / KILDER ---- */
+const NEWS_PATH = 'data/nyheter.json';
+const SOURCES_PATH = 'data/nyhetskilder.json';
+const NEWS_BADGE_LABEL = { side: 'SIDE', apen: 'ÅPEN', lukket: 'LUKKET' };
+
+let newsList = [], newsSha = null;
+let kilderList = [], kilderSha = null;
+
+function switchNewsTab(which) {
+  document.getElementById('tabPaneNews').style.display = which === 'news' ? '' : 'none';
+  document.getElementById('tabPaneKilder').style.display = which === 'kilder' ? '' : 'none';
+  document.getElementById('tabBtnNews').classList.toggle('active', which === 'news');
+  document.getElementById('tabBtnKilder').classList.toggle('active', which === 'kilder');
+}
+
+function setNewsStatus(msg, isErr) {
+  const el = document.getElementById('newsStatus');
+  el.textContent = msg;
+  el.className = isErr ? 'err' : 'ok';
+}
+function setKildeStatus(msg, isErr) {
+  const el = document.getElementById('kildeStatus');
+  el.textContent = msg;
+  el.className = isErr ? 'err' : 'ok';
+}
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+function fmtDate(iso) {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  return d + '.' + m + '.' + y;
+}
+
+function onNewsKildeChange() {
+  const sel = document.getElementById('newsKilde');
+  const opt = sel.options[sel.selectedIndex];
+  const elv = opt.getAttribute('data-elv');
+  const type = opt.getAttribute('data-type');
+  if (elv) document.getElementById('newsElv').value = elv;
+  if (type) document.getElementById('newsType').value = type;
+}
+
+function fyllKildeDropdown() {
+  const sel = document.getElementById('newsKilde');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">– velg kilde (valgfritt) –</option>' +
+    kilderList.map(k => '<option value="' + k.id + '" data-elv="' + k.elv + '" data-type="' + k.type + '">' +
+      k.navn + ' (' + NEWS_BADGE_LABEL[k.type] + ')</option>').join('');
+  sel.value = current;
+}
+
+async function loadKilder() {
+  setKildeStatus('Henter kilder …', false);
+  try {
+    const { list, sha } = await fetchJsonFile(SOURCES_PATH);
+    kilderList = list;
+    kilderSha = sha;
+    renderKilderList();
+    fyllKildeDropdown();
+    setKildeStatus('', false);
+  } catch (e) {
+    setKildeStatus('Henting feilet: ' + e.message, true);
+  }
+}
+
+function renderKilderList() {
+  const el = document.getElementById('kildeList');
+  if (kilderList.length === 0) { el.innerHTML = '<div class="news-empty">Ingen kilder registrert ennå.</div>'; return; }
+  const sorted = [...kilderList].sort((a, b) => a.navn.localeCompare(b.navn, 'no'));
+  el.innerHTML = sorted.map(k =>
+    '<div class="news-list-row">' +
+      '<div class="meta">' +
+        '<div class="headline"><span class="news-badge ' + k.type + '">' + NEWS_BADGE_LABEL[k.type] + '</span>' + k.navn + '</div>' +
+        '<div class="sub">' + k.elv + ' · ' + k.url + '</div>' +
+      '</div>' +
+      '<button class="del" onclick="slettKilde(\'' + k.id + '\')">Slett</button>' +
+    '</div>'
+  ).join('');
+}
+
+async function leggTilKilde() {
+  if (!getToken()) { setKildeStatus('Lagre GitHub-token først.', true); return; }
+  const navn = document.getElementById('kildeNavn').value.trim();
+  const type = document.getElementById('kildeType').value;
+  const elv = document.getElementById('kildeElv').value;
+  const url = document.getElementById('kildeUrl').value.trim();
+  if (!navn || !url) { setKildeStatus('Navn og URL må fylles ut.', true); return; }
+
+  document.getElementById('kildeBtn').disabled = true;
+  setKildeStatus('Lagrer …', false);
+  try {
+    let maxN = 0;
+    kilderList.forEach(k => { const m = /^K-(\d+)$/.exec(k.id || ''); if (m) maxN = Math.max(maxN, parseInt(m[1], 10)); });
+    const entry = { id: 'K-' + String(maxN + 1).padStart(3, '0'), navn, type, elv, url };
+    const updated = [...kilderList, entry];
+    kilderSha = await putJsonFile(SOURCES_PATH, updated, 'Legg til kilde ' + entry.id + ' (' + navn + ') via admin', kilderSha);
+    kilderList = updated;
+    renderKilderList();
+    fyllKildeDropdown();
+    document.getElementById('kildeNavn').value = '';
+    document.getElementById('kildeUrl').value = '';
+    setKildeStatus('✓ Lagret ' + entry.id + ' til ' + SOURCES_PATH, false);
+  } catch (e) {
+    setKildeStatus('Lagring feilet: ' + e.message, true);
+  } finally {
+    document.getElementById('kildeBtn').disabled = false;
+  }
+}
+
+async function slettKilde(id) {
+  if (!getToken()) { setKildeStatus('Lagre GitHub-token først.', true); return; }
+  if (!confirm('Slette kilden ' + id + '? Nyheter som allerede refererer til den beholder sin elv/type uendret.')) return;
+  setKildeStatus('Sletter …', false);
+  try {
+    const updated = kilderList.filter(k => k.id !== id);
+    kilderSha = await putJsonFile(SOURCES_PATH, updated, 'Fjern kilde ' + id + ' via admin', kilderSha);
+    kilderList = updated;
+    renderKilderList();
+    fyllKildeDropdown();
+    setKildeStatus('✓ Slettet ' + id, false);
+  } catch (e) {
+    setKildeStatus('Sletting feilet: ' + e.message, true);
+  }
+}
+
+async function loadNyheter() {
+  setNewsStatus('Henter nyheter …', false);
+  try {
+    const { list, sha } = await fetchJsonFile(NEWS_PATH);
+    newsList = list;
+    newsSha = sha;
+    renderNyheterList();
+    setNewsStatus('', false);
+  } catch (e) {
+    setNewsStatus('Henting feilet: ' + e.message, true);
+  }
+}
+
+function renderNyheterList() {
+  const el = document.getElementById('newsList');
+  if (newsList.length === 0) { el.innerHTML = '<div class="news-empty">Ingen nyheter registrert ennå.</div>'; return; }
+  const today = todayStr();
+  const sorted = [...newsList].sort((a, b) => a.startDate.localeCompare(b.startDate));
+  el.innerHTML = sorted.map(n => {
+    let statusTag;
+    if (n.startDate > today) statusTag = '<span class="news-status-tag kommende">KOMMENDE</span>';
+    else if (n.stopDate && n.stopDate < today) statusTag = '<span class="news-status-tag utlopt">UTLØPT</span>';
+    else statusTag = '<span class="news-status-tag aktiv">AKTIV</span>';
+    const periode = n.stopDate ? fmtDate(n.startDate) + '–' + fmtDate(n.stopDate) : 'fra ' + fmtDate(n.startDate);
+    return '<div class="news-list-row">' +
+      '<div class="meta">' +
+        '<div class="headline"><span class="news-badge ' + n.sourceType + '">' + NEWS_BADGE_LABEL[n.sourceType] + '</span>' + n.headline + statusTag + '</div>' +
+        '<div class="sub">' + n.elv + ' · ' + periode + '</div>' +
+      '</div>' +
+      '<button class="del" onclick="slettNyhet(\'' + n.id + '\')">Slett</button>' +
+    '</div>';
+  }).join('');
+}
+
+async function leggTilNyhet() {
+  if (!getToken()) { setNewsStatus('Lagre GitHub-token først.', true); return; }
+  const elv = document.getElementById('newsElv').value;
+  const sourceType = document.getElementById('newsType').value;
+  const headline = document.getElementById('newsHeadline').value.trim();
+  const link = document.getElementById('newsLink').value.trim();
+  const startDate = document.getElementById('newsStart').value;
+  const stopDate = document.getElementById('newsStop').value;
+  if (!headline || !link || !startDate) { setNewsStatus('Overskrift, lenke og vis fra-dato må fylles ut.', true); return; }
+
+  document.getElementById('newsBtn').disabled = true;
+  setNewsStatus('Lagrer …', false);
+  try {
+    let maxN = 0;
+    newsList.forEach(n => { const m = /^N-(\d+)$/.exec(n.id || ''); if (m) maxN = Math.max(maxN, parseInt(m[1], 10)); });
+    const entry = { id: 'N-' + String(maxN + 1).padStart(3, '0'), elv, sourceType, headline, link, startDate, stopDate: stopDate || null };
+    const updated = [...newsList, entry];
+    newsSha = await putJsonFile(NEWS_PATH, updated, 'Legg til nyhet ' + entry.id + ' (' + elv + ') via admin', newsSha);
+    newsList = updated;
+    renderNyheterList();
+    document.getElementById('newsHeadline').value = '';
+    document.getElementById('newsLink').value = '';
+    document.getElementById('newsStart').value = todayStr();
+    document.getElementById('newsStop').value = '';
+    setNewsStatus('✓ Lagret ' + entry.id + ' til ' + NEWS_PATH + ' (synlig i banneret etter Pages-cache, ~10 min).', false);
+  } catch (e) {
+    setNewsStatus('Lagring feilet: ' + e.message, true);
+  } finally {
+    document.getElementById('newsBtn').disabled = false;
+  }
+}
+
+async function slettNyhet(id) {
+  if (!getToken()) { setNewsStatus('Lagre GitHub-token først.', true); return; }
+  if (!confirm('Slette nyheten ' + id + '?')) return;
+  setNewsStatus('Sletter …', false);
+  try {
+    const updated = newsList.filter(n => n.id !== id);
+    newsSha = await putJsonFile(NEWS_PATH, updated, 'Fjern nyhet ' + id + ' via admin', newsSha);
+    newsList = updated;
+    renderNyheterList();
+    setNewsStatus('✓ Slettet ' + id, false);
+  } catch (e) {
+    setNewsStatus('Sletting feilet: ' + e.message, true);
+  }
 }
 
 let _listItems = [];
@@ -1387,6 +1715,9 @@ function openSettings() {
 lastSoner();
 listMedia();
 updateChips();
+document.getElementById('newsStart').value = todayStr();
+loadKilder();
+loadNyheter();
 if (localStorage.getItem(NVE_KEY)) {
   document.getElementById('nveInput').placeholder = 'NVE-nøkkel er lagret ✓ (lim inn ny for å bytte)';
 }
