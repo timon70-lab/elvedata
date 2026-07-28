@@ -7,5 +7,14 @@
     "link": "https://lakseelver.no/nb/news/2025/07/midtsesongevaluering-2026-fisket-fortsetter-ut-august-med-samme-regler-som-hittil-i",
     "startDate": "2026-07-28",
     "stopDate": "2026-08-31"
+  },
+  {
+    "id": "N-002",
+    "elv": "Otra",
+    "sourceType": "side",
+    "headline": "Midtsesongevaluering 2026 - Ingen endring",
+    "link": "https://lakseelver.no/nb/news/2026/07/nyhetssaker-midsesongevaluering-i-otra-og-stopp-i-cr-pga-hoy-vanntemperatur",
+    "startDate": "2026-07-28",
+    "stopDate": "2026-08-31"
   }
 ]
