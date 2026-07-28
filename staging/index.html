@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>[STAGING] Elvedata – Sørlandselver</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f2d4a; color: #e2e8f0;
+         display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+  header { padding: 18px 20px 10px; text-align: center; }
+  header h1 { margin: 0; font-size: 1.3rem; font-weight: 700; }
+  header p { margin: 4px 0 0; font-size: 0.8rem; color: #94a3b8; }
+  #map { width: 100%; flex: 1 1 auto; min-height: 380px; }  /* fyller resten av skjermen - ingen scroll */
+  .legend { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; padding: 8px 16px 10px; font-size: 0.7rem; color: #94a3b8; }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .river-marker { display: flex; align-items: center; justify-content: center; border-radius: 50%; color: #fff; font-weight: 800; font-size: 0.82rem; border: 2px solid rgba(255,255,255,0.85); box-shadow: 0 1px 4px rgba(0,0,0,0.35); }
+  .river-marker.stop { background: #b91c1c; font-size: 1.1rem; }
+  .river-marker.opening { background: #d69e2e; font-size: 0.64rem; }
+  .river-marker.nodata { background: #4a5568; font-size: 1rem; }
+  .popup-card { font-family: inherit; min-width: 205px; }
+  .popup-card .pc-title { font-weight: 700; font-size: 0.95rem; margin: 0 0 2px; color: #0f2d4a; }
+  .popup-card .pc-flow { font-size: 0.78rem; color: #475569; margin: 0 0 8px; }
+  .popup-card .pc-score { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .popup-card .pc-score-num { font-size: 1.4rem; font-weight: 800; }
+  .popup-card .pc-score-lbl { font-size: 0.72rem; color: #64748b; }
+  .popup-card .pc-status { font-size: 0.82rem; color: #1a202c; margin: 0 0 10px; font-weight: 600; }
+  .popup-card .pc-substatus { font-size: 0.74rem; color: #64748b; margin: -6px 0 10px; }
+  .popup-card a.pc-link { display: block; text-align: center; background: #0f2d4a; color: #fff; text-decoration: none; padding: 7px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; }
+  .catch-label { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2px; background: rgba(255,255,255,0.92); color: #0f2d4a; font-size: 0.6rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; white-space: nowrap; border: 1px solid rgba(0,0,0,0.12); pointer-events: none; }
+  .popup-card .pc-catches { margin-top: 10px; padding-top: 8px; border-top: 1px solid #e2e8f0; }
+  .popup-card .pc-catches-title a { color: inherit; text-decoration: none; }
+.pc-catches-title a:hover { text-decoration: underline; }
+.pc-catches-title { font-size: 0.72rem; font-weight: 700; color: #0f2d4a; margin: 0 0 5px; }
+  .popup-card .pc-catch-row { font-size: 0.7rem; color: #334155; display: grid; grid-template-columns: 30px 1fr 32px 34px; column-gap: 5px; align-items: baseline; padding: 3px 4px; border-radius: 4px; }
+  .popup-card .pc-catch-row.cc-shade { background: #f3f4f6; }
+  .popup-card .pc-catch-row .cc-date { color: #64748b; }
+  .popup-card .pc-catch-row .cc-sone { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .popup-card .pc-catch-row .cc-vekt { text-align: right; font-weight: 600; }
+  .popup-card .pc-catch-row .cc-agn { text-align: left; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .popup-card .pc-catch-empty { font-size: 0.72rem; color: #94a3b8; font-style: italic; }
+  .popup-card .pc-catch-list { max-height: 160px; overflow-y: auto; padding-right: 10px; }
+  .leaflet-popup-content-wrapper { border-radius: 10px; }
+  .leaflet-tooltip.nodata-tip { font-size: 0.72rem; }
+
+  /* --- Nyhetsbanner (rullerende, dra for å bla manuelt) --- */
+  .news-ticker-wrap {
+    background: rgba(0,0,0,0.22);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    position: relative;
+    height: 32px;
+  }
+  .news-ticker-wrap::-webkit-scrollbar { display: none; }
+  .news-ticker-track { display: flex; align-items: center; height: 100%; white-space: nowrap; width: max-content; }
+  .news-item { display: inline-flex; align-items: center; gap: 6px; padding: 0 22px; font-size: 0.72rem; color: #e2e8f0; text-decoration: none; border-right: 1px solid rgba(255,255,255,0.15); }
+  .news-item:hover { color: #f6ad55; }
+  .news-item b { color: #cbd5e0; font-weight: 700; }
+  .news-badge { font-size: 0.58rem; padding: 1px 6px; border-radius: 20px; font-weight: 700; flex-shrink: 0; letter-spacing: 0.02em; }
+  .news-badge.side { background: #276749; color: #d4f5e2; }
+  .news-badge.apen { background: #975a16; color: #fff3d6; }
+  .news-badge.lukket { background: #822727; color: #ffe0e0; }
+</style>
+<!-- GoatCounter deaktivert i staging - skal ikke telle testbesøk
+<script data-goatcounter="https://elvedata.goatcounter.com/count"
+        data-goatcounter-settings='{"allow_local": false}'
+        async src="//gc.zgo.at/count.js"></script>
+-->
+</head>
+<body>
+
+<div style="background:#c05621; color:#fff; text-align:center; font-size:0.75rem; font-weight:700; padding:6px 10px;">
+  🧪 STAGING — testversjon, ikke del denne lenken
+</div>
+
+<header>
+  <h1>🌿 Elvedata</h1>
+  <p>Live fiskeforhold for sørlandselver — trykk på en elv for detaljer</p>
+</header>
+
+<div class="news-ticker-wrap" id="newsTickerWrap" tabindex="0" style="display:none;">
+  <div class="news-ticker-track" id="newsTickerTrack"></div>
+</div>
+
+<div id="map"></div>
+
+<div class="legend">
+  <span><span class="dot" style="background:#38a169"></span> 56–100 svært godt</span>
+  <span><span class="dot" style="background:#3182ce"></span> 36–55 godt</span>
+  <span><span class="dot" style="background:#dd6b20"></span> 20–35 middels</span>
+  <span><span class="dot" style="background:#e53e3e"></span> 0–19 svakt</span>
+  <span><span class="dot" style="background:#4a5568"></span> Ingen data</span>
+</div>
+<div class="legend" style="padding-top:0; flex-direction:column; align-items:center; gap:4px;">
+  <span><svg width="13" height="13" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" fill="#9ae6b4" stroke="#64748b" stroke-width="1.4" stroke-linejoin="round"/></svg> Dråpe = uregulert elv (naturlig vannføring)</span>
+  <span><svg width="13" height="13" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="#f09595" stroke="#64748b" stroke-width="1.4" stroke-linejoin="round"/></svg><svg width="13" height="13" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="#e24b4a" stroke="#64748b" stroke-width="1.4" stroke-linejoin="round"/></svg><svg width="13" height="13" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="#791f1f" stroke="#64748b" stroke-width="1.4" stroke-linejoin="round"/></svg> Lyn = regulert elv (kraftregulering) — mørkere farge = sterkere regulering</span>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const MONTH_ABBR_NO = ['','jan','feb','mar','apr','mai','jun','jul','aug','sep','okt','nov','des'];
+const MONTH_NAMES_LONG = ['','januar','februar','mars','april','mai','juni','juli','august','september','oktober','november','desember'];
+
+function formatShort(md) {
+  const m = Math.floor(md / 100), d = md % 100;
+  return d + '.' + MONTH_ABBR_NO[m];
+}
+function formatLong(md) {
+  const m = Math.floor(md / 100), d = md % 100;
+  return d + '. ' + MONTH_NAMES_LONG[m];
+}
+function parseMD(str) {
+  const [m, d] = str.split('-').map(Number);
+  return m * 100 + d;
+}
+
+const RIVERS = [
+  {
+    id: 'audna', regulation: 'none', name: 'Audna', lat: 58.19512, lon: 7.34214, hasData: true,
+    dashboardUrl: 'https://timon70-lab.github.io/elvedata/audna/',
+    flowUrl: 'https://timon70-lab.github.io/elvedata/data/vannforing.json',
+    catchUrl: 'https://timon70-lab.github.io/elvedata/data/fangster_audna.json',
+    borsUrl: 'https://laksebors.inatur.no/bors/621',
+    scoreTable: {"0":22,"5":40,"10":44,"15":42,"20":49,"25":54,"30":52,"35":36,"40":26,"45":27,"50":31,"55":23},
+    maxBin: 55, seasonStart: '06-01', seasonEnd: '08-31'
+  },
+  {
+    id: 'lygna', regulation: 'none', name: 'Lygna', lat: 58.25278, lon: 7.18556, hasData: true,
+    dashboardUrl: 'https://timon70-lab.github.io/elvedata/lygna/',
+    flowUrl: 'https://timon70-lab.github.io/elvedata/data/vannforing_lygna.json',
+    catchUrl: 'https://timon70-lab.github.io/elvedata/data/fangster_lygna.json',
+    borsUrl: 'https://laksebors.inatur.no/bors/25',
+    scoreTable: {"0":33,"5":46,"10":59,"15":64,"20":59,"25":55,"30":52,"35":44,"40":46,"45":40,"50":43,"55":53},
+    maxBin: 55, seasonStart: '06-15', seasonEnd: '08-31'
+  },
+  { id: 'storelva', regulation: 'none',    name: 'Storelva (Vegårvassdraget)', lat: 58.63946, lon: 8.89749, hasData: false, seasonStart: '08-01', seasonEnd: '09-15' },
+  { id: 'nidelva', regulation: 'heavy',     name: 'Nidelva (Arendal)',          lat: 58.4471, lon: 8.60796, hasData: false, seasonStart: '06-15', seasonEnd: '09-15' },
+  { id: 'tovdalselva', regulation: 'moderate', name: 'Tovdalselva',                lat: 58.31994, lon: 8.19338, hasData: false, seasonStart: '06-01', seasonEnd: '08-31' },
+  {
+    id: 'otra', regulation: 'heavy', name: 'Otra', lat: 58.24628, lon: 7.952091, hasData: true,
+    dashboardUrl: 'https://timon70-lab.github.io/elvedata/otra/',
+    flowUrl: 'https://timon70-lab.github.io/elvedata/data/vannforing_otra.json',
+    catchUrl: 'https://timon70-lab.github.io/elvedata/data/fangster_otra.json',
+    borsUrl: 'https://laksebors.inatur.no/bors/6',
+    scoreTable: {"50":73,"75":72,"100":69,"125":62,"150":58,"175":44,"200":54,"225":61,"250":44,"275":43,"300":43},
+    maxBin: 300, binStep: 25, seasonStart: '06-15', seasonEnd: '08-17'
+  },
+  {
+    id: 'sygna', regulation: 'none', name: 'Sygna', lat: 58.15147, lon: 7.8362, hasData: true,
+    dashboardUrl: 'https://timon70-lab.github.io/elvedata/sygna/',
+    flowUrl: 'https://timon70-lab.github.io/elvedata/data/vannforing_sygna.json',
+    catchUrl: 'https://timon70-lab.github.io/elvedata/data/fangster_sygna.json',
+    borsUrl: 'https://laksebors.inatur.no/bors/717',
+    scoreTable: {"0":3,"2":12,"4":20,"6":36,"8":57,"10":53,"12":58,"14":50,"16":47,"18":67},
+    maxBin: 18, binStep: 2, seasonStart: '07-15', seasonEnd: '08-31'
+  },
+  {
+    id: 'mandalselva', regulation: 'moderate', name: 'Mandalselva', lat: 58.268685, lon: 7.521004, hasData: true,
+    dashboardUrl: 'https://timon70-lab.github.io/elvedata/mandalselva/',
+    flowUrl: 'https://timon70-lab.github.io/elvedata/data/vannforing_mandalselva.json',
+    catchUrl: 'https://timon70-lab.github.io/elvedata/data/fangster_mandalselva.json',
+    borsUrl: 'https://laksebors.inatur.no/bors/1542',
+    scoreTable: {"15":43,"20":75,"25":80,"30":77,"35":79,"40":79,"45":78,"50":79,"55":79,"60":80,"65":71,"70":76,"75":71,"80":68,"85":69,"90":68,"95":63,"100":66,"105":63,"110":56,"115":63,"120":52,"125":57,"130":65,"135":60,"140":43,"145":44,"150":75},
+    maxBin: 150, seasonStart: '06-01', seasonEnd: '08-31'
+  },
+  { id: 'kvina', regulation: 'heavy',       name: 'Kvina',                      lat: 58.31777, lon: 6.95605, hasData: false, seasonStart: '06-01', seasonEnd: '08-15' },
+  { id: 'sireana', regulation: 'heavy',     name: 'Sireåna (Sira)',             lat: 58.29747, lon: 6.45852, hasData: false, seasonStart: '07-01', seasonEnd: '08-31' },
+  { id: 'bjerkreimselva', regulation: 'light', name: 'Bjerkreimselva',          lat: 58.5407, lon: 6.03607, hasData: false, seasonStart: '06-01', seasonEnd: '09-20' }
+];
+
+function scoreColor(s) {
+  // Terskler skalert til ny to-segments skala (knee 80 = historisk P90-nivå)
+  if (s === null) return '#718096';
+  if (s >= 56) return '#38a169';
+  if (s >= 36) return '#3182ce';
+  if (s >= 20) return '#dd6b20';
+  return '#e53e3e';
+}
+
+const REG_COLORS = { none: '#9ae6b4', light: '#f09595', moderate: '#e24b4a', heavy: '#791f1f' };
+
+function regIconSvg(mainSize, regulation) {
+  const isNatural = regulation === 'none' || !regulation;
+  const color = REG_COLORS[regulation] || REG_COLORS.none;
+  const iconSize = isNatural
+    ? Math.max(16, Math.round(mainSize * 0.4))
+    : Math.max(19, Math.round(mainSize * 0.47));
+  const offset = -Math.round(iconSize * 0.3);
+  const shape = isNatural
+    ? '<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" fill="' + color + '" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>'
+    : '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="' + color + '" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>';
+  return '<svg width="' + iconSize + '" height="' + iconSize + '" viewBox="0 0 24 24" style="position:absolute; top:' + offset + 'px; right:' + offset + 'px; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.5));">' + shape + '</svg>';
+}
+
+function wrapWithBadge(mainHtml, mainSize, regulation) {
+  return '<div style="position:relative; width:' + mainSize + 'px; height:' + mainSize + 'px;">' + mainHtml + regIconSvg(mainSize, regulation) + '</div>';
+}
+
+function nearestBinScore(table, bin, maxBin) {
+  const b = Math.max(0, Math.min(maxBin, bin));
+  for (let d = 0; d <= maxBin; d += 5) {
+    if (table[String(b - d)] !== undefined) return table[String(b - d)];
+    if (table[String(b + d)] !== undefined) return table[String(b + d)];
+  }
+  return null;
+}
+
+// Felles sesong-vurdering: 'score' = i sesong, 'opening' = før sesongstart, 'closed' = etter sesongslutt
+function seasonPhase(seasonStart, seasonEnd, now) {
+  const today = (now.getMonth() + 1) * 100 + now.getDate();
+  const start = parseMD(seasonStart);
+  const end = parseMD(seasonEnd);
+  if (today >= start && today <= end) return { phase: 'score' };
+  if (today < start) return { phase: 'opening', date: start };
+  return { phase: 'closed', date: start };
+}
+
+// Avgjør hva slags markør en elv skal ha akkurat nå
+function riverState(river, now) {
+  if (river.hasData) {
+    return seasonPhase(river.seasonStart, river.seasonEnd, now);
+  }
+  if (river.seasonStart) {
+    const ph = seasonPhase(river.seasonStart, river.seasonEnd, now);
+    if (ph.phase === 'opening') return { phase: 'opening-nodata', date: ph.date };
+  }
+  return { phase: 'nodata' };
+}
+
+const map = L.map('map', { zoomControl: true }).setView([58.35, 7.55], 9);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap-bidragsytere',
+  maxZoom: 18
+}).addTo(map);
+
+const now = new Date();
+
+RIVERS.forEach((river) => {
+  const st = riverState(river, now);
+
+  // --- Elver uten dashboard: kun markør + tooltip, ingen klikk-aksjon ---
+  if (st.phase === 'nodata' || st.phase === 'opening-nodata') {
+    let inner, tipText, size;
+    if (st.phase === 'opening-nodata') {
+      size = 38;
+      inner = '<div class="river-marker opening" style="width:' + size + 'px;height:' + size + 'px">' + formatShort(st.date) + '</div>';
+      tipText = '<strong>' + river.name + '</strong><br>Åpner ' + formatLong(st.date) + ' for laksefiske';
+    } else {
+      size = 36;
+      inner = '<div class="river-marker nodata" style="width:' + size + 'px;height:' + size + 'px">-</div>';
+      tipText = '<strong>' + river.name + '</strong><br>Kommer?';
+    }
+    const html = wrapWithBadge(inner, size, river.regulation);
+    const icon = L.divIcon({ className: '', html: html, iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
+    const marker = L.marker([river.lat, river.lon], { icon }).addTo(map);
+    marker.bindTooltip(tipText, { className: 'nodata-tip', direction: 'top' });
+    return;
+  }
+
+  // --- Elver med dashboard: score / åpner-dato / stengt ---
+  const mainSize = 40;
+  const icon = L.divIcon({
+    className: '',
+    html: wrapWithBadge('<div class="river-marker" style="width:' + mainSize + 'px;height:' + mainSize + 'px;background:#718096">…</div>', mainSize, river.regulation),
+    iconSize: [mainSize, mainSize], iconAnchor: [mainSize / 2, mainSize / 2]
+  });
+  const marker = L.marker([river.lat, river.lon], { icon }).addTo(map);
+  marker.bindTooltip('<strong>' + river.name + '</strong>', { className: 'nodata-tip', direction: 'top' });
+  marker.bindPopup(
+    '<div class="popup-card"><p class="pc-title">' + river.name + '</p><p class="pc-flow">Laster…</p></div>'
+  );
+
+  async function render() {
+    const el = marker.getElement();
+    const inner = el ? el.querySelector('.river-marker') : null;
+
+    if (st.phase === 'closed') {
+      if (inner) { inner.className = 'river-marker stop'; inner.style.background = '#b91c1c'; inner.textContent = '⛔'; }
+      marker.setPopupContent(
+        '<div class="popup-card">' +
+          '<p class="pc-title">' + river.name + '</p>' +
+          '<p class="pc-status">Stengt for sesongen</p>' +
+          '<p class="pc-substatus">Åpner ' + formatLong(st.date) + '</p>' +
+          '<a class="pc-link" href="' + river.dashboardUrl + '" target="_blank">Åpne dashboard →</a>' +
+        '</div>'
+      );
+      return;
+    }
+    if (st.phase === 'opening') {
+      if (inner) { inner.className = 'river-marker opening'; inner.style.background = '#d69e2e'; inner.textContent = formatShort(st.date); }
+      marker.setPopupContent(
+        '<div class="popup-card">' +
+          '<p class="pc-title">' + river.name + '</p>' +
+          '<p class="pc-status">Åpner ' + formatLong(st.date) + '</p>' +
+          '<a class="pc-link" href="' + river.dashboardUrl + '" target="_blank">Åpne dashboard →</a>' +
+        '</div>'
+      );
+      return;
+    }
+
+    // phase === 'score' -> hent live vannføring
+    let flowVal = null, score = null;
+    try {
+      const res = await fetch(river.flowUrl);
+      if (res.ok) {
+        const json = await res.json();
+        const obs = json.data[0].observations.filter(o => o.value !== null);
+        if (obs.length) {
+          flowVal = obs[obs.length - 1].value;
+          const step = river.binStep || 5;
+          const bin = Math.floor(flowVal / step) * step;
+          score = nearestBinScore(river.scoreTable, bin, river.maxBin);
+        }
+      }
+    } catch (e) { /* marker faller tilbake til grå/ukjent */ }
+
+    const col = scoreColor(score);
+    if (inner) { inner.style.background = col; inner.textContent = score !== null ? score : '–'; }
+
+    // Fangster siste 3 dager (valgfritt - feiler stille hvis kilden er utilgjengelig)
+    let catches = null;
+    if (river.catchUrl) {
+      try {
+        const cres = await fetch(river.catchUrl);
+        if (cres.ok) catches = await cres.json();
+      } catch (e) { /* ingen fangstdata - label utelates */ }
+    }
+    if (inner && catches !== null) {
+      let label = inner.parentElement.querySelector('.catch-label');
+      if (!label) {
+        label = document.createElement('div');
+        label.className = 'catch-label';
+        inner.parentElement.appendChild(label);
+      }
+      label.textContent = catches.length === 1 ? '1 fangst' : catches.length + ' fangster';
+    }
+
+    const flowStr = flowVal !== null ? flowVal.toFixed(1) + ' m³/s' : 'ikke tilgjengelig';
+    const scoreStr = score !== null ? score : '–';
+
+    const borsLink = (txt, r) => r.borsUrl
+      ? '<a href="' + r.borsUrl + '" target="_blank" rel="noopener" title="Åpne laksebørsen for ' + r.name + ' (siste fangster)">' + txt + ' \u2197</a>'
+      : txt;
+    let catchesHtml = '';
+    if (catches !== null) {
+      if (catches.length === 0) {
+        catchesHtml =
+          '<div class="pc-catches">' +
+            '<p class="pc-catches-title">' + borsLink('Fangst siste 3 dager', river) + '</p>' +
+            '<p class="pc-catch-empty">Ingen registrerte fangster</p>' +
+          '</div>';
+      } else {
+        let lastDate = null, shade = false;
+        const rows = catches.map(c => {
+          const d = c.dato ? c.dato.slice(8,10) + '.' + c.dato.slice(5,7) : '–';
+          if (d !== lastDate) { shade = !shade; lastDate = d; }
+          const sone = (c.sone || '–').replace(/^Sone(\d)/, 'Sone $1');
+          const vekt = (c.vekt !== null && c.vekt !== undefined) ? Number(c.vekt).toFixed(1) + ' kg' : '–';
+          const agn = c.agn || '–';
+          return '<div class="pc-catch-row' + (shade ? ' cc-shade' : '') + '">' +
+            '<span class="cc-date">' + d + '</span>' +
+            '<span class="cc-sone" title="' + sone + '">' + sone + '</span>' +
+            '<span class="cc-vekt">' + vekt + '</span>' +
+            '<span class="cc-agn" title="' + agn + '">' + agn + '</span>' +
+          '</div>';
+        }).join('');
+        catchesHtml =
+          '<div class="pc-catches">' +
+            '<p class="pc-catches-title">' + borsLink('Fangst siste 3 dager (' + catches.length + ')', river) + '</p>' +
+            '<div class="pc-catch-list">' + rows + '</div>' +
+          '</div>';
+      }
+    }
+
+    marker.setPopupContent(
+      '<div class="popup-card">' +
+        '<p class="pc-title">' + river.name + '</p>' +
+        '<p class="pc-flow">Vannføring: ' + flowStr + '</p>' +
+        '<div class="pc-score">' +
+          '<span class="pc-score-num" style="color:' + col + '">' + scoreStr + '</span>' +
+          '<span class="pc-score-lbl">fiskescore<br>nå</span>' +
+        '</div>' +
+        '<a class="pc-link" href="' + river.dashboardUrl + '" target="_blank">Åpne dashboard →</a>' +
+        catchesHtml +
+      '</div>'
+    );
+  }
+
+  render();
+});
+</script>
+
+<script>
+// Nyhetsbanner - henter data/nyheter.json (skrevet av admin/index.html).
+// Viser kun nyheter som er aktive i dag (vis fra-dato <= i dag <= vis til-dato, eller ingen til-dato),
+// uavhengig av hvilken elv de gjelder. Sortert på vis fra-dato, eldste først.
+const NEWS_BADGE_LABEL = { side: 'SIDE', apen: 'ÅPEN', lukket: 'LUKKET' };
+
+let newsAutoTimer = null;
+let newsUserInteracting = false;
+
+function startNewsAutoScroll(wrap) {
+  stopNewsAutoScroll();
+  newsAutoTimer = setInterval(function () {
+    if (newsUserInteracting) return;
+    const half = wrap.scrollWidth / 2; // innholdet er duplisert -> halvveis er ett fullt "rundt"
+    wrap.scrollLeft += 1;
+    if (wrap.scrollLeft >= half) wrap.scrollLeft -= half;
+  }, 30);
+}
+function stopNewsAutoScroll() {
+  if (newsAutoTimer) { clearInterval(newsAutoTimer); newsAutoTimer = null; }
+}
+
+function renderNewsTicker(items) {
+  const wrap = document.getElementById('newsTickerWrap');
+  const track = document.getElementById('newsTickerTrack');
+  if (!items || items.length === 0) { wrap.style.display = 'none'; return; }
+
+  const itemHtml = items.map(function (n) {
+    return '<a class="news-item" href="' + n.link + '" target="_blank" rel="noopener">' +
+      '<span class="news-badge ' + n.sourceType + '">' + (NEWS_BADGE_LABEL[n.sourceType] || '') + '</span>' +
+      '<b>' + n.elv + ':</b> ' + n.headline +
+    '</a>';
+  }).join('');
+
+  // Dupliser settet slik at auto-scroll kan loope sømløst
+  track.innerHTML = itemHtml + itemHtml;
+  wrap.style.display = 'block';
+
+  // Manuell dra-for-å-bla: pause auto-scroll mens brukeren interagerer,
+  // gjenoppta en liten stund etter at fingeren/musen slippes.
+  const pause = function () { newsUserInteracting = true; };
+  const resumeSoon = function () { setTimeout(function () { newsUserInteracting = false; }, 2500); };
+  wrap.addEventListener('pointerdown', pause);
+  wrap.addEventListener('pointerup', resumeSoon);
+  wrap.addEventListener('pointercancel', resumeSoon);
+  wrap.addEventListener('mouseenter', pause);
+  wrap.addEventListener('mouseleave', resumeSoon);
+  wrap.addEventListener('focusin', pause);
+  wrap.addEventListener('focusout', resumeSoon);
+
+  startNewsAutoScroll(wrap);
+}
+
+async function loadNewsTicker() {
+  try {
+    const res = await fetch('https://timon70-lab.github.io/elvedata/data/nyheter.json', { cache: 'no-cache' });
+    if (!res.ok) { document.getElementById('newsTickerWrap').style.display = 'none'; return; }
+    const items = await res.json();
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const active = items
+      .filter(function (n) { return n.startDate <= todayStr && (!n.stopDate || n.stopDate >= todayStr); })
+      .sort(function (a, b) { return a.startDate.localeCompare(b.startDate); });
+    renderNewsTicker(active);
+  } catch (e) {
+    document.getElementById('newsTickerWrap').style.display = 'none';
+  }
+}
+
+loadNewsTicker();
+</script>
+
+<div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.031</span><br>
+  <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
+</div>
+
+</body>
+</html>
