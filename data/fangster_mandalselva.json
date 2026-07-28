@@ -8,6 +8,20 @@
  },
  {
   "dato": "2026-07-28",
+  "sone": "Sone 3",
+  "vekt": 1.5,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-28",
+  "sone": "Sone 3",
+  "vekt": 1.7,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-28",
   "sone": "Holmesland P",
   "vekt": 5.5,
   "agn": "Flue",
@@ -109,6 +123,20 @@
   "sone": "Sone 3",
   "vekt": 3,
   "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-26",
+  "sone": "Hauge B1",
+  "vekt": 1.5,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-26",
+  "sone": "Hauge B1",
+  "vekt": 2.3,
+  "agn": "Sluk",
   "art": "Laks"
  },
  {
