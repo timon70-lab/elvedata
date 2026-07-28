@@ -5,5 +5,12 @@
     "type": "side",
     "elv": "Audna",
     "url": "https://lakseelver.no/nb/elver/audna"
+  },
+  {
+    "id": "K-002",
+    "navn": "Otra Elveeierlag",
+    "type": "side",
+    "elv": "Otra",
+    "url": "https://lakseelver.no/nb/elver/otra"
   }
 ]
