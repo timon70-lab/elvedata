@@ -16,5 +16,14 @@
     "link": "https://lakseelver.no/nb/news/2026/07/nyhetssaker-midsesongevaluering-i-otra-og-stopp-i-cr-pga-hoy-vanntemperatur",
     "startDate": "2026-07-28",
     "stopDate": "2026-08-31"
+  },
+  {
+    "id": "N-003",
+    "elv": "Otra",
+    "sourceType": "side",
+    "headline": "C/R igjen tillatt fra 28.Juli",
+    "link": "https://lakseelver.no/nb/news/2026/07/det-apnes-igjen-forsiktig-cr-ikke-slipp-ut-skadet-eller-utkjort-fisk",
+    "startDate": "2026-07-28",
+    "stopDate": null
   }
 ]
