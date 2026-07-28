@@ -164,6 +164,84 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
   </div>
 </div>
 
+<details class="card-details" open>
+  <summary>📰 Nyheter <span class="sum-hint">(rullerende banner på oversiktskartet)</span></summary>
+<div class="card tab-card" style="border-radius:0 0 12px 12px;">
+  <div class="tab-bar">
+    <button id="tabBtnNews" class="tab-btn active" onclick="switchNewsTab('news')">📰 Nyheter</button>
+    <button id="tabBtnKilder" class="tab-btn" onclick="switchNewsTab('kilder')">🔗 Kilder</button>
+  </div>
+
+  <!-- ---- NYHETER ---- -->
+  <div id="tabPaneNews" class="tab-pane">
+    <h2>Ny nyhet</h2>
+    <div class="news-grid">
+      <label>Kilde
+        <select id="newsKilde" onchange="onNewsKildeChange()">
+          <option value="">– velg kilde (valgfritt) –</option>
+        </select>
+      </label>
+      <label>Elv
+        <select id="newsElv">
+          <option>Audna</option><option>Lygna</option><option>Mandalselva</option><option>Otra</option><option>Sygna</option><option>Alle elver</option>
+        </select>
+      </label>
+      <label>Tilgangstype
+        <select id="newsType">
+          <option value="side">Side (nettside/Facebook-side)</option>
+          <option value="apen">Åpen Facebook-gruppe</option>
+          <option value="lukket">Lukket Facebook-gruppe</option>
+        </select>
+      </label>
+      <label style="grid-column:1/-1">Overskrift
+        <input type="text" id="newsHeadline" placeholder="F.eks. Ny bro sperrer adkomst til Sone 3"></label>
+      <label style="grid-column:1/-1">Lenke til artikkel/innlegg
+        <input type="url" id="newsLink" placeholder="https://facebook.com/..."></label>
+      <label>Vis fra dato <input type="date" id="newsStart"></label>
+      <label>Vis til dato (valgfritt) <input type="date" id="newsStop"></label>
+    </div>
+    <div class="save-row">
+      <button id="newsBtn" onclick="leggTilNyhet()">➕ Legg til nyhet</button>
+    </div>
+    <div id="newsStatus"></div>
+    <div class="hint" style="margin:10px 0">Banneret viser kun nyheter som er aktive i dag (mellom vis fra- og vis til-dato), uavhengig av hvilken elv de gjelder, sortert på vis fra-dato med eldste først.</div>
+
+    <h2 style="margin-top:16px">Alle nyheter</h2>
+    <div id="newsList"><div class="news-empty">Laster …</div></div>
+  </div>
+
+  <!-- ---- KILDER ---- -->
+  <div id="tabPaneKilder" class="tab-pane" style="display:none">
+    <h2>Ny kilde</h2>
+    <div class="news-grid">
+      <label style="grid-column:1/-1">Navn
+        <input type="text" id="kildeNavn" placeholder="F.eks. Mandalselva Elveeierlag"></label>
+      <label>Type
+        <select id="kildeType">
+          <option value="side">Side (nettside/Facebook-side)</option>
+          <option value="apen">Åpen Facebook-gruppe</option>
+          <option value="lukket">Lukket Facebook-gruppe</option>
+        </select>
+      </label>
+      <label>Elv
+        <select id="kildeElv">
+          <option>Audna</option><option>Lygna</option><option>Mandalselva</option><option>Otra</option><option>Sygna</option><option>Alle elver</option>
+        </select>
+      </label>
+      <label style="grid-column:1/-1">URL (grunnlenke til kilden)
+        <input type="url" id="kildeUrl" placeholder="https://mandalselva.no eller https://facebook.com/..."></label>
+    </div>
+    <div class="save-row">
+      <button id="kildeBtn" onclick="leggTilKilde()">➕ Legg til kilde</button>
+    </div>
+    <div id="kildeStatus"></div>
+
+    <h2 style="margin-top:16px">Registrerte kilder</h2>
+    <div id="kildeList"><div class="news-empty">Laster …</div></div>
+  </div>
+</div>
+</details>
+
 <div class="layout">
   <div class="col-left">
     <div class="card tab-card">
@@ -273,84 +351,6 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
 </div>
   </div>
 </div>
-
-<details class="card-details" open>
-  <summary>📰 Nyheter <span class="sum-hint">(rullerende banner på oversiktskartet)</span></summary>
-<div class="card tab-card" style="border-radius:0 0 12px 12px;">
-  <div class="tab-bar">
-    <button id="tabBtnNews" class="tab-btn active" onclick="switchNewsTab('news')">📰 Nyheter</button>
-    <button id="tabBtnKilder" class="tab-btn" onclick="switchNewsTab('kilder')">🔗 Kilder</button>
-  </div>
-
-  <!-- ---- NYHETER ---- -->
-  <div id="tabPaneNews" class="tab-pane">
-    <h2>Ny nyhet</h2>
-    <div class="news-grid">
-      <label>Kilde
-        <select id="newsKilde" onchange="onNewsKildeChange()">
-          <option value="">– velg kilde (valgfritt) –</option>
-        </select>
-      </label>
-      <label>Elv
-        <select id="newsElv">
-          <option>Audna</option><option>Lygna</option><option>Mandalselva</option><option>Otra</option><option>Sygna</option><option>Alle elver</option>
-        </select>
-      </label>
-      <label>Tilgangstype
-        <select id="newsType">
-          <option value="side">Side (nettside/Facebook-side)</option>
-          <option value="apen">Åpen Facebook-gruppe</option>
-          <option value="lukket">Lukket Facebook-gruppe</option>
-        </select>
-      </label>
-      <label style="grid-column:1/-1">Overskrift
-        <input type="text" id="newsHeadline" placeholder="F.eks. Ny bro sperrer adkomst til Sone 3"></label>
-      <label style="grid-column:1/-1">Lenke til artikkel/innlegg
-        <input type="url" id="newsLink" placeholder="https://facebook.com/..."></label>
-      <label>Vis fra dato <input type="date" id="newsStart"></label>
-      <label>Vis til dato (valgfritt) <input type="date" id="newsStop"></label>
-    </div>
-    <div class="save-row">
-      <button id="newsBtn" onclick="leggTilNyhet()">➕ Legg til nyhet</button>
-    </div>
-    <div id="newsStatus"></div>
-    <div class="hint" style="margin:10px 0">Banneret viser kun nyheter som er aktive i dag (mellom vis fra- og vis til-dato), uavhengig av hvilken elv de gjelder, sortert på vis fra-dato med eldste først.</div>
-
-    <h2 style="margin-top:16px">Alle nyheter</h2>
-    <div id="newsList"><div class="news-empty">Laster …</div></div>
-  </div>
-
-  <!-- ---- KILDER ---- -->
-  <div id="tabPaneKilder" class="tab-pane" style="display:none">
-    <h2>Ny kilde</h2>
-    <div class="news-grid">
-      <label style="grid-column:1/-1">Navn
-        <input type="text" id="kildeNavn" placeholder="F.eks. Mandalselva Elveeierlag"></label>
-      <label>Type
-        <select id="kildeType">
-          <option value="side">Side (nettside/Facebook-side)</option>
-          <option value="apen">Åpen Facebook-gruppe</option>
-          <option value="lukket">Lukket Facebook-gruppe</option>
-        </select>
-      </label>
-      <label>Elv
-        <select id="kildeElv">
-          <option>Audna</option><option>Lygna</option><option>Mandalselva</option><option>Otra</option><option>Sygna</option><option>Alle elver</option>
-        </select>
-      </label>
-      <label style="grid-column:1/-1">URL (grunnlenke til kilden)
-        <input type="url" id="kildeUrl" placeholder="https://mandalselva.no eller https://facebook.com/..."></label>
-    </div>
-    <div class="save-row">
-      <button id="kildeBtn" onclick="leggTilKilde()">➕ Legg til kilde</button>
-    </div>
-    <div id="kildeStatus"></div>
-
-    <h2 style="margin-top:16px">Registrerte kilder</h2>
-    <div id="kildeList"><div class="news-empty">Laster …</div></div>
-  </div>
-</div>
-</details>
 
 <details class="card-details">
   <summary>⚖️ Scoringsparametre per elv <span class="sum-hint">(sjelden brukt)</span></summary>
