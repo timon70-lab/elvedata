@@ -45,6 +45,29 @@
   .popup-card .pc-catch-list { max-height: 160px; overflow-y: auto; padding-right: 10px; }
   .leaflet-popup-content-wrapper { border-radius: 10px; }
   .leaflet-tooltip.nodata-tip { font-size: 0.72rem; }
+
+  /* --- Nyhetsbanner (rullerende, dra for å bla manuelt) --- */
+  .news-ticker-wrap {
+    background: rgba(0,0,0,0.22);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    position: relative;
+    height: 32px;
+  }
+  .news-ticker-wrap::-webkit-scrollbar { display: none; }
+  .news-ticker-track { display: flex; align-items: center; height: 100%; white-space: nowrap; width: max-content; }
+  .news-item { display: inline-flex; align-items: center; gap: 6px; padding: 0 22px; font-size: 0.72rem; color: #e2e8f0; text-decoration: none; border-right: 1px solid rgba(255,255,255,0.15); }
+  .news-item:hover { color: #f6ad55; }
+  .news-item b { color: #cbd5e0; font-weight: 700; }
+  .news-badge { font-size: 0.58rem; padding: 1px 6px; border-radius: 20px; font-weight: 700; flex-shrink: 0; letter-spacing: 0.02em; }
+  .news-badge.side { background: #276749; color: #d4f5e2; }
+  .news-badge.apen { background: #975a16; color: #fff3d6; }
+  .news-badge.lukket { background: #822727; color: #ffe0e0; }
 </style>
 <script data-goatcounter="https://elvedata.goatcounter.com/count"
         data-goatcounter-settings='{"allow_local": false}'
@@ -56,6 +79,10 @@
   <h1>🌿 Elvedata</h1>
   <p>Live fiskeforhold for sørlandselver — trykk på en elv for detaljer</p>
 </header>
+
+<div class="news-ticker-wrap" id="newsTickerWrap" tabindex="0" style="display:none;">
+  <div class="news-ticker-track" id="newsTickerTrack"></div>
+</div>
 
 <div id="map"></div>
 
@@ -365,8 +392,79 @@ RIVERS.forEach((river) => {
 });
 </script>
 
+<script>
+// Nyhetsbanner - henter data/nyheter.json (skrevet av admin/index.html).
+// Viser kun nyheter som er aktive i dag (vis fra-dato <= i dag <= vis til-dato, eller ingen til-dato),
+// uavhengig av hvilken elv de gjelder. Sortert på vis fra-dato, eldste først.
+const NEWS_BADGE_LABEL = { side: 'SIDE', apen: 'ÅPEN', lukket: 'LUKKET' };
+
+let newsAutoTimer = null;
+let newsUserInteracting = false;
+
+function startNewsAutoScroll(wrap) {
+  stopNewsAutoScroll();
+  newsAutoTimer = setInterval(function () {
+    if (newsUserInteracting) return;
+    const half = wrap.scrollWidth / 2; // innholdet er duplisert -> halvveis er ett fullt "rundt"
+    wrap.scrollLeft += 1;
+    if (wrap.scrollLeft >= half) wrap.scrollLeft -= half;
+  }, 30);
+}
+function stopNewsAutoScroll() {
+  if (newsAutoTimer) { clearInterval(newsAutoTimer); newsAutoTimer = null; }
+}
+
+function renderNewsTicker(items) {
+  const wrap = document.getElementById('newsTickerWrap');
+  const track = document.getElementById('newsTickerTrack');
+  if (!items || items.length === 0) { wrap.style.display = 'none'; return; }
+
+  const itemHtml = items.map(function (n) {
+    return '<a class="news-item" href="' + n.link + '" target="_blank" rel="noopener">' +
+      '<span class="news-badge ' + n.sourceType + '">' + (NEWS_BADGE_LABEL[n.sourceType] || '') + '</span>' +
+      '<b>' + n.elv + ':</b> ' + n.headline +
+    '</a>';
+  }).join('');
+
+  // Dupliser settet slik at auto-scroll kan loope sømløst
+  track.innerHTML = itemHtml + itemHtml;
+  wrap.style.display = 'block';
+
+  // Manuell dra-for-å-bla: pause auto-scroll mens brukeren interagerer,
+  // gjenoppta en liten stund etter at fingeren/musen slippes.
+  const pause = function () { newsUserInteracting = true; };
+  const resumeSoon = function () { setTimeout(function () { newsUserInteracting = false; }, 2500); };
+  wrap.addEventListener('pointerdown', pause);
+  wrap.addEventListener('pointerup', resumeSoon);
+  wrap.addEventListener('pointercancel', resumeSoon);
+  wrap.addEventListener('mouseenter', pause);
+  wrap.addEventListener('mouseleave', resumeSoon);
+  wrap.addEventListener('focusin', pause);
+  wrap.addEventListener('focusout', resumeSoon);
+
+  startNewsAutoScroll(wrap);
+}
+
+async function loadNewsTicker() {
+  try {
+    const res = await fetch('https://timon70-lab.github.io/elvedata/data/nyheter.json', { cache: 'no-cache' });
+    if (!res.ok) { document.getElementById('newsTickerWrap').style.display = 'none'; return; }
+    const items = await res.json();
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const active = items
+      .filter(function (n) { return n.startDate <= todayStr && (!n.stopDate || n.stopDate >= todayStr); })
+      .sort(function (a, b) { return a.startDate.localeCompare(b.startDate); });
+    renderNewsTicker(active);
+  } catch (e) {
+    document.getElementById('newsTickerWrap').style.display = 'none';
+  }
+}
+
+loadNewsTicker();
+</script>
+
 <div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.027</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.031</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
