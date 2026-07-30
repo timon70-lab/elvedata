@@ -144,6 +144,11 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
 .news-list-row .sub { font-size: 0.72rem; color: #64748b; word-break: break-all; }
 .news-list-row button.del { background: #fee2e2; color: #b91c1c; padding: 5px 10px; font-size: 0.75rem; flex-shrink:0; }
 .news-list-row button.del:hover { background: #fecaca; }
+.news-row-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+.news-list-row button.edit { background: #dbeafe; color: #1d4ed8; padding: 5px 10px; font-size: 0.75rem; }
+.news-list-row button.edit:hover { background: #bfdbfe; }
+.news-editing-banner { background:#eff6ff; border:1px solid #bfdbfe; color:#1d4ed8; font-size:0.78rem; border-radius:8px; padding:8px 10px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+.news-editing-banner button { background:#fff; color:#1d4ed8; border:1px solid #bfdbfe; padding:4px 10px; font-size:0.72rem; }
 .news-empty { font-size: 0.78rem; color: #94a3b8; font-style: italic; padding: 10px 0; }
 .news-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
 .news-grid label { grid-column: span 1; }
@@ -174,7 +179,11 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
 
   <!-- ---- NYHETER ---- -->
   <div id="tabPaneNews" class="tab-pane">
-    <h2>Ny nyhet</h2>
+    <h2 id="newsFormHeading">Ny nyhet</h2>
+    <div id="newsEditingBanner" class="news-editing-banner" style="display:none">
+      <span>✏️ Redigerer <b id="newsEditingId"></b> — endringer overskriver denne nyheten.</span>
+      <button onclick="avbrytRedigerNyhet()">Avbryt</button>
+    </div>
     <div class="news-grid">
       <label>Kilde
         <select id="newsKilde" onchange="onNewsKildeChange()">
@@ -204,7 +213,7 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
       <button id="newsBtn" onclick="leggTilNyhet()">➕ Legg til nyhet</button>
     </div>
     <div id="newsStatus"></div>
-    <div class="hint" style="margin:10px 0">Banneret viser kun nyheter som er aktive i dag (mellom vis fra- og vis til-dato), uavhengig av hvilken elv de gjelder, sortert på vis fra-dato med eldste først.</div>
+    <div class="hint" style="margin:10px 0">Banneret viser kun nyheter som er aktive i dag (mellom vis fra- og vis til-dato), uavhengig av hvilken elv de gjelder, sortert på vis fra-dato med nyeste først.</div>
 
     <h2 style="margin-top:16px">Alle nyheter</h2>
     <div id="newsList"><div class="news-empty">Laster …</div></div>
@@ -819,6 +828,7 @@ const SOURCES_PATH = 'data/nyhetskilder.json';
 const NEWS_BADGE_LABEL = { side: 'SIDE', apen: 'ÅPEN', lukket: 'LUKKET' };
 
 let newsList = [], newsSha = null;
+let editingNewsId = null;
 let kilderList = [], kilderSha = null;
 
 function switchNewsTab(which) {
@@ -969,9 +979,40 @@ function renderNyheterList() {
         '<div class="headline"><span class="news-badge ' + n.sourceType + '">' + NEWS_BADGE_LABEL[n.sourceType] + '</span>' + n.headline + statusTag + '</div>' +
         '<div class="sub">' + n.elv + ' · ' + periode + '</div>' +
       '</div>' +
-      '<button class="del" onclick="slettNyhet(\'' + n.id + '\')">Slett</button>' +
+      '<div class="news-row-actions">' +
+        '<button class="edit" onclick="startRedigerNyhet(\'' + n.id + '\')">Rediger</button>' +
+        '<button class="del" onclick="slettNyhet(\'' + n.id + '\')">Slett</button>' +
+      '</div>' +
     '</div>';
   }).join('');
+}
+
+function startRedigerNyhet(id) {
+  const n = newsList.find(x => x.id === id);
+  if (!n) return;
+  editingNewsId = id;
+  document.getElementById('newsElv').value = n.elv;
+  document.getElementById('newsType').value = n.sourceType;
+  document.getElementById('newsHeadline').value = n.headline;
+  document.getElementById('newsLink').value = n.link;
+  document.getElementById('newsStart').value = n.startDate;
+  document.getElementById('newsStop').value = n.stopDate || '';
+  document.getElementById('newsFormHeading').textContent = 'Rediger nyhet';
+  document.getElementById('newsEditingId').textContent = id;
+  document.getElementById('newsEditingBanner').style.display = 'flex';
+  document.getElementById('newsBtn').textContent = '💾 Oppdater nyhet';
+  document.getElementById('newsBtn').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function avbrytRedigerNyhet() {
+  editingNewsId = null;
+  document.getElementById('newsHeadline').value = '';
+  document.getElementById('newsLink').value = '';
+  document.getElementById('newsStart').value = todayStr();
+  document.getElementById('newsStop').value = '';
+  document.getElementById('newsFormHeading').textContent = 'Ny nyhet';
+  document.getElementById('newsEditingBanner').style.display = 'none';
+  document.getElementById('newsBtn').textContent = '➕ Legg til nyhet';
 }
 
 async function leggTilNyhet() {
@@ -985,22 +1026,38 @@ async function leggTilNyhet() {
   if (!headline || !link || !startDate) { setNewsStatus('Overskrift, lenke og vis fra-dato må fylles ut.', true); return; }
 
   document.getElementById('newsBtn').disabled = true;
-  setNewsStatus('Lagrer …', false);
+  const isEdit = !!editingNewsId;
+  setNewsStatus(isEdit ? 'Oppdaterer …' : 'Lagrer …', false);
   try {
-    let maxN = 0;
-    newsList.forEach(n => { const m = /^N-(\d+)$/.exec(n.id || ''); if (m) maxN = Math.max(maxN, parseInt(m[1], 10)); });
-    const entry = { id: 'N-' + String(maxN + 1).padStart(3, '0'), elv, sourceType, headline, link, startDate, stopDate: stopDate || null };
-    const updated = [...newsList, entry];
-    newsSha = await putJsonFile(NEWS_PATH, updated, 'Legg til nyhet ' + entry.id + ' (' + elv + ') via admin', newsSha);
+    let updated, entryId, commitMsg;
+    if (isEdit) {
+      entryId = editingNewsId;
+      updated = newsList.map(n => n.id === entryId
+        ? { id: entryId, elv, sourceType, headline, link, startDate, stopDate: stopDate || null }
+        : n);
+      commitMsg = 'Oppdater nyhet ' + entryId + ' (' + elv + ') via admin';
+    } else {
+      let maxN = 0;
+      newsList.forEach(n => { const m = /^N-(\d+)$/.exec(n.id || ''); if (m) maxN = Math.max(maxN, parseInt(m[1], 10)); });
+      entryId = 'N-' + String(maxN + 1).padStart(3, '0');
+      updated = [...newsList, { id: entryId, elv, sourceType, headline, link, startDate, stopDate: stopDate || null }];
+      commitMsg = 'Legg til nyhet ' + entryId + ' (' + elv + ') via admin';
+    }
+    newsSha = await putJsonFile(NEWS_PATH, updated, commitMsg, newsSha);
     newsList = updated;
     renderNyheterList();
-    document.getElementById('newsHeadline').value = '';
-    document.getElementById('newsLink').value = '';
-    document.getElementById('newsStart').value = todayStr();
-    document.getElementById('newsStop').value = '';
-    setNewsStatus('✓ Lagret ' + entry.id + ' til ' + NEWS_PATH + ' (synlig i banneret etter Pages-cache, ~10 min).', false);
+    if (isEdit) {
+      avbrytRedigerNyhet();
+      setNewsStatus('✓ Oppdaterte ' + entryId + ' i ' + NEWS_PATH + ' (synlig i banneret etter Pages-cache, ~10 min).', false);
+    } else {
+      document.getElementById('newsHeadline').value = '';
+      document.getElementById('newsLink').value = '';
+      document.getElementById('newsStart').value = todayStr();
+      document.getElementById('newsStop').value = '';
+      setNewsStatus('✓ Lagret ' + entryId + ' til ' + NEWS_PATH + ' (synlig i banneret etter Pages-cache, ~10 min).', false);
+    }
   } catch (e) {
-    setNewsStatus('Lagring feilet: ' + e.message, true);
+    setNewsStatus((isEdit ? 'Oppdatering' : 'Lagring') + ' feilet: ' + e.message, true);
   } finally {
     document.getElementById('newsBtn').disabled = false;
   }
@@ -1014,6 +1071,7 @@ async function slettNyhet(id) {
     const updated = newsList.filter(n => n.id !== id);
     newsSha = await putJsonFile(NEWS_PATH, updated, 'Fjern nyhet ' + id + ' via admin', newsSha);
     newsList = updated;
+    if (editingNewsId === id) avbrytRedigerNyhet();
     renderNyheterList();
     setNewsStatus('✓ Slettet ' + id, false);
   } catch (e) {
