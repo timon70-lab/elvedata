@@ -34,5 +34,14 @@
     "link": "https://www.facebook.com/share/p/19KMhhsTGi/",
     "startDate": "2026-07-28",
     "stopDate": null
+  },
+  {
+    "id": "N-005",
+    "elv": "Mandalselva",
+    "sourceType": "side",
+    "headline": "Midtsesongevaluering - Endring fra 1.Aug",
+    "link": "https://lakseelver.no/nb/news/2026/07/midtsesongevaluering-2026-1",
+    "startDate": "2026-07-28",
+    "stopDate": "2026-09-15"
   }
 ]
