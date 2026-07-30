@@ -395,7 +395,7 @@ RIVERS.forEach((river) => {
 <script>
 // Nyhetsbanner - henter data/nyheter.json (skrevet av admin/index.html).
 // Viser kun nyheter som er aktive i dag (vis fra-dato <= i dag <= vis til-dato, eller ingen til-dato),
-// uavhengig av hvilken elv de gjelder. Sortert på vis fra-dato, eldste først.
+// uavhengig av hvilken elv de gjelder. Sortert på vis fra-dato, nyeste først (venstre).
 const NEWS_BADGE_LABEL = { side: 'SIDE', apen: 'ÅPEN', lukket: 'LUKKET' };
 
 let newsAutoTimer = null;
@@ -453,7 +453,7 @@ async function loadNewsTicker() {
     const todayStr = new Date().toISOString().slice(0, 10);
     const active = items
       .filter(function (n) { return n.startDate <= todayStr && (!n.stopDate || n.stopDate >= todayStr); })
-      .sort(function (a, b) { return a.startDate.localeCompare(b.startDate); });
+      .sort(function (a, b) { return b.startDate.localeCompare(a.startDate); }); // nyeste vis fra-dato først (venstre)
     renderNewsTicker(active);
   } catch (e) {
     document.getElementById('newsTickerWrap').style.display = 'none';
@@ -464,7 +464,7 @@ loadNewsTicker();
 </script>
 
 <div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.031</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.032</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
