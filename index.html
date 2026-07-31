@@ -230,6 +230,12 @@ function riverState(river, now) {
 }
 
 const map = L.map('map', { zoomControl: true }).setView([58.35, 7.55], 9);
+
+// Lukk ev. åpen popup når fanen mister fokus (f.eks. fordi "Åpne dashboard"-lenken
+// åpnet elva i en ny fane) - slik at popup-en ikke står igjen åpen når man bytter tilbake.
+document.addEventListener('visibilitychange', function () {
+  if (document.visibilityState === 'hidden') map.closePopup();
+});
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap-bidragsytere',
   maxZoom: 18
@@ -464,7 +470,7 @@ loadNewsTicker();
 </script>
 
 <div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.032</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.033</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
