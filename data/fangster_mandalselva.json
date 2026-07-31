@@ -1,6 +1,13 @@
 [
  {
   "dato": "2026-07-31",
+  "sone": "Sone 3",
+  "vekt": 3,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-31",
   "sone": "Fossefjellene",
   "vekt": 2,
   "agn": "Meitemark",
