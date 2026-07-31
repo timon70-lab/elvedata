@@ -1,6 +1,13 @@
 [
  {
   "dato": "2026-07-30",
+  "sone": "Delomr2, Sone Haugefossen",
+  "vekt": 2,
+  "agn": "Mark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-30",
   "sone": "Sone 3",
   "vekt": 1.2,
   "agn": "Meitemark",
