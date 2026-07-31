@@ -43,5 +43,14 @@
     "link": "https://lakseelver.no/nb/news/2026/07/midtsesongevaluering-2026-1",
     "startDate": "2026-07-30",
     "stopDate": "2026-09-15"
+  },
+  {
+    "id": "N-006",
+    "elv": "Alle elver",
+    "sourceType": "side",
+    "headline": "Klikk oppe til høyre for å gi tilbakemelding",
+    "link": "https://forms.gle/erbDidxsjVDPz8BR9",
+    "startDate": "2026-08-01",
+    "stopDate": null
   }
 ]
