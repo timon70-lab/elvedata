@@ -3,17 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex, nofollow">
-<title>[STAGING] Elvedata – Sørlandselver</title>
+<title>Elvedata – Sørlandselver</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <style>
   * { box-sizing: border-box; }
   html, body { height: 100%; }
   body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f2d4a; color: #e2e8f0;
          display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
-  header { padding: 18px 20px 10px; text-align: center; }
+  header { padding: 18px 20px 10px; text-align: center; position: relative; }
   header h1 { margin: 0; font-size: 1.3rem; font-weight: 700; }
   header p { margin: 4px 0 0; font-size: 0.8rem; color: #94a3b8; }
+  .feedback-link {
+    position: absolute; top: 18px; right: 18px;
+    display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16);
+    border-radius: 999px; text-decoration: none; font-size: 1.05rem;
+  }
+  .feedback-link:hover { background: rgba(255,255,255,.16); }
   #map { width: 100%; flex: 1 1 auto; min-height: 380px; }  /* fyller resten av skjermen - ingen scroll */
   .legend { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; padding: 8px 16px 10px; font-size: 0.7rem; color: #94a3b8; }
   .legend span { display: inline-flex; align-items: center; gap: 5px; }
@@ -70,21 +77,16 @@
   .news-badge.apen { background: #975a16; color: #fff3d6; }
   .news-badge.lukket { background: #822727; color: #ffe0e0; }
 </style>
-<!-- GoatCounter deaktivert i staging - skal ikke telle testbesøk
 <script data-goatcounter="https://elvedata.goatcounter.com/count"
         data-goatcounter-settings='{"allow_local": false}'
         async src="//gc.zgo.at/count.js"></script>
--->
 </head>
 <body>
-
-<div style="background:#c05621; color:#fff; text-align:center; font-size:0.75rem; font-weight:700; padding:6px 10px;">
-  🧪 STAGING — testversjon, ikke del denne lenken
-</div>
 
 <header>
   <h1>🌿 Elvedata</h1>
   <p>Live fiskeforhold for sørlandselver — trykk på en elv for detaljer</p>
+  <a class="feedback-link" href="https://forms.gle/JbZt3QCmrVAGJnAT9" target="_blank" rel="noopener" title="Gi tilbakemelding">💬</a>
 </header>
 
 <div class="news-ticker-wrap" id="newsTickerWrap" tabindex="0" style="display:none;">
@@ -237,6 +239,12 @@ function riverState(river, now) {
 }
 
 const map = L.map('map', { zoomControl: true }).setView([58.35, 7.55], 9);
+
+// Lukk ev. åpen popup når fanen mister fokus (f.eks. fordi "Åpne dashboard"-lenken
+// åpnet elva i en ny fane) - slik at popup-en ikke står igjen åpen når man bytter tilbake.
+document.addEventListener('visibilitychange', function () {
+  if (document.visibilityState === 'hidden') map.closePopup();
+});
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap-bidragsytere',
   maxZoom: 18
@@ -402,7 +410,7 @@ RIVERS.forEach((river) => {
 <script>
 // Nyhetsbanner - henter data/nyheter.json (skrevet av admin/index.html).
 // Viser kun nyheter som er aktive i dag (vis fra-dato <= i dag <= vis til-dato, eller ingen til-dato),
-// uavhengig av hvilken elv de gjelder. Sortert på vis fra-dato, eldste først.
+// uavhengig av hvilken elv de gjelder. Sortert på vis fra-dato, nyeste først (venstre).
 const NEWS_BADGE_LABEL = { side: 'SIDE', apen: 'ÅPEN', lukket: 'LUKKET' };
 
 let newsAutoTimer = null;
@@ -460,7 +468,7 @@ async function loadNewsTicker() {
     const todayStr = new Date().toISOString().slice(0, 10);
     const active = items
       .filter(function (n) { return n.startDate <= todayStr && (!n.stopDate || n.stopDate >= todayStr); })
-      .sort(function (a, b) { return a.startDate.localeCompare(b.startDate); });
+      .sort(function (a, b) { return b.startDate.localeCompare(a.startDate); }); // nyeste vis fra-dato først (venstre)
     renderNewsTicker(active);
   } catch (e) {
     document.getElementById('newsTickerWrap').style.display = 'none';
@@ -471,7 +479,7 @@ loadNewsTicker();
 </script>
 
 <div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.031</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.034</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
