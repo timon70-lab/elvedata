@@ -2,7 +2,21 @@
  {
   "dato": "2026-08-01",
   "sone": "Sone 3",
+  "vekt": 1.7,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-01",
+  "sone": "Sone 3",
   "vekt": 2.1,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-07-31",
+  "sone": "Sone 3",
+  "vekt": 1.7,
   "agn": "Meitemark",
   "art": "Laks"
  },
