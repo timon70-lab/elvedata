@@ -181,6 +181,7 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .zi-boom-icon { font-size:1.1rem; line-height:1; flex-shrink:0; }
 .zi-boom-hdr { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#975a16; }
 .zi-boom-txt { font-size:0.68rem; color:#744210; margin-top:1px; }
+.zi-record-txt { font-size:0.6rem; font-weight:700; color:#b7791f; margin-top:10px; }
 .zi-boom-cols { display:flex; gap:14px; width:100%; }
 .zi-boom-col { flex:1; min-width:0; }
 .zi-boom-col + .zi-boom-col { border-left:1px solid #fbd38d; padding-left:14px; }
@@ -319,6 +320,9 @@ function priceColor(price) {
 }
 const ZONE_TOOL_RATING = {"Sone 2":[{"name":"Sluk","stars":3},{"name":"Flue","stars":2},{"name":"Mark","stars":1}],"Sone 5B Rød":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 5B Øst":[{"name":"Sluk","stars":3},{"name":"Flue","stars":2},{"name":"Mark","stars":1}],"Sone 5A Blå":[{"name":"Flue","stars":3},{"name":"Mark","stars":2},{"name":"Sluk","stars":1}],"Sone 3A":[{"name":"Sluk","stars":3},{"name":"Flue","stars":2},{"name":"Mark","stars":1}],"Sone 4A":[{"name":"Sluk","stars":3},{"name":"Flue","stars":2},{"name":"Mark","stars":1}],"Sone 3B Hageodden":[{"name":"Sluk","stars":3},{"name":"Mark","stars":2},{"name":"Flue","stars":1}],"Sone 1":[{"name":"Sluk","stars":3},{"name":"Flue","stars":2},{"name":"Mark","stars":1}],"Sone 4C Holmane":[{"name":"Mark","stars":3},{"name":"Sluk","stars":2},{"name":"Flue","stars":1}],"Sone 4B Ravnås":[{"name":"Mark","stars":3},{"name":"Flue","stars":2},{"name":"Sluk","stars":1}],"Sone 3C Mosby":[{"name":"Mark","stars":3},{"name":"Sluk","stars":2},{"name":"Flue","stars":1}]};
 const BOOM_DAYS = {"Sone 2":{"date":"2017-06-01","count":13,"flow":151},"Sone 5B Rød":{"date":"2017-06-01","count":15,"flow":151},"Sone 5B Øst":{"date":"2023-06-01","count":7,"flow":123},"Sone 5A Blå":{"date":"2018-08-27","count":24,"flow":86},"Sone 3A":{"date":"2024-07-11","count":22,"flow":206},"Sone 4A":{"date":"2024-07-11","count":26,"flow":206},"Sone 3B Hageodden":{"date":"2020-08-08","count":5,"flow":190},"Sone 1":{"date":"2025-06-15","count":10,"flow":79},"Sone 4C Holmane":{"date":"2020-07-03","count":3,"flow":149},"Sone 4B Ravnås":{"date":"2020-08-02","count":4,"flow":269}};
+
+// Tyngste registrerte laks per sone (Art=="Laks"), fra OtraFangstlogg20162025.csv
+const REKORDLAKS_DATA = {"Sone 1":{"vekt":16.2,"dato":"2022-06-02"},"Sone 2":{"vekt":11.6,"dato":"2018-06-01"},"Sone 3A":{"vekt":11.2,"dato":"2019-06-01"},"Sone 3B Hageodden":{"vekt":10.3,"dato":"2024-06-01"},"Sone 3C Mosby":{"vekt":4.5,"dato":"2022-08-24"},"Sone 4A":{"vekt":11.6,"dato":"2023-07-19"},"Sone 4B Ravnås":{"vekt":6.5,"dato":"2023-06-03"},"Sone 4C Holmane":{"vekt":7.2,"dato":"2017-06-06"},"Sone 5A Blå":{"vekt":13.5,"dato":"2017-09-05"},"Sone 5B Rød":{"vekt":13.3,"dato":"2022-06-24"},"Sone 5B Øst":{"vekt":10.2,"dato":"2022-07-06"}};
 let SCORE_CFG = { rate: 0.8, vol: 0.2, shrinkC: 15, knee: 80 };   // fallback hvis config.json ikke kan hentes
 let SPARK_CFG = { max: 150, normal: 94 };   // fallback: P75 / median sesongvannføring
 fetch('https://timon70-lab.github.io/elvedata/data/config.json', { cache: 'no-cache' })
@@ -943,10 +947,21 @@ function showZoneInfo(zone, scrollTo = true) {
   } else {
     boomTxt = 'Ingen rekorddag verdt å nevne';
   }
+
+  let rekordlaksHtml = '';
+  const rekord = REKORDLAKS_DATA[zone];
+  if (rekord) {
+    const rd = new Date(rekord.dato + 'T00:00:00');
+    const rekordDateLbl = rd.getDate() + '. ' + MONTH_NAMES_FULL[rd.getMonth()] + ' ' + rd.getFullYear();
+    const vektStr = rekord.vekt.toFixed(1).replace('.', ',');
+    rekordlaksHtml = '<div class="zi-record-txt">REKORDLAKS - ' + vektStr + ' kg (' + rekordDateLbl + ')</div>';
+  }
+
   const boomColHtml = '<div style="display:flex;gap:8px;align-items:center;">'
     + '<span class="zi-boom-icon">🏆</span>'
     + '<div><div class="zi-boom-hdr">Rekorddag</div>'
-    + '<div class="zi-boom-txt">' + boomTxt + '</div></div>'
+    + '<div class="zi-boom-txt">' + boomTxt + '</div>'
+    + rekordlaksHtml + '</div>'
     + '</div>';
 
   const toolRating = ZONE_TOOL_RATING[zone];
@@ -1388,7 +1403,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.027</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.030</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
