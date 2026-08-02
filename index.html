@@ -128,18 +128,18 @@ function parseMD(str) {
 const RIVERS = [
   {
     id: 'audna', regulation: 'none', name: 'Audna', lat: 58.19512, lon: 7.34214, hasData: true,
-    dashboardUrl: 'https://timon70-lab.github.io/elvedata/audna/',
-    flowUrl: 'https://timon70-lab.github.io/elvedata/data/vannforing.json',
-    catchUrl: 'https://timon70-lab.github.io/elvedata/data/fangster_audna.json',
+    dashboardUrl: 'audna/',
+    flowUrl: 'data/vannforing.json',
+    catchUrl: 'data/fangster_audna.json',
     borsUrl: 'https://laksebors.inatur.no/bors/621',
     scoreTable: {"0":22,"5":40,"10":44,"15":42,"20":49,"25":54,"30":52,"35":36,"40":26,"45":27,"50":31,"55":23},
     maxBin: 55, seasonStart: '06-01', seasonEnd: '08-31'
   },
   {
     id: 'lygna', regulation: 'none', name: 'Lygna', lat: 58.25278, lon: 7.18556, hasData: true,
-    dashboardUrl: 'https://timon70-lab.github.io/elvedata/lygna/',
-    flowUrl: 'https://timon70-lab.github.io/elvedata/data/vannforing_lygna.json',
-    catchUrl: 'https://timon70-lab.github.io/elvedata/data/fangster_lygna.json',
+    dashboardUrl: 'lygna/',
+    flowUrl: 'data/vannforing_lygna.json',
+    catchUrl: 'data/fangster_lygna.json',
     borsUrl: 'https://laksebors.inatur.no/bors/25',
     scoreTable: {"0":33,"5":46,"10":59,"15":64,"20":59,"25":55,"30":52,"35":44,"40":46,"45":40,"50":43,"55":53},
     maxBin: 55, seasonStart: '06-15', seasonEnd: '08-31'
@@ -149,27 +149,27 @@ const RIVERS = [
   { id: 'tovdalselva', regulation: 'moderate', name: 'Tovdalselva',                lat: 58.31994, lon: 8.19338, hasData: false, seasonStart: '06-01', seasonEnd: '08-31' },
   {
     id: 'otra', regulation: 'heavy', name: 'Otra', lat: 58.24628, lon: 7.952091, hasData: true,
-    dashboardUrl: 'https://timon70-lab.github.io/elvedata/otra/',
-    flowUrl: 'https://timon70-lab.github.io/elvedata/data/vannforing_otra.json',
-    catchUrl: 'https://timon70-lab.github.io/elvedata/data/fangster_otra.json',
+    dashboardUrl: 'otra/',
+    flowUrl: 'data/vannforing_otra.json',
+    catchUrl: 'data/fangster_otra.json',
     borsUrl: 'https://laksebors.inatur.no/bors/6',
     scoreTable: {"50":73,"75":72,"100":69,"125":62,"150":58,"175":44,"200":54,"225":61,"250":44,"275":43,"300":43},
     maxBin: 300, binStep: 25, seasonStart: '06-15', seasonEnd: '08-17'
   },
   {
     id: 'sygna', regulation: 'none', name: 'Sygna', lat: 58.15147, lon: 7.8362, hasData: true,
-    dashboardUrl: 'https://timon70-lab.github.io/elvedata/sygna/',
-    flowUrl: 'https://timon70-lab.github.io/elvedata/data/vannforing_sygna.json',
-    catchUrl: 'https://timon70-lab.github.io/elvedata/data/fangster_sygna.json',
+    dashboardUrl: 'sygna/',
+    flowUrl: 'data/vannforing_sygna.json',
+    catchUrl: 'data/fangster_sygna.json',
     borsUrl: 'https://laksebors.inatur.no/bors/717',
     scoreTable: {"0":3,"2":12,"4":20,"6":36,"8":57,"10":53,"12":58,"14":50,"16":47,"18":67},
     maxBin: 18, binStep: 2, seasonStart: '07-15', seasonEnd: '08-31'
   },
   {
     id: 'mandalselva', regulation: 'moderate', name: 'Mandalselva', lat: 58.268685, lon: 7.521004, hasData: true,
-    dashboardUrl: 'https://timon70-lab.github.io/elvedata/mandalselva/',
-    flowUrl: 'https://timon70-lab.github.io/elvedata/data/vannforing_mandalselva.json',
-    catchUrl: 'https://timon70-lab.github.io/elvedata/data/fangster_mandalselva.json',
+    dashboardUrl: 'mandalselva/',
+    flowUrl: 'data/vannforing_mandalselva.json',
+    catchUrl: 'data/fangster_mandalselva.json',
     borsUrl: 'https://laksebors.inatur.no/bors/1542',
     scoreTable: {"15":43,"20":75,"25":80,"30":77,"35":79,"40":79,"45":78,"50":79,"55":79,"60":80,"65":71,"70":76,"75":71,"80":68,"85":69,"90":68,"95":63,"100":66,"105":63,"110":56,"115":63,"120":52,"125":57,"130":65,"135":60,"140":43,"145":44,"150":75},
     maxBin: 150, seasonStart: '06-01', seasonEnd: '08-31'
@@ -462,7 +462,7 @@ function renderNewsTicker(items) {
 
 async function loadNewsTicker() {
   try {
-    const res = await fetch('https://timon70-lab.github.io/elvedata/data/nyheter.json', { cache: 'no-cache' });
+    const res = await fetch('data/nyheter.json', { cache: 'no-cache' });
     if (!res.ok) { document.getElementById('newsTickerWrap').style.display = 'none'; return; }
     const items = await res.json();
     const todayStr = new Date().toISOString().slice(0, 10);
@@ -479,7 +479,7 @@ loadNewsTicker();
 </script>
 
 <div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.035</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.036</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
