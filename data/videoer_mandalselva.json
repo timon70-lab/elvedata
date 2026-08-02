@@ -88,5 +88,16 @@
     "dateISO": "2026-08-01",
     "timeUTC": "18:01",
     "vannforing": 30
+  },
+  {
+    "id": "V-009",
+    "zone": "Steinshylen",
+    "lat": 58.2578,
+    "lon": 7.5193,
+    "youtubeId": "_uaxLWwLhto",
+    "caption": "Steinshylen · Video",
+    "dateISO": "2026-08-01",
+    "timeUTC": "17:58",
+    "vannforing": 30
   }
 ]
