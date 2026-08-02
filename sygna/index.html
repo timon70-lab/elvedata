@@ -277,8 +277,8 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 </div>
 
 <script>
-const NVE_CACHE_URL = 'https://timon70-lab.github.io/elvedata/data/vannforing_sygna.json';
-const NEDBOR_CACHE_URL = 'https://timon70-lab.github.io/elvedata/data/nedbor_sygna.json';
+const NVE_CACHE_URL = '../data/vannforing_sygna.json';
+const NEDBOR_CACHE_URL = '../data/nedbor_sygna.json';
 
 const ZONE_INFO = {
   'Alle åpne soner': {
@@ -315,10 +315,10 @@ function zoneLabel(zone) {
 }
 
 
-const BILDE_BASE = 'https://timon70-lab.github.io/elvedata/bilder/sygna/';
+const BILDE_BASE = '../bilder/sygna/';
 const LABEL_ZOOM_THRESHOLD = 13; // Sonenavn-etiketter vises først fra dette zoomnivået
-const PHOTOS_URL = 'https://timon70-lab.github.io/elvedata/data/photos_sygna.json';
-const VIDEOS_URL = 'https://timon70-lab.github.io/elvedata/data/videoer_sygna.json';
+const PHOTOS_URL = '../data/photos_sygna.json';
+const VIDEOS_URL = '../data/videoer_sygna.json';
 
 /* ---------- Sentral konfig (data/config.json) — scoringsparametre ---------- */
 const PRICES = {"Alle åpne soner": {"dogn": 150, "sesong": 1000}};
@@ -342,7 +342,7 @@ const BOOM_DAYS = {"Alle åpne soner": {"date": "2020-09-26", "count": 57, "flow
 const REKORDLAKS_DATA = {"Alle åpne soner":{"vekt":9.5,"dato":"2017-07-21"}};
 let SCORE_CFG = { rate: 0.8, vol: 0.2, shrinkC: 15, knee: 80 };   // fallback hvis config.json ikke kan hentes
 let SPARK_CFG = { max: 5.2, normal: 2.3 };   // fallback: P75 / median sesongvannføring
-fetch('https://timon70-lab.github.io/elvedata/data/config.json', { cache: 'no-cache' })
+fetch('../data/config.json', { cache: 'no-cache' })
   .then(r => r.ok ? r.json() : null)
   .then(cfg => {
     const w = cfg && cfg.score && (cfg.score.sygna || cfg.score.default);
@@ -1391,7 +1391,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div class="zi-body" id="ziBody"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.024</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.025</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 

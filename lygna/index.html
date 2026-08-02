@@ -276,8 +276,8 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 </div>
 
 <script>
-const NVE_CACHE_URL = 'https://timon70-lab.github.io/elvedata/data/vannforing_lygna.json';
-const NEDBOR_CACHE_URL = 'https://timon70-lab.github.io/elvedata/data/nedbor.json';
+const NVE_CACHE_URL = '../data/vannforing_lygna.json';
+const NEDBOR_CACHE_URL = '../data/nedbor.json';
 
 const ZONE_INFO = {
   'Sone 1 Bjerga og Fidja': {
@@ -488,10 +488,10 @@ function zoneLabel(zone) {
 }
 
 
-const BILDE_BASE = 'https://timon70-lab.github.io/elvedata/bilder/lygna/';
+const BILDE_BASE = '../bilder/lygna/';
 const LABEL_ZOOM_THRESHOLD = 13; // Sonenavn-etiketter vises først fra dette zoomnivået
-const PHOTOS_URL = 'https://timon70-lab.github.io/elvedata/data/photos_lygna.json';
-const VIDEOS_URL = 'https://timon70-lab.github.io/elvedata/data/videoer_lygna.json';
+const PHOTOS_URL = '../data/photos_lygna.json';
+const VIDEOS_URL = '../data/videoer_lygna.json';
 
 /* ---------- Sentral konfig (data/config.json) — scoringsparametre ---------- */
 const PRICES = {"Gysfossen til Lygne":{"dogn":150,"sesong":400},"Kvåsfossen til Gysfossen":{"dogn":150,"sesong":400},"Sone 1 Bjerga og Fidja":{"dogn":250,"sesong":2200},"Sone 10 Grøvan og Foss":{"dogn":250,"sesong":2200},"Sone 11 Foss øvre":{"dogn":250,"sesong":2200},"Sone 13 Gitlestad":{"dogn":250,"sesong":2200},"Sone 14 Rudjord":{"dogn":250,"sesong":2200},"Sone 15 Vemestad ytre":{"dogn":250,"sesong":2200},"Sone 16 Vemestad øvre":{"dogn":250,"sesong":2200},"Sone 17 Moi":{"dogn":250,"sesong":2200},"Sone 18 Kvås":{"dogn":250,"sesong":2200},"Sone 2 Årnes":{"dogn":250,"sesong":2200},"Sone 3 Kvavik":{"dogn":250,"sesong":2200},"Sone 4 Berge øvre":{"dogn":250,"sesong":2200},"Sone 5 Bringsjord":{"dogn":250,"sesong":2200},"Sone 6 Bergsaker":{"dogn":250,"sesong":2200},"Sone 7":{"dogn":250,"sesong":2200},"Sone 8 Prestegården":{"dogn":100},"Sone 9 Kvelland":{"dogn":250,"sesong":2200},"Sone12 Vegge":{"dogn":250,"sesong":2200}};
@@ -514,7 +514,7 @@ const BOOM_DAYS = {"Sone 9 Kvelland":{"date":"2022-08-03","count":41,"flow":5},"
 const REKORDLAKS_DATA = {"Sone 9 Kvelland":{"vekt":10.5,"dato":"2025-07-06"},"Sone 15 Vemestad ytre":{"vekt":10.4,"dato":"2022-06-03"},"Sone 5 Bringsjord":{"vekt":12.0,"dato":"2021-07-09"},"Sone 14 Rudjord":{"vekt":7.9,"dato":"2019-06-05"},"Sone 1 Bjerga og Fidja":{"vekt":8.2,"dato":"2017-08-06"},"Sone 8 Prestegården":{"vekt":11.7,"dato":"2017-07-29"},"Sone 7":{"vekt":9.9,"dato":"2017-08-03"},"Sone12 Vegge":{"vekt":8.8,"dato":"2019-08-24"},"Sone 4 Berge øvre":{"vekt":6.9,"dato":"2016-06-29"},"Sone 18 Kvås":{"vekt":12.0,"dato":"2024-07-12"},"Sone 17 Moi":{"vekt":8.0,"dato":"2016-08-04"},"Sone 6 Bergsaker":{"vekt":8.3,"dato":"2017-08-03"},"Sone 13 Gitlestad":{"vekt":9.0,"dato":"2020-08-08"},"Sone 10 Grøvan og Foss":{"vekt":9.7,"dato":"2017-06-11"},"Sone 16 Vemestad øvre":{"vekt":9.7,"dato":"2020-07-04"},"Sone 2 Årnes":{"vekt":6.4,"dato":"2016-07-29"},"Sone 3 Kvavik":{"vekt":7.0,"dato":"2018-08-01"},"Sone 11 Foss øvre":{"vekt":5.0,"dato":"2021-07-30"},"Kvåsfossen til Gysfossen":{"vekt":9.0,"dato":"2023-08-17"},"Gysfossen til Lygne":{"vekt":3.3,"dato":"2022-08-04"}};
 let SCORE_CFG = { rate: 0.8, vol: 0.2, shrinkC: 15, knee: 80 };   // fallback hvis config.json ikke kan hentes
 let SPARK_CFG = { max: 12, normal: 6.5 };   // fallback: P75 / median sesongvannføring
-fetch('https://timon70-lab.github.io/elvedata/data/config.json', { cache: 'no-cache' })
+fetch('../data/config.json', { cache: 'no-cache' })
   .then(r => r.ok ? r.json() : null)
   .then(cfg => {
     const w = cfg && cfg.score && (cfg.score.lygna || cfg.score.default);
@@ -1580,7 +1580,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.046</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.047</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 

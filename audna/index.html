@@ -285,8 +285,8 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 </div>
 
 <script>
-const NVE_CACHE_URL = 'https://timon70-lab.github.io/elvedata/data/vannforing.json';
-const NEDBOR_CACHE_URL = 'https://timon70-lab.github.io/elvedata/data/nedbor.json';
+const NVE_CACHE_URL = '../data/vannforing.json';
+const NEDBOR_CACHE_URL = '../data/nedbor.json';
 
 const ZONE_INFO = {
   'Sone1': {
@@ -400,10 +400,10 @@ const FLY_DATA = {"2016": {"6": {"0": {"Sone2": 1,"Sone5": 2,"Sone6": 2,"Sone8":
 const ZONES = ['Sone1','Sone2','Sone3','Sone4','Sone 5A','Sone 5B','Sone5','Sone6','Sone7','Sone8'];
 
 
-const BILDE_BASE = 'https://timon70-lab.github.io/elvedata/bilder/audna/';
+const BILDE_BASE = '../bilder/audna/';
 const LABEL_ZOOM_THRESHOLD = 13; // Sonenavn-etiketter vises først fra dette zoomnivået
-const PHOTOS_URL = 'https://timon70-lab.github.io/elvedata/data/photos_audna.json';
-const VIDEOS_URL = 'https://timon70-lab.github.io/elvedata/data/videoer_audna.json';
+const PHOTOS_URL = '../data/photos_audna.json';
+const VIDEOS_URL = '../data/videoer_audna.json';
 
 /* ---------- Sentral konfig (data/config.json) — scoringsparametre ---------- */
 const PRICES = {"Sone 5A":{"dogn":400,"sesong":3500},"Sone 5B":{"dogn":350,"sesong":3000},"Sone1":{"dogn":250,"sesong":1200},"Sone2":{"dogn":350,"sesong":2900},"Sone3":{"dogn":250},"Sone4":{"dogn":1200},"Sone6":{"dogn":300,"sesong":3000},"Sone7":{"dogn":450},"Sone8":{"dogn":250,"sesong":1500}};
@@ -426,7 +426,7 @@ const BOOM_DAYS = {"Sone4":{"date":"2016-07-30","count":25,"flow":10},"Sone 5A":
 const REKORDLAKS_DATA = {"Sone4":{"vekt":12.0,"dato":"2017-08-04"},"Sone 5A":{"vekt":11.0,"dato":"2024-08-19"},"Sone8":{"vekt":11.8,"dato":"2017-06-01"},"Sone3":{"vekt":8.5,"dato":"2024-07-29"},"Sone2":{"vekt":9.4,"dato":"2017-08-04"},"Sone6":{"vekt":9.0,"dato":"2018-06-28"},"Sone7":{"vekt":9.0,"dato":"2024-07-13"},"Sone 5B":{"vekt":10.6,"dato":"2023-07-24"},"Sone1":{"vekt":4.4,"dato":"2021-07-08"},"Sone5":{"vekt":9.5,"dato":"2021-06-15"}};
 let SCORE_CFG = { rate: 0.8, vol: 0.2, shrinkC: 15, knee: 80 };   // fallback hvis config.json ikke kan hentes
 let SPARK_CFG = { max: 11, normal: 6 };   // fallback: P75 / median sesongvannføring
-fetch('https://timon70-lab.github.io/elvedata/data/config.json', { cache: 'no-cache' })
+fetch('../data/config.json', { cache: 'no-cache' })
   .then(r => r.ok ? r.json() : null)
   .then(cfg => {
     const w = cfg && cfg.score && (cfg.score.audna || cfg.score.default);
@@ -1492,7 +1492,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.147</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.148</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
