@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Administrasjon og arbeidsområder skal ikke indekseres
+Disallow: /admin/
+Disallow: /staging/
+Disallow: /scripts/
+Disallow: /docs/
+Disallow: /data/
+
+Sitemap: https://elvesona.no/sitemap.xml
