@@ -26,5 +26,12 @@
     "type": "side",
     "elv": "Mandalselva",
     "url": "https://lakseelver.no/nb/elver/mandalselva"
+  },
+  {
+    "id": "K-005",
+    "navn": "Otra House Vennesla",
+    "type": "apen",
+    "elv": "Otra",
+    "url": "https://www.facebook.com/share/1PX4mNDPMs/"
   }
 ]
