@@ -4,9 +4,9 @@
 
 ---
 
-## Hva viser Elvedata?
+## Hva viser Elvesona?
 
-Elvedata samler fangststatistikk fra 2016 til 2025 og kobler den mot vannføringen på
+Elvesona samler fangststatistikk fra 2016 til 2025 og kobler den mot vannføringen på
 fangstdagen. Når du drar i vannføringsslideren, spør systemet i praksis:
 
 > **Historisk sett — når elva har stått omtrent slik den står nå, i denne perioden av
@@ -19,7 +19,7 @@ mange fangster per fiskedag ved akkurat denne vannføringen.
 
 ## Hva poengsummen *ikke* er
 
-**Det er ikke en spådom om dagen i dag.** Elvedata vet ingenting om hvor mye fisk som
+**Det er ikke en spådom om dagen i dag.** Elvesona vet ingenting om hvor mye fisk som
 faktisk står i elva akkurat nå. Tallet er historikk, ikke prognose.
 
 **Det er ikke en garanti.** Laksefiske har en stor porsjon flaks. En sone med 85 poeng
@@ -103,7 +103,7 @@ fiskemelding — vannføringen styres av kraftverksdrift, ikke av regn.
 - **Nedbørsvarsel:** Meteorologisk institutt
 - **Kart:** OpenStreetMap
 
-Elvedata er et privat, ikke-kommersielt prosjekt uten tilknytning til elveeierlagene.
+Elvesona er et privat, ikke-kommersielt prosjekt uten tilknytning til elveeierlagene.
 Sonegrenser og kvoteregler er gjengitt etter beste evne, men **det er alltid de offisielle
 reglene fra elveeierlaget som gjelder**. Sjekk kortet ditt og oppslag ved elva.
 

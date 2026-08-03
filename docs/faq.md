@@ -89,7 +89,7 @@ Vi bruker GoatCounter, som ikke setter informasjonskapsler og ikke lagrer noe so
 knyttes til deg. Vi kan se hvor mange som besøker sidene, men ikke hvem — og heller ikke
 om du har vært innom før. Derfor er det heller ikke noe cookie-banner her.
 
-### Hvem står bak Elvedata?
+### Hvem står bak Elvesona?
 
 Et privat, ikke-kommersielt hobbyprosjekt uten tilknytning til elveeierlagene. Tjenesten
 er gratis og uten reklame.
