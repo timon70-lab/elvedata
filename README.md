@@ -1,10 +1,14 @@
-# Elvedata
+# Elvesona
 
 Fiskeintelligens for lakseelver i Agder — vannføring, fangsthistorikk og sonescore.
 
-**Live:** [timon70-lab.github.io/elvedata](https://timon70-lab.github.io/elvedata/)
+**Live:** [elvesona.no](https://elvesona.no)
+**Facebook:** gruppa *Elvesona* (åpen)
 
-Elvedata kobler historisk fangststatistikk (2016–2025) mot vannføringen på fangstdagen, og
+> Tjenesten heter **Elvesona** utad. Repoet, GitHub Pages-stien og filnavn bruker fortsatt
+> `elvedata` av historiske grunner — begge navn viser til det samme.
+
+Elvesona kobler historisk fangststatistikk (2016–2025) mot vannføringen på fangstdagen, og
 regner ut hvilke soner som historisk har fisket best under forhold som dagens. Fem elver:
 **Audna, Lygna, Mandalselva, Otra og Sygna**.
 
