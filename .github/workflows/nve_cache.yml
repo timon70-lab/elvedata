@@ -57,11 +57,15 @@ jobs:
             -o data/nedbor.json
           curl -s \
             -H "User-Agent: audna-dashboard github.com/timon70-lab/audna" \
+            "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=58.4786&lon=7.2083" \
+            -o data/nedbor_lygna.json
+          curl -s \
+            -H "User-Agent: audna-dashboard github.com/timon70-lab/audna" \
             "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=58.155136&lon=7.835791" \
             -o data/nedbor_sygna.json
           python3 -c "
           import json
-          for fn, navn in [('data/nedbor.json','Audna/Lygna-punkt'), ('data/nedbor_sygna.json','Sygna/Nodeland-punkt')]:
+          for fn, navn in [('data/nedbor.json','Audna/Konsmo-punkt'), ('data/nedbor_lygna.json','Lygna/Eiken-punkt'), ('data/nedbor_sygna.json','Sygna/Nodeland-punkt')]:
               with open(fn) as f:
                   d = json.load(f)
               ts = d['properties']['timeseries']
@@ -72,7 +76,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/vannforing.json data/vannforing_lygna.json data/vannforing_mandalselva.json data/vannforing_otra.json data/vannforing_sygna.json data/nedbor.json data/nedbor_sygna.json
+          git add data/vannforing.json data/vannforing_lygna.json data/vannforing_mandalselva.json data/vannforing_otra.json data/vannforing_sygna.json data/nedbor.json data/nedbor_lygna.json data/nedbor_sygna.json
           if git diff --cached --quiet; then
             echo "Ingen endringer aa committe."
             exit 0
