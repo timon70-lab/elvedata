@@ -1,6 +1,20 @@
 [
  {
   "dato": "2026-08-04",
+  "sone": "Fuskeland under Nødingfossen",
+  "vekt": 2.3,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-04",
+  "sone": "Sone 3",
+  "vekt": 1.8,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-04",
   "sone": "Sone 3",
   "vekt": 2.5,
   "agn": "Flue",
