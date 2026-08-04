@@ -96,40 +96,5 @@
   "vekt": 2,
   "agn": "Flue",
   "art": "Laks"
- },
- {
-  "dato": "2026-08-01",
-  "sone": "Sone 3A",
-  "vekt": 1.6,
-  "agn": "Flue",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-01",
-  "sone": "Sone 5A Blå",
-  "vekt": 1.9,
-  "agn": "Meitemark",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-01",
-  "sone": "Sone 5B Rød",
-  "vekt": 2,
-  "agn": "Sluk",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-01",
-  "sone": "Sone 4A",
-  "vekt": 1.7,
-  "agn": "Meitemark",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-01",
-  "sone": "Sone 5B Rød",
-  "vekt": 1.3,
-  "agn": "Flue",
-  "art": "Laks"
  }
 ]
