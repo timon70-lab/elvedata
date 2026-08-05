@@ -79,6 +79,13 @@
  {
   "dato": "2026-08-03",
   "sone": "Sone 5B Rød",
+  "vekt": 2,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-03",
+  "sone": "Sone 5B Rød",
   "vekt": 2.5,
   "agn": "Sluk",
   "art": "Laks"
