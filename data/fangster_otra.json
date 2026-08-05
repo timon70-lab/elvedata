@@ -9,6 +9,13 @@
  {
   "dato": "2026-08-05",
   "sone": "Sone 4A",
+  "vekt": 1.4,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-05",
+  "sone": "Sone 4A",
   "vekt": 3,
   "agn": "Flue",
   "art": "Laks"
@@ -53,6 +60,13 @@
   "sone": "Sone 5B Rød",
   "vekt": 3.5,
   "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-04",
+  "sone": "Sone 3A",
+  "vekt": 2.5,
+  "agn": "Sluk",
   "art": "Laks"
  },
  {
