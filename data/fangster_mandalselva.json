@@ -1,6 +1,27 @@
 [
  {
   "dato": "2026-08-05",
+  "sone": "Laksehylen",
+  "vekt": 4.6,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-05",
+  "sone": "Bjåhylen",
+  "vekt": 1.4,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-05",
+  "sone": "Sone 3",
+  "vekt": 1.62,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-05",
   "sone": "Sone 3",
   "vekt": 2.2,
   "agn": "Flue",
