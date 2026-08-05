@@ -70,7 +70,7 @@
   "art": "Laks"
  },
  {
-  "dato": "2026-08-04",
+  "dato": "2026-08-03",
   "sone": "Sone 3",
   "vekt": 2,
   "agn": "Meitemark",
@@ -179,111 +179,6 @@
   "sone": "Sone 3",
   "vekt": 2.6,
   "agn": "Flue",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-02",
-  "sone": "Holmesland C",
-  "vekt": 2,
-  "agn": "Flue",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-02",
-  "sone": "Sone 2 - Holmegård",
-  "vekt": 1.1,
-  "agn": "Flue",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-02",
-  "sone": "Laksehylen",
-  "vekt": 6.5,
-  "agn": "Flue",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-02",
-  "sone": "Sone 3",
-  "vekt": 3.4,
-  "agn": "Sluk",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-02",
-  "sone": "Delomr 4, Steinshylen",
-  "vekt": 2.8,
-  "agn": "Sluk",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-02",
-  "sone": "Delomr 2, Laksøya",
-  "vekt": 1.6,
-  "agn": "Sluk",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-02",
-  "sone": "Sone 3",
-  "vekt": 1.6,
-  "agn": "Sluk",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-02",
-  "sone": "Sone 3",
-  "vekt": 2.5,
-  "agn": "Meitemark",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-02",
-  "sone": "Sone 3",
-  "vekt": 5,
-  "agn": "Meitemark",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-02",
-  "sone": "Sone 3",
-  "vekt": 4.5,
-  "agn": "Flue",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-02",
-  "sone": "Sone 3",
-  "vekt": 1.5,
-  "agn": "Flue",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-02",
-  "sone": "Sone 3",
-  "vekt": 3,
-  "agn": "Flue",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-02",
-  "sone": "Hauge C",
-  "vekt": 2.3,
-  "agn": "Meitemark",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-02",
-  "sone": "Sone 3",
-  "vekt": 2,
-  "agn": "Flue",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-02",
-  "sone": "Sone 3",
-  "vekt": 1.6,
-  "agn": "Sluk",
   "art": "Laks"
  }
 ]
