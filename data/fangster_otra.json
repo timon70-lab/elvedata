@@ -1,6 +1,27 @@
 [
  {
   "dato": "2026-08-06",
+  "sone": "Sone 2",
+  "vekt": 1.3,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-06",
+  "sone": "Sone 3A",
+  "vekt": 2,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-06",
+  "sone": "Sone 5A Blå",
+  "vekt": 2,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-06",
   "sone": "Sone 5B Rød",
   "vekt": 2.5,
   "agn": "Sluk",
@@ -39,6 +60,13 @@
   "sone": "Sone 5B Rød",
   "vekt": 1.2,
   "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-05",
+  "sone": "Sone 5B Rød",
+  "vekt": 1.9,
+  "agn": "Flue",
   "art": "Laks"
  },
  {

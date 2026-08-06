@@ -1,6 +1,27 @@
 [
  {
   "dato": "2026-08-06",
+  "sone": "Hauge A",
+  "vekt": 0.9,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-06",
+  "sone": "Delomr 2, Sone Fuskeland under Nødingfossen",
+  "vekt": 1.9,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-06",
+  "sone": "Delomr 2, Sone Fuskeland under Nødingfossen",
+  "vekt": 1.6,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-06",
   "sone": "Sone 3",
   "vekt": 2.3,
   "agn": "Flue",
@@ -72,6 +93,13 @@
  {
   "dato": "2026-08-05",
   "sone": "Sone 3",
+  "vekt": 3.5,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-05",
+  "sone": "Sone 3",
   "vekt": 2.6,
   "agn": "Flue",
   "art": "Laks"
@@ -94,13 +122,6 @@
   "dato": "2026-08-05",
   "sone": "Sone 3",
   "vekt": 1.8,
-  "agn": "Flue",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-05",
-  "sone": "Sone 3",
-  "vekt": 3.5,
   "agn": "Flue",
   "art": "Laks"
  },
@@ -178,6 +199,13 @@
   "dato": "2026-08-05",
   "sone": "Sone 3",
   "vekt": 2.6,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-04",
+  "sone": "Nodehylen",
+  "vekt": 3.1,
   "agn": "Flue",
   "art": "Laks"
  },
