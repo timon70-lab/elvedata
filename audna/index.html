@@ -380,6 +380,12 @@ const P90_RATE_FLY = 3.0,  P90_VOL_FLY = 77.4;
 const MAX_RATE_ALL = 11.0,  MAX_VOL_ALL = 1356;
 const MAX_RATE_FLY = 6.0,   MAX_VOL_FLY = 326;
 
+// Konstanter for ELVESCOREN - utledet pa elvenivaa (hele elva som en enhet),
+// ikke pa sonenivaa. P90 er dagvektet 90-persentil av elvas daglige fangstrate
+// over alle celler (aar/maaned/bin) i 2016-2025.
+const P90_RATE_ELV = 21.25, P90_VOL_ELV = 137.9;
+const MAX_RATE_ELV = 69.50, MAX_VOL_ELV = 443.0;
+
 const ZONE_COORDS = {
   'Sone 5A': {s:[58.12663,7.33986], e:[58.15179,7.36636]},
   'Sone 5B': {s:[58.15189,7.36660], e:[58.21173,7.33608]},
@@ -424,7 +430,7 @@ const BOOM_DAYS = {"Sone4":{"date":"2016-07-30","count":25,"flow":10},"Sone 5A":
 
 // Tyngste registrerte laks per sone (Art/Fisk=="Laks"), fra fangstloggen. Ved lik vekt vinner siste fangst.
 const REKORDLAKS_DATA = {"Sone4":{"vekt":12.0,"dato":"2017-08-04"},"Sone 5A":{"vekt":11.0,"dato":"2024-08-19"},"Sone8":{"vekt":11.8,"dato":"2017-06-01"},"Sone3":{"vekt":8.5,"dato":"2024-07-29"},"Sone2":{"vekt":9.4,"dato":"2017-08-04"},"Sone6":{"vekt":9.0,"dato":"2018-06-28"},"Sone7":{"vekt":9.0,"dato":"2024-07-13"},"Sone 5B":{"vekt":10.6,"dato":"2023-07-24"},"Sone1":{"vekt":4.4,"dato":"2021-07-08"},"Sone5":{"vekt":9.5,"dato":"2021-06-15"}};
-let SCORE_CFG = { rate: 0.8, vol: 0.2, shrinkC: 15, knee: 80 };   // fallback hvis config.json ikke kan hentes
+let SCORE_CFG = { rate: 0.8, vol: 0.2, shrinkC: 15, shrinkCElv: 8, knee: 80 };   // fallback hvis config.json ikke kan hentes
 let SPARK_CFG = { max: 11, normal: 6 };   // fallback: P75 / median sesongvannføring
 fetch('../data/config.json', { cache: 'no-cache' })
   .then(r => r.ok ? r.json() : null)
@@ -435,6 +441,7 @@ fetch('../data/config.json', { cache: 'no-cache' })
         rate: w.rateWeight,
         vol: w.volWeight,
         shrinkC: isFinite(w.shrinkC) ? w.shrinkC : 15,
+        shrinkCElv: isFinite(w.shrinkCElv) ? w.shrinkCElv : 8,
         knee: isFinite(w.knee) ? w.knee : 80
       };
       const sp = cfg && cfg.sparkline && (cfg.sparkline.audna || cfg.sparkline.default);
@@ -603,6 +610,60 @@ function computeScores() {
   return scores;
 }
 
+function binTotals(bin) {
+  // Elvas samlede fangster og dager for en bin i valgt aar/maaned-vindu
+  const { catches, days } = binZoneStats(bin);
+  let sum = 0;
+  ZONES.forEach(z => sum += catches[z]);
+  return { catches: sum, days };
+}
+
+function computeRiverScore() {
+  // ELVESCORE - lostrevet fra sonescorene. Samme tre-stegs pipeline
+  // (glatting -> shrinkage -> to-segments skala), men med elva som EN enhet.
+  //
+  // Bakgrunn: tidligere var elvescoren et fangstvektet snitt av sonescorene.
+  // Det gjorde at scoren maalte hvor KONSENTRERT fisket var i beste sone,
+  // ikke hvor godt det fisket i elva. Ved hoy vannforing sprer fangstene seg
+  // paa flere soner, og snittet falt selv naar det ble tatt dobbelt saa mye fisk.
+  const center = binTotals(String(currentFlow));
+  const lower  = binTotals(String(currentFlow - 5));
+  const upper  = binTotals(String(currentFlow + 5));
+
+  const wC = 2, wN = 1;
+  const poolDays = wC*center.days + (lower.days > 0 ? wN*lower.days : 0) + (upper.days > 0 ? wN*upper.days : 0);
+  if (poolDays === 0) return null;
+  const effDays = poolDays / wC;
+
+  const pooled = wC*center.catches + (lower.days > 0 ? wN*lower.catches : 0) + (upper.days > 0 ? wN*upper.catches : 0);
+  const smRate = pooled / poolDays;
+
+  // Prior: elvas snittrate over ALLE vannforinger i valgt vindu
+  let totF = 0, totD = 0;
+  for (let y = Math.min(yearLo,yearHi); y <= Math.max(yearLo,yearHi); y++) {
+    for (let m = Math.min(monthLo,monthHi); m <= Math.max(monthLo,monthHi); m++) {
+      const dm = DAYS_DATA[String(y)]?.[String(m)];
+      if (dm) for (const b of Object.keys(dm)) totD += dm[b];
+      const md = ALL_DATA[String(y)]?.[String(m)];
+      if (!md) continue;
+      for (const b of Object.keys(md)) {
+        for (const [zone, cnt] of Object.entries(md[b])) {
+          if (ZONES.includes(zone)) totF += cnt;
+        }
+      }
+    }
+  }
+  const prior = totD > 0 ? totF / totD : 0;
+
+  const C = SCORE_CFG.shrinkCElv;
+  const shrunk = (smRate * effDays + C * prior) / (effDays + C);
+
+  return Math.round(
+    scaleScore(shrunk, P90_RATE_ELV, MAX_RATE_ELV) * SCORE_CFG.rate +
+    scaleScore(center.catches, P90_VOL_ELV, MAX_VOL_ELV) * SCORE_CFG.vol
+  );
+}
+
 function scoreColor(s) {
   const k = SCORE_CFG.knee / 100;   // terskler skalert til knee (80 => 56/36/20)
   if (s >= 70*k) return '#38a169';
@@ -748,19 +809,9 @@ function update() {
     '<div class="stat-item"><span class="stat-num">' + st.totalDays + '</span><span class="stat-lbl">Dager</span></div>' +
     '<div class="stat-item"><span class="stat-num">' + perDayStr + '</span><span class="stat-lbl">Per dag</span></div>';
 
-  // Total score = fangstvektet snitt av alle soners score
-  const allScores = ZONES.map(z => scores[z]);
-  let totalW = allScores.reduce((s,z) => s + z.catches, 0);
-  let riverScore;
-  if (totalW > 0) {
-    riverScore = Math.round(allScores.reduce((s,z) => s + z.score * z.catches, 0) / totalW);
-  } else {
-    // Ingen fangster i senterbinen: vekt med sonens vindutotaler i stedet
-    const fbW = allScores.reduce((s,z) => s + (z.winTotal || 0), 0);
-    riverScore = fbW > 0
-      ? Math.round(allScores.reduce((s,z) => s + z.score * (z.winTotal || 0), 0) / fbW)
-      : 0;
-  }
+  // Total score = elvas egen score, beregnet paa elvas samlede fangstrate
+  // (ikke lenger et snitt av sonescorene - se computeRiverScore).
+  const riverScore = computeRiverScore() ?? 0;
   const riverCol = scoreColor(riverScore);
   document.getElementById('totalScoreBox').innerHTML =
     '<div style="position:relative;display:inline-flex;align-items:center;justify-content:center">'
