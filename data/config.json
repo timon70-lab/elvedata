@@ -4,36 +4,42 @@
       "rateWeight": 0.8,
       "volWeight": 0.2,
       "shrinkC": 15,
+      "shrinkCElv": 15,
       "knee": 80
     },
     "audna": {
       "rateWeight": 0.8,
       "volWeight": 0.2,
       "shrinkC": 15,
+      "shrinkCElv": 8,
       "knee": 80
     },
     "lygna": {
       "rateWeight": 0.8,
       "volWeight": 0.2,
       "shrinkC": 15,
+      "shrinkCElv": 15,
       "knee": 80
     },
     "mandalselva": {
       "rateWeight": 1,
       "volWeight": 0,
       "shrinkC": 15,
+      "shrinkCElv": 15,
       "knee": 80
     },
     "otra": {
       "rateWeight": 0.8,
       "volWeight": 0.2,
       "shrinkC": 15,
+      "shrinkCElv": 15,
       "knee": 80
     },
     "sygna": {
       "rateWeight": 0.8,
       "volWeight": 0.2,
       "shrinkC": 15,
+      "shrinkCElv": 15,
       "knee": 80
     }
   },
