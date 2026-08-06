@@ -18,7 +18,7 @@
       "rateWeight": 0.8,
       "volWeight": 0.2,
       "shrinkC": 15,
-      "shrinkCElv": 15,
+      "shrinkCElv": 8,
       "knee": 80
     },
     "mandalselva": {
