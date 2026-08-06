@@ -458,6 +458,7 @@ function renderRivers() {
     const w = config.score[river];
     const pct = Math.round((w.rateWeight || 0) * 100);
     const shrinkC = (w.shrinkC != null) ? w.shrinkC : 15;
+    const shrinkCElv = (w.shrinkCElv != null) ? w.shrinkCElv : shrinkC;
     const knee = (w.knee != null) ? w.knee : 80;
     const sp = (config.sparkline && (config.sparkline[river] || config.sparkline.default)) || {};
     const sparkMax = (sp.max != null) ? sp.max : 12;
@@ -472,9 +473,14 @@ function renderRivers() {
       <input type="range" min="0" max="100" step="5" value="${pct}"
              oninput="onSlide('${river}', this.value)">
       <div class="param-row">
-        <label>shrinkC <input type="number" min="0" max="60" step="5" value="${shrinkC}"
+        <label>shrinkC soner <input type="number" min="0" max="60" step="1" value="${shrinkC}"
                oninput="onParam('${river}','shrinkC',this.value)"
-               title="Pseudo-dager: hvor mange dagers datagrunnlag prioren teller som. Høyere = mer konservativ i tynne bins."></label>
+               title="Pseudo-dager for SONESCOREN. Hvor mange dagers datagrunnlag prioren teller som. Høyere = mer konservativ i tynne bins."></label>
+        <label>shrinkC elv <input type="number" min="0" max="60" step="1" value="${shrinkCElv}"
+               oninput="onParam('${river}','shrinkCElv',this.value)"
+               title="Pseudo-dager for ELVESCOREN. Elva har mer data enn enkeltsoner og tåler lavere verdi. Audna bruker 8; øvrige elver bruker ennå ikke dette feltet."></label>
+      </div>
+      <div class="param-row">
         <label>knee <input type="number" min="50" max="95" step="5" value="${knee}"
                oninput="onParam('${river}','knee',this.value)"
                title="Knekkpunkt: score ved P90-nivå. Lineær 0–knee opp til P90, log-komprimert knee–100 mot historisk maks."></label>
