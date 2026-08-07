@@ -14,6 +14,8 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .fiskemelding { position: absolute; top: 10px; right: 12px; max-width: 200px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 8px 10px; display: none; }
 .fiskemelding .fm-title { font-size: 0.7rem; font-weight: 600; color: #e2e8f0; display: flex; align-items: center; gap: 5px; }
 .fiskemelding .fm-text { font-size: 0.62rem; color: #94a3b8; margin-top: 3px; line-height: 1.4; }
+.back-link { display: inline-flex; align-items: center; gap: 4px; font-size: 0.62rem; color: #7fd4f0; text-decoration: none; margin-bottom: 5px; }
+.back-link:hover { color: #a8e4f5; text-decoration: underline; }
 .rname { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #9ae6b4; margin-bottom: 6px; }
 .flow-row { display: flex; align-items: baseline; gap: 5px; margin-bottom: 3px; }
 .flow-num { font-size: 1.8rem; font-weight: 800; color: #68d391; line-height: 1; }
@@ -212,6 +214,7 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 <h1>Audna · Dynamisk oversikt</h1>
 
 <div class="banner">
+  <a class="back-link" href="../">&larr; Alle elver</a>
   <div class="rname">🌿 Audna</div>
   <div class="flow-row"><span class="live-dot"></span><span class="flow-num" id="audnaFlow">…</span><span class="flow-unit">m³/s</span><span class="trend-badge" id="trendBadge" style="font-size:1.2rem;margin-left:6px;"></span><span class="trend-label" id="trendLabel" style="font-size:0.6rem;color:#94a3b8;margin-left:2px;align-self:center;"></span></div>
   <div class="station-lbl">Gaupefossen · 23.8.0</div>
@@ -1543,7 +1546,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.148</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.149</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
