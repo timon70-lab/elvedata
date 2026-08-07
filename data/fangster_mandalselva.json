@@ -36,6 +36,13 @@
  },
  {
   "dato": "2026-08-06",
+  "sone": "Sone 3",
+  "vekt": 3.8,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-06",
   "sone": "Sone 4",
   "vekt": 2,
   "agn": "Sluk",
