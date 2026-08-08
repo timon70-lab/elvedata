@@ -78,6 +78,13 @@
  },
  {
   "dato": "2026-08-06",
+  "sone": "Delomr 2, Laksøya",
+  "vekt": 1.3,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-06",
   "sone": "Sone 3",
   "vekt": 3.8,
   "agn": "Flue",
