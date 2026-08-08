@@ -114,6 +114,13 @@
  {
   "dato": "2026-08-06",
   "sone": "Sone 5A Blå",
+  "vekt": 4,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-06",
+  "sone": "Sone 5A Blå",
   "vekt": 1.5,
   "agn": "Flue",
   "art": "Laks"
