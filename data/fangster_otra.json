@@ -2,6 +2,13 @@
  {
   "dato": "2026-08-09",
   "sone": "Sone 3A",
+  "vekt": 1.1,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-09",
+  "sone": "Sone 3A",
   "vekt": 2.5,
   "agn": "Meitemark",
   "art": "Laks"
