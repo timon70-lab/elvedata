@@ -1,6 +1,20 @@
 [
  {
   "dato": "2026-08-09",
+  "sone": "Fuskeland B",
+  "vekt": 2.3,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-09",
+  "sone": "Hauge D",
+  "vekt": 1.8,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-09",
   "sone": "Sone 4",
   "vekt": 2.1,
   "agn": "Flue",
@@ -46,6 +60,13 @@
   "sone": "Hauge D",
   "vekt": 2.9,
   "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-08",
+  "sone": "Bringsdal A",
+  "vekt": 2.5,
+  "agn": "Meitemark",
   "art": "Laks"
  },
  {
@@ -144,6 +165,13 @@
   "sone": "Sone 3",
   "vekt": 2.6,
   "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-07",
+  "sone": "Fossefjellene",
+  "vekt": 3.5,
+  "agn": "Meitemark",
   "art": "Laks"
  },
  {
