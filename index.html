@@ -277,7 +277,7 @@ function riverState(river, now) {
 
 const map = L.map('map', { zoomControl: true }).setView([58.35, 7.55], 9);
 
-// Lukk ev. åpen popup når fanen mister fokus (f.eks. fordi "Åpne dashboard"-lenken
+// Lukk ev. åpen popup når fanen mister fokus (f.eks. fordi "Åpne elvesiden"-lenken
 // åpnet elva i en ny fane) - slik at popup-en ikke står igjen åpen når man bytter tilbake.
 document.addEventListener('visibilitychange', function () {
   if (document.visibilityState === 'hidden') map.closePopup();
@@ -336,7 +336,7 @@ RIVERS.forEach((river) => {
           '<p class="pc-title">' + river.name + '</p>' +
           '<p class="pc-status">Stengt for sesongen</p>' +
           '<p class="pc-substatus">Åpner ' + formatLong(st.date) + '</p>' +
-          '<a class="pc-link" href="' + river.dashboardUrl + '" target="_blank">Åpne dashboard →</a>' +
+          '<a class="pc-link" href="' + river.dashboardUrl + '" target="_blank">Åpne elvesiden →</a>' +
         '</div>'
       );
       return;
@@ -348,7 +348,7 @@ RIVERS.forEach((river) => {
         '<div class="popup-card">' +
           '<p class="pc-title">' + river.name + '</p>' +
           '<p class="pc-status">Åpner ' + formatLong(st.date) + '</p>' +
-          '<a class="pc-link" href="' + river.dashboardUrl + '" target="_blank">Åpne dashboard →</a>' +
+          '<a class="pc-link" href="' + river.dashboardUrl + '" target="_blank">Åpne elvesiden →</a>' +
         '</div>'
       );
       return;
@@ -430,7 +430,7 @@ RIVERS.forEach((river) => {
           '<span class="pc-score-num" style="color:' + col + '">' + scoreStr + '</span>' +
           '<span class="pc-score-lbl">fiskescore<br>nå</span>' +
         '</div>' +
-        '<a class="pc-link" href="' + river.dashboardUrl + '" target="_blank">Åpne dashboard →</a>' +
+        '<a class="pc-link" href="' + river.dashboardUrl + '" target="_blank">Åpne elvesiden →</a>' +
         catchesHtml +
       '</div>'
     );
@@ -512,7 +512,7 @@ loadNewsTicker();
 </script>
 
 <div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.040</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.042</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
