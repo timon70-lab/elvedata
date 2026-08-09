@@ -85,6 +85,13 @@
  },
  {
   "dato": "2026-08-08",
+  "sone": "Sone 3",
+  "vekt": 3,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-08",
   "sone": "Bringsdal A",
   "vekt": 2.5,
   "agn": "Meitemark",
@@ -186,6 +193,13 @@
   "sone": "Sone 3",
   "vekt": 2.6,
   "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-07",
+  "sone": "Sone 3",
+  "vekt": 2,
+  "agn": "Sluk",
   "art": "Laks"
  },
  {
