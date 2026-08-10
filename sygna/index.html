@@ -194,6 +194,28 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .sparkline-wrap svg { width:100%; height:32px; }
 .trend-badge { font-size:1.2rem; line-height:1; flex-shrink:0; }
 .trend-label { font-size:0.6rem; color:#94a3b8; line-height:1.2; flex-shrink:0; }
+
+/* Fullskjerm-kart */
+.map-fs-btn { background:#276749; color:#fff; border:none; border-radius:6px; font-size:0.6rem; font-weight:700; padding:4px 8px; cursor:pointer; white-space:nowrap; }
+.map-fs-btn:hover { background:#2f855a; }
+.map-hdr-right { display:flex; align-items:center; gap:8px; }
+#mapFs { display:contents; }
+#fsCtrlBox, #fsExitBtn, #fsHint { display:none; }
+#mapFs.fs-on { display:block; position:fixed; inset:0; z-index:9500; background:#0f172a; max-width:none; margin:0; padding:0; }
+#mapFs.fs-on .map-panel { position:absolute; inset:0; width:100%; max-width:none; border-radius:0; box-shadow:none; }
+#mapFs.fs-on .map-header { display:none; }
+#mapFs.fs-on .map-panel { display:block; }
+#mapFs.fs-on #map { position:absolute !important; top:0 !important; right:0 !important; bottom:0 !important; left:0 !important; width:auto !important; height:auto !important; }
+#mapFs.fs-on #fsCtrlBox { display:flex; flex-direction:column; align-items:stretch; gap:12px; position:absolute; top:88px; left:10px; z-index:9600; width:330px; max-width:calc(100vw - 28px); background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:14px 16px; box-shadow:0 4px 18px rgba(0,0,0,0.28); }
+#mapFs.fs-on #fsCtrlBox .ctrl-row { width:100%; gap:10px; flex-wrap:nowrap; }
+#mapFs.fs-on #fsCtrlBox .ctrl-row > input[type=range] { width:auto; flex:1 1 auto; min-width:0; }
+#mapFs.fs-on #fsCtrlBox .flow-chip { align-self:flex-start; }
+#mapFs.fs-on #fsExitBtn { display:block; position:absolute; top:12px; right:12px; z-index:9600; background:#fff; color:#276749; border:none; border-radius:8px; font-size:0.72rem; font-weight:700; padding:8px 12px; cursor:pointer; box-shadow:0 2px 14px rgba(0,0,0,0.3); }
+#mapFs.fs-on #fsHint { display:block; position:absolute; left:12px; bottom:12px; z-index:9600; background:rgba(255,255,255,0.85); color:#1a202c; font-size:0.62rem; padding:5px 10px; border-radius:6px; }
+#mapFs.fs-on #photoPanel { position:absolute; right:12px; bottom:12px; z-index:9600; width:310px; max-width:calc(100vw - 24px); max-height:calc(100vh - 24px); overflow:auto; margin-top:0; }
+#mapFs.fs-on #photoFs { z-index:9900; }
+/* Gi plass til «Avslutt fullskjerm» over Leaflets topright-kontroller */
+#mapFs.fs-on .leaflet-top.leaflet-right { margin-top:46px; }
 </style>
 <script data-goatcounter="https://elvedata.goatcounter.com/count"
         data-goatcounter-settings='{"allow_local": false}'
@@ -236,7 +258,7 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
   <div class="panel-body">
     <div class="zone-list" id="zoneList"></div>
     <div class="ctrl-col">
-      <div class="ctrl-row">
+      <div class="ctrl-row" id="flowCtrlRow">
         <label>Vannføring</label>
         <input type="range" id="flowSlider" min="0" max="18" step="2" value="2" oninput="onFlowChange(this.value)">
         <span class="ctrl-val" id="flowVal">2–4 m³/s</span>
@@ -271,12 +293,20 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
   </div>
 </div>
 
+<div id="mapFs">
 <div class="map-panel">
   <div class="map-header">
     <span class="map-title" id="mapTitle">🗺 Kart</span>
-    <span class="map-hint">Klikk en sone for å zoome inn</span>
+    <span class="map-hdr-right">
+      <span class="map-hint">Klikk en sone for å zoome inn</span>
+      <button id="mapFsBtn" class="map-fs-btn" onclick="toggleMapFullscreen()" title="Åpne kartet i fullskjerm">⛶ Fullskjerm</button>
+    </span>
   </div>
   <div id="map"></div>
+</div>
+<div id="fsCtrlBox"></div>
+<button id="fsExitBtn" onclick="toggleMapFullscreen()" title="Avslutt fullskjerm">✕ Avslutt fullskjerm</button>
+<div id="fsHint">Esc lukker fullskjerm</div>
 </div>
 
 <script>
@@ -903,6 +933,7 @@ function selectZone(zone) {
 }
 
 function showZoneInfo(zone, scrollTo = true) {
+  if (_mapFsOn) return; // soneinfopanelet vises ikke i fullskjerm
   const info = ZONE_INFO[zone];
   if (!info) return;
   const scores = computeScores();
@@ -1058,7 +1089,7 @@ function openZoneMedia(zone, target) {
   _activeMediaIdx = posInGroup >= 0 ? posInGroup : 0;
   _renderMedia();
   document.getElementById('photoPanel').classList.add('visible');
-  document.getElementById('photoPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (!_mapFsOn) document.getElementById('photoPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function showMedia(idx) {
@@ -1349,6 +1380,105 @@ fetchNedbor();
 fetchPhotos();
 fetchVideos();
 window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
+
+/* ===== Fullskjerm-kart =====
+   Flytter selve DOM-nodene (vannføring-raden, flowChip, fotopanel, bildevisning)
+   inn i #mapFs ved inngang og tilbake ved utgang. Samme noder og id-er,
+   så all eksisterende logikk virker uendret. */
+var _mapFsOn = false;
+var _fsHomes = [];
+
+function _fsStash(el) { if (el) _fsHomes.push({ el: el, p: el.parentNode, n: el.nextSibling }); }
+
+function _fsRestoreAll() {
+  for (var i = _fsHomes.length - 1; i >= 0; i--) {
+    var h = _fsHomes[i];
+    if (h.p) h.p.insertBefore(h.el, h.n);
+  }
+  _fsHomes = [];
+}
+
+function _fsResize() {
+  [0, 60, 150, 350, 700].forEach(function (ms) {
+    setTimeout(function () { if (typeof map !== 'undefined' && map) map.invalidateSize(); }, ms);
+  });
+}
+
+/* Leaflet oppdager ikke alltid at containeren endrer størrelse under
+   fullskjermovergangen - ResizeObserver fanger den uansett når den skjer. */
+var _fsRO = null;
+function _fsObserveMap() {
+  if (_fsRO || typeof ResizeObserver === 'undefined') return;
+  var el = document.getElementById('map');
+  if (!el) return;
+  var t = null;
+  _fsRO = new ResizeObserver(function () {
+    clearTimeout(t);
+    t = setTimeout(function () { if (typeof map !== 'undefined' && map) map.invalidateSize(); }, 60);
+  });
+  _fsRO.observe(el);
+}
+
+function _enterMapFs() {
+  var wrap = document.getElementById('mapFs');
+  var box  = document.getElementById('fsCtrlBox');
+  var row  = document.getElementById('flowCtrlRow');
+  var chip = document.getElementById('flowChip');
+  var pp   = document.getElementById('photoPanel');
+  var pfs  = document.getElementById('photoFs');
+  _fsHomes = [];
+  [row, chip, pp, pfs].forEach(_fsStash);
+  if (row)  box.appendChild(row);
+  if (chip) box.appendChild(chip);
+  if (pp)   wrap.appendChild(pp);
+  if (pfs)  wrap.appendChild(pfs);
+  wrap.classList.add('fs-on');
+  _mapFsOn = true;
+  closeZoneInfo();
+  _fsObserveMap();
+  try {
+    if (wrap.requestFullscreen) wrap.requestFullscreen().catch(function () {});
+    else if (wrap.webkitRequestFullscreen) wrap.webkitRequestFullscreen();
+  } catch (e) { /* faller tilbake til CSS-fullskjerm */ }
+  _fsResize();
+}
+
+function _teardownMapFs() {
+  document.getElementById('mapFs').classList.remove('fs-on');
+  _fsRestoreAll();
+  _mapFsOn = false;
+  _fsResize();
+}
+
+function toggleMapFullscreen() {
+  if (!_mapFsOn) { _enterMapFs(); return; }
+  var fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+  if (fsEl) {
+    if (document.exitFullscreen) document.exitFullscreen();
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    return; // fullscreenchange rydder opp
+  }
+  _teardownMapFs();
+}
+
+function _onMapFsChange() {
+  var fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+  if (!fsEl && _mapFsOn) _teardownMapFs();
+}
+document.addEventListener('fullscreenchange', _onMapFsChange);
+document.addEventListener('webkitfullscreenchange', _onMapFsChange);
+
+document.addEventListener('keydown', function (e) {
+  if (e.key !== 'Escape' || !_mapFsOn) return;
+  if (document.fullscreenElement || document.webkitFullscreenElement) return; // nettleseren lukker selv
+  var pfs = document.getElementById('photoFs');
+  if (pfs && pfs.classList.contains('open')) return; // lukk bildet først
+  _teardownMapFs();
+});
+
+window.addEventListener('resize', function () {
+  if (_mapFsOn && typeof map !== 'undefined' && map) map.invalidateSize();
+});
 </script>
 
 
@@ -1394,7 +1524,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div class="zi-body" id="ziBody"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.026</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.030</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
