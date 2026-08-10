@@ -1,6 +1,13 @@
 [
  {
   "dato": "2026-08-10",
+  "sone": "Stoveland",
+  "vekt": 2.4,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-10",
   "sone": "Bjåhylen",
   "vekt": 1.9,
   "agn": "Flue",
@@ -39,6 +46,20 @@
   "sone": "Sone 3",
   "vekt": 2.6,
   "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-09",
+  "sone": "Sone 3",
+  "vekt": 7,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-09",
+  "sone": "Sone 3",
+  "vekt": 2,
+  "agn": "Meitemark",
   "art": "Laks"
  },
  {
