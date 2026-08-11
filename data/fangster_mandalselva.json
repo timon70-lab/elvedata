@@ -1,6 +1,13 @@
 [
  {
   "dato": "2026-08-11",
+  "sone": "Hauge A",
+  "vekt": 2.3,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-11",
   "sone": "Fossefjellene",
   "vekt": 2.1,
   "agn": "Meitemark",
