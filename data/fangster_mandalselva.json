@@ -2,6 +2,20 @@
  {
   "dato": "2026-08-11",
   "sone": "Fuskeland B",
+  "vekt": 1.9,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-11",
+  "sone": "Sone 4",
+  "vekt": 2.5,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-11",
+  "sone": "Fuskeland B",
   "vekt": 2.5,
   "agn": "Meitemark",
   "art": "Laks"
