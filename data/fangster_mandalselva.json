@@ -1,6 +1,20 @@
 [
  {
   "dato": "2026-08-11",
+  "sone": "Fossefjellene",
+  "vekt": 2.1,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-11",
+  "sone": "Holmesland C",
+  "vekt": 2.5,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-10",
   "sone": "Holmesland C",
   "vekt": 2.5,
   "agn": "Sluk",
