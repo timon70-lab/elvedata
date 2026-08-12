@@ -1,9 +1,9 @@
 [
  {
   "dato": "2026-08-12",
-  "sone": "Sone 2",
-  "vekt": 1.9,
-  "agn": "Sluk",
+  "sone": "Sone 5A Blå",
+  "vekt": 1.6,
+  "agn": "Meitemark",
   "art": "Laks"
  },
  {
@@ -11,6 +11,13 @@
   "sone": "Sone 5A Blå",
   "vekt": 3,
   "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-12",
+  "sone": "Sone 2",
+  "vekt": 1.9,
+  "agn": "Sluk",
   "art": "Laks"
  },
  {
