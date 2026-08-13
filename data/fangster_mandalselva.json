@@ -1,6 +1,34 @@
 [
  {
   "dato": "2026-08-13",
+  "sone": "Sone 2 - Furuholmen",
+  "vekt": 1.2,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-13",
+  "sone": "Sone 2 - Furuholmen",
+  "vekt": 1.5,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-13",
+  "sone": "Sone 3",
+  "vekt": 2.1,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-13",
+  "sone": "Sone 3",
+  "vekt": 2.2,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-13",
   "sone": "Hauge A",
   "vekt": 1.54,
   "agn": "Flue",
