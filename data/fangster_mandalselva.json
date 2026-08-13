@@ -2,6 +2,27 @@
  {
   "dato": "2026-08-13",
   "sone": "Sone 3",
+  "vekt": 2,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-13",
+  "sone": "Sone 3",
+  "vekt": 2.8,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-13",
+  "sone": "Sone 3",
+  "vekt": 2.7,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-13",
+  "sone": "Sone 3",
   "vekt": 2.3,
   "agn": "Sluk",
   "art": "Laks"
@@ -81,6 +102,13 @@
   "sone": "Fossefjellene",
   "vekt": 1.5,
   "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-11",
+  "sone": "Laksehylen",
+  "vekt": 2.6,
+  "agn": "Sluk",
   "art": "Laks"
  },
  {
