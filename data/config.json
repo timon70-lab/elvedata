@@ -41,6 +41,13 @@
       "shrinkC": 15,
       "shrinkCElv": 15,
       "knee": 80
+    },
+    "tovdalselva": {
+      "rateWeight": 0.8,
+      "volWeight": 0.2,
+      "shrinkC": 15,
+      "shrinkCElv": 8,
+      "knee": 80
     }
   },
   "sparkline": {
@@ -67,6 +74,10 @@
     "sygna": {
       "max": 5.2,
       "normal": 2.3
+    },
+    "tovdalselva": {
+      "max": 49,
+      "normal": 24
     }
   }
 }
