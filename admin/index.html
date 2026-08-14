@@ -1468,37 +1468,29 @@ async function hentVannforingFoto() {
 }
 
 function compressImage(file, orientation) {
+  // MERK: orientation-parameteren brukes bevisst IKKE til aa transformere canvas.
+  // Nettleseren har image-orientation: from-image som standard og har allerede
+  // snudd bildet riktig vei naar img.onload fyrer - img.width/height er de
+  // orienterte maalene. En manuell EXIF-transform her ville rotert en gang for mye,
+  // som er nettopp det som skjedde med portrettbilder (orientation 6 og 8).
+  // Canvas-utdata inneholder ingen EXIF, saa pikslene ligger riktig i fila etterpaa.
   return new Promise((resolve, reject) => {
     const img = new Image();
+    const url = URL.createObjectURL(file);
     img.onload = () => {
+      URL.revokeObjectURL(url);
       const MAX_W = 1600;
-      let w = img.width, h = img.height;
-      const swap = orientation >= 5 && orientation <= 8;
-      let cw = swap ? h : w, ch = swap ? w : h;
+      let cw = img.naturalWidth || img.width;
+      let ch = img.naturalHeight || img.height;
       if (cw > MAX_W) { ch = Math.round(ch * MAX_W / cw); cw = MAX_W; }
-      const scale = swap ? ch / h : cw / w;
       const canvas = document.createElement('canvas');
       canvas.width = cw; canvas.height = ch;
       const ctx = canvas.getContext('2d');
-      ctx.save();
-      // EXIF-orientering (samme 8 tilfeller som ImageOps.exif_transpose)
-      const dw = w * scale, dh = h * scale;
-      switch (orientation) {
-        case 2: ctx.translate(cw, 0); ctx.scale(-1, 1); break;
-        case 3: ctx.translate(cw, ch); ctx.rotate(Math.PI); break;
-        case 4: ctx.translate(0, ch); ctx.scale(1, -1); break;
-        case 5: ctx.rotate(0.5*Math.PI); ctx.scale(1, -1); break;
-        case 6: ctx.rotate(0.5*Math.PI); ctx.translate(0, -dh); break;
-        case 7: ctx.rotate(0.5*Math.PI); ctx.translate(dw, -dh); ctx.scale(-1, 1); break;
-        case 8: ctx.rotate(-0.5*Math.PI); ctx.translate(-dw, 0); break;
-        default: break;
-      }
-      ctx.drawImage(img, 0, 0, dw, dh);
-      ctx.restore();
+      ctx.drawImage(img, 0, 0, cw, ch);
       canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('komprimering feilet')), 'image/jpeg', 0.8);
     };
-    img.onerror = () => reject(new Error('kunne ikke laste bildet i nettleseren'));
-    img.src = URL.createObjectURL(file);
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('kunne ikke laste bildet i nettleseren')); };
+    img.src = url;
   });
 }
 
