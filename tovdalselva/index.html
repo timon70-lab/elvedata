@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tovdalselva – Dynamisk oversikt</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f4f8; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px 12px 40px; }
+h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #94a3b8; margin-bottom: 16px; text-align: center; }
+.banner { width: 100%; max-width: 480px; background: #0f2d4a; border-radius: 14px; padding: 14px 18px; margin-bottom: 14px; position: relative; }
+.fiskemelding { position: absolute; top: 10px; right: 12px; max-width: 200px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 8px 10px; display: none; }
+.fiskemelding .fm-title { font-size: 0.7rem; font-weight: 600; color: #e2e8f0; display: flex; align-items: center; gap: 5px; }
+.fiskemelding .fm-text { font-size: 0.62rem; color: #94a3b8; margin-top: 3px; line-height: 1.4; }
+.back-link { display: inline-flex; align-items: center; gap: 4px; font-size: 0.62rem; color: #7fd4f0; text-decoration: none; margin-bottom: 5px; }
+.back-link:hover { color: #a8e4f5; text-decoration: underline; }
+.rname { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #9ae6b4; margin-bottom: 6px; }
+.flow-row { display: flex; align-items: baseline; gap: 5px; margin-bottom: 3px; }
+.flow-num { font-size: 1.8rem; font-weight: 800; color: #68d391; line-height: 1; }
+.flow-unit { font-size: 0.7rem; color: #94a3b8; }
+.live-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #68d391; margin-right: 4px; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.station-lbl { font-size: 0.6rem; color: #4a6fa5; margin-bottom: 3px; }
+.flow-status { font-size: 0.6rem; }
+.quota-box { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; gap: 14px; flex-wrap: wrap; }
+.quota-item { font-size: 0.67rem; color: #94a3b8; line-height: 1.5; }
+.quota-item strong { color: #cbd5e1; }
+.ctrl-col { display: flex; flex-direction: column; gap: 11px; padding: 12px 14px 14px; border-left: 2px solid #f0fff4; justify-content: center; min-width: 0; }
+.ctrl-row { display: flex; align-items: center; gap: 8px; }
+.ctrl-row label { font-size: 0.65rem; font-weight: 700; color: #4a5568; white-space: nowrap; min-width: 44px; }
+.ctrl-val { font-size: 0.72rem; font-weight: 700; color: #276749; min-width: 88px; text-align: right; white-space: nowrap; }
+/* Single range */
+.ctrl-row > input[type=range] { width: 90px; flex: 0 0 90px; accent-color: #276749; cursor: pointer; }
+/* Dual-handle slider */
+.dual-slider { position: relative; width: 90px; flex: 0 0 90px; height: 20px; display: flex; align-items: center; }
+.dual-slider::before { content: ''; position: absolute; left: 0; right: 0; height: 4px; background: #e2e8f0; border-radius: 2px; }
+.dual-fill { position: absolute; height: 4px; background: #276749; border-radius: 2px; pointer-events: none; z-index: 1; }
+.dual-slider input[type=range] {
+  position: absolute; width: 100%; left: 0; pointer-events: none;
+  -webkit-appearance: none; appearance: none;
+  height: 4px; background: transparent; outline: none; margin: 0; padding: 0;
+}
+.dual-slider input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+  background: #276749; border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2); cursor: pointer; pointer-events: all;
+}
+.dual-slider input[type=range]::-moz-range-thumb {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #276749; border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2); cursor: pointer; pointer-events: all; border: none;
+}
+/* Fly pill */
+.fly-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 6px; border: 1.5px solid #e2e8f0; background: white; color: #94a3b8; font-size: 0.72rem; font-weight: 700; cursor: pointer; transition: all 0.18s; user-select: none; }
+.fly-pill .pip { width: 7px; height: 7px; border-radius: 50%; background: #e2e8f0; transition: background 0.18s; flex-shrink: 0; }
+.fly-pill.active { background: #276749; color: white; border-color: #276749; }
+.fly-pill.active .pip { background: #9ae6b4; }
+/* Zone panel */
+.panel { width: 100%; max-width: 480px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 14px; }
+.panel-body { display: grid; grid-template-columns: 1fr auto; align-items: start; }
+@media (max-width: 520px) {
+  .fiskemelding { position: static; max-width: none; margin-top: 10px; }
+  .panel-body { grid-template-columns: 1fr; }
+  .ctrl-col { border-left: none; border-top: 2px solid #f0fff4; justify-content: flex-start; }
+  .ctrl-row > input[type=range], .dual-slider { width: auto; flex: 1 1 auto; }
+}
+.panel-header { padding: 11px 14px 9px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; display: flex; flex-direction: column; gap: 1px; min-height: 64px; }
+.panel-name { font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #276749; }
+.panel-sub { font-size: 0.58rem; color: #94a3b8; }
+.zone-list { padding: 10px 12px 14px; display: flex; flex-direction: column; gap: 9px; min-height: 160px; }
+.zone-row { display: flex; align-items: center; gap: 10px; cursor: pointer; border-radius: 8px; padding: 4px 6px; transition: background 0.15s; }
+.zone-row:hover { background: #f0fff4; }
+.zone-row.active { background: #c6f6d5; }
+.mini-ring { position: relative; flex-shrink: 0; }
+.mini-ring svg { display: block; }
+.mini-ring .mnum { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 0.68rem; font-weight: 800; line-height: 1; }
+.zone-info { flex: 1; min-width: 0; }
+.zone-name { font-size: 0.76rem; font-weight: 700; color: #1a202c; }
+.zone-catches { font-size: 0.6rem; color: #94a3b8; margin-top: 1px; }
+.zone-map-hint { font-size: 0.58rem; color: #68d391; margin-top: 1px; }
+.no-data { font-size: 0.72rem; color: #94a3b8; padding: 8px 4px; font-style: italic; }
+/* Map */
+.map-panel { width: 100%; max-width: 480px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+.map-header { padding: 10px 14px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; display: flex; justify-content: space-between; align-items: center; }
+.map-header .map-title { font-size: 0.78rem; font-weight: 700; color: #276749; }
+.map-header .map-hint { font-size: 0.62rem; color: #94a3b8; }
+#map { height: 320px; width: 100%; }
+.leaflet-tooltip.mtip { background: #1a202c; color: #e2e8f0; border: 1px solid #4a5568; font-size: .72rem; font-weight: 700; padding: 2px 7px; border-radius: 5px; box-shadow: none; }
+.leaflet-tooltip.zone-label { background: #ffffff; color: #1a202c; border: 1px solid rgba(0,0,0,0.15); font-size: 0.58rem; font-weight: 700; padding: 1px 4px; border-radius: 4px; box-shadow: none; pointer-events: none; text-align: center; line-height: 1.2; }
+.leaflet-tooltip.zone-label::before { display: none; }
+.leaflet-tooltip.mtip::before { display: none; }
+
+.photo-panel { width: 100%; max-width: 480px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-top: 14px; display: none; }
+.photo-panel.visible { display: block; }
+.photo-header { padding: 10px 14px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; display: flex; justify-content: space-between; align-items: center; }
+.photo-header .photo-title { font-size: 0.78rem; font-weight: 700; color: #276749; }
+.photo-grid { display: flex; flex-direction: column; gap: 0; }
+.photo-item { position: relative; cursor: pointer; }
+.photo-item img { width: 100%; display: block; max-height: 260px; object-fit: cover; }
+.photo-caption { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.45); color: white; font-size: 0.65rem; padding: 5px 9px; }
+.photo-fullscreen { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; gap: 10px; }
+.photo-fullscreen.open { display: flex; }
+.photo-fullscreen img { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 6px; }
+.photo-fullscreen .close-btn { color: white; font-size: 1.5rem; cursor: pointer; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
+.photo-fullscreen .photo-fs-caption { color: #cbd5e0; font-size: 0.72rem; }
+
+.photo-panel { width: 100%; max-width: 480px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-top: 14px; display: none; }
+.photo-panel.visible { display: block; }
+.photo-hdr { padding: 10px 14px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; display: flex; justify-content: space-between; align-items: center; }
+.photo-hdr span { font-size: 0.78rem; font-weight: 700; color: #276749; }
+.photo-hdr button { background: none; border: none; color: #94a3b8; font-size: 1rem; cursor: pointer; line-height: 1; }
+.pg-nav-btn { background:none; border:2px solid #9ae6b4; border-radius:8px; color:#276749; font-size:1.35rem; font-weight:700; cursor:pointer; padding:6px 20px; line-height:1; min-height:44px; }
+.pg-nav-btn:disabled { color:#cbd5e0; border-color:#e2e8f0; cursor:not-allowed; }
+.photo-nav-row { display: flex; justify-content: center; align-items: center; gap: 18px; padding: 8px 14px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; }
+.video-thumb { position:relative; cursor:pointer; }
+.video-thumb img { width:100%; display:block; max-height:280px; object-fit:cover; }
+.video-play { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:2.4rem; color:white; background:rgba(0,0,0,0.35); text-shadow:0 2px 8px rgba(0,0,0,.6); }
+.video-thumb:hover .video-play { background:rgba(0,0,0,0.5); }
+.video-fs-btn { position:absolute; top:8px; right:8px; background:rgba(0,0,0,0.5); color:white; border:none;
+  border-radius:6px; width:32px; height:32px; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.video-fs-btn:hover { background:rgba(0,0,0,0.7); }
+.video-frame { width:100%; aspect-ratio:16/9; display:block; border:0; }
+.flow-chip { background:#f0fff4; border:1px solid #c6f6d5; border-radius:999px; color:#276749;
+  font-size:0.6rem; font-weight:700; cursor:pointer; padding:3px 8px; line-height:1.3; white-space:nowrap; }
+.flow-chip.on { background:#276749; border-color:#276749; color:white; }
+.photo-img { width: 100%; display: block; max-height: 280px; object-fit: cover; cursor: pointer; }
+.photo-cap { padding: 7px 14px 10px; font-size: 0.68rem; color: #64748b; }
+.dir-link { display: inline-block; margin: 0 14px 10px; font-size: 0.68rem; color: #276749; background: #f0fff4;
+        border: 1px solid #c6f6d5; border-radius: 999px; padding: 3px 11px; text-decoration: none; }
+.dir-link:hover { background: #c6f6d5; }
+.photo-fs { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
+.photo-fs.open { display: flex; }
+.photo-fs img { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 6px; }
+.photo-fs .fs-cap { color: #f1f5f9; font-size: 0.95rem; font-weight: 600; text-align: center; padding: 0 16px; }
+.photo-fs .fs-close { color: white; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.photo-fs .fs-nav { position: absolute; top: 50%; transform: translateY(-50%); color: white; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 44px; height: 44px; font-size: 1.6rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.photo-fs .fs-nav:hover { background: rgba(255,255,255,0.28); }
+.photo-fs .fs-nav:disabled { opacity: 0.25; cursor: default; }
+.photo-fs .fs-nav-prev { left: 12px; }
+.photo-fs .fs-nav-next { right: 12px; }
+
+.zone-info-panel { width:100%; max-width:480px; background:white; border-radius:14px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,.07); margin-top:14px; display:none; }
+.zone-info-panel.visible { display:block; }
+.zi-hdr { padding:10px 14px; background:#f0fff4; border-bottom:2px solid #c6f6d5; display:flex; justify-content:space-between; align-items:center; }
+.zi-hdr-title { font-size:.78rem; font-weight:700; color:#276749; }
+.zi-hdr button { background:none; border:none; color:#94a3b8; font-size:1rem; cursor:pointer; line-height:1; }
+.zi-body { padding:12px 14px 14px; display:flex; flex-direction:column; gap:6px; }
+.zi-desc { font-size:.73rem; color:#374151; line-height:1.5; border-bottom:1px solid #f1f5f9; padding-bottom:8px; margin-bottom:2px; }
+.zi-row { display:flex; justify-content:space-between; align-items:baseline; font-size:.72rem; padding:2px 0; border-bottom:1px solid #f8fafc; }
+.zi-row:last-child { border-bottom:none; }
+.zi-label { color:#64748b; }
+.zi-val { color:#1a202c; font-weight:600; text-align:right; max-width:60%; }
+.zi-score-row { display:flex; align-items:center; gap:8px; padding:6px 0 4px; border-bottom:1px solid #f1f5f9; margin-bottom:4px; }
+.zi-score-num { font-size:1.6rem; font-weight:800; line-height:1; }
+.zi-score-label { font-size:.68rem; color:#64748b; }
+.zi-topbins { margin-left:auto; display:flex; flex-direction:column; gap:3px; align-items:flex-start; }
+.zi-topbins-hdr { font-size:.62rem; font-weight:700; color:#276749; margin-bottom:1px; }
+.zi-topbin-row { display:flex; align-items:center; gap:5px; }
+.zi-topbin-row svg { display:block; flex-shrink:0; }
+.zi-topbin-txt { font-size:.62rem; color:#64748b; white-space:nowrap; }
+.zi-topbin-stats { font-size:.6rem; color:#94a3b8; margin-top:2px; white-space:nowrap; }
+.zi-link { display:inline-block; margin-top:8px; font-size:.7rem; color:#276749; text-decoration:none; border:1px solid #c6f6d5; border-radius:6px; padding:4px 10px; }
+.zi-link:hover { background:#f0fff4; }
+.zi-price { font-size:.78rem; font-weight:700; color:#1a202c; text-align:center; padding:6px 4px; background:#f8fafc; border-radius:6px; margin-top:2px; }
+.zi-sources { margin-top:10px; font-size:.62rem; color:#94a3b8; border-top:1px solid #f1f5f9; padding-top:7px; }
+.zi-sources a { color:#94a3b8; text-decoration:underline; }
+
+.total-score-box { display:flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0; position:relative; }
+.total-score-box .mnum { position:absolute; font-size:0.85rem; font-weight:800; line-height:1; }
+.total-score-lbl { font-size:0.54rem; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; margin-top:2px; }
+.stat-box { display:flex; gap:10px; align-items:flex-start; flex-shrink:0; }
+.stat-item { display:flex; flex-direction:column; align-items:center; background:rgba(255,255,255,0.55); border-radius:8px; padding:4px 8px; min-width:44px; }
+.stat-num { font-size:1.05rem; font-weight:800; color:#276749; line-height:1.1; }
+.stat-lbl { font-size:0.54rem; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; text-align:center; margin-top:1px; }
+
+.video-panel { width:100%; max-width:480px; background:white; border-radius:14px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,.07); margin-top:14px; display:none; }
+.video-panel.visible { display:block; }
+.vp-hdr { padding:10px 14px; background:#fff5f5; border-bottom:2px solid #fed7d7; display:flex; justify-content:space-between; align-items:center; }
+.vp-hdr-title { font-size:.78rem; font-weight:700; color:#c53030; }
+.vp-hdr button { background:none; border:none; color:#94a3b8; font-size:1rem; cursor:pointer; }
+.vp-iframe-wrap { position:relative; padding-bottom:56.25%; height:0; overflow:hidden; }
+.vp-iframe-wrap iframe { position:absolute; top:0; left:0; width:100%; height:100%; border:none; }
+.vp-info { padding:12px 14px 14px; font-size:.71rem; color:#374151; }
+.vp-yt-btn { display:inline-block; margin-top:8px; background:#c53030; color:white; text-decoration:none; border-radius:6px; padding:7px 14px; font-size:.75rem; font-weight:700; }
+.vp-yt-btn:hover { background:#9b2c2c; }
+
+.zi-boom { display:flex; gap:8px; align-items:center; margin-top:8px; padding:8px 10px; background:#fffbea; border:1px solid #fbd38d; border-radius:8px; }
+.zi-boom-icon { font-size:1.1rem; line-height:1; flex-shrink:0; }
+.zi-boom-hdr { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#975a16; }
+.zi-boom-txt { font-size:0.68rem; color:#744210; margin-top:1px; }
+.zi-record-txt { font-size:0.6rem; font-weight:700; color:#b7791f; margin-top:10px; }
+.zi-boom-cols { display:flex; gap:14px; width:100%; }
+.zi-boom-col { flex:1; min-width:0; }
+.zi-boom-col + .zi-boom-col { border-left:1px solid #fbd38d; padding-left:14px; }
+.zi-tool-hdr { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#975a16; margin-bottom:3px; }
+.zi-tool-row { display:flex; width:100%; align-items:center; justify-content:space-between; line-height:1.3; }
+.zi-tool-name { font-size:0.68rem; color:#744210; }
+.zi-tool-stars { letter-spacing:1px; color:#d69e2e; font-size:0.75rem; text-shadow:0 1px 1.5px rgba(0,0,0,0.3); }
+.sparkline-row { display:flex; align-items:center; gap:8px; margin-top:4px; }
+.sparkline-wrap { flex:1; height:32px; }
+.sparkline-wrap svg { width:100%; height:32px; }
+.trend-badge { font-size:1.2rem; line-height:1; flex-shrink:0; }
+.trend-label { font-size:0.6rem; color:#94a3b8; line-height:1.2; flex-shrink:0; }
+</style>
+<script data-goatcounter="https://elvedata.goatcounter.com/count"
+        data-goatcounter-settings='{"allow_local": false}'
+        async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<h1>Tovdalselva · Dynamisk oversikt</h1>
+
+<div class="banner">
+  <a class="back-link" href="../">&larr; Alle elver</a>
+  <div class="rname">🌿 Tovdalselva</div>
+  <div class="flow-row"><span class="live-dot"></span><span class="flow-num" id="tovdalFlow">…</span><span class="flow-unit">m³/s</span><span class="trend-badge" id="trendBadge" style="font-size:1.2rem;margin-left:6px;"></span><span class="trend-label" id="trendLabel" style="font-size:0.6rem;color:#94a3b8;margin-left:2px;align-self:center;"></span></div>
+  <div class="station-lbl">Flakksvann · 20.3.0</div>
+  <div class="flow-status" id="tovdalStatus"></div>
+  <div class="sparkline-row">
+    <div class="sparkline-wrap"><svg id="sparkSvg" viewBox="0 0 200 32" preserveAspectRatio="none"></svg></div>
+  </div>
+  <div style="font-size:0.55rem; color:#4a6741; text-align:right; margin-top:1px; opacity:0.7;">Vannføring siste 7 dager</div>
+  <div class="quota-box">
+    <div class="quota-item"><strong>Døgn:</strong> 1 laks / 2 sjøørret</div>
+    <div class="quota-item"><strong>Sesong:</strong> 5 laks (fra 15/8 maks 1 &gt;65 cm)</div>
+    <div class="quota-item"><strong>Gjenutsett:</strong> all laks &gt;65 cm · maks 2/døgn</div>
+  </div>
+  <div class="fiskemelding" id="fiskemelding">
+    <div class="fm-title" id="fmTitle"></div>
+    <div class="fm-text" id="fmText"></div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+      <div>
+        <span class="panel-name">Tovdalselva · Topp 3 soner</span>
+      </div>
+      <div class="total-score-box" id="totalScoreBox"></div>
+      <div class="stat-box" id="statBox"></div>
+    </div>
+  </div>
+  <div class="panel-body">
+    <div class="zone-list" id="zoneList"></div>
+    <div class="ctrl-col">
+      <div class="ctrl-row">
+        <label>Vannføring</label>
+        <input type="range" id="flowSlider" min="0" max="85" step="5" value="25" oninput="onFlowChange(this.value)">
+        <span class="ctrl-val" id="flowVal">25–30 m³/s</span>
+      </div>
+      <div class="ctrl-row">
+        <label>År</label>
+        <div class="dual-slider">
+          <div class="dual-fill" id="yearFill"></div>
+          <input type="range" id="yearLo" min="2016" max="2025" step="1" value="2016" oninput="onYearChange()">
+          <input type="range" id="yearHi" min="2016" max="2025" step="1" value="2025" oninput="onYearChange()">
+        </div>
+        <span class="ctrl-val" id="yearVal">2016–2025</span>
+      </div>
+      <div class="ctrl-row">
+        <label>Måned</label>
+        <div class="dual-slider">
+          <div class="dual-fill" id="monthFill"></div>
+          <input type="range" id="monthLo" min="6" max="9" step="1" value="6" oninput="onMonthChange()">
+          <input type="range" id="monthHi" min="6" max="9" step="1" value="9" oninput="onMonthChange()">
+        </div>
+        <span class="ctrl-val" id="monthVal">Jun–Sep</span>
+      </div>
+      <div class="ctrl-row">
+        <div class="fly-pill" id="flyPill" onclick="toggleFly()">
+          <span class="pip"></span> Kun flue
+        </div>
+        <div class="fly-pill" id="laksPill" onclick="toggleLaks()">
+          <span class="pip"></span> Kun laks
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="map-panel">
+  <div class="map-header">
+    <span class="map-title" id="mapTitle">🗺 Kart</span>
+    <span class="map-hint">Klikk en sone for å zoome inn</span>
+  </div>
+  <div id="map"></div>
+</div>
+
+<script>
+const NVE_CACHE_URL = '../data/vannforing_tovdalselva.json';
+const NEDBOR_CACHE_URL = '../data/nedbor_tovdalselva.json';
+
+const ZONE_INFO = {
+  "Sone 1": {
+    name: "Sone 1 – Sjøen til Knarrestad",
+    desc: "Nederste sone, ca. 6 km fra utløpet i Topdalsfjorden opp til Knarrestad et par hundre meter nedstrøms Boen Gård. Relativt stilleflytende med mye vegetasjon langs breddene, og mye innmark og bebyggelse. Elvas viktigste strekning for reproduksjon av sjøørret — 81 % av fangstene her er sjøørret — og kan til tider gi svært godt sjøørretfiske.",
+    redskap: "Sluk og flue · mark i flomperioder",
+    sesong: "1. juni – 31. august",
+    kortUrl: "https://www.inatur.no/laksefiske/56978820e4b0fc575c11475a",
+    merknader: "Fiskeforbud fra land uten grunneiers tillatelse. Unntak: Tveit Prestegård og Knarrestad. Båtfiske tillatt på hele strekningen, dorging tillatt. Soneskillet er merket med skilt."
+  },
+  "Sone 2": {
+    name: "Sone 2 – Buestad til Krageboen",
+    desc: "Ca. 1,3 km fra Buestad opp til Krageboen, ca. 100 m oppstrøms Boen bru. Flere gode høler og stryk samt to fosser, og variert fiske gjennom hele sona. Elvas mest fangstrike sone med 1363 registrerte laks 2016–2025.",
+    redskap: "Flue, sluk, mark",
+    sesong: "1. juni – 31. august",
+    kortUrl: "https://www.inatur.no/laksefiske/56978820e4b0fc575c11475a",
+    merknader: "Flue og dupp er IKKE tillatt i sone 2. Østsida er forbeholdt privat fiske. Fredet fra «Blakken» og ca. 100 m oppstrøms Boen bru — merket med skilt. Fjell og svaberg blir glatte i regnvær."
+  },
+  "Sone 3": {
+    name: "Sone 3 – Boenfossen til Flaksvann",
+    desc: "Fra fisketelleren ved Boenfossen, ca. 200 m oppstrøms Boen bru, og opp til midten av Flaksvann. Både stilleflytende partier og mer urolige stryk, særlig i øvre del. Meget godt egnet for fluefiske etter både ørret og laks, men har også partier som passer for sluk og mark.",
+    redskap: "Flue, sluk, mark",
+    sesong: "1. juni – 31. august",
+    kortUrl: "https://www.inatur.no/laksefiske/56978820e4b0fc575c11475a",
+    merknader: "Fisketeller ved Boenfossen registrerer oppgangen."
+  },
+  "Sone 4 og 5": {
+    name: "Sone 4 og 5 – Flaksvann til Herefossfjorden",
+    desc: "Øverste del av lakseførende strekning, fra Flaksvann og opp til Herefossfjorden der laksens ferd ender. Variert med flere stryk, høler og mindre fosser, og god plass for både flue-, sluk- og markfiskere.",
+    redskap: "Flue, sluk, mark",
+    sesong: "1. juni – 31. august",
+    kortUrl: "https://www.inatur.no/laksefiske/56978820e4b0fc575c11475a",
+    merknader: "Innenfor sonen ligger tre egne dagskortsoner: Laksefoss, Buhølen og Teinefoss. Ordinært sonekort er IKKE gyldig i disse."
+  },
+  "Laksefoss": {
+    name: "Laksefoss – dagskortsone",
+    desc: "Egen dagskortsone innenfor sone 4. Fossestryk med begrenset antall kort. Den eneste sonen i elva der mark er det mest fangstrike redskapet.",
+    redskap: "Mark, flue, sluk",
+    sesong: "1. juni – 31. august",
+    kortUrl: "https://www.inatur.no/laksefiske/56978820e4b0fc575c11475a",
+    merknader: "Eget dagskort — ordinært sone 4-kort er ikke gyldig her."
+  },
+  "Buhølen": {
+    name: "Buhølen – dagskortsone",
+    desc: "Egen dagskortsone innenfor sone 4, like nedstrøms Laksefoss. Høl med rolig strøm der fisken samler seg.",
+    redskap: "Flue, sluk, mark",
+    sesong: "1. juni – 31. august",
+    kortUrl: "https://www.inatur.no/laksefiske/56978820e4b0fc575c11475a",
+    merknader: "Eget dagskort — ordinært sone 4-kort er ikke gyldig her."
+  },
+  "Teinefoss Fluefiske": {
+    name: "Teinefoss – fluefiskesone",
+    desc: "Egen dagskortsone innenfor sone 4, forbeholdt fluefiske. 98 % av fangstene her er tatt på flue. Kort strekning, høyest kortpris i elva.",
+    redskap: "Kun flue",
+    sesong: "1. juni – 31. august",
+    kortUrl: "https://www.inatur.no/laksefiske/56978820e4b0fc575c11475a",
+    merknader: "Eget dagskort — ordinært sone 4-kort er ikke gyldig her. Fluefiske."
+  }
+};
+
+const FLOW_LOOKUP = {"2016-06-01": 75, "2016-06-02": 70, "2016-06-03": 65, "2016-06-04": 60, "2016-06-05": 55, "2016-06-06": 45, "2016-06-07": 30, "2016-06-08": 20, "2016-06-09": 15, "2016-06-10": 20, "2016-06-11": 20, "2016-06-12": 20, "2016-06-13": 20, "2016-06-14": 20, "2016-06-15": 20, "2016-06-16": 20, "2016-06-17": 25, "2016-06-18": 25, "2016-06-19": 20, "2016-06-20": 15, "2016-06-21": 25, "2016-06-22": 30, "2016-06-23": 30, "2016-06-24": 30, "2016-06-25": 30, "2016-06-26": 25, "2016-06-27": 30, "2016-06-28": 30, "2016-06-29": 30, "2016-06-30": 35, "2016-07-01": 40, "2016-07-02": 50, "2016-07-03": 55, "2016-07-04": 55, "2016-07-05": 60, "2016-07-06": 50, "2016-07-07": 40, "2016-07-08": 35, "2016-07-09": 25, "2016-07-10": 15, "2016-07-11": 10, "2016-07-12": 20, "2016-07-13": 35, "2016-07-14": 35, "2016-07-15": 30, "2016-07-16": 25, "2016-07-17": 20, "2016-07-18": 15, "2016-07-19": 20, "2016-07-20": 25, "2016-07-21": 25, "2016-07-22": 20, "2016-07-23": 20, "2016-07-24": 20, "2016-07-25": 20, "2016-07-26": 20, "2016-07-27": 20, "2016-07-28": 20, "2016-07-29": 15, "2016-07-30": 15, "2016-07-31": 15, "2016-08-01": 20, "2016-08-02": 30, "2016-08-03": 35, "2016-08-04": 35, "2016-08-05": 60, "2016-08-06": 70, "2016-08-07": 65, "2016-08-08": 55, "2016-08-09": 60, "2016-08-10": 60, "2016-08-11": 65, "2016-08-12": 65, "2016-08-13": 60, "2016-08-14": 50, "2016-08-15": 35, "2016-08-16": 30, "2016-08-17": 30, "2016-08-18": 30, "2016-08-19": 25, "2016-08-20": 25, "2016-08-21": 25, "2016-08-22": 25, "2016-08-23": 30, "2016-08-24": 30, "2016-08-25": 30, "2016-08-26": 30, "2016-08-27": 35, "2016-08-28": 30, "2016-08-29": 30, "2016-08-30": 25, "2016-08-31": 25, "2016-09-01": 25, "2016-09-02": 25, "2016-09-03": 20, "2016-09-04": 10, "2016-09-05": 10, "2016-09-06": 15, "2016-09-07": 15, "2016-09-08": 10, "2016-09-09": 15, "2016-09-10": 15, "2016-09-11": 20, "2016-09-12": 20, "2016-09-13": 15, "2016-09-14": 10, "2016-09-15": 15, "2017-06-01": 20, "2017-06-02": 30, "2017-06-03": 20, "2017-06-04": 20, "2017-06-05": 20, "2017-06-06": 25, "2017-06-07": 50, "2017-06-08": 85, "2017-06-09": 85, "2017-06-10": 85, "2017-06-11": 85, "2017-06-12": 85, "2017-06-13": 85, "2017-06-14": 85, "2017-06-15": 75, "2017-06-16": 65, "2017-06-17": 70, "2017-06-18": 70, "2017-06-19": 65, "2017-06-20": 55, "2017-06-21": 45, "2017-06-22": 45, "2017-06-23": 40, "2017-06-24": 25, "2017-06-25": 15, "2017-06-26": 15, "2017-06-27": 20, "2017-06-28": 25, "2017-06-29": 30, "2017-06-30": 25, "2017-07-01": 15, "2017-07-02": 10, "2017-07-03": 5, "2017-07-04": 10, "2017-07-05": 10, "2017-07-06": 15, "2017-07-07": 15, "2017-07-08": 15, "2017-07-09": 10, "2017-07-10": 5, "2017-07-11": 10, "2017-07-12": 10, "2017-07-13": 10, "2017-07-14": 5, "2017-07-15": 5, "2017-07-16": 5, "2017-07-17": 5, "2017-07-18": 5, "2017-07-19": 5, "2017-07-20": 5, "2017-07-21": 5, "2017-07-22": 5, "2017-07-23": 5, "2017-07-24": 5, "2017-07-25": 5, "2017-07-26": 5, "2017-07-27": 5, "2017-07-28": 5, "2017-07-29": 5, "2017-07-30": 5, "2017-07-31": 10, "2017-08-01": 10, "2017-08-02": 15, "2017-08-03": 35, "2017-08-04": 65, "2017-08-05": 75, "2017-08-06": 75, "2017-08-07": 60, "2017-08-08": 55, "2017-08-09": 55, "2017-08-10": 60, "2017-08-11": 55, "2017-08-12": 45, "2017-08-13": 35, "2017-08-14": 35, "2017-08-15": 35, "2017-08-16": 35, "2017-08-17": 35, "2017-08-18": 40, "2017-08-19": 45, "2017-08-20": 40, "2017-08-21": 45, "2017-08-22": 45, "2017-08-23": 40, "2017-08-24": 40, "2017-08-25": 35, "2017-08-26": 25, "2017-08-27": 20, "2017-08-28": 20, "2017-08-29": 25, "2017-08-30": 30, "2017-08-31": 30, "2017-09-01": 35, "2017-09-02": 30, "2017-09-03": 20, "2017-09-04": 15, "2017-09-05": 15, "2017-09-06": 25, "2017-09-07": 65, "2017-09-08": 85, "2017-09-09": 85, "2017-09-10": 85, "2017-09-11": 85, "2017-09-12": 85, "2017-09-13": 85, "2017-09-14": 85, "2017-09-15": 85, "2018-06-01": 10, "2018-06-02": 10, "2018-06-03": 5, "2018-06-04": 5, "2018-06-05": 5, "2018-06-06": 5, "2018-06-07": 5, "2018-06-08": 5, "2018-06-09": 5, "2018-06-10": 5, "2018-06-11": 5, "2018-06-12": 5, "2018-06-13": 5, "2018-06-14": 5, "2018-06-15": 5, "2018-06-16": 5, "2018-06-17": 5, "2018-06-18": 5, "2018-06-19": 5, "2018-06-20": 5, "2018-06-21": 5, "2018-06-22": 5, "2018-06-23": 5, "2018-06-24": 5, "2018-06-25": 5, "2018-06-26": 5, "2018-06-27": 5, "2018-06-28": 5, "2018-06-29": 5, "2018-06-30": 5, "2018-07-01": 5, "2018-07-02": 5, "2018-07-03": 5, "2018-07-04": 5, "2018-07-05": 5, "2018-07-06": 5, "2018-07-07": 5, "2018-07-08": 5, "2018-07-09": 5, "2018-07-10": 5, "2018-07-11": 0, "2018-07-12": 0, "2018-07-13": 0, "2018-07-14": 0, "2018-07-15": 0, "2018-07-16": 0, "2018-07-17": 0, "2018-07-18": 0, "2018-07-19": 0, "2018-07-20": 0, "2018-07-21": 0, "2018-07-22": 0, "2018-07-23": 0, "2018-07-24": 0, "2018-07-25": 0, "2018-07-26": 0, "2018-07-27": 0, "2018-07-28": 0, "2018-07-29": 0, "2018-07-30": 0, "2018-07-31": 0, "2018-08-01": 0, "2018-08-02": 0, "2018-08-03": 0, "2018-08-04": 0, "2018-08-05": 0, "2018-08-06": 0, "2018-08-07": 0, "2018-08-08": 0, "2018-08-09": 0, "2018-08-10": 0, "2018-08-11": 0, "2018-08-12": 0, "2018-08-13": 0, "2018-08-14": 0, "2018-08-15": 0, "2018-08-16": 0, "2018-08-17": 0, "2018-08-18": 5, "2018-08-19": 5, "2018-08-20": 0, "2018-08-21": 0, "2018-08-22": 5, "2018-08-23": 5, "2018-08-24": 5, "2018-08-25": 5, "2018-08-26": 5, "2018-08-27": 5, "2018-08-28": 10, "2018-08-29": 10, "2018-08-30": 10, "2018-08-31": 10, "2019-06-01": 30, "2019-06-02": 35, "2019-06-03": 25, "2019-06-04": 35, "2019-06-05": 45, "2019-06-06": 40, "2019-06-07": 40, "2019-06-08": 35, "2019-06-09": 35, "2019-06-10": 40, "2019-06-11": 65, "2019-06-12": 85, "2019-06-13": 85, "2019-06-14": 85, "2019-06-15": 85, "2019-06-16": 85, "2019-06-17": 85, "2019-06-18": 70, "2019-06-19": 65, "2019-06-20": 65, "2019-06-21": 65, "2019-06-22": 55, "2019-06-23": 35, "2019-06-24": 30, "2019-06-25": 40, "2019-06-26": 45, "2019-06-27": 35, "2019-06-28": 35, "2019-06-29": 25, "2019-06-30": 15, "2019-07-01": 10, "2019-07-02": 10, "2019-07-03": 15, "2019-07-04": 20, "2019-07-05": 15, "2019-07-06": 15, "2019-07-07": 10, "2019-07-08": 10, "2019-07-09": 10, "2019-07-10": 15, "2019-07-11": 15, "2019-07-12": 15, "2019-07-13": 10, "2019-07-14": 10, "2019-07-15": 5, "2019-07-16": 5, "2019-07-17": 5, "2019-07-18": 10, "2019-07-19": 10, "2019-07-20": 5, "2019-07-21": 15, "2019-07-22": 30, "2019-07-23": 50, "2019-07-24": 60, "2019-07-25": 60, "2019-07-26": 50, "2019-07-27": 40, "2019-07-28": 40, "2019-07-29": 40, "2019-07-30": 20, "2019-07-31": 15, "2019-08-01": 15, "2019-08-02": 20, "2019-08-03": 25, "2019-08-04": 15, "2019-08-05": 10, "2019-08-06": 15, "2019-08-07": 25, "2019-08-08": 35, "2019-08-09": 35, "2019-08-10": 40, "2019-08-11": 60, "2019-08-12": 75, "2019-08-13": 85, "2019-08-14": 85, "2019-08-15": 80, "2019-08-16": 70, "2019-08-17": 85, "2019-08-18": 85, "2019-08-19": 85, "2019-08-20": 85, "2019-08-21": 85, "2019-08-22": 85, "2019-08-23": 85, "2019-08-24": 85, "2019-08-25": 85, "2019-08-26": 85, "2019-08-27": 70, "2019-08-28": 60, "2019-08-29": 55, "2019-08-30": 55, "2019-08-31": 40, "2019-09-01": 30, "2019-09-02": 30, "2019-09-03": 40, "2019-09-04": 45, "2019-09-05": 45, "2019-09-06": 40, "2019-09-07": 50, "2019-09-08": 50, "2019-09-09": 45, "2019-09-10": 55, "2019-09-11": 70, "2019-09-12": 80, "2019-09-13": 80, "2019-09-14": 70, "2019-09-15": 65, "2020-06-01": 40, "2020-06-02": 35, "2020-06-03": 30, "2020-06-04": 30, "2020-06-05": 45, "2020-06-06": 75, "2020-06-07": 75, "2020-06-08": 85, "2020-06-09": 85, "2020-06-10": 70, "2020-06-11": 55, "2020-06-12": 45, "2020-06-13": 35, "2020-06-14": 30, "2020-06-15": 25, "2020-06-16": 30, "2020-06-17": 30, "2020-06-18": 30, "2020-06-19": 20, "2020-06-20": 20, "2020-06-21": 25, "2020-06-22": 25, "2020-06-23": 30, "2020-06-24": 35, "2020-06-25": 35, "2020-06-26": 30, "2020-06-27": 25, "2020-06-28": 25, "2020-06-29": 25, "2020-06-30": 30, "2020-07-01": 30, "2020-07-02": 30, "2020-07-03": 35, "2020-07-04": 35, "2020-07-05": 35, "2020-07-06": 35, "2020-07-07": 40, "2020-07-08": 40, "2020-07-09": 35, "2020-07-10": 30, "2020-07-11": 30, "2020-07-12": 25, "2020-07-13": 25, "2020-07-14": 20, "2020-07-15": 20, "2020-07-16": 20, "2020-07-17": 20, "2020-07-18": 20, "2020-07-19": 20, "2020-07-20": 20, "2020-07-21": 20, "2020-07-22": 25, "2020-07-23": 25, "2020-07-24": 30, "2020-07-25": 30, "2020-07-26": 45, "2020-07-27": 80, "2020-07-28": 85, "2020-07-29": 85, "2020-07-30": 85, "2020-07-31": 85, "2020-08-01": 85, "2020-08-02": 85, "2020-08-03": 80, "2020-08-04": 65, "2020-08-05": 50, "2020-08-06": 50, "2020-08-07": 45, "2020-08-08": 40, "2020-08-09": 35, "2020-08-10": 30, "2020-08-11": 25, "2020-08-12": 35, "2020-08-13": 30, "2020-08-14": 25, "2020-08-15": 25, "2020-08-16": 20, "2020-08-17": 20, "2020-08-18": 10, "2020-08-19": 5, "2020-08-20": 5, "2020-08-21": 15, "2020-08-22": 20, "2020-08-23": 20, "2020-08-24": 20, "2020-08-25": 25, "2020-08-26": 25, "2020-08-27": 30, "2020-08-28": 20, "2020-08-29": 20, "2020-08-30": 10, "2020-08-31": 10, "2020-09-01": 15, "2020-09-02": 15, "2020-09-03": 15, "2020-09-04": 15, "2020-09-05": 15, "2020-09-06": 15, "2020-09-07": 15, "2020-09-08": 15, "2020-09-09": 20, "2020-09-10": 20, "2020-09-11": 15, "2020-09-12": 15, "2020-09-13": 10, "2020-09-14": 10, "2020-09-15": 15, "2021-06-01": 65, "2021-06-02": 55, "2021-06-03": 45, "2021-06-04": 45, "2021-06-05": 40, "2021-06-06": 25, "2021-06-07": 20, "2021-06-08": 30, "2021-06-09": 35, "2021-06-10": 30, "2021-06-11": 20, "2021-06-12": 15, "2021-06-13": 10, "2021-06-14": 10, "2021-06-15": 10, "2021-06-16": 15, "2021-06-17": 20, "2021-06-18": 20, "2021-06-19": 30, "2021-06-20": 20, "2021-06-21": 10, "2021-06-22": 15, "2021-06-23": 20, "2021-06-24": 20, "2021-06-25": 15, "2021-06-26": 15, "2021-06-27": 10, "2021-06-28": 10, "2021-06-29": 10, "2021-06-30": 5, "2021-07-01": 10, "2021-07-02": 10, "2021-07-03": 5, "2021-07-04": 10, "2021-07-05": 10, "2021-07-06": 10, "2021-07-07": 10, "2021-07-08": 10, "2021-07-09": 40, "2021-07-10": 60, "2021-07-11": 50, "2021-07-12": 40, "2021-07-13": 35, "2021-07-14": 25, "2021-07-15": 20, "2021-07-16": 25, "2021-07-17": 25, "2021-07-18": 15, "2021-07-19": 10, "2021-07-20": 10, "2021-07-21": 10, "2021-07-22": 10, "2021-07-23": 5, "2021-07-24": 5, "2021-07-25": 5, "2021-07-26": 10, "2021-07-27": 15, "2021-07-28": 15, "2021-07-29": 15, "2021-07-30": 10, "2021-07-31": 15, "2021-08-01": 25, "2021-08-02": 35, "2021-08-03": 35, "2021-08-04": 35, "2021-08-05": 35, "2021-08-06": 35, "2021-08-07": 35, "2021-08-08": 25, "2021-08-09": 15, "2021-08-10": 20, "2021-08-11": 20, "2021-08-12": 15, "2021-08-13": 20, "2021-08-14": 15, "2021-08-15": 10, "2021-08-16": 15, "2021-08-17": 15, "2021-08-18": 15, "2021-08-19": 10, "2021-08-20": 10, "2021-08-21": 10, "2021-08-22": 5, "2021-08-23": 5, "2021-08-24": 5, "2021-08-25": 10, "2021-08-26": 10, "2021-08-27": 5, "2021-08-28": 5, "2021-08-29": 5, "2021-08-30": 10, "2021-08-31": 10, "2022-06-01": 10, "2022-06-02": 10, "2022-06-03": 10, "2022-06-04": 10, "2022-06-05": 10, "2022-06-06": 10, "2022-06-07": 10, "2022-06-08": 10, "2022-06-09": 10, "2022-06-10": 5, "2022-06-11": 5, "2022-06-12": 5, "2022-06-13": 5, "2022-06-14": 5, "2022-06-15": 5, "2022-06-16": 5, "2022-06-17": 5, "2022-06-18": 5, "2022-06-19": 5, "2022-06-20": 5, "2022-06-21": 5, "2022-06-22": 0, "2022-06-23": 0, "2022-06-24": 0, "2022-06-25": 0, "2022-06-26": 0, "2022-06-27": 0, "2022-06-28": 0, "2022-06-29": 0, "2022-06-30": 0, "2022-07-01": 0, "2022-07-02": 0, "2022-07-03": 0, "2022-07-04": 0, "2022-07-05": 0, "2022-07-06": 0, "2022-07-07": 0, "2022-07-08": 0, "2022-07-09": 0, "2022-07-10": 0, "2022-07-11": 0, "2022-07-12": 0, "2022-07-13": 0, "2022-07-14": 0, "2022-07-15": 0, "2022-07-16": 0, "2022-07-17": 0, "2022-07-18": 0, "2022-07-19": 0, "2022-07-20": 0, "2022-07-21": 0, "2022-07-22": 0, "2022-07-23": 0, "2022-07-24": 0, "2022-07-25": 0, "2022-07-26": 0, "2022-07-27": 0, "2022-07-28": 0, "2022-07-29": 0, "2022-07-30": 0, "2022-07-31": 0, "2022-08-01": 0, "2022-08-02": 0, "2022-08-03": 0, "2022-08-04": 0, "2022-08-05": 0, "2022-08-06": 0, "2022-08-07": 0, "2022-08-08": 0, "2022-08-09": 0, "2022-08-10": 0, "2022-08-11": 0, "2022-08-12": 0, "2022-08-13": 0, "2022-08-14": 0, "2022-08-15": 0, "2022-08-16": 0, "2022-08-17": 0, "2022-08-18": 0, "2022-08-19": 0, "2022-08-20": 0, "2022-08-21": 0, "2022-08-22": 0, "2022-08-23": 0, "2022-08-24": 0, "2022-08-25": 0, "2022-08-26": 5, "2022-08-27": 5, "2022-08-28": 5, "2022-08-29": 5, "2022-08-30": 5, "2022-08-31": 5, "2023-06-01": 30, "2023-06-02": 25, "2023-06-03": 25, "2023-06-04": 20, "2023-06-05": 20, "2023-06-06": 15, "2023-06-07": 15, "2023-06-08": 15, "2023-06-09": 15, "2023-06-10": 15, "2023-06-11": 15, "2023-06-12": 10, "2023-06-13": 10, "2023-06-14": 10, "2023-06-15": 10, "2023-06-16": 10, "2023-06-17": 10, "2023-06-18": 10, "2023-06-19": 5, "2023-06-20": 10, "2023-06-21": 10, "2023-06-22": 10, "2023-06-23": 10, "2023-06-24": 10, "2023-06-25": 10, "2023-06-26": 10, "2023-06-27": 10, "2023-06-28": 10, "2023-06-29": 10, "2023-06-30": 10, "2023-07-01": 10, "2023-07-02": 10, "2023-07-03": 5, "2023-07-04": 10, "2023-07-05": 10, "2023-07-06": 15, "2023-07-07": 25, "2023-07-08": 30, "2023-07-09": 40, "2023-07-10": 40, "2023-07-11": 35, "2023-07-12": 30, "2023-07-13": 25, "2023-07-14": 30, "2023-07-15": 30, "2023-07-16": 25, "2023-07-17": 30, "2023-07-18": 50, "2023-07-19": 70, "2023-07-20": 65, "2023-07-21": 55, "2023-07-22": 55, "2023-07-23": 45, "2023-07-24": 40, "2023-07-25": 40, "2023-07-26": 20, "2023-07-27": 15, "2023-07-28": 15, "2023-07-29": 20, "2023-07-30": 20, "2023-07-31": 15, "2023-08-01": 15, "2023-08-02": 20, "2023-08-03": 15, "2023-08-04": 10, "2023-08-05": 10, "2023-08-06": 10, "2023-08-07": 10, "2023-08-08": 10, "2023-08-09": 10, "2023-08-10": 10, "2023-08-11": 15, "2023-08-12": 15, "2023-08-13": 15, "2023-08-14": 15, "2023-08-15": 25, "2023-08-16": 30, "2023-08-17": 35, "2023-08-18": 35, "2023-08-19": 30, "2023-08-20": 65, "2023-08-21": 80, "2023-08-22": 75, "2023-08-23": 65, "2023-08-24": 60, "2023-08-25": 55, "2023-08-26": 55, "2023-08-27": 50, "2023-08-28": 50, "2023-08-29": 45, "2023-08-30": 55, "2023-08-31": 60, "2024-06-01": 85, "2024-06-02": 80, "2024-06-03": 70, "2024-06-04": 60, "2024-06-05": 40, "2024-06-06": 45, "2024-06-07": 55, "2024-06-08": 50, "2024-06-09": 35, "2024-06-10": 30, "2024-06-11": 45, "2024-06-12": 50, "2024-06-13": 55, "2024-06-14": 55, "2024-06-15": 60, "2024-06-16": 85, "2024-06-17": 85, "2024-06-18": 85, "2024-06-19": 85, "2024-06-20": 85, "2024-06-21": 85, "2024-06-22": 85, "2024-06-23": 75, "2024-06-24": 65, "2024-06-25": 60, "2024-06-26": 55, "2024-06-27": 50, "2024-06-28": 40, "2024-06-29": 25, "2024-06-30": 20, "2024-07-01": 15, "2024-07-02": 20, "2024-07-03": 20, "2024-07-04": 25, "2024-07-05": 20, "2024-07-06": 20, "2024-07-07": 20, "2024-07-08": 30, "2024-07-09": 40, "2024-07-10": 40, "2024-07-11": 50, "2024-07-12": 60, "2024-07-13": 60, "2024-07-14": 55, "2024-07-15": 65, "2024-07-16": 80, "2024-07-17": 85, "2024-07-18": 80, "2024-07-19": 70, "2024-07-20": 65, "2024-07-21": 60, "2024-07-22": 75, "2024-07-23": 85, "2024-07-24": 70, "2024-07-25": 60, "2024-07-26": 65, "2024-07-27": 65, "2024-07-28": 55, "2024-07-29": 45, "2024-07-30": 45, "2024-07-31": 40, "2024-08-01": 35, "2024-08-02": 25, "2024-08-03": 25, "2024-08-04": 20, "2024-08-05": 15, "2024-08-06": 25, "2024-08-07": 30, "2024-08-08": 25, "2024-08-09": 20, "2024-08-10": 15, "2024-08-11": 15, "2024-08-12": 20, "2024-08-13": 25, "2024-08-14": 25, "2024-08-15": 30, "2024-08-16": 40, "2024-08-17": 45, "2024-08-18": 35, "2024-08-19": 30, "2024-08-20": 45, "2024-08-21": 75, "2024-08-22": 65, "2024-08-23": 85, "2024-08-24": 85, "2024-08-25": 85, "2024-08-26": 85, "2024-08-27": 85, "2024-08-28": 85, "2024-08-29": 85, "2024-08-30": 80, "2024-08-31": 65, "2025-06-01": 25, "2025-06-02": 20, "2025-06-03": 15, "2025-06-04": 10, "2025-06-05": 20, "2025-06-06": 25, "2025-06-07": 25, "2025-06-08": 25, "2025-06-09": 20, "2025-06-10": 20, "2025-06-11": 25, "2025-06-12": 30, "2025-06-13": 25, "2025-06-14": 15, "2025-06-15": 15, "2025-06-16": 15, "2025-06-17": 15, "2025-06-18": 10, "2025-06-19": 10, "2025-06-20": 10, "2025-06-21": 10, "2025-06-22": 10, "2025-06-23": 10, "2025-06-24": 5, "2025-06-25": 5, "2025-06-26": 15, "2025-06-27": 10, "2025-06-28": 5, "2025-06-29": 5, "2025-06-30": 5, "2025-07-01": 5, "2025-07-02": 5, "2025-07-03": 5, "2025-07-04": 5, "2025-07-05": 5, "2025-07-06": 5, "2025-07-07": 0, "2025-07-08": 0, "2025-07-09": 0, "2025-07-10": 0, "2025-07-11": 5, "2025-07-12": 5, "2025-07-13": 5, "2025-07-14": 5, "2025-07-15": 5, "2025-07-16": 5, "2025-07-17": 5, "2025-07-18": 5, "2025-07-19": 5, "2025-07-20": 5, "2025-07-21": 5, "2025-07-22": 5, "2025-07-23": 5, "2025-07-24": 5, "2025-07-25": 5, "2025-07-26": 0, "2025-07-27": 0, "2025-07-28": 0, "2025-07-29": 0, "2025-07-30": 5, "2025-07-31": 5, "2025-08-01": 5, "2025-08-02": 5, "2025-08-03": 5, "2025-08-04": 5, "2025-08-05": 10, "2025-08-06": 10, "2025-08-07": 10, "2025-08-08": 10, "2025-08-09": 10, "2025-08-10": 10, "2025-08-11": 10, "2025-08-12": 10, "2025-08-13": 10, "2025-08-14": 10, "2025-08-15": 10, "2025-08-16": 10, "2025-08-17": 5, "2025-08-18": 5, "2025-08-19": 5, "2025-08-20": 5, "2025-08-21": 10, "2025-08-22": 10, "2025-08-23": 5, "2025-08-24": 5, "2025-08-25": 5, "2025-08-26": 5, "2025-08-27": 5, "2025-08-28": 10, "2025-08-29": 10, "2025-08-30": 15, "2025-08-31": 25};
+const MONTH_NAMES = {6:'Jun', 7:'Jul', 8:'Aug', 9:'Sep'};
+const MONTH_NAMES_FULL = ['januar','februar','mars','april','mai','juni','juli','august','september','oktober','november','desember'];
+// Normalisering: 90-persentil av rate og volum (ikke absolutt maks)
+const P90_RATE_ALL = 2.77,  P90_VOL_ALL = 96.5;
+const P90_RATE_FLY = 1.99,  P90_VOL_FLY = 57.5;
+const MAX_RATE_ALL = 6.3,  MAX_VOL_ALL = 150;
+const MAX_RATE_FLY = 5.0,   MAX_VOL_FLY = 100;
+// Egne konstanter for «Kun laks» (ALL = laks + sjoorret, som Sygna)
+const P90_RATE_LAKS = 2.6,  P90_VOL_LAKS = 84.5;
+const P90_RATE_LAKS_FLY = 1.78,  P90_VOL_LAKS_FLY = 55.0;
+const MAX_RATE_LAKS = 6.0,  MAX_VOL_LAKS = 135;
+const MAX_RATE_LAKS_FLY = 4.8,  MAX_VOL_LAKS_FLY = 97;
+
+// Konstanter for ELVESCOREN - utledet pa elvenivaa (hele elva som en enhet),
+// ikke pa sonenivaa. P90 er dagvektet 90-persentil av elvas daglige fangstrate
+// over alle celler (aar/maaned/bin) i 2016-2025.
+const P90_RATE_ELV = 10.33, P90_VOL_ELV = 37.0;
+const MAX_RATE_ELV = 32.50, MAX_VOL_ELV = 146.0;
+
+const ZONE_COORDS = {"Sone 1": {"s": [58.194085, 8.072286], "e": [58.236377, 8.132994]}, "Sone 2": {"s": [58.236529, 8.133025], "e": [58.244813, 8.1393]}, "Sone 3": {"s": [58.247186, 8.141622], "e": [58.328349, 8.2041]}, "Sone 4 og 5": {"s": [58.32931, 8.207531], "e": [58.454377, 8.324595]}, "Teinefoss Fluefiske": {"s": [58.340993, 8.227803], "e": [58.342484, 8.230194]}, "Buhølen": {"s": [58.384812, 8.266821], "e": [58.391357, 8.272056]}, "Laksefoss": {"s": [58.39158, 8.272223], "e": [58.402819, 8.282051]}};
+
+
+const ALL_DATA = {"2016": {"6": {"15": {"Sone 2": 1}, "20": {"Buhølen": 1, "Sone 1": 1, "Sone 2": 18, "Sone 3": 2, "Sone 4 og 5": 6, "Teinefoss Fluefiske": 11}, "25": {"Buhølen": 1, "Sone 1": 2, "Sone 2": 7, "Sone 3": 3, "Sone 4 og 5": 5}, "30": {"Sone 2": 29, "Sone 4 og 5": 8, "Teinefoss Fluefiske": 5}, "35": {"Laksefoss": 2, "Sone 2": 7}, "45": {"Sone 2": 2, "Sone 3": 2, "Teinefoss Fluefiske": 4}, "55": {"Sone 2": 2}, "60": {"Sone 2": 1}, "65": {"Sone 2": 1}, "70": {"Sone 1": 1, "Sone 2": 2}, "75": {"Sone 2": 10, "Sone 3": 2}}, "7": {"10": {"Sone 2": 4}, "15": {"Buhølen": 3, "Laksefoss": 1, "Sone 2": 4, "Sone 3": 5, "Sone 4 og 5": 5, "Teinefoss Fluefiske": 1}, "20": {"Buhølen": 4, "Laksefoss": 5, "Sone 1": 1, "Sone 2": 9, "Sone 3": 10, "Sone 4 og 5": 21, "Teinefoss Fluefiske": 1}, "25": {"Buhølen": 1, "Sone 1": 2, "Sone 2": 12, "Sone 3": 4, "Sone 4 og 5": 7}, "30": {"Sone 3": 1, "Sone 4 og 5": 4}, "35": {"Laksefoss": 2, "Sone 1": 2, "Sone 2": 8, "Sone 3": 3, "Sone 4 og 5": 8}, "40": {"Sone 1": 3, "Sone 2": 5, "Sone 3": 1, "Sone 4 og 5": 5}, "50": {"Sone 1": 1, "Sone 2": 5, "Sone 3": 1, "Sone 4 og 5": 4}, "55": {"Sone 2": 3, "Sone 4 og 5": 6}, "60": {"Sone 2": 3, "Sone 3": 1, "Sone 4 og 5": 2}}, "8": {"20": {"Laksefoss": 2, "Sone 3": 2, "Sone 4 og 5": 1}, "25": {"Laksefoss": 3, "Sone 1": 4, "Sone 2": 7, "Sone 3": 8, "Sone 4 og 5": 21}, "30": {"Buhølen": 3, "Laksefoss": 4, "Sone 1": 3, "Sone 2": 2, "Sone 3": 10, "Sone 4 og 5": 33}, "35": {"Laksefoss": 4, "Sone 1": 2, "Sone 2": 2, "Sone 3": 12, "Sone 4 og 5": 23}, "50": {"Sone 1": 1, "Sone 3": 4, "Sone 4 og 5": 7}, "55": {"Buhølen": 1, "Laksefoss": 3, "Sone 3": 16, "Sone 4 og 5": 8}, "60": {"Buhølen": 1, "Laksefoss": 3, "Sone 2": 6, "Sone 3": 8, "Sone 4 og 5": 23}, "65": {"Buhølen": 3, "Laksefoss": 4, "Sone 1": 1, "Sone 2": 4, "Sone 3": 12, "Sone 4 og 5": 17}, "70": {"Buhølen": 1, "Laksefoss": 2, "Sone 3": 2, "Sone 4 og 5": 2}}, "9": {"10": {"Sone 1": 1, "Sone 3": 1, "Sone 4 og 5": 1}, "15": {"Buhølen": 1, "Laksefoss": 1, "Sone 1": 6, "Sone 3": 7, "Sone 4 og 5": 3}, "20": {"Sone 1": 2, "Sone 3": 2, "Sone 4 og 5": 2}, "25": {"Laksefoss": 1, "Sone 3": 4, "Sone 4 og 5": 3, "Teinefoss Fluefiske": 1}}}, "2017": {"6": {"15": {"Buhølen": 1, "Sone 2": 5, "Sone 3": 4, "Sone 4 og 5": 3, "Teinefoss Fluefiske": 4}, "20": {"Laksefoss": 1, "Sone 2": 19, "Sone 3": 8, "Sone 4 og 5": 9, "Teinefoss Fluefiske": 8}, "25": {"Laksefoss": 4, "Sone 2": 8, "Sone 3": 4, "Sone 4 og 5": 6, "Teinefoss Fluefiske": 4}, "30": {"Sone 1": 1, "Sone 2": 11, "Sone 3": 2, "Sone 4 og 5": 2}, "40": {"Sone 3": 1, "Sone 4 og 5": 2}, "45": {"Laksefoss": 3, "Sone 2": 6, "Sone 4 og 5": 2}, "50": {"Sone 2": 1, "Sone 3": 1, "Sone 4 og 5": 1}, "55": {"Laksefoss": 1, "Sone 2": 1, "Sone 4 og 5": 2}, "65": {"Sone 2": 6, "Sone 3": 2, "Sone 4 og 5": 2}, "70": {"Sone 2": 11, "Sone 3": 1, "Sone 4 og 5": 5}, "75": {"Sone 1": 1, "Sone 2": 4, "Sone 3": 2}, "85": {"Sone 1": 1, "Sone 2": 23, "Sone 3": 5, "Sone 4 og 5": 9, "Teinefoss Fluefiske": 1}}, "7": {"5": {"Laksefoss": 2, "Sone 1": 1, "Sone 2": 10, "Sone 3": 2, "Sone 4 og 5": 4, "Teinefoss Fluefiske": 1}, "10": {"Laksefoss": 2, "Sone 1": 1, "Sone 2": 2, "Sone 3": 1, "Sone 4 og 5": 4, "Teinefoss Fluefiske": 1}, "15": {"Buhølen": 1, "Laksefoss": 1, "Sone 1": 1, "Sone 2": 4, "Sone 4 og 5": 2}}, "8": {"10": {"Sone 3": 4, "Sone 4 og 5": 1}, "15": {"Buhølen": 1, "Sone 3": 1, "Sone 4 og 5": 1}, "20": {"Sone 1": 2, "Sone 2": 2, "Sone 4 og 5": 5}, "25": {"Buhølen": 1, "Sone 1": 1, "Sone 3": 1, "Sone 4 og 5": 6, "Teinefoss Fluefiske": 2}, "30": {"Sone 1": 5, "Sone 2": 1, "Sone 4 og 5": 7}, "35": {"Buhølen": 2, "Laksefoss": 3, "Sone 1": 11, "Sone 2": 7, "Sone 3": 8, "Sone 4 og 5": 34}, "40": {"Buhølen": 1, "Laksefoss": 2, "Sone 1": 6, "Sone 2": 6, "Sone 3": 5, "Sone 4 og 5": 26}, "45": {"Laksefoss": 2, "Sone 2": 7, "Sone 3": 6, "Sone 4 og 5": 29}, "55": {"Buhølen": 2, "Laksefoss": 2, "Sone 1": 3, "Sone 2": 10, "Sone 3": 6, "Sone 4 og 5": 16}, "60": {"Buhølen": 1, "Laksefoss": 5, "Sone 1": 1, "Sone 2": 6, "Sone 3": 3, "Sone 4 og 5": 8}, "65": {"Laksefoss": 2, "Sone 2": 6, "Sone 3": 6, "Sone 4 og 5": 13}, "75": {"Sone 2": 5, "Sone 3": 4, "Sone 4 og 5": 9}}, "9": {"15": {"Sone 1": 1, "Sone 3": 1}, "20": {"Laksefoss": 1, "Sone 4 og 5": 1}, "25": {"Laksefoss": 2}, "30": {"Buhølen": 1, "Sone 1": 1, "Sone 4 og 5": 4}, "35": {"Sone 4 og 5": 2}, "65": {"Sone 3": 2, "Sone 4 og 5": 3}, "85": {"Buhølen": 1, "Sone 1": 27, "Sone 2": 1, "Sone 3": 6, "Sone 4 og 5": 15}}}, "2018": {"6": {"5": {"Sone 1": 1, "Sone 2": 24}, "10": {"Sone 1": 2, "Sone 2": 1}}, "7": {"0": {"Sone 1": 2, "Sone 2": 1}, "5": {"Sone 2": 1}}, "8": {"0": {"Sone 1": 3, "Sone 2": 5, "Sone 3": 1}, "5": {"Laksefoss": 1, "Sone 1": 1, "Sone 2": 21, "Sone 3": 2, "Teinefoss Fluefiske": 2}, "10": {"Sone 2": 3, "Sone 4 og 5": 3, "Teinefoss Fluefiske": 5}}}, "2019": {"6": {"15": {"Sone 2": 4}, "25": {"Sone 2": 8, "Sone 3": 3, "Sone 4 og 5": 1}, "30": {"Sone 2": 17, "Sone 3": 3, "Sone 4 og 5": 1}, "35": {"Sone 1": 1, "Sone 2": 26, "Sone 3": 2, "Sone 4 og 5": 1}, "40": {"Sone 1": 2, "Sone 2": 14, "Sone 3": 2, "Sone 4 og 5": 2}, "45": {"Sone 2": 10, "Sone 3": 1}, "55": {"Sone 2": 9}, "65": {"Sone 1": 1, "Sone 2": 17, "Sone 4 og 5": 1}, "70": {"Sone 1": 1, "Sone 2": 6, "Sone 3": 1, "Sone 4 og 5": 1}, "85": {"Laksefoss": 1, "Sone 2": 16, "Sone 3": 1, "Sone 4 og 5": 1}}, "7": {"5": {"Sone 1": 3, "Sone 2": 12}, "10": {"Buhølen": 1, "Sone 1": 3, "Sone 2": 27, "Sone 3": 1, "Sone 4 og 5": 3, "Teinefoss Fluefiske": 1}, "15": {"Laksefoss": 1, "Sone 1": 2, "Sone 2": 23, "Sone 3": 3, "Sone 4 og 5": 5, "Teinefoss Fluefiske": 1}, "20": {"Laksefoss": 1, "Sone 1": 1, "Sone 2": 8, "Sone 3": 3, "Sone 4 og 5": 6}, "30": {"Buhølen": 1, "Sone 2": 6, "Sone 3": 4, "Sone 4 og 5": 5}, "40": {"Sone 2": 18, "Sone 4 og 5": 4}, "50": {"Sone 1": 2, "Sone 2": 11, "Sone 3": 3, "Sone 4 og 5": 1}, "60": {"Laksefoss": 1, "Sone 1": 2, "Sone 2": 22, "Sone 3": 1, "Sone 4 og 5": 2}}, "8": {"10": {}, "15": {"Buhølen": 2, "Laksefoss": 2, "Sone 1": 1, "Sone 2": 7, "Sone 3": 4, "Sone 4 og 5": 4}, "20": {"Laksefoss": 1, "Sone 2": 1, "Sone 4 og 5": 2}, "25": {"Buhølen": 1, "Sone 1": 4, "Sone 2": 9, "Sone 3": 3, "Sone 4 og 5": 7}, "35": {"Laksefoss": 1, "Sone 1": 2, "Sone 2": 7, "Sone 3": 6, "Sone 4 og 5": 6}, "40": {"Sone 1": 6, "Sone 2": 9, "Sone 3": 5, "Sone 4 og 5": 13}, "55": {"Buhølen": 1, "Laksefoss": 7, "Sone 2": 4, "Sone 3": 3, "Sone 4 og 5": 13}, "60": {"Laksefoss": 3, "Sone 1": 2, "Sone 2": 10, "Sone 3": 7, "Sone 4 og 5": 12}, "70": {"Buhølen": 3, "Laksefoss": 1, "Sone 2": 5, "Sone 3": 3, "Sone 4 og 5": 13}, "75": {"Laksefoss": 1, "Sone 1": 10, "Sone 2": 5, "Sone 3": 2, "Sone 4 og 5": 9}, "80": {"Buhølen": 3, "Sone 1": 2, "Sone 2": 7, "Sone 3": 7, "Sone 4 og 5": 9}, "85": {"Buhølen": 7, "Laksefoss": 2, "Sone 1": 34, "Sone 2": 23, "Sone 3": 21, "Sone 4 og 5": 59}}, "9": {"30": {"Buhølen": 1, "Sone 1": 14, "Sone 2": 5, "Sone 3": 2}, "40": {"Laksefoss": 1, "Sone 1": 2, "Sone 2": 1, "Sone 3": 4, "Sone 4 og 5": 12}, "45": {"Buhølen": 1, "Sone 1": 11, "Sone 2": 5, "Sone 3": 2, "Sone 4 og 5": 7}, "50": {"Buhølen": 6, "Sone 1": 1, "Sone 2": 7, "Sone 4 og 5": 12}, "55": {"Laksefoss": 2, "Sone 1": 1, "Sone 2": 1, "Sone 4 og 5": 1}, "65": {"Buhølen": 1, "Sone 1": 1, "Sone 2": 15, "Sone 3": 1, "Sone 4 og 5": 12}, "70": {"Buhølen": 2, "Laksefoss": 3, "Sone 1": 1, "Sone 2": 25, "Sone 3": 9, "Sone 4 og 5": 25}, "80": {"Buhølen": 1, "Laksefoss": 2, "Sone 1": 4, "Sone 2": 2, "Sone 3": 4, "Sone 4 og 5": 21}}}, "2020": {"6": {"20": {"Sone 2": 7}, "25": {"Sone 2": 26, "Teinefoss Fluefiske": 1}, "30": {"Sone 1": 1, "Sone 2": 19, "Sone 3": 1}, "35": {"Sone 1": 2, "Sone 2": 19, "Sone 3": 1}, "40": {"Sone 1": 1, "Sone 2": 23}, "45": {"Sone 2": 14, "Sone 3": 1}, "55": {"Sone 2": 2}, "70": {"Sone 1": 3}, "75": {"Sone 1": 2, "Sone 2": 8}, "85": {"Sone 1": 1, "Sone 2": 3}}, "7": {"20": {"Buhølen": 2, "Laksefoss": 3, "Sone 1": 3, "Sone 2": 13, "Sone 3": 6, "Sone 4 og 5": 6, "Teinefoss Fluefiske": 1}, "25": {"Laksefoss": 1, "Sone 1": 1, "Sone 2": 14, "Sone 3": 3, "Sone 4 og 5": 2}, "30": {"Laksefoss": 1, "Sone 1": 2, "Sone 2": 19, "Sone 3": 11, "Sone 4 og 5": 2, "Teinefoss Fluefiske": 2}, "35": {"Sone 1": 1, "Sone 2": 24, "Sone 3": 5, "Sone 4 og 5": 1}, "40": {"Laksefoss": 1, "Sone 2": 7, "Sone 3": 3}, "45": {"Buhølen": 1, "Sone 1": 1, "Sone 2": 9, "Sone 3": 4, "Sone 4 og 5": 5}, "80": {"Buhølen": 1, "Sone 1": 2, "Sone 2": 5, "Sone 3": 8, "Sone 4 og 5": 11}, "85": {"Buhølen": 4, "Sone 1": 1, "Sone 2": 2, "Sone 3": 2, "Sone 4 og 5": 13}}, "8": {"5": {"Laksefoss": 1, "Sone 2": 3, "Sone 3": 1, "Sone 4 og 5": 2, "Teinefoss Fluefiske": 1}, "10": {"Sone 2": 9, "Sone 4 og 5": 1, "Teinefoss Fluefiske": 2}, "15": {"Sone 2": 2, "Sone 4 og 5": 5}, "20": {"Buhølen": 3, "Laksefoss": 5, "Sone 1": 7, "Sone 2": 16, "Sone 3": 9, "Sone 4 og 5": 23}, "25": {"Buhølen": 1, "Laksefoss": 2, "Sone 1": 6, "Sone 2": 15, "Sone 3": 5, "Sone 4 og 5": 15}, "30": {"Laksefoss": 1, "Sone 2": 4, "Sone 4 og 5": 1}, "35": {"Sone 2": 4, "Sone 3": 1, "Sone 4 og 5": 4}, "40": {"Sone 2": 10, "Sone 4 og 5": 2}, "45": {"Buhølen": 2, "Sone 2": 4}, "50": {"Sone 1": 5, "Sone 2": 13, "Sone 3": 3, "Sone 4 og 5": 15}, "65": {"Laksefoss": 1, "Sone 2": 5, "Sone 4 og 5": 9}, "80": {"Sone 1": 1, "Sone 2": 10, "Sone 3": 2, "Sone 4 og 5": 6}, "85": {"Buhølen": 1, "Laksefoss": 1, "Sone 1": 1, "Sone 2": 6, "Sone 3": 5, "Sone 4 og 5": 7}}, "9": {"10": {"Buhølen": 1, "Sone 1": 6, "Sone 2": 1, "Sone 4 og 5": 2}, "15": {"Buhølen": 6, "Laksefoss": 2, "Sone 1": 20, "Sone 2": 11, "Sone 3": 5, "Sone 4 og 5": 19}, "20": {"Sone 2": 4, "Sone 3": 3}}}, "2021": {"6": {"5": {}, "10": {"Sone 1": 1, "Sone 2": 5, "Teinefoss Fluefiske": 2}, "15": {"Sone 2": 1, "Sone 3": 4, "Sone 4 og 5": 1, "Teinefoss Fluefiske": 1}, "20": {"Sone 1": 5, "Sone 2": 5, "Sone 3": 1, "Teinefoss Fluefiske": 2}, "25": {"Sone 1": 2, "Sone 2": 3}, "30": {"Sone 2": 4, "Sone 3": 4}, "35": {"Sone 3": 1}, "40": {"Sone 2": 4, "Sone 3": 1}, "45": {"Sone 2": 11}, "55": {"Sone 2": 10, "Sone 4 og 5": 1}, "65": {"Sone 2": 17}}, "7": {"5": {"Sone 2": 2}, "10": {"Sone 1": 3, "Sone 2": 5, "Sone 3": 3}, "15": {"Sone 2": 6, "Sone 3": 3, "Sone 4 og 5": 7}, "20": {"Sone 3": 1, "Sone 4 og 5": 1}, "25": {"Sone 2": 3, "Sone 3": 1, "Teinefoss Fluefiske": 1}, "35": {"Sone 2": 1}, "40": {"Sone 2": 1, "Sone 3": 2, "Sone 4 og 5": 2}, "50": {"Sone 2": 2, "Sone 3": 1, "Sone 4 og 5": 1}, "60": {"Buhølen": 1, "Laksefoss": 1, "Sone 2": 1, "Sone 4 og 5": 1}}, "8": {"5": {"Laksefoss": 1, "Sone 2": 4, "Sone 3": 3, "Sone 4 og 5": 4}, "10": {"Sone 1": 4, "Sone 2": 6, "Sone 3": 1, "Sone 4 og 5": 10, "Teinefoss Fluefiske": 1}, "15": {"Buhølen": 4, "Sone 1": 1, "Sone 2": 3, "Sone 3": 1, "Sone 4 og 5": 9, "Teinefoss Fluefiske": 3}, "20": {"Buhølen": 4, "Sone 4 og 5": 9, "Teinefoss Fluefiske": 2}, "25": {"Buhølen": 3, "Sone 2": 8, "Sone 3": 5, "Sone 4 og 5": 8}, "35": {"Buhølen": 2, "Laksefoss": 3, "Sone 1": 1, "Sone 2": 5, "Sone 3": 16, "Sone 4 og 5": 21}}}, "2022": {"6": {"0": {"Sone 2": 6}, "5": {"Sone 1": 1, "Sone 2": 5, "Sone 3": 4, "Sone 4 og 5": 3, "Teinefoss Fluefiske": 1}, "10": {"Sone 2": 15, "Sone 3": 1, "Sone 4 og 5": 6, "Teinefoss Fluefiske": 5}}, "7": {"0": {"Sone 1": 27, "Sone 2": 37, "Sone 3": 1, "Sone 4 og 5": 1}}, "8": {"0": {"Sone 1": 13, "Sone 2": 10, "Sone 3": 2, "Sone 4 og 5": 1}, "5": {"Buhølen": 2, "Sone 1": 1, "Sone 2": 9, "Sone 3": 10, "Sone 4 og 5": 12}}}, "2023": {"6": {"5": {"Teinefoss Fluefiske": 1}, "10": {"Buhølen": 1, "Sone 1": 4, "Sone 2": 16, "Sone 3": 7, "Sone 4 og 5": 2, "Teinefoss Fluefiske": 6}, "15": {"Sone 2": 3, "Sone 3": 3, "Teinefoss Fluefiske": 2}, "20": {"Sone 2": 2, "Teinefoss Fluefiske": 1}, "25": {"Sone 1": 1, "Sone 2": 14, "Sone 3": 1, "Sone 4 og 5": 1, "Teinefoss Fluefiske": 1}, "30": {"Sone 1": 3, "Sone 2": 20}}, "7": {"5": {"Sone 2": 1}, "10": {"Sone 2": 1, "Sone 3": 1, "Teinefoss Fluefiske": 2}, "15": {"Buhølen": 1, "Sone 1": 2, "Sone 3": 3, "Sone 4 og 5": 10, "Teinefoss Fluefiske": 3}, "20": {"Buhølen": 2, "Laksefoss": 1, "Sone 1": 1, "Sone 2": 5, "Sone 3": 6, "Sone 4 og 5": 10, "Teinefoss Fluefiske": 6}, "25": {"Buhølen": 1, "Sone 2": 3, "Sone 3": 7, "Sone 4 og 5": 5}, "30": {"Laksefoss": 1, "Sone 2": 5, "Sone 3": 10, "Sone 4 og 5": 17, "Teinefoss Fluefiske": 5}, "35": {"Sone 2": 2, "Sone 4 og 5": 4}, "40": {"Buhølen": 1, "Laksefoss": 1, "Sone 1": 1, "Sone 2": 9, "Sone 3": 4, "Sone 4 og 5": 5, "Teinefoss Fluefiske": 2}, "45": {"Buhølen": 1, "Laksefoss": 1, "Sone 2": 1, "Sone 3": 1, "Sone 4 og 5": 4}, "50": {"Sone 2": 3, "Sone 4 og 5": 3}, "55": {"Buhølen": 3, "Sone 2": 5, "Sone 3": 2, "Sone 4 og 5": 6}, "65": {"Laksefoss": 1, "Sone 2": 1, "Sone 3": 3, "Sone 4 og 5": 5}, "70": {"Laksefoss": 2, "Sone 3": 2, "Sone 4 og 5": 6, "Teinefoss Fluefiske": 1}}, "8": {"10": {"Buhølen": 2, "Laksefoss": 2, "Sone 1": 1, "Sone 2": 1, "Sone 3": 6, "Sone 4 og 5": 16, "Teinefoss Fluefiske": 3}, "15": {"Buhølen": 2, "Laksefoss": 3, "Sone 1": 2, "Sone 2": 2, "Sone 3": 8, "Sone 4 og 5": 26, "Teinefoss Fluefiske": 5}, "20": {"Sone 1": 1, "Sone 3": 2, "Sone 4 og 5": 1, "Teinefoss Fluefiske": 1}, "25": {"Sone 1": 1, "Sone 2": 1, "Sone 4 og 5": 7}, "30": {"Laksefoss": 2, "Sone 2": 5, "Sone 3": 6, "Sone 4 og 5": 13}, "35": {"Laksefoss": 1, "Sone 2": 5, "Sone 3": 3, "Sone 4 og 5": 22}, "45": {"Buhølen": 1, "Laksefoss": 2, "Sone 1": 5, "Sone 4 og 5": 6}, "50": {"Buhølen": 3, "Laksefoss": 3, "Sone 1": 2, "Sone 2": 4, "Sone 3": 3, "Sone 4 og 5": 10}, "55": {"Buhølen": 5, "Laksefoss": 3, "Sone 1": 9, "Sone 2": 1, "Sone 3": 7, "Sone 4 og 5": 25}, "60": {"Buhølen": 5, "Laksefoss": 3, "Sone 1": 3, "Sone 2": 2, "Sone 3": 4, "Sone 4 og 5": 11}, "65": {"Buhølen": 1, "Laksefoss": 1, "Sone 2": 2, "Sone 3": 3, "Sone 4 og 5": 12}, "75": {"Sone 1": 5, "Sone 2": 1, "Sone 3": 1, "Sone 4 og 5": 11}, "80": {"Sone 3": 3, "Sone 4 og 5": 12}}}, "2024": {"6": {"20": {}, "25": {}, "30": {"Sone 2": 1, "Sone 4 og 5": 1}, "35": {"Buhølen": 1, "Sone 3": 1}, "40": {"Sone 2": 2, "Sone 3": 1}, "45": {"Sone 1": 3, "Sone 2": 1, "Sone 4 og 5": 2}, "50": {"Sone 1": 1, "Sone 2": 1, "Sone 3": 1, "Sone 4 og 5": 2}, "55": {"Sone 2": 4, "Sone 4 og 5": 4}, "60": {"Sone 2": 6, "Sone 3": 2}, "65": {}, "70": {"Sone 2": 6}, "75": {}, "80": {"Sone 1": 2, "Sone 3": 1}, "85": {"Laksefoss": 1, "Sone 1": 8, "Sone 2": 10, "Sone 3": 4, "Sone 4 og 5": 4}}, "7": {"15": {}, "20": {}, "25": {}, "30": {}, "40": {"Laksefoss": 1, "Sone 4 og 5": 2}, "45": {"Buhølen": 1, "Laksefoss": 1, "Sone 2": 2, "Sone 3": 1, "Sone 4 og 5": 2}, "50": {"Buhølen": 2, "Laksefoss": 1, "Sone 2": 3, "Sone 3": 4, "Sone 4 og 5": 8}, "55": {"Sone 2": 5, "Sone 3": 1, "Sone 4 og 5": 1}, "60": {"Buhølen": 1, "Laksefoss": 2, "Sone 1": 3, "Sone 2": 14, "Sone 3": 2, "Sone 4 og 5": 8, "Teinefoss Fluefiske": 1}, "65": {"Laksefoss": 3, "Sone 1": 2, "Sone 2": 3, "Sone 3": 5, "Sone 4 og 5": 2}, "70": {"Sone 1": 2, "Sone 2": 1, "Sone 3": 2, "Sone 4 og 5": 2}, "75": {"Laksefoss": 3, "Sone 4 og 5": 3}, "80": {"Buhølen": 1, "Sone 2": 2, "Sone 3": 1, "Sone 4 og 5": 4}, "85": {"Sone 2": 6}}, "8": {"15": {"Buhølen": 3, "Sone 1": 1, "Sone 2": 1, "Sone 3": 2, "Sone 4 og 5": 4}, "20": {"Laksefoss": 1, "Sone 4 og 5": 6}, "25": {"Buhølen": 1, "Laksefoss": 1, "Sone 1": 1, "Sone 2": 2, "Sone 3": 3, "Sone 4 og 5": 12}, "30": {"Buhølen": 1, "Sone 2": 2, "Sone 3": 1, "Sone 4 og 5": 8}, "35": {"Laksefoss": 2, "Sone 3": 4, "Sone 4 og 5": 5}, "40": {"Buhølen": 2, "Laksefoss": 4, "Sone 3": 1, "Sone 4 og 5": 5}, "45": {"Sone 1": 1, "Sone 3": 1, "Sone 4 og 5": 6}, "65": {}, "75": {}, "80": {}, "85": {}}}, "2025": {"6": {"5": {"Laksefoss": 1, "Sone 2": 1}, "10": {"Sone 2": 3, "Sone 3": 1, "Sone 4 og 5": 2, "Teinefoss Fluefiske": 2}, "15": {"Sone 1": 1, "Sone 2": 1, "Sone 3": 4}, "20": {"Sone 2": 2, "Sone 4 og 5": 1}, "25": {"Laksefoss": 1, "Sone 4 og 5": 1}, "30": {}}, "7": {"0": {"Sone 1": 1}, "5": {"Sone 2": 1}}, "8": {"5": {"Buhølen": 1, "Laksefoss": 1, "Sone 1": 1, "Sone 2": 9, "Sone 3": 3, "Sone 4 og 5": 22}, "10": {"Buhølen": 2, "Laksefoss": 4, "Sone 1": 1, "Sone 2": 12, "Sone 3": 25, "Sone 4 og 5": 21, "Teinefoss Fluefiske": 2}, "15": {"Sone 2": 2, "Sone 3": 2, "Sone 4 og 5": 6}, "25": {"Laksefoss": 1, "Sone 2": 1, "Sone 3": 8, "Sone 4 og 5": 10}}}};
+const DAYS_DATA = {"2016": {"6": {"15": 2, "20": 9, "25": 4, "30": 8, "35": 1, "45": 1, "55": 1, "60": 1, "65": 1, "70": 1, "75": 1}, "7": {"10": 1, "15": 5, "20": 10, "25": 4, "30": 1, "35": 3, "40": 2, "50": 2, "55": 2, "60": 1}, "8": {"20": 1, "25": 6, "30": 10, "35": 4, "50": 1, "55": 1, "60": 4, "65": 3, "70": 1}, "9": {"10": 4, "15": 6, "20": 3, "25": 2}}, "2017": {"6": {"15": 2, "20": 5, "25": 4, "30": 2, "40": 1, "45": 2, "50": 1, "55": 1, "65": 2, "70": 2, "75": 1, "85": 7}, "7": {"5": 19, "10": 8, "15": 4}, "8": {"10": 1, "15": 1, "20": 2, "25": 2, "30": 2, "35": 7, "40": 4, "45": 4, "55": 3, "60": 2, "65": 1, "75": 2}, "9": {"15": 2, "20": 1, "25": 1, "30": 1, "35": 1, "65": 1, "85": 8}}, "2018": {"6": {"5": 28, "10": 2}, "7": {"0": 21, "5": 10}, "8": {"0": 19, "5": 8, "10": 4}}, "2019": {"6": {"15": 1, "25": 2, "30": 2, "35": 7, "40": 4, "45": 2, "55": 1, "65": 4, "70": 1, "85": 6}, "7": {"5": 4, "10": 9, "15": 8, "20": 2, "30": 1, "40": 3, "50": 2, "60": 2}, "8": {"10": 1, "15": 3, "20": 1, "25": 2, "35": 2, "40": 2, "55": 2, "60": 2, "70": 2, "75": 1, "80": 1, "85": 12}, "9": {"30": 2, "40": 2, "45": 3, "50": 2, "55": 1, "65": 1, "70": 2, "80": 2}}, "2020": {"6": {"20": 2, "25": 6, "30": 9, "35": 4, "40": 1, "45": 2, "55": 1, "70": 1, "75": 2, "85": 2}, "7": {"20": 8, "25": 4, "30": 6, "35": 5, "40": 2, "45": 1, "80": 1, "85": 4}, "8": {"5": 2, "10": 3, "15": 1, "20": 7, "25": 5, "30": 3, "35": 2, "40": 1, "45": 1, "50": 2, "65": 1, "80": 1, "85": 2}, "9": {"10": 2, "15": 11, "20": 2}}, "2021": {"6": {"5": 1, "10": 7, "15": 5, "20": 7, "25": 1, "30": 3, "35": 1, "40": 1, "45": 2, "55": 1, "65": 1}, "7": {"5": 4, "10": 13, "15": 5, "20": 1, "25": 3, "35": 1, "40": 2, "50": 1, "60": 1}, "8": {"5": 6, "10": 8, "15": 6, "20": 3, "25": 2, "35": 6}}, "2022": {"6": {"0": 9, "5": 12, "10": 9}, "7": {"0": 31}, "8": {"0": 25, "5": 6}}, "2023": {"6": {"5": 1, "10": 18, "15": 6, "20": 2, "25": 2, "30": 1}, "7": {"5": 1, "10": 4, "15": 4, "20": 3, "25": 3, "30": 5, "35": 1, "40": 4, "45": 1, "50": 1, "55": 2, "65": 1, "70": 1}, "8": {"10": 7, "15": 6, "20": 1, "25": 1, "30": 2, "35": 2, "45": 1, "50": 2, "55": 3, "60": 2, "65": 2, "75": 1, "80": 1}}, "2024": {"6": {"20": 1, "25": 1, "30": 1, "35": 1, "40": 2, "45": 2, "50": 3, "55": 4, "60": 3, "65": 1, "70": 1, "75": 1, "80": 1, "85": 8}, "7": {"15": 1, "20": 5, "25": 1, "30": 1, "40": 3, "45": 2, "50": 1, "55": 2, "60": 4, "65": 4, "70": 2, "75": 1, "80": 2, "85": 2}, "8": {"15": 3, "20": 3, "25": 6, "30": 3, "35": 2, "40": 1, "45": 2, "65": 2, "75": 1, "80": 1, "85": 7}}, "2025": {"6": {"5": 5, "10": 8, "15": 6, "20": 4, "25": 6, "30": 1}, "7": {"0": 8, "5": 23}, "8": {"5": 13, "10": 16, "15": 1, "25": 1}}};
+const FLY_DATA = {"2016": {"6": {"20": {"Sone 2": 10, "Sone 4 og 5": 4, "Teinefoss Fluefiske": 11}, "25": {"Buhølen": 1, "Sone 1": 1, "Sone 2": 4, "Sone 3": 3, "Sone 4 og 5": 4}, "30": {"Sone 2": 24, "Sone 4 og 5": 5, "Teinefoss Fluefiske": 5}, "35": {"Sone 2": 2}, "45": {"Sone 3": 1, "Teinefoss Fluefiske": 4}, "55": {"Sone 2": 2}, "60": {"Sone 2": 1}, "65": {"Sone 2": 1}, "70": {"Sone 2": 2}, "75": {"Sone 2": 7, "Sone 3": 1}}, "7": {"10": {"Sone 2": 4}, "15": {"Sone 2": 2, "Sone 3": 4, "Sone 4 og 5": 1, "Teinefoss Fluefiske": 1}, "20": {"Buhølen": 2, "Laksefoss": 3, "Sone 1": 1, "Sone 2": 9, "Sone 3": 3, "Sone 4 og 5": 11, "Teinefoss Fluefiske": 1}, "25": {"Sone 1": 2, "Sone 2": 12, "Sone 3": 2, "Sone 4 og 5": 5}, "30": {"Sone 3": 1, "Sone 4 og 5": 4}, "35": {"Sone 1": 2, "Sone 2": 8, "Sone 3": 3, "Sone 4 og 5": 6}, "40": {"Sone 1": 2, "Sone 2": 3, "Sone 3": 1, "Sone 4 og 5": 3}, "50": {"Sone 1": 1, "Sone 2": 4, "Sone 3": 1, "Sone 4 og 5": 2}, "55": {"Sone 2": 3, "Sone 4 og 5": 4}, "60": {"Sone 2": 3, "Sone 3": 1, "Sone 4 og 5": 2}}, "8": {"20": {"Sone 3": 1}, "25": {"Sone 1": 1, "Sone 2": 7, "Sone 3": 4, "Sone 4 og 5": 7}, "30": {"Buhølen": 2, "Sone 2": 2, "Sone 3": 6, "Sone 4 og 5": 16}, "35": {"Laksefoss": 1, "Sone 1": 1, "Sone 2": 2, "Sone 3": 8, "Sone 4 og 5": 18}, "50": {"Sone 1": 1, "Sone 3": 3, "Sone 4 og 5": 4}, "55": {"Buhølen": 1, "Laksefoss": 2, "Sone 3": 3, "Sone 4 og 5": 7}, "60": {"Buhølen": 1, "Laksefoss": 2, "Sone 2": 6, "Sone 3": 6, "Sone 4 og 5": 16}, "65": {"Buhølen": 3, "Laksefoss": 4, "Sone 2": 3, "Sone 3": 3, "Sone 4 og 5": 12}, "70": {"Buhølen": 1, "Laksefoss": 2, "Sone 3": 1, "Sone 4 og 5": 2}}, "9": {"10": {"Sone 1": 1, "Sone 3": 1}, "15": {"Buhølen": 1, "Laksefoss": 1, "Sone 1": 6, "Sone 3": 3, "Sone 4 og 5": 3}, "20": {"Sone 1": 2, "Sone 3": 2, "Sone 4 og 5": 2}, "25": {"Laksefoss": 1, "Sone 3": 3, "Sone 4 og 5": 3, "Teinefoss Fluefiske": 1}}}, "2017": {"6": {"15": {"Buhølen": 1, "Sone 2": 5, "Sone 3": 1, "Sone 4 og 5": 1, "Teinefoss Fluefiske": 4}, "20": {"Sone 2": 10, "Sone 3": 6, "Sone 4 og 5": 6, "Teinefoss Fluefiske": 8}, "25": {"Laksefoss": 2, "Sone 2": 4, "Sone 3": 4, "Sone 4 og 5": 4, "Teinefoss Fluefiske": 4}, "30": {"Sone 2": 8, "Sone 4 og 5": 1}, "40": {"Sone 3": 1, "Sone 4 og 5": 2}, "45": {"Laksefoss": 1, "Sone 2": 5, "Sone 4 og 5": 2}, "50": {"Sone 2": 1}, "55": {"Sone 4 og 5": 2}, "65": {"Sone 2": 4, "Sone 3": 1, "Sone 4 og 5": 2}, "70": {"Sone 2": 9, "Sone 3": 1, "Sone 4 og 5": 4}, "75": {"Sone 2": 4, "Sone 3": 2}, "85": {"Sone 1": 1, "Sone 2": 16, "Sone 3": 2, "Sone 4 og 5": 6, "Teinefoss Fluefiske": 1}}, "7": {"5": {"Laksefoss": 1, "Sone 1": 1, "Sone 2": 4, "Sone 4 og 5": 4, "Teinefoss Fluefiske": 1}, "10": {"Sone 2": 1, "Sone 4 og 5": 2, "Teinefoss Fluefiske": 1}, "15": {"Buhølen": 1}}, "8": {"10": {"Sone 4 og 5": 1}, "15": {"Buhølen": 1, "Sone 4 og 5": 1}, "20": {"Sone 1": 2, "Sone 2": 1, "Sone 4 og 5": 3}, "25": {"Sone 3": 1, "Sone 4 og 5": 6, "Teinefoss Fluefiske": 2}, "30": {"Sone 1": 5, "Sone 4 og 5": 4}, "35": {"Buhølen": 2, "Sone 1": 10, "Sone 2": 5, "Sone 3": 3, "Sone 4 og 5": 27}, "40": {"Laksefoss": 2, "Sone 1": 5, "Sone 2": 4, "Sone 3": 2, "Sone 4 og 5": 16}, "45": {"Laksefoss": 1, "Sone 2": 6, "Sone 3": 4, "Sone 4 og 5": 23}, "55": {"Buhølen": 1, "Laksefoss": 2, "Sone 1": 3, "Sone 2": 7, "Sone 3": 2, "Sone 4 og 5": 13}, "60": {"Buhølen": 1, "Laksefoss": 4, "Sone 2": 4, "Sone 3": 2, "Sone 4 og 5": 8}, "65": {"Sone 2": 5, "Sone 3": 5, "Sone 4 og 5": 12}, "75": {"Sone 2": 4, "Sone 3": 3, "Sone 4 og 5": 9}}, "9": {"15": {"Sone 1": 1}, "20": {"Laksefoss": 1, "Sone 4 og 5": 1}, "25": {"Laksefoss": 1}, "30": {"Buhølen": 1, "Sone 1": 1, "Sone 4 og 5": 3}, "35": {"Sone 4 og 5": 2}, "65": {"Sone 3": 2, "Sone 4 og 5": 3}, "85": {"Buhølen": 1, "Sone 1": 21, "Sone 2": 1, "Sone 3": 1, "Sone 4 og 5": 13}}}, "2018": {"6": {"5": {"Sone 1": 1, "Sone 2": 7}, "10": {"Sone 1": 1}}, "7": {"5": {"Sone 2": 1}}, "8": {"0": {"Sone 2": 5}, "5": {"Sone 1": 1, "Sone 2": 7, "Teinefoss Fluefiske": 1}, "10": {"Sone 2": 1, "Sone 4 og 5": 2, "Teinefoss Fluefiske": 5}}}, "2019": {"6": {"15": {"Sone 2": 3}, "25": {"Sone 2": 4, "Sone 3": 3, "Sone 4 og 5": 1}, "30": {"Sone 2": 9, "Sone 3": 2, "Sone 4 og 5": 1}, "35": {"Sone 2": 18, "Sone 3": 1, "Sone 4 og 5": 1}, "40": {"Sone 1": 1, "Sone 2": 13, "Sone 3": 1, "Sone 4 og 5": 2}, "45": {"Sone 2": 6, "Sone 3": 1}, "55": {"Sone 2": 4}, "65": {"Sone 2": 15, "Sone 4 og 5": 1}, "70": {"Sone 2": 6, "Sone 3": 1, "Sone 4 og 5": 1}, "85": {"Laksefoss": 1, "Sone 2": 5, "Sone 3": 1}}, "7": {"5": {"Sone 1": 2}, "10": {"Sone 2": 9, "Sone 3": 1, "Sone 4 og 5": 2, "Teinefoss Fluefiske": 1}, "15": {"Sone 2": 8, "Sone 3": 2, "Sone 4 og 5": 4}, "20": {"Laksefoss": 1, "Sone 2": 5, "Sone 3": 3, "Sone 4 og 5": 5}, "30": {"Buhølen": 1, "Sone 3": 3, "Sone 4 og 5": 5}, "40": {"Sone 2": 11, "Sone 4 og 5": 3}, "50": {"Sone 2": 10, "Sone 3": 2}, "60": {"Laksefoss": 1, "Sone 2": 19, "Sone 4 og 5": 2}}, "8": {"15": {"Buhølen": 2, "Sone 1": 1, "Sone 2": 1, "Sone 3": 3, "Sone 4 og 5": 3}, "20": {"Laksefoss": 1, "Sone 2": 1, "Sone 4 og 5": 1}, "25": {"Sone 1": 3, "Sone 2": 5, "Sone 3": 3, "Sone 4 og 5": 6}, "35": {"Sone 1": 2, "Sone 2": 3, "Sone 3": 4, "Sone 4 og 5": 3}, "40": {"Sone 1": 5, "Sone 2": 5, "Sone 3": 3, "Sone 4 og 5": 9}, "55": {"Buhølen": 1, "Laksefoss": 2, "Sone 2": 3, "Sone 3": 1, "Sone 4 og 5": 11}, "60": {"Laksefoss": 3, "Sone 1": 1, "Sone 2": 10, "Sone 3": 4, "Sone 4 og 5": 6}, "70": {"Buhølen": 3, "Sone 2": 5, "Sone 3": 3, "Sone 4 og 5": 5}, "75": {"Laksefoss": 1, "Sone 1": 10, "Sone 2": 5, "Sone 3": 1, "Sone 4 og 5": 7}, "80": {"Buhølen": 2, "Sone 1": 2, "Sone 2": 6, "Sone 3": 6, "Sone 4 og 5": 7}, "85": {"Buhølen": 7, "Sone 1": 25, "Sone 2": 14, "Sone 3": 10, "Sone 4 og 5": 46}}, "9": {"30": {"Buhølen": 1, "Sone 1": 14, "Sone 2": 1}, "40": {"Sone 1": 2, "Sone 2": 1, "Sone 3": 4, "Sone 4 og 5": 8}, "45": {"Buhølen": 1, "Sone 1": 7, "Sone 2": 4, "Sone 3": 1, "Sone 4 og 5": 7}, "50": {"Buhølen": 5, "Sone 2": 2, "Sone 4 og 5": 12}, "55": {"Laksefoss": 2, "Sone 1": 1, "Sone 4 og 5": 1}, "65": {"Sone 1": 1, "Sone 2": 12, "Sone 3": 1, "Sone 4 og 5": 8}, "70": {"Buhølen": 2, "Laksefoss": 2, "Sone 2": 22, "Sone 3": 9, "Sone 4 og 5": 21}, "80": {"Sone 1": 4, "Sone 3": 4, "Sone 4 og 5": 17}}}, "2020": {"6": {"20": {"Sone 2": 6}, "25": {"Sone 2": 13, "Teinefoss Fluefiske": 1}, "30": {"Sone 2": 15, "Sone 3": 1}, "35": {"Sone 2": 14, "Sone 3": 1}, "40": {"Sone 2": 11}, "45": {"Sone 2": 14, "Sone 3": 1}, "75": {"Sone 2": 5}, "85": {"Sone 2": 2}}, "7": {"20": {"Buhølen": 2, "Sone 1": 3, "Sone 2": 6, "Sone 3": 3, "Sone 4 og 5": 5, "Teinefoss Fluefiske": 1}, "25": {"Sone 2": 6, "Sone 3": 1, "Sone 4 og 5": 1}, "30": {"Laksefoss": 1, "Sone 2": 8, "Sone 3": 2, "Sone 4 og 5": 2, "Teinefoss Fluefiske": 2}, "35": {"Sone 1": 1, "Sone 2": 18, "Sone 4 og 5": 1}, "40": {"Sone 2": 5, "Sone 3": 1}, "45": {"Buhølen": 1, "Sone 1": 1, "Sone 2": 3, "Sone 3": 3, "Sone 4 og 5": 5}, "80": {"Sone 2": 4, "Sone 3": 7, "Sone 4 og 5": 10}, "85": {"Buhølen": 4, "Sone 1": 1, "Sone 2": 2, "Sone 3": 1, "Sone 4 og 5": 7}}, "8": {"5": {"Sone 3": 1, "Teinefoss Fluefiske": 1}, "10": {"Sone 2": 2, "Sone 4 og 5": 1, "Teinefoss Fluefiske": 2}, "15": {"Sone 4 og 5": 4}, "20": {"Buhølen": 2, "Sone 1": 6, "Sone 2": 6, "Sone 3": 4, "Sone 4 og 5": 17}, "25": {"Buhølen": 1, "Sone 1": 6, "Sone 2": 5, "Sone 3": 3, "Sone 4 og 5": 7}, "30": {"Sone 2": 4, "Sone 4 og 5": 1}, "35": {"Sone 2": 3, "Sone 4 og 5": 3}, "40": {"Sone 2": 6, "Sone 4 og 5": 2}, "45": {"Buhølen": 2, "Sone 2": 3}, "50": {"Sone 1": 5, "Sone 2": 6, "Sone 3": 2, "Sone 4 og 5": 14}, "65": {"Sone 2": 2, "Sone 4 og 5": 6}, "80": {"Sone 1": 1, "Sone 2": 7, "Sone 3": 1, "Sone 4 og 5": 5}, "85": {"Buhølen": 1, "Sone 1": 1, "Sone 2": 3, "Sone 3": 1, "Sone 4 og 5": 7}}, "9": {"10": {"Buhølen": 1, "Sone 1": 6, "Sone 4 og 5": 1}, "15": {"Buhølen": 6, "Sone 1": 20, "Sone 2": 6, "Sone 3": 4, "Sone 4 og 5": 13}, "20": {"Sone 2": 3, "Sone 3": 3}}}, "2021": {"6": {"10": {"Sone 1": 1, "Sone 2": 2, "Teinefoss Fluefiske": 2}, "15": {"Sone 2": 1, "Sone 3": 3, "Teinefoss Fluefiske": 1}, "20": {"Sone 1": 2, "Sone 2": 4, "Sone 3": 1, "Teinefoss Fluefiske": 2}, "25": {"Sone 2": 2}, "30": {"Sone 2": 4, "Sone 3": 3}, "35": {"Sone 3": 1}, "40": {"Sone 2": 2, "Sone 3": 1}, "45": {"Sone 2": 9}, "55": {"Sone 2": 10}, "65": {"Sone 2": 8}}, "7": {"5": {"Sone 2": 2}, "10": {"Sone 1": 1, "Sone 2": 4, "Sone 3": 2}, "15": {"Sone 2": 5, "Sone 3": 1, "Sone 4 og 5": 6}, "20": {"Sone 3": 1, "Sone 4 og 5": 1}, "25": {"Sone 2": 2, "Teinefoss Fluefiske": 1}, "40": {"Sone 4 og 5": 2}, "50": {"Sone 2": 2}, "60": {"Buhølen": 1, "Laksefoss": 1, "Sone 4 og 5": 1}}, "8": {"5": {"Laksefoss": 1, "Sone 3": 1, "Sone 4 og 5": 3}, "10": {"Sone 1": 3, "Sone 2": 6, "Sone 3": 1, "Sone 4 og 5": 6, "Teinefoss Fluefiske": 1}, "15": {"Buhølen": 3, "Sone 1": 1, "Sone 2": 1, "Sone 3": 1, "Sone 4 og 5": 5, "Teinefoss Fluefiske": 3}, "20": {"Buhølen": 3, "Sone 4 og 5": 5, "Teinefoss Fluefiske": 2}, "25": {"Buhølen": 1, "Sone 2": 6, "Sone 3": 4, "Sone 4 og 5": 6}, "35": {"Buhølen": 2, "Laksefoss": 3, "Sone 1": 1, "Sone 2": 5, "Sone 3": 7, "Sone 4 og 5": 16}}}, "2022": {"6": {"0": {"Sone 2": 6}, "5": {"Sone 2": 2, "Sone 4 og 5": 3, "Teinefoss Fluefiske": 1}, "10": {"Sone 2": 7, "Sone 4 og 5": 6, "Teinefoss Fluefiske": 5}}, "7": {"0": {"Sone 1": 2, "Sone 2": 33, "Sone 3": 1}}, "8": {"0": {"Sone 1": 12, "Sone 2": 3}, "5": {"Buhølen": 2, "Sone 1": 1, "Sone 2": 6, "Sone 3": 7, "Sone 4 og 5": 11}}}, "2023": {"6": {"5": {"Teinefoss Fluefiske": 1}, "10": {"Buhølen": 1, "Sone 2": 10, "Sone 3": 6, "Sone 4 og 5": 1, "Teinefoss Fluefiske": 6}, "15": {"Sone 2": 3, "Sone 3": 2, "Teinefoss Fluefiske": 2}, "20": {"Sone 2": 1, "Teinefoss Fluefiske": 1}, "25": {"Sone 2": 5, "Sone 3": 1, "Sone 4 og 5": 1, "Teinefoss Fluefiske": 1}, "30": {"Sone 2": 12}}, "7": {"5": {"Sone 2": 1}, "10": {"Sone 2": 1, "Teinefoss Fluefiske": 2}, "15": {"Buhølen": 1, "Sone 1": 1, "Sone 3": 2, "Sone 4 og 5": 8, "Teinefoss Fluefiske": 3}, "20": {"Buhølen": 2, "Sone 1": 1, "Sone 2": 3, "Sone 3": 5, "Sone 4 og 5": 2, "Teinefoss Fluefiske": 6}, "25": {"Sone 2": 1, "Sone 3": 6, "Sone 4 og 5": 4}, "30": {"Laksefoss": 1, "Sone 2": 2, "Sone 3": 9, "Sone 4 og 5": 14, "Teinefoss Fluefiske": 5}, "35": {"Sone 2": 2, "Sone 4 og 5": 3}, "40": {"Laksefoss": 1, "Sone 2": 7, "Sone 3": 4, "Sone 4 og 5": 5, "Teinefoss Fluefiske": 2}, "45": {"Buhølen": 1, "Sone 2": 1, "Sone 3": 1, "Sone 4 og 5": 1}, "50": {"Sone 2": 3, "Sone 4 og 5": 3}, "55": {"Buhølen": 2, "Sone 3": 2, "Sone 4 og 5": 3}, "65": {"Laksefoss": 1, "Sone 3": 2, "Sone 4 og 5": 3}, "70": {"Laksefoss": 2, "Sone 3": 2, "Sone 4 og 5": 2, "Teinefoss Fluefiske": 1}}, "8": {"10": {"Buhølen": 2, "Sone 1": 1, "Sone 3": 6, "Sone 4 og 5": 7, "Teinefoss Fluefiske": 3}, "15": {"Buhølen": 1, "Laksefoss": 1, "Sone 2": 1, "Sone 3": 4, "Sone 4 og 5": 8, "Teinefoss Fluefiske": 5}, "20": {"Sone 3": 2, "Sone 4 og 5": 1, "Teinefoss Fluefiske": 1}, "25": {"Sone 1": 1, "Sone 2": 1, "Sone 4 og 5": 5}, "30": {"Sone 2": 5, "Sone 3": 6, "Sone 4 og 5": 9}, "35": {"Laksefoss": 1, "Sone 2": 2, "Sone 3": 1, "Sone 4 og 5": 15}, "45": {"Sone 1": 5, "Sone 4 og 5": 3}, "50": {"Buhølen": 3, "Laksefoss": 1, "Sone 1": 1, "Sone 2": 3, "Sone 4 og 5": 6}, "55": {"Buhølen": 3, "Sone 1": 8, "Sone 2": 1, "Sone 3": 4, "Sone 4 og 5": 14}, "60": {"Buhølen": 1, "Sone 1": 3, "Sone 3": 4, "Sone 4 og 5": 7}, "65": {"Sone 2": 2, "Sone 3": 2, "Sone 4 og 5": 7}, "75": {"Sone 1": 5, "Sone 2": 1, "Sone 3": 1, "Sone 4 og 5": 7}, "80": {"Sone 3": 1, "Sone 4 og 5": 8}}}, "2024": {"6": {"30": {"Sone 2": 1, "Sone 4 og 5": 1}, "35": {"Sone 3": 1}, "40": {"Sone 2": 1}, "45": {"Sone 1": 1, "Sone 2": 1, "Sone 4 og 5": 2}, "50": {"Sone 3": 1, "Sone 4 og 5": 2}, "55": {"Sone 2": 4, "Sone 4 og 5": 2}, "60": {"Sone 2": 1}, "70": {"Sone 2": 2}, "80": {"Sone 1": 2}, "85": {"Sone 1": 8, "Sone 2": 6, "Sone 3": 1, "Sone 4 og 5": 3}}, "7": {"40": {"Sone 4 og 5": 1}, "45": {"Sone 2": 2, "Sone 3": 1}, "50": {"Buhølen": 2, "Sone 2": 1, "Sone 3": 3, "Sone 4 og 5": 2}, "55": {"Sone 2": 5, "Sone 3": 1, "Sone 4 og 5": 1}, "60": {"Sone 1": 2, "Sone 2": 13, "Sone 3": 1, "Sone 4 og 5": 5, "Teinefoss Fluefiske": 1}, "65": {"Laksefoss": 1, "Sone 1": 1, "Sone 2": 3, "Sone 3": 4}, "70": {"Sone 1": 1, "Sone 2": 1, "Sone 3": 1, "Sone 4 og 5": 2}, "80": {"Sone 2": 2, "Sone 4 og 5": 3}, "85": {"Sone 2": 6}}, "8": {"15": {"Sone 2": 1, "Sone 3": 1, "Sone 4 og 5": 1}, "20": {"Laksefoss": 1, "Sone 4 og 5": 1}, "25": {"Laksefoss": 1, "Sone 2": 1, "Sone 3": 2, "Sone 4 og 5": 9}, "30": {"Sone 2": 1, "Sone 3": 1, "Sone 4 og 5": 4}, "35": {"Sone 3": 3, "Sone 4 og 5": 5}, "40": {"Sone 4 og 5": 4}, "45": {"Sone 1": 1, "Sone 3": 1, "Sone 4 og 5": 5}}}, "2025": {"6": {"5": {"Sone 2": 1}, "10": {"Sone 2": 2, "Sone 3": 1, "Teinefoss Fluefiske": 2}, "15": {"Sone 3": 4}, "20": {"Sone 2": 2}, "25": {"Sone 4 og 5": 1}}, "7": {"5": {"Sone 2": 1}}, "8": {"5": {"Sone 2": 6, "Sone 3": 3, "Sone 4 og 5": 7}, "10": {"Buhølen": 1, "Laksefoss": 1, "Sone 1": 1, "Sone 2": 10, "Sone 3": 19, "Sone 4 og 5": 11, "Teinefoss Fluefiske": 2}, "15": {"Sone 2": 1, "Sone 3": 2, "Sone 4 og 5": 6}, "25": {"Sone 2": 1, "Sone 3": 4, "Sone 4 og 5": 8}}}};
+const LAKS_DATA = {"2016": {"6": {"15": {"Sone 2": 1}, "20": {"Buhølen": 1, "Sone 2": 17, "Sone 3": 2, "Sone 4 og 5": 6, "Teinefoss Fluefiske": 11}, "25": {"Buhølen": 1, "Sone 2": 6, "Sone 3": 2, "Sone 4 og 5": 5}, "30": {"Sone 2": 26, "Sone 4 og 5": 8, "Teinefoss Fluefiske": 5}, "35": {"Laksefoss": 2, "Sone 2": 6}, "45": {"Sone 2": 2, "Sone 3": 1, "Teinefoss Fluefiske": 4}, "55": {"Sone 2": 2}, "60": {"Sone 2": 1}, "65": {"Sone 2": 1}, "70": {"Sone 2": 2}, "75": {"Sone 2": 10, "Sone 3": 1}}, "7": {"10": {"Sone 2": 4}, "15": {"Buhølen": 3, "Laksefoss": 1, "Sone 2": 4, "Sone 3": 4, "Sone 4 og 5": 5, "Teinefoss Fluefiske": 1}, "20": {"Buhølen": 4, "Laksefoss": 4, "Sone 1": 1, "Sone 2": 9, "Sone 3": 10, "Sone 4 og 5": 21, "Teinefoss Fluefiske": 1}, "25": {"Buhølen": 1, "Sone 2": 12, "Sone 3": 3, "Sone 4 og 5": 7}, "30": {"Sone 3": 1, "Sone 4 og 5": 4}, "35": {"Laksefoss": 2, "Sone 1": 1, "Sone 2": 7, "Sone 3": 3, "Sone 4 og 5": 8}, "40": {"Sone 1": 1, "Sone 2": 5, "Sone 3": 1, "Sone 4 og 5": 4}, "50": {"Sone 1": 1, "Sone 2": 5, "Sone 3": 1, "Sone 4 og 5": 4}, "55": {"Sone 2": 3, "Sone 4 og 5": 6}, "60": {"Sone 2": 3, "Sone 4 og 5": 2}}, "8": {"20": {"Laksefoss": 2, "Sone 3": 2, "Sone 4 og 5": 1}, "25": {"Laksefoss": 3, "Sone 1": 3, "Sone 2": 7, "Sone 3": 7, "Sone 4 og 5": 21}, "30": {"Buhølen": 3, "Laksefoss": 4, "Sone 1": 3, "Sone 2": 2, "Sone 3": 6, "Sone 4 og 5": 33}, "35": {"Laksefoss": 4, "Sone 1": 1, "Sone 2": 2, "Sone 3": 11, "Sone 4 og 5": 21}, "50": {"Sone 3": 3, "Sone 4 og 5": 7}, "55": {"Buhølen": 1, "Laksefoss": 3, "Sone 3": 16, "Sone 4 og 5": 8}, "60": {"Buhølen": 1, "Laksefoss": 3, "Sone 2": 5, "Sone 3": 8, "Sone 4 og 5": 23}, "65": {"Buhølen": 3, "Laksefoss": 4, "Sone 2": 4, "Sone 3": 10, "Sone 4 og 5": 17}, "70": {"Buhølen": 1, "Laksefoss": 2, "Sone 3": 2, "Sone 4 og 5": 2}}, "9": {"10": {"Sone 3": 1, "Sone 4 og 5": 1}, "15": {"Buhølen": 1, "Laksefoss": 1, "Sone 3": 5, "Sone 4 og 5": 3}, "20": {"Sone 3": 1, "Sone 4 og 5": 2}, "25": {"Laksefoss": 1, "Sone 3": 3, "Sone 4 og 5": 3, "Teinefoss Fluefiske": 1}}}, "2017": {"6": {"15": {"Buhølen": 1, "Sone 2": 5, "Sone 3": 2, "Sone 4 og 5": 3, "Teinefoss Fluefiske": 4}, "20": {"Laksefoss": 1, "Sone 2": 19, "Sone 3": 8, "Sone 4 og 5": 9, "Teinefoss Fluefiske": 8}, "25": {"Laksefoss": 3, "Sone 2": 8, "Sone 3": 2, "Sone 4 og 5": 6, "Teinefoss Fluefiske": 4}, "30": {"Sone 1": 1, "Sone 2": 11, "Sone 4 og 5": 2}, "40": {"Sone 3": 1, "Sone 4 og 5": 2}, "45": {"Laksefoss": 3, "Sone 2": 6, "Sone 4 og 5": 2}, "50": {"Sone 2": 1, "Sone 3": 1, "Sone 4 og 5": 1}, "55": {"Laksefoss": 1, "Sone 2": 1, "Sone 4 og 5": 2}, "65": {"Sone 2": 6, "Sone 3": 2, "Sone 4 og 5": 2}, "70": {"Sone 2": 11, "Sone 3": 1, "Sone 4 og 5": 4}, "75": {"Sone 1": 1, "Sone 2": 4, "Sone 3": 2}, "85": {"Sone 2": 21, "Sone 3": 4, "Sone 4 og 5": 8, "Teinefoss Fluefiske": 1}}, "7": {"5": {"Laksefoss": 2, "Sone 2": 10, "Sone 3": 1, "Sone 4 og 5": 4, "Teinefoss Fluefiske": 1}, "10": {"Laksefoss": 1, "Sone 1": 1, "Sone 2": 2, "Sone 3": 1, "Sone 4 og 5": 3, "Teinefoss Fluefiske": 1}, "15": {"Buhølen": 1, "Laksefoss": 1, "Sone 2": 4, "Sone 4 og 5": 2}}, "8": {"10": {"Sone 3": 4, "Sone 4 og 5": 1}, "15": {"Buhølen": 1, "Sone 3": 1, "Sone 4 og 5": 1}, "20": {"Sone 2": 1, "Sone 4 og 5": 5}, "25": {"Buhølen": 1, "Sone 1": 1, "Sone 3": 1, "Sone 4 og 5": 6, "Teinefoss Fluefiske": 2}, "30": {"Sone 1": 1, "Sone 2": 1, "Sone 4 og 5": 7}, "35": {"Buhølen": 2, "Laksefoss": 3, "Sone 1": 1, "Sone 2": 7, "Sone 3": 8, "Sone 4 og 5": 33}, "40": {"Buhølen": 1, "Laksefoss": 2, "Sone 1": 1, "Sone 2": 6, "Sone 3": 2, "Sone 4 og 5": 26}, "45": {"Laksefoss": 2, "Sone 2": 7, "Sone 3": 5, "Sone 4 og 5": 27}, "55": {"Buhølen": 1, "Laksefoss": 2, "Sone 2": 10, "Sone 3": 4, "Sone 4 og 5": 16}, "60": {"Buhølen": 1, "Laksefoss": 5, "Sone 1": 1, "Sone 2": 6, "Sone 3": 3, "Sone 4 og 5": 8}, "65": {"Laksefoss": 2, "Sone 2": 6, "Sone 3": 3, "Sone 4 og 5": 13}, "75": {"Sone 2": 5, "Sone 3": 4, "Sone 4 og 5": 9}}, "9": {"15": {"Sone 3": 1}, "20": {"Laksefoss": 1, "Sone 4 og 5": 1}, "25": {"Laksefoss": 2}, "30": {"Buhølen": 1, "Sone 1": 1, "Sone 4 og 5": 4}, "35": {"Sone 4 og 5": 2}, "65": {"Sone 3": 2, "Sone 4 og 5": 3}, "85": {"Buhølen": 1, "Sone 1": 9, "Sone 2": 1, "Sone 3": 5, "Sone 4 og 5": 15}}}, "2018": {"6": {"5": {"Sone 2": 23}, "10": {"Sone 2": 1}}, "7": {"0": {"Sone 1": 2, "Sone 2": 1}, "5": {"Sone 2": 1}}, "8": {"0": {"Sone 1": 1, "Sone 2": 5, "Sone 3": 1}, "5": {"Laksefoss": 1, "Sone 1": 1, "Sone 2": 19, "Sone 3": 2, "Teinefoss Fluefiske": 2}, "10": {"Sone 2": 3, "Sone 4 og 5": 3, "Teinefoss Fluefiske": 5}}}, "2019": {"6": {"15": {"Sone 2": 2}, "25": {"Sone 2": 7, "Sone 4 og 5": 1}, "30": {"Sone 2": 14, "Sone 3": 1, "Sone 4 og 5": 1}, "35": {"Sone 2": 17, "Sone 3": 2, "Sone 4 og 5": 1}, "40": {"Sone 2": 10, "Sone 3": 1, "Sone 4 og 5": 2}, "45": {"Sone 2": 10, "Sone 3": 1}, "55": {"Sone 2": 9}, "65": {"Sone 2": 16, "Sone 4 og 5": 1}, "70": {"Sone 2": 6, "Sone 3": 1, "Sone 4 og 5": 1}, "85": {"Laksefoss": 1, "Sone 2": 12, "Sone 3": 1, "Sone 4 og 5": 1}}, "7": {"5": {"Sone 2": 12}, "10": {"Buhølen": 1, "Sone 2": 26, "Sone 3": 1, "Sone 4 og 5": 1, "Teinefoss Fluefiske": 1}, "15": {"Laksefoss": 1, "Sone 2": 20, "Sone 3": 2, "Sone 4 og 5": 5, "Teinefoss Fluefiske": 1}, "20": {"Laksefoss": 1, "Sone 2": 8, "Sone 3": 2, "Sone 4 og 5": 6}, "30": {"Buhølen": 1, "Sone 2": 6, "Sone 3": 2, "Sone 4 og 5": 5}, "40": {"Sone 2": 18, "Sone 4 og 5": 4}, "50": {"Sone 2": 10, "Sone 3": 2, "Sone 4 og 5": 1}, "60": {"Laksefoss": 1, "Sone 2": 20, "Sone 3": 1, "Sone 4 og 5": 2}}, "8": {"15": {"Buhølen": 2, "Laksefoss": 2, "Sone 2": 7, "Sone 3": 4, "Sone 4 og 5": 4}, "20": {"Laksefoss": 1, "Sone 2": 1, "Sone 4 og 5": 2}, "25": {"Buhølen": 1, "Sone 2": 9, "Sone 3": 2, "Sone 4 og 5": 7}, "35": {"Laksefoss": 1, "Sone 2": 7, "Sone 3": 5, "Sone 4 og 5": 6}, "40": {"Sone 1": 3, "Sone 2": 8, "Sone 3": 4, "Sone 4 og 5": 13}, "55": {"Buhølen": 1, "Laksefoss": 7, "Sone 2": 4, "Sone 3": 3, "Sone 4 og 5": 13}, "60": {"Laksefoss": 3, "Sone 1": 1, "Sone 2": 10, "Sone 3": 6, "Sone 4 og 5": 12}, "70": {"Buhølen": 3, "Laksefoss": 1, "Sone 2": 4, "Sone 3": 2, "Sone 4 og 5": 13}, "75": {"Laksefoss": 1, "Sone 2": 5, "Sone 3": 2, "Sone 4 og 5": 9}, "80": {"Buhølen": 3, "Sone 2": 5, "Sone 3": 4, "Sone 4 og 5": 9}, "85": {"Buhølen": 7, "Laksefoss": 2, "Sone 1": 6, "Sone 2": 19, "Sone 3": 19, "Sone 4 og 5": 58}}, "9": {"30": {"Buhølen": 1, "Sone 2": 5}, "40": {"Laksefoss": 1, "Sone 2": 1, "Sone 3": 4, "Sone 4 og 5": 12}, "45": {"Buhølen": 1, "Sone 1": 3, "Sone 2": 5, "Sone 3": 1, "Sone 4 og 5": 7}, "50": {"Buhølen": 6, "Sone 1": 1, "Sone 2": 7, "Sone 4 og 5": 12}, "55": {"Laksefoss": 2, "Sone 2": 1, "Sone 4 og 5": 1}, "65": {"Buhølen": 1, "Sone 2": 12, "Sone 3": 1, "Sone 4 og 5": 11}, "70": {"Buhølen": 2, "Laksefoss": 3, "Sone 2": 23, "Sone 3": 7, "Sone 4 og 5": 25}, "80": {"Buhølen": 1, "Laksefoss": 2, "Sone 2": 2, "Sone 3": 4, "Sone 4 og 5": 21}}}, "2020": {"6": {"20": {"Sone 2": 6}, "25": {"Sone 2": 26, "Teinefoss Fluefiske": 1}, "30": {"Sone 2": 15}, "35": {"Sone 2": 16}, "40": {"Sone 2": 22}, "45": {"Sone 2": 10}, "75": {"Sone 2": 8}, "85": {"Sone 2": 3}}, "7": {"20": {"Buhølen": 2, "Laksefoss": 3, "Sone 2": 13, "Sone 3": 6, "Sone 4 og 5": 6, "Teinefoss Fluefiske": 1}, "25": {"Laksefoss": 1, "Sone 2": 13, "Sone 3": 2, "Sone 4 og 5": 2}, "30": {"Laksefoss": 1, "Sone 1": 1, "Sone 2": 18, "Sone 3": 8, "Sone 4 og 5": 2, "Teinefoss Fluefiske": 2}, "35": {"Sone 2": 24, "Sone 3": 3, "Sone 4 og 5": 1}, "40": {"Laksefoss": 1, "Sone 2": 6, "Sone 3": 3}, "45": {"Buhølen": 1, "Sone 2": 9, "Sone 3": 4, "Sone 4 og 5": 5}, "80": {"Buhølen": 1, "Sone 2": 5, "Sone 3": 6, "Sone 4 og 5": 11}, "85": {"Buhølen": 4, "Sone 1": 1, "Sone 2": 2, "Sone 3": 2, "Sone 4 og 5": 10}}, "8": {"5": {"Laksefoss": 1, "Sone 2": 3, "Sone 4 og 5": 1, "Teinefoss Fluefiske": 1}, "10": {"Sone 2": 8, "Sone 4 og 5": 1, "Teinefoss Fluefiske": 2}, "15": {"Sone 2": 2, "Sone 4 og 5": 5}, "20": {"Buhølen": 2, "Laksefoss": 5, "Sone 1": 1, "Sone 2": 16, "Sone 3": 7, "Sone 4 og 5": 20}, "25": {"Buhølen": 1, "Laksefoss": 2, "Sone 1": 2, "Sone 2": 13, "Sone 3": 3, "Sone 4 og 5": 15}, "30": {"Laksefoss": 1, "Sone 2": 4, "Sone 4 og 5": 1}, "35": {"Sone 2": 4, "Sone 4 og 5": 4}, "40": {"Sone 2": 10, "Sone 4 og 5": 2}, "45": {"Buhølen": 2, "Sone 2": 2}, "50": {"Sone 2": 13, "Sone 3": 2, "Sone 4 og 5": 15}, "65": {"Laksefoss": 1, "Sone 2": 5, "Sone 4 og 5": 9}, "80": {"Sone 2": 10, "Sone 3": 2, "Sone 4 og 5": 5}, "85": {"Buhølen": 1, "Laksefoss": 1, "Sone 2": 5, "Sone 3": 3, "Sone 4 og 5": 6}}, "9": {"10": {"Buhølen": 1, "Sone 2": 1}, "15": {"Buhølen": 6, "Laksefoss": 2, "Sone 2": 11, "Sone 3": 2, "Sone 4 og 5": 18}, "20": {"Sone 2": 3}}}, "2021": {"6": {"10": {"Sone 2": 4, "Teinefoss Fluefiske": 2}, "15": {"Sone 2": 1, "Sone 4 og 5": 1, "Teinefoss Fluefiske": 1}, "20": {"Sone 2": 3, "Sone 3": 1, "Teinefoss Fluefiske": 2}, "25": {"Sone 2": 3}, "30": {"Sone 2": 1, "Sone 3": 1}, "40": {"Sone 2": 3}, "45": {"Sone 2": 9}, "55": {"Sone 2": 9}, "65": {"Sone 2": 14}}, "7": {"5": {"Sone 2": 2}, "10": {"Sone 1": 1, "Sone 2": 5, "Sone 3": 1}, "15": {"Sone 2": 6, "Sone 3": 3, "Sone 4 og 5": 4}, "20": {"Sone 4 og 5": 1}, "25": {"Sone 2": 3, "Sone 3": 1, "Teinefoss Fluefiske": 1}, "35": {"Sone 2": 1}, "40": {"Sone 2": 1, "Sone 3": 2, "Sone 4 og 5": 2}, "50": {"Sone 2": 2, "Sone 3": 1, "Sone 4 og 5": 1}, "60": {"Buhølen": 1, "Laksefoss": 1, "Sone 2": 1, "Sone 4 og 5": 1}}, "8": {"5": {"Laksefoss": 1, "Sone 2": 4, "Sone 3": 3, "Sone 4 og 5": 4}, "10": {"Sone 1": 1, "Sone 2": 6, "Sone 4 og 5": 7, "Teinefoss Fluefiske": 1}, "15": {"Buhølen": 4, "Sone 2": 3, "Sone 4 og 5": 9, "Teinefoss Fluefiske": 3}, "20": {"Buhølen": 4, "Sone 4 og 5": 9, "Teinefoss Fluefiske": 2}, "25": {"Buhølen": 3, "Sone 2": 8, "Sone 3": 2, "Sone 4 og 5": 8}, "35": {"Buhølen": 2, "Laksefoss": 3, "Sone 2": 5, "Sone 3": 14, "Sone 4 og 5": 21}}}, "2022": {"6": {"0": {"Sone 2": 5}, "5": {"Sone 2": 3, "Sone 4 og 5": 3, "Teinefoss Fluefiske": 1}, "10": {"Sone 2": 11, "Sone 3": 1, "Sone 4 og 5": 6, "Teinefoss Fluefiske": 4}}, "7": {"0": {"Sone 1": 16, "Sone 2": 20, "Sone 4 og 5": 1}}, "8": {"0": {"Sone 1": 2, "Sone 2": 7, "Sone 3": 2, "Sone 4 og 5": 1}, "5": {"Buhølen": 2, "Sone 1": 1, "Sone 2": 4, "Sone 3": 5, "Sone 4 og 5": 9}}}, "2023": {"6": {"5": {"Teinefoss Fluefiske": 1}, "10": {"Buhølen": 1, "Sone 2": 10, "Sone 3": 3, "Sone 4 og 5": 2, "Teinefoss Fluefiske": 6}, "15": {"Sone 2": 2, "Sone 3": 2, "Teinefoss Fluefiske": 1}, "20": {"Sone 2": 2, "Teinefoss Fluefiske": 1}, "25": {"Sone 2": 13, "Sone 3": 1, "Sone 4 og 5": 1, "Teinefoss Fluefiske": 1}, "30": {"Sone 2": 19}}, "7": {"5": {"Sone 2": 1}, "10": {"Sone 2": 1, "Sone 3": 1, "Teinefoss Fluefiske": 2}, "15": {"Buhølen": 1, "Sone 3": 3, "Sone 4 og 5": 10, "Teinefoss Fluefiske": 3}, "20": {"Buhølen": 2, "Laksefoss": 1, "Sone 2": 5, "Sone 3": 4, "Sone 4 og 5": 9, "Teinefoss Fluefiske": 6}, "25": {"Buhølen": 1, "Sone 2": 3, "Sone 3": 3, "Sone 4 og 5": 5}, "30": {"Laksefoss": 1, "Sone 2": 5, "Sone 3": 9, "Sone 4 og 5": 16, "Teinefoss Fluefiske": 5}, "35": {"Sone 2": 2, "Sone 4 og 5": 4}, "40": {"Buhølen": 1, "Laksefoss": 1, "Sone 1": 1, "Sone 2": 9, "Sone 3": 2, "Sone 4 og 5": 5, "Teinefoss Fluefiske": 2}, "45": {"Buhølen": 1, "Laksefoss": 1, "Sone 2": 1, "Sone 4 og 5": 4}, "50": {"Sone 2": 2, "Sone 4 og 5": 3}, "55": {"Buhølen": 3, "Sone 2": 5, "Sone 3": 1, "Sone 4 og 5": 6}, "65": {"Laksefoss": 1, "Sone 2": 1, "Sone 3": 1, "Sone 4 og 5": 5}, "70": {"Laksefoss": 2, "Sone 3": 2, "Sone 4 og 5": 6, "Teinefoss Fluefiske": 1}}, "8": {"10": {"Buhølen": 2, "Laksefoss": 2, "Sone 2": 1, "Sone 3": 3, "Sone 4 og 5": 16, "Teinefoss Fluefiske": 3}, "15": {"Buhølen": 2, "Laksefoss": 3, "Sone 1": 1, "Sone 2": 2, "Sone 3": 6, "Sone 4 og 5": 24, "Teinefoss Fluefiske": 5}, "20": {"Sone 1": 1, "Sone 3": 1, "Sone 4 og 5": 1, "Teinefoss Fluefiske": 1}, "25": {"Sone 2": 1, "Sone 4 og 5": 7}, "30": {"Laksefoss": 2, "Sone 2": 5, "Sone 3": 5, "Sone 4 og 5": 13}, "35": {"Laksefoss": 1, "Sone 2": 5, "Sone 3": 3, "Sone 4 og 5": 22}, "45": {"Buhølen": 1, "Laksefoss": 2, "Sone 4 og 5": 6}, "50": {"Buhølen": 3, "Laksefoss": 3, "Sone 2": 4, "Sone 3": 3, "Sone 4 og 5": 10}, "55": {"Buhølen": 5, "Laksefoss": 3, "Sone 1": 1, "Sone 2": 1, "Sone 3": 5, "Sone 4 og 5": 22}, "60": {"Buhølen": 5, "Laksefoss": 3, "Sone 2": 2, "Sone 3": 4, "Sone 4 og 5": 10}, "65": {"Buhølen": 1, "Laksefoss": 1, "Sone 2": 1, "Sone 3": 3, "Sone 4 og 5": 11}, "75": {"Sone 2": 1, "Sone 3": 1, "Sone 4 og 5": 11}, "80": {"Sone 3": 3, "Sone 4 og 5": 12}}}, "2024": {"6": {"30": {"Sone 2": 1, "Sone 4 og 5": 1}, "35": {"Buhølen": 1, "Sone 3": 1}, "40": {"Sone 2": 2, "Sone 3": 1}, "45": {"Sone 2": 1, "Sone 4 og 5": 2}, "50": {"Sone 1": 1, "Sone 2": 1, "Sone 4 og 5": 2}, "55": {"Sone 2": 4, "Sone 4 og 5": 4}, "60": {"Sone 2": 6, "Sone 3": 2}, "70": {"Sone 2": 4}, "80": {"Sone 3": 1}, "85": {"Laksefoss": 1, "Sone 2": 7, "Sone 3": 3, "Sone 4 og 5": 4}}, "7": {"40": {"Laksefoss": 1, "Sone 4 og 5": 2}, "45": {"Buhølen": 1, "Laksefoss": 1, "Sone 2": 2, "Sone 3": 1, "Sone 4 og 5": 2}, "50": {"Buhølen": 2, "Laksefoss": 1, "Sone 2": 3, "Sone 3": 2, "Sone 4 og 5": 8}, "55": {"Sone 2": 5, "Sone 3": 1, "Sone 4 og 5": 1}, "60": {"Buhølen": 1, "Laksefoss": 2, "Sone 2": 13, "Sone 3": 1, "Sone 4 og 5": 5, "Teinefoss Fluefiske": 1}, "65": {"Laksefoss": 3, "Sone 2": 3, "Sone 3": 2, "Sone 4 og 5": 2}, "70": {"Sone 2": 1, "Sone 4 og 5": 2}, "75": {"Laksefoss": 3, "Sone 4 og 5": 1}, "80": {"Sone 2": 2, "Sone 4 og 5": 2}, "85": {"Sone 2": 6}}, "8": {"15": {"Buhølen": 3, "Sone 2": 1, "Sone 3": 1, "Sone 4 og 5": 4}, "20": {"Laksefoss": 1, "Sone 4 og 5": 6}, "25": {"Buhølen": 1, "Laksefoss": 1, "Sone 2": 2, "Sone 3": 2, "Sone 4 og 5": 12}, "30": {"Buhølen": 1, "Sone 2": 2, "Sone 3": 1, "Sone 4 og 5": 8}, "35": {"Laksefoss": 2, "Sone 3": 1, "Sone 4 og 5": 4}, "40": {"Buhølen": 2, "Laksefoss": 4, "Sone 3": 1, "Sone 4 og 5": 5}, "45": {"Sone 4 og 5": 6}}}, "2025": {"6": {"10": {"Sone 2": 2, "Sone 4 og 5": 2, "Teinefoss Fluefiske": 2}, "15": {"Sone 2": 1, "Sone 3": 2}, "20": {"Sone 2": 2, "Sone 4 og 5": 1}, "25": {"Laksefoss": 1}}, "8": {"5": {"Buhølen": 1, "Laksefoss": 1, "Sone 2": 8, "Sone 3": 1, "Sone 4 og 5": 22}, "10": {"Buhølen": 2, "Laksefoss": 4, "Sone 2": 12, "Sone 3": 16, "Sone 4 og 5": 21, "Teinefoss Fluefiske": 2}, "15": {"Sone 2": 1, "Sone 3": 2, "Sone 4 og 5": 6}, "25": {"Laksefoss": 1, "Sone 2": 1, "Sone 3": 8, "Sone 4 og 5": 10}}}};
+const LAKS_FLY_DATA = {"2016": {"6": {"20": {"Sone 2": 10, "Sone 4 og 5": 4, "Teinefoss Fluefiske": 11}, "25": {"Buhølen": 1, "Sone 2": 4, "Sone 3": 2, "Sone 4 og 5": 4}, "30": {"Sone 2": 22, "Sone 4 og 5": 5, "Teinefoss Fluefiske": 5}, "35": {"Sone 2": 2}, "45": {"Sone 3": 1, "Teinefoss Fluefiske": 4}, "55": {"Sone 2": 2}, "60": {"Sone 2": 1}, "65": {"Sone 2": 1}, "70": {"Sone 2": 2}, "75": {"Sone 2": 7}}, "7": {"10": {"Sone 2": 4}, "15": {"Sone 2": 2, "Sone 3": 3, "Sone 4 og 5": 1, "Teinefoss Fluefiske": 1}, "20": {"Buhølen": 2, "Laksefoss": 3, "Sone 1": 1, "Sone 2": 9, "Sone 3": 3, "Sone 4 og 5": 11, "Teinefoss Fluefiske": 1}, "25": {"Sone 2": 12, "Sone 3": 1, "Sone 4 og 5": 5}, "30": {"Sone 3": 1, "Sone 4 og 5": 4}, "35": {"Sone 1": 1, "Sone 2": 7, "Sone 3": 3, "Sone 4 og 5": 6}, "40": {"Sone 2": 3, "Sone 3": 1, "Sone 4 og 5": 3}, "50": {"Sone 1": 1, "Sone 2": 4, "Sone 3": 1, "Sone 4 og 5": 2}, "55": {"Sone 2": 3, "Sone 4 og 5": 4}, "60": {"Sone 2": 3, "Sone 4 og 5": 2}}, "8": {"20": {"Sone 3": 1}, "25": {"Sone 2": 7, "Sone 3": 4, "Sone 4 og 5": 7}, "30": {"Buhølen": 2, "Sone 2": 2, "Sone 3": 2, "Sone 4 og 5": 16}, "35": {"Laksefoss": 1, "Sone 2": 2, "Sone 3": 7, "Sone 4 og 5": 16}, "50": {"Sone 3": 2, "Sone 4 og 5": 4}, "55": {"Buhølen": 1, "Laksefoss": 2, "Sone 3": 3, "Sone 4 og 5": 7}, "60": {"Buhølen": 1, "Laksefoss": 2, "Sone 2": 5, "Sone 3": 6, "Sone 4 og 5": 16}, "65": {"Buhølen": 3, "Laksefoss": 4, "Sone 2": 3, "Sone 3": 2, "Sone 4 og 5": 12}, "70": {"Buhølen": 1, "Laksefoss": 2, "Sone 3": 1, "Sone 4 og 5": 2}}, "9": {"10": {"Sone 3": 1}, "15": {"Buhølen": 1, "Laksefoss": 1, "Sone 3": 1, "Sone 4 og 5": 3}, "20": {"Sone 3": 1, "Sone 4 og 5": 2}, "25": {"Laksefoss": 1, "Sone 3": 2, "Sone 4 og 5": 3, "Teinefoss Fluefiske": 1}}}, "2017": {"6": {"15": {"Buhølen": 1, "Sone 2": 5, "Sone 3": 1, "Sone 4 og 5": 1, "Teinefoss Fluefiske": 4}, "20": {"Sone 2": 10, "Sone 3": 6, "Sone 4 og 5": 6, "Teinefoss Fluefiske": 8}, "25": {"Laksefoss": 1, "Sone 2": 4, "Sone 3": 2, "Sone 4 og 5": 4, "Teinefoss Fluefiske": 4}, "30": {"Sone 2": 8, "Sone 4 og 5": 1}, "40": {"Sone 3": 1, "Sone 4 og 5": 2}, "45": {"Laksefoss": 1, "Sone 2": 5, "Sone 4 og 5": 2}, "50": {"Sone 2": 1}, "55": {"Sone 4 og 5": 2}, "65": {"Sone 2": 4, "Sone 3": 1, "Sone 4 og 5": 2}, "70": {"Sone 2": 9, "Sone 3": 1, "Sone 4 og 5": 4}, "75": {"Sone 2": 4, "Sone 3": 2}, "85": {"Sone 2": 14, "Sone 3": 1, "Sone 4 og 5": 5, "Teinefoss Fluefiske": 1}}, "7": {"5": {"Laksefoss": 1, "Sone 2": 4, "Sone 4 og 5": 4, "Teinefoss Fluefiske": 1}, "10": {"Sone 2": 1, "Sone 4 og 5": 2, "Teinefoss Fluefiske": 1}, "15": {"Buhølen": 1}}, "8": {"10": {"Sone 4 og 5": 1}, "15": {"Buhølen": 1, "Sone 4 og 5": 1}, "20": {"Sone 2": 1, "Sone 4 og 5": 3}, "25": {"Sone 3": 1, "Sone 4 og 5": 6, "Teinefoss Fluefiske": 2}, "30": {"Sone 1": 1, "Sone 4 og 5": 4}, "35": {"Buhølen": 2, "Sone 2": 5, "Sone 3": 3, "Sone 4 og 5": 27}, "40": {"Laksefoss": 2, "Sone 2": 4, "Sone 3": 1, "Sone 4 og 5": 16}, "45": {"Laksefoss": 1, "Sone 2": 6, "Sone 3": 4, "Sone 4 og 5": 21}, "55": {"Laksefoss": 2, "Sone 2": 7, "Sone 3": 2, "Sone 4 og 5": 13}, "60": {"Buhølen": 1, "Laksefoss": 4, "Sone 2": 4, "Sone 3": 2, "Sone 4 og 5": 8}, "65": {"Sone 2": 5, "Sone 3": 3, "Sone 4 og 5": 12}, "75": {"Sone 2": 4, "Sone 3": 3, "Sone 4 og 5": 9}}, "9": {"20": {"Laksefoss": 1, "Sone 4 og 5": 1}, "25": {"Laksefoss": 1}, "30": {"Buhølen": 1, "Sone 1": 1, "Sone 4 og 5": 3}, "35": {"Sone 4 og 5": 2}, "65": {"Sone 3": 2, "Sone 4 og 5": 3}, "85": {"Buhølen": 1, "Sone 1": 6, "Sone 2": 1, "Sone 3": 1, "Sone 4 og 5": 13}}}, "2018": {"6": {"5": {"Sone 2": 6}}, "7": {"5": {"Sone 2": 1}}, "8": {"0": {"Sone 2": 5}, "5": {"Sone 1": 1, "Sone 2": 7, "Teinefoss Fluefiske": 1}, "10": {"Sone 2": 1, "Sone 4 og 5": 2, "Teinefoss Fluefiske": 5}}}, "2019": {"6": {"15": {"Sone 2": 1}, "25": {"Sone 2": 3, "Sone 4 og 5": 1}, "30": {"Sone 2": 6, "Sone 3": 1, "Sone 4 og 5": 1}, "35": {"Sone 2": 9, "Sone 3": 1, "Sone 4 og 5": 1}, "40": {"Sone 2": 10, "Sone 4 og 5": 2}, "45": {"Sone 2": 6, "Sone 3": 1}, "55": {"Sone 2": 4}, "65": {"Sone 2": 14, "Sone 4 og 5": 1}, "70": {"Sone 2": 6, "Sone 3": 1, "Sone 4 og 5": 1}, "85": {"Laksefoss": 1, "Sone 2": 3, "Sone 3": 1}}, "7": {"10": {"Sone 2": 8, "Sone 3": 1, "Teinefoss Fluefiske": 1}, "15": {"Sone 2": 5, "Sone 3": 1, "Sone 4 og 5": 4}, "20": {"Laksefoss": 1, "Sone 2": 5, "Sone 3": 2, "Sone 4 og 5": 5}, "30": {"Buhølen": 1, "Sone 3": 1, "Sone 4 og 5": 5}, "40": {"Sone 2": 11, "Sone 4 og 5": 3}, "50": {"Sone 2": 9, "Sone 3": 1}, "60": {"Laksefoss": 1, "Sone 2": 17, "Sone 4 og 5": 2}}, "8": {"15": {"Buhølen": 2, "Sone 2": 1, "Sone 3": 3, "Sone 4 og 5": 3}, "20": {"Laksefoss": 1, "Sone 2": 1, "Sone 4 og 5": 1}, "25": {"Sone 2": 5, "Sone 3": 2, "Sone 4 og 5": 6}, "35": {"Sone 2": 3, "Sone 3": 3, "Sone 4 og 5": 3}, "40": {"Sone 1": 2, "Sone 2": 4, "Sone 3": 2, "Sone 4 og 5": 9}, "55": {"Buhølen": 1, "Laksefoss": 2, "Sone 2": 3, "Sone 3": 1, "Sone 4 og 5": 11}, "60": {"Laksefoss": 3, "Sone 2": 10, "Sone 3": 3, "Sone 4 og 5": 6}, "70": {"Buhølen": 3, "Sone 2": 4, "Sone 3": 2, "Sone 4 og 5": 5}, "75": {"Laksefoss": 1, "Sone 2": 5, "Sone 3": 1, "Sone 4 og 5": 7}, "80": {"Buhølen": 2, "Sone 2": 4, "Sone 3": 3, "Sone 4 og 5": 7}, "85": {"Buhølen": 7, "Sone 1": 3, "Sone 2": 11, "Sone 3": 10, "Sone 4 og 5": 45}}, "9": {"30": {"Buhølen": 1, "Sone 2": 1}, "40": {"Sone 2": 1, "Sone 3": 4, "Sone 4 og 5": 8}, "45": {"Buhølen": 1, "Sone 1": 1, "Sone 2": 4, "Sone 4 og 5": 7}, "50": {"Buhølen": 5, "Sone 2": 2, "Sone 4 og 5": 12}, "55": {"Laksefoss": 2, "Sone 4 og 5": 1}, "65": {"Sone 2": 9, "Sone 3": 1, "Sone 4 og 5": 7}, "70": {"Buhølen": 2, "Laksefoss": 2, "Sone 2": 20, "Sone 3": 7, "Sone 4 og 5": 21}, "80": {"Sone 3": 4, "Sone 4 og 5": 17}}}, "2020": {"6": {"20": {"Sone 2": 5}, "25": {"Sone 2": 13, "Teinefoss Fluefiske": 1}, "30": {"Sone 2": 12}, "35": {"Sone 2": 11}, "40": {"Sone 2": 10}, "45": {"Sone 2": 10}, "75": {"Sone 2": 5}, "85": {"Sone 2": 2}}, "7": {"20": {"Buhølen": 2, "Sone 2": 6, "Sone 3": 3, "Sone 4 og 5": 5, "Teinefoss Fluefiske": 1}, "25": {"Sone 2": 5, "Sone 4 og 5": 1}, "30": {"Laksefoss": 1, "Sone 2": 7, "Sone 3": 2, "Sone 4 og 5": 2, "Teinefoss Fluefiske": 2}, "35": {"Sone 2": 18, "Sone 4 og 5": 1}, "40": {"Sone 2": 4, "Sone 3": 1}, "45": {"Buhølen": 1, "Sone 2": 3, "Sone 3": 3, "Sone 4 og 5": 5}, "80": {"Sone 2": 4, "Sone 3": 5, "Sone 4 og 5": 10}, "85": {"Buhølen": 4, "Sone 1": 1, "Sone 2": 2, "Sone 3": 1, "Sone 4 og 5": 6}}, "8": {"5": {"Teinefoss Fluefiske": 1}, "10": {"Sone 2": 2, "Sone 4 og 5": 1, "Teinefoss Fluefiske": 2}, "15": {"Sone 4 og 5": 4}, "20": {"Buhølen": 1, "Sone 2": 6, "Sone 3": 3, "Sone 4 og 5": 15}, "25": {"Buhølen": 1, "Sone 1": 2, "Sone 2": 3, "Sone 3": 1, "Sone 4 og 5": 7}, "30": {"Sone 2": 4, "Sone 4 og 5": 1}, "35": {"Sone 2": 3, "Sone 4 og 5": 3}, "40": {"Sone 2": 6, "Sone 4 og 5": 2}, "45": {"Buhølen": 2, "Sone 2": 1}, "50": {"Sone 2": 6, "Sone 3": 2, "Sone 4 og 5": 14}, "65": {"Sone 2": 2, "Sone 4 og 5": 6}, "80": {"Sone 2": 7, "Sone 3": 1, "Sone 4 og 5": 4}, "85": {"Buhølen": 1, "Sone 2": 2, "Sone 4 og 5": 6}}, "9": {"10": {"Buhølen": 1}, "15": {"Buhølen": 6, "Sone 2": 6, "Sone 3": 1, "Sone 4 og 5": 12}, "20": {"Sone 2": 2}}}, "2021": {"6": {"10": {"Sone 2": 2, "Teinefoss Fluefiske": 2}, "15": {"Sone 2": 1, "Teinefoss Fluefiske": 1}, "20": {"Sone 2": 2, "Sone 3": 1, "Teinefoss Fluefiske": 2}, "25": {"Sone 2": 2}, "30": {"Sone 2": 1}, "40": {"Sone 2": 2}, "45": {"Sone 2": 7}, "55": {"Sone 2": 9}, "65": {"Sone 2": 6}}, "7": {"5": {"Sone 2": 2}, "10": {"Sone 2": 4}, "15": {"Sone 2": 5, "Sone 3": 1, "Sone 4 og 5": 3}, "20": {"Sone 4 og 5": 1}, "25": {"Sone 2": 2, "Teinefoss Fluefiske": 1}, "40": {"Sone 4 og 5": 2}, "50": {"Sone 2": 2}, "60": {"Buhølen": 1, "Laksefoss": 1, "Sone 4 og 5": 1}}, "8": {"5": {"Laksefoss": 1, "Sone 3": 1, "Sone 4 og 5": 3}, "10": {"Sone 2": 6, "Sone 4 og 5": 4, "Teinefoss Fluefiske": 1}, "15": {"Buhølen": 3, "Sone 2": 1, "Sone 4 og 5": 5, "Teinefoss Fluefiske": 3}, "20": {"Buhølen": 3, "Sone 4 og 5": 5, "Teinefoss Fluefiske": 2}, "25": {"Buhølen": 1, "Sone 2": 6, "Sone 3": 1, "Sone 4 og 5": 6}, "35": {"Buhølen": 2, "Laksefoss": 3, "Sone 2": 5, "Sone 3": 6, "Sone 4 og 5": 16}}}, "2022": {"6": {"0": {"Sone 2": 5}, "5": {"Sone 2": 2, "Sone 4 og 5": 3, "Teinefoss Fluefiske": 1}, "10": {"Sone 2": 5, "Sone 4 og 5": 6, "Teinefoss Fluefiske": 4}}, "7": {"0": {"Sone 2": 16}}, "8": {"0": {"Sone 1": 1, "Sone 2": 2}, "5": {"Buhølen": 2, "Sone 1": 1, "Sone 2": 2, "Sone 3": 3, "Sone 4 og 5": 9}}}, "2023": {"6": {"5": {"Teinefoss Fluefiske": 1}, "10": {"Buhølen": 1, "Sone 2": 4, "Sone 3": 2, "Sone 4 og 5": 1, "Teinefoss Fluefiske": 6}, "15": {"Sone 2": 2, "Sone 3": 1, "Teinefoss Fluefiske": 1}, "20": {"Sone 2": 1, "Teinefoss Fluefiske": 1}, "25": {"Sone 2": 5, "Sone 3": 1, "Sone 4 og 5": 1, "Teinefoss Fluefiske": 1}, "30": {"Sone 2": 11}}, "7": {"5": {"Sone 2": 1}, "10": {"Sone 2": 1, "Teinefoss Fluefiske": 2}, "15": {"Buhølen": 1, "Sone 3": 2, "Sone 4 og 5": 8, "Teinefoss Fluefiske": 3}, "20": {"Buhølen": 2, "Sone 2": 3, "Sone 3": 3, "Sone 4 og 5": 2, "Teinefoss Fluefiske": 6}, "25": {"Sone 2": 1, "Sone 3": 2, "Sone 4 og 5": 4}, "30": {"Laksefoss": 1, "Sone 2": 2, "Sone 3": 8, "Sone 4 og 5": 13, "Teinefoss Fluefiske": 5}, "35": {"Sone 2": 2, "Sone 4 og 5": 3}, "40": {"Laksefoss": 1, "Sone 2": 7, "Sone 3": 2, "Sone 4 og 5": 5, "Teinefoss Fluefiske": 2}, "45": {"Buhølen": 1, "Sone 2": 1, "Sone 4 og 5": 1}, "50": {"Sone 2": 2, "Sone 4 og 5": 3}, "55": {"Buhølen": 2, "Sone 3": 1, "Sone 4 og 5": 3}, "65": {"Laksefoss": 1, "Sone 3": 1, "Sone 4 og 5": 3}, "70": {"Laksefoss": 2, "Sone 3": 2, "Sone 4 og 5": 2, "Teinefoss Fluefiske": 1}}, "8": {"10": {"Buhølen": 2, "Sone 3": 3, "Sone 4 og 5": 7, "Teinefoss Fluefiske": 3}, "15": {"Buhølen": 1, "Laksefoss": 1, "Sone 2": 1, "Sone 3": 3, "Sone 4 og 5": 8, "Teinefoss Fluefiske": 5}, "20": {"Sone 3": 1, "Sone 4 og 5": 1, "Teinefoss Fluefiske": 1}, "25": {"Sone 2": 1, "Sone 4 og 5": 5}, "30": {"Sone 2": 5, "Sone 3": 5, "Sone 4 og 5": 9}, "35": {"Laksefoss": 1, "Sone 2": 2, "Sone 3": 1, "Sone 4 og 5": 15}, "45": {"Sone 4 og 5": 3}, "50": {"Buhølen": 3, "Laksefoss": 1, "Sone 2": 3, "Sone 4 og 5": 6}, "55": {"Buhølen": 3, "Sone 2": 1, "Sone 3": 4, "Sone 4 og 5": 13}, "60": {"Buhølen": 1, "Sone 3": 4, "Sone 4 og 5": 6}, "65": {"Sone 2": 1, "Sone 3": 2, "Sone 4 og 5": 6}, "75": {"Sone 2": 1, "Sone 3": 1, "Sone 4 og 5": 7}, "80": {"Sone 3": 1, "Sone 4 og 5": 8}}}, "2024": {"6": {"30": {"Sone 2": 1, "Sone 4 og 5": 1}, "35": {"Sone 3": 1}, "40": {"Sone 2": 1}, "45": {"Sone 2": 1, "Sone 4 og 5": 2}, "50": {"Sone 4 og 5": 2}, "55": {"Sone 2": 4, "Sone 4 og 5": 2}, "60": {"Sone 2": 1}, "70": {"Sone 2": 1}, "85": {"Sone 2": 3, "Sone 3": 1, "Sone 4 og 5": 3}}, "7": {"40": {"Sone 4 og 5": 1}, "45": {"Sone 2": 2, "Sone 3": 1}, "50": {"Buhølen": 2, "Sone 2": 1, "Sone 3": 1, "Sone 4 og 5": 2}, "55": {"Sone 2": 5, "Sone 3": 1, "Sone 4 og 5": 1}, "60": {"Sone 2": 12, "Sone 3": 1, "Sone 4 og 5": 3, "Teinefoss Fluefiske": 1}, "65": {"Laksefoss": 1, "Sone 2": 3, "Sone 3": 1}, "70": {"Sone 2": 1, "Sone 4 og 5": 2}, "80": {"Sone 2": 2, "Sone 4 og 5": 2}, "85": {"Sone 2": 6}}, "8": {"15": {"Sone 2": 1, "Sone 4 og 5": 1}, "20": {"Laksefoss": 1, "Sone 4 og 5": 1}, "25": {"Laksefoss": 1, "Sone 2": 1, "Sone 3": 1, "Sone 4 og 5": 9}, "30": {"Sone 2": 1, "Sone 3": 1, "Sone 4 og 5": 4}, "35": {"Sone 4 og 5": 4}, "40": {"Sone 4 og 5": 4}, "45": {"Sone 4 og 5": 5}}}, "2025": {"6": {"10": {"Sone 2": 1, "Teinefoss Fluefiske": 2}, "15": {"Sone 3": 2}, "20": {"Sone 2": 2}}, "8": {"5": {"Sone 2": 5, "Sone 3": 1, "Sone 4 og 5": 7}, "10": {"Buhølen": 1, "Laksefoss": 1, "Sone 2": 10, "Sone 3": 11, "Sone 4 og 5": 11, "Teinefoss Fluefiske": 2}, "15": {"Sone 3": 2, "Sone 4 og 5": 6}, "25": {"Sone 2": 1, "Sone 3": 4, "Sone 4 og 5": 8}}}};
+const ZONES = ["Sone 1", "Sone 2", "Sone 3", "Sone 4 og 5", "Teinefoss Fluefiske", "Buhølen", "Laksefoss"];
+
+
+const BILDE_BASE = '../bilder/tovdalselva/';
+const LABEL_ZOOM_THRESHOLD = 13; // Sonenavn-etiketter vises først fra dette zoomnivået
+const PHOTOS_URL = '../data/photos_tovdalselva.json';
+const VIDEOS_URL = '../data/videoer_tovdalselva.json';
+
+/* ---------- Sentral konfig (data/config.json) — scoringsparametre ---------- */
+const PRICES = {"Sone 1": {"dogn": 170, "sesong": 1250}, "Sone 2": {"dogn": 380}, "Sone 3": {"dogn": 390, "sesong": 2450}, "Sone 4 og 5": {"dogn": 290, "sesong": 2450}, "Teinefoss Fluefiske": {"dogn": 710}, "Buhølen": {"dogn": 410}, "Laksefoss": {"dogn": 410}};
+// Prisfargeskala for sone-tooltip: billigst = grønn, dyrest = rød, basert på alle dagspriser i elva.
+// Prisfargeskala for sone-tooltip: felles skala for ALLE fem elver (ikke per elv),
+// slik at en gitt kr-pris alltid gir samme farge uansett hvilken elv du ser på.
+// Global bunn = 100 kr, global topp = 1000 kr. Priser utenfor dette clampes til endepunktfargen.
+const GLOBAL_PRICE_MIN = 100;
+const GLOBAL_PRICE_MAX = 1000;
+function priceColor(price) {
+  if (typeof price !== 'number') return '#374151';
+  const t = Math.min(1, Math.max(0, (price - GLOBAL_PRICE_MIN) / (GLOBAL_PRICE_MAX - GLOBAL_PRICE_MIN)));
+  const hue = 120 * (1 - t); // 120 = grønn (billigst), 0 = rød (dyrest)
+  return 'hsl(' + hue.toFixed(0) + ', 70%, 38%)';
+}
+const ZONE_TOOL_RATING = {"Sone 1": [{"name": "Flue", "stars": 3}, {"name": "Sluk", "stars": 2}, {"name": "Mark", "stars": 1}], "Sone 2": [{"name": "Flue", "stars": 3}, {"name": "Sluk", "stars": 2}, {"name": "Mark", "stars": 1}], "Sone 3": [{"name": "Flue", "stars": 3}, {"name": "Sluk", "stars": 2}, {"name": "Mark", "stars": 1}], "Sone 4 og 5": [{"name": "Flue", "stars": 3}, {"name": "Sluk", "stars": 2}, {"name": "Mark", "stars": 1}], "Teinefoss Fluefiske": [{"name": "Flue", "stars": 3}, {"name": "Sluk", "stars": 2}, {"name": "Mark", "stars": 1}], "Buhølen": [{"name": "Flue", "stars": 3}, {"name": "Sluk", "stars": 2}, {"name": "Mark", "stars": 1}], "Laksefoss": [{"name": "Mark", "stars": 3}, {"name": "Flue", "stars": 2}, {"name": "Sluk", "stars": 1}]};
+const BOOM_DAYS = {"Sone 1": {"date": "2019-09-02", "count": 10, "flow": 30}, "Sone 2": {"date": "2020-06-01", "count": 23, "flow": 40}, "Sone 3": {"date": "2016-08-08", "count": 16, "flow": 55}, "Sone 4 og 5": {"date": "2019-09-14", "count": 15, "flow": 70}, "Teinefoss Fluefiske": {"date": "2023-07-29", "count": 4, "flow": 20}, "Buhølen": {"date": "2023-08-31", "count": 4, "flow": 60}, "Laksefoss": {"date": "2019-08-30", "count": 5, "flow": 55}};
+
+// Tyngste registrerte laks per sone (Art/Fisk=="Laks"), fra fangstloggen. Ved lik vekt vinner siste fangst.
+const REKORDLAKS_DATA = {"Sone 3": {"vekt": 13.0, "dato": "2017-06-15"}, "Sone 2": {"vekt": 12.5, "dato": "2024-07-11"}, "Teinefoss Fluefiske": {"vekt": 10.3, "dato": "2016-06-08"}, "Sone 4 og 5": {"vekt": 11.0, "dato": "2017-08-24"}, "Buhølen": {"vekt": 9.25, "dato": "2016-08-08"}, "Laksefoss": {"vekt": 7.2, "dato": "2017-08-10"}, "Sone 1": {"vekt": 7.0, "dato": "2017-09-11"}};
+let SCORE_CFG = { rate: 0.8, vol: 0.2, shrinkC: 15, shrinkCElv: 8, knee: 80 };   // fallback hvis config.json ikke kan hentes
+let SPARK_CFG = { max: 49, normal: 24 };   // fallback: P75 / median sesongvannføring
+fetch('../data/config.json', { cache: 'no-cache' })
+  .then(r => r.ok ? r.json() : null)
+  .then(cfg => {
+    const w = cfg && cfg.score && (cfg.score.tovdalselva || cfg.score.default);
+    if (w && isFinite(w.rateWeight) && isFinite(w.volWeight)) {
+      SCORE_CFG = {
+        rate: w.rateWeight,
+        vol: w.volWeight,
+        shrinkC: isFinite(w.shrinkC) ? w.shrinkC : 15,
+        shrinkCElv: isFinite(w.shrinkCElv) ? w.shrinkCElv : 8,
+        knee: isFinite(w.knee) ? w.knee : 80
+      };
+      const sp = cfg && cfg.sparkline && (cfg.sparkline.tovdalselva || cfg.sparkline.default);
+      if (sp && isFinite(sp.max) && isFinite(sp.normal)) SPARK_CFG = { max: sp.max, normal: sp.normal };
+      try { update(); } catch (e) {}
+    }
+  })
+  .catch(() => {});
+let PHOTOS = [];
+let photoMarkers = [];
+
+let VIDEOS = [];
+let videoMarkers = [];
+
+let activePhoto = null;
+let currentFlow = 25;
+// Fiskemeldingen kombinerer nedbørvarsel med LIVE vannføring. Grunnlag: 980 sesongdøgn
+// 2016-2025, nedbør fra MET Hynnekleiv SN38730 mot vannføring ved Flakksvann 20.3.0.
+// Etter >=10 mm nedbør er median stigning t+2 ca. +40 % naar elva staar over 10 m3/s,
+// men bare ca. +12 % under 10 m3/s - tørt nedbørfelt absorberer regnet.
+const FM_LOW_FLOW = 10;
+let liveFlow = null, fmSum24 = null, fmSum48 = null;
+let yearLo = 2016, yearHi = 2025;
+let monthLo = 6, monthHi = 9;
+let flyOnly = false;
+let laksOnly = false;
+function activeData() {
+  return laksOnly ? (flyOnly ? LAKS_FLY_DATA : LAKS_DATA)
+                  : (flyOnly ? FLY_DATA : ALL_DATA);
+}
+function activeConsts() {
+  return laksOnly
+    ? (flyOnly ? {p90Rate:P90_RATE_LAKS_FLY, p90Vol:P90_VOL_LAKS_FLY, maxRate:MAX_RATE_LAKS_FLY, maxVol:MAX_VOL_LAKS_FLY}
+               : {p90Rate:P90_RATE_LAKS, p90Vol:P90_VOL_LAKS, maxRate:MAX_RATE_LAKS, maxVol:MAX_VOL_LAKS})
+    : (flyOnly ? {p90Rate:P90_RATE_FLY, p90Vol:P90_VOL_FLY, maxRate:MAX_RATE_FLY, maxVol:MAX_VOL_FLY}
+               : {p90Rate:P90_RATE_ALL, p90Vol:P90_VOL_ALL, maxRate:MAX_RATE_ALL, maxVol:MAX_VOL_ALL});
+}
+let activeZone = null;
+let map = null;
+let mapLayers = {};
+
+// ── CONTROLS ──────────────────────────────────────────────────────────────
+function onFlowChange(val) {
+  currentFlow = parseInt(val);
+  document.getElementById('flowVal').textContent = (currentFlow >= 85 ? '85+' : currentFlow + '–' + (currentFlow+5)) + ' m³/s';
+  update();
+  if (flowFilterOn) _rebuildZoneMedia();
+}
+
+function updateDualFill(loId, hiId, fillId, min, max) {
+  const lo = parseInt(document.getElementById(loId).value);
+  const hi = parseInt(document.getElementById(hiId).value);
+  const pLo = (Math.min(lo,hi) - min) / (max - min) * 100;
+  const pHi = (Math.max(lo,hi) - min) / (max - min) * 100;
+  const f = document.getElementById(fillId);
+  f.style.left = pLo + '%';
+  f.style.width = (pHi - pLo) + '%';
+}
+
+function onYearChange() {
+  yearLo = parseInt(document.getElementById('yearLo').value);
+  yearHi = parseInt(document.getElementById('yearHi').value);
+  const lo = Math.min(yearLo,yearHi), hi = Math.max(yearLo,yearHi);
+  document.getElementById('yearVal').textContent = lo === hi ? String(lo) : lo + '–' + hi;
+  updateDualFill('yearLo','yearHi','yearFill',2016,2025);
+  update();
+}
+
+function onMonthChange() {
+  monthLo = parseInt(document.getElementById('monthLo').value);
+  monthHi = parseInt(document.getElementById('monthHi').value);
+  const lo = Math.min(monthLo,monthHi), hi = Math.max(monthLo,monthHi);
+  document.getElementById('monthVal').textContent = lo === hi ? MONTH_NAMES[lo] : MONTH_NAMES[lo] + '–' + MONTH_NAMES[hi];
+  updateDualFill('monthLo','monthHi','monthFill',6,9);
+  update();
+}
+
+function toggleFly() {
+  flyOnly = !flyOnly;
+  document.getElementById('flyPill').classList.toggle('active', flyOnly);
+  update();
+}
+function toggleLaks() {
+  laksOnly = !laksOnly;
+  document.getElementById('laksPill').classList.toggle('active', laksOnly);
+  update();
+}
+
+// ── SCORES ────────────────────────────────────────────────────────────────
+function computeStats() {
+  const yLo = Math.min(yearLo,yearHi), yHi = Math.max(yearLo,yearHi);
+  const mLo = Math.min(monthLo,monthHi), mHi = Math.max(monthLo,monthHi);
+  const bin = String(currentFlow);
+  const data = activeData();
+
+  let totalCatches = 0, totalDays = 0;
+  for (let y = yLo; y <= yHi; y++) {
+    const yd = data[y], dy = DAYS_DATA[y];
+    for (let m = mLo; m <= mHi; m++) {
+      const ym = yd?.[m], dm = dy?.[m];
+      if (ym?.[bin]) {
+        Object.values(ym[bin]).forEach(v => totalCatches += v);
+      }
+      if (dm?.[bin]) totalDays += dm[bin];
+    }
+  }
+  const perDay = totalDays > 0 ? (totalCatches / totalDays) : 0;
+  return { totalCatches, totalDays, perDay };
+}
+
+function binZoneStats(bin) {
+  // Fangster per sone og antall dager for én bin innenfor valgt år/måned-vindu
+  const data = activeData();
+  const catches = {};
+  ZONES.forEach(z => catches[z] = 0);
+  let days = 0;
+  for (let y = Math.min(yearLo,yearHi); y <= Math.max(yearLo,yearHi); y++) {
+    for (let m = Math.min(monthLo,monthHi); m <= Math.max(monthLo,monthHi); m++) {
+      days += DAYS_DATA[String(y)]?.[String(m)]?.[bin] || 0;
+      const bd = data[String(y)]?.[String(m)]?.[bin];
+      if (!bd) continue;
+      for (const [zone, cnt] of Object.entries(bd)) {
+        if (catches.hasOwnProperty(zone)) catches[zone] += cnt;
+      }
+    }
+  }
+  return { catches, days };
+}
+
+function scaleScore(x, p90, xmax) {
+  // To-segments skala: lineær 0→knee opp til P90, log-komprimert knee→100 mot historisk maks
+  if (x <= 0 || p90 <= 0) return 0;
+  const knee = SCORE_CFG.knee;
+  if (x <= p90) return knee * x / p90;
+  return Math.min(100, knee + (100 - knee) * Math.log(x / p90) / Math.log(Math.max(xmax / p90, 1.001)));
+}
+
+function computeScores() {
+  // Rørledning: glatting (nabobins, vekter 1-2-1) → shrinkage (mot sonens
+  // snittrate i vinduet, styrke shrinkC pseudo-dager) → to-segments skala.
+  // Justerbare parametre (vekting, shrinkC, knee) hentes fra data/config.json.
+  const {p90Rate, p90Vol, maxRate, maxVol} = activeConsts();
+  const data = activeData();
+
+  // Senterbin + nabobins (glatting)
+  const center = binZoneStats(String(currentFlow));
+  const lower  = binZoneStats(String(currentFlow - 5));
+  const upper  = binZoneStats(String(currentFlow + 5));
+  const wC = 2, wN = 1;
+  const poolDays = wC*center.days + (lower.days > 0 ? wN*lower.days : 0) + (upper.days > 0 ? wN*upper.days : 0);
+  if (poolDays === 0) return null;   // ingen observerte dager nær denne vannføringen i vinduet
+  const effDays = poolDays / wC;
+
+  // Prior: sonens snittrate over ALLE vannføringer i valgt vindu
+  const totals = {};
+  ZONES.forEach(z => totals[z] = 0);
+  let allDays = 0;
+  for (let y = Math.min(yearLo,yearHi); y <= Math.max(yearLo,yearHi); y++) {
+    for (let m = Math.min(monthLo,monthHi); m <= Math.max(monthLo,monthHi); m++) {
+      const dm = DAYS_DATA[String(y)]?.[String(m)];
+      if (dm) for (const b of Object.keys(dm)) allDays += dm[b];
+      const md = data[String(y)]?.[String(m)];
+      if (!md) continue;
+      for (const b of Object.keys(md)) {
+        for (const [zone, cnt] of Object.entries(md[b])) {
+          if (totals.hasOwnProperty(zone)) totals[zone] += cnt;
+        }
+      }
+    }
+  }
+
+  const C = SCORE_CFG.shrinkC;
+  const scores = {};
+  ZONES.forEach(z => {
+    const vol    = center.catches[z];
+    const pooled = wC*center.catches[z] + (lower.days > 0 ? wN*lower.catches[z] : 0) + (upper.days > 0 ? wN*upper.catches[z] : 0);
+    const smRate = pooled / poolDays;
+    const prior  = allDays > 0 ? totals[z] / allDays : 0;
+    const shrunk = (smRate * effDays + C * prior) / (effDays + C);
+    const combined = Math.round(
+      scaleScore(shrunk, p90Rate, maxRate) * SCORE_CFG.rate +
+      scaleScore(vol,    p90Vol,  maxVol)  * SCORE_CFG.vol
+    );
+    scores[z] = { score: combined, catches: vol, winTotal: totals[z] };
+  });
+  return scores;
+}
+
+function binTotals(bin) {
+  // Elvas samlede fangster og dager for en bin i valgt aar/maaned-vindu
+  const { catches, days } = binZoneStats(bin);
+  let sum = 0;
+  ZONES.forEach(z => sum += catches[z]);
+  return { catches: sum, days };
+}
+
+function computeRiverScore() {
+  // ELVESCORE - lostrevet fra sonescorene. Samme tre-stegs pipeline
+  // (glatting -> shrinkage -> to-segments skala), men med elva som EN enhet.
+  //
+  // Bakgrunn: tidligere var elvescoren et fangstvektet snitt av sonescorene.
+  // Det gjorde at scoren maalte hvor KONSENTRERT fisket var i beste sone,
+  // ikke hvor godt det fisket i elva. Ved hoy vannforing sprer fangstene seg
+  // paa flere soner, og snittet falt selv naar det ble tatt dobbelt saa mye fisk.
+  const center = binTotals(String(currentFlow));
+  const lower  = binTotals(String(currentFlow - 5));
+  const upper  = binTotals(String(currentFlow + 5));
+
+  const wC = 2, wN = 1;
+  const poolDays = wC*center.days + (lower.days > 0 ? wN*lower.days : 0) + (upper.days > 0 ? wN*upper.days : 0);
+  if (poolDays === 0) return null;
+  const effDays = poolDays / wC;
+
+  const pooled = wC*center.catches + (lower.days > 0 ? wN*lower.catches : 0) + (upper.days > 0 ? wN*upper.catches : 0);
+  const smRate = pooled / poolDays;
+
+  // Prior: elvas snittrate over ALLE vannforinger i valgt vindu
+  let totF = 0, totD = 0;
+  for (let y = Math.min(yearLo,yearHi); y <= Math.max(yearLo,yearHi); y++) {
+    for (let m = Math.min(monthLo,monthHi); m <= Math.max(monthLo,monthHi); m++) {
+      const dm = DAYS_DATA[String(y)]?.[String(m)];
+      if (dm) for (const b of Object.keys(dm)) totD += dm[b];
+      const md = activeData()[String(y)]?.[String(m)];
+      if (!md) continue;
+      for (const b of Object.keys(md)) {
+        for (const [zone, cnt] of Object.entries(md[b])) {
+          if (ZONES.includes(zone)) totF += cnt;
+        }
+      }
+    }
+  }
+  const prior = totD > 0 ? totF / totD : 0;
+
+  const C = SCORE_CFG.shrinkCElv;
+  const shrunk = (smRate * effDays + C * prior) / (effDays + C);
+
+  return Math.round(
+    scaleScore(shrunk, P90_RATE_ELV, MAX_RATE_ELV) * SCORE_CFG.rate +
+    scaleScore(center.catches, P90_VOL_ELV, MAX_VOL_ELV) * SCORE_CFG.vol
+  );
+}
+
+function scoreColor(s) {
+  const k = SCORE_CFG.knee / 100;   // terskler skalert til knee (80 => 56/36/20)
+  if (s >= 70*k) return '#38a169';
+  if (s >= 45*k) return '#3182ce';
+  if (s >= 25*k) return '#ed8936';
+  return '#e53e3e';
+}
+
+function drawRing(score, color) {
+  const r=20, c=24, circ=+(2*Math.PI*r).toFixed(1), off=+(circ-(score/100)*circ).toFixed(1);
+  return '<svg width="48" height="48" viewBox="0 0 48 48">'
+    +'<circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="none" stroke="#e2e8f0" stroke-width="5"/>'
+    +'<circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="5"'
+    +' stroke-linecap="round" stroke-dasharray="'+circ+'" stroke-dashoffset="'+off+'"'
+    +' transform="rotate(-90 '+c+' '+c+')"/></svg>';
+}
+
+function drawMiniRing(score, color) {
+  const r=12, c=16, circ=+(2*Math.PI*r).toFixed(1), off=+(circ-(score/100)*circ).toFixed(1);
+  return '<svg width="32" height="32" viewBox="0 0 32 32">'
+    +'<circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="none" stroke="#e2e8f0" stroke-width="4"/>'
+    +'<circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="4"'
+    +' stroke-linecap="round" stroke-dasharray="'+circ+'" stroke-dashoffset="'+off+'"'
+    +' transform="rotate(-90 '+c+' '+c+')"/>'
+    +'<text x="'+c+'" y="'+(c+3.5)+'" text-anchor="middle" font-size="10" font-weight="800" fill="'+color+'">'+score+'</text>'
+    +'</svg>';
+}
+
+function computeZoneBinScores(zone) {
+  // Beregner sonens score for HVER vannføringsbin i valgt år/måned-vindu.
+  // Brukes til «beste vannføring for denne sonen»-visningen i infopanelet —
+  // avhenger bevisst KUN av år/måned-sliderne, ikke av vannførings-slideren.
+  const {p90Rate, p90Vol, maxRate, maxVol} = activeConsts();
+  const data = activeData();
+  const C = SCORE_CFG.shrinkC;
+  const wC = 2, wN = 1;
+  const yLo = Math.min(yearLo,yearHi), yHi = Math.max(yearLo,yearHi);
+  const mLo = Math.min(monthLo,monthHi), mHi = Math.max(monthLo,monthHi);
+
+  const binSet = new Set();
+  let allDays = 0, zoneTotal = 0;
+  for (let y = yLo; y <= yHi; y++) {
+    for (let m = mLo; m <= mHi; m++) {
+      const dm = DAYS_DATA[String(y)]?.[String(m)];
+      if (dm) for (const b of Object.keys(dm)) { binSet.add(b); allDays += dm[b]; }
+      const md = data[String(y)]?.[String(m)];
+      if (md) for (const b of Object.keys(md)) { if (md[b][zone]) zoneTotal += md[b][zone]; }
+    }
+  }
+  const prior = allDays > 0 ? zoneTotal / allDays : 0;
+
+  const results = [];
+  binSet.forEach(binStr => {
+    const bin = parseInt(binStr);
+    const center = binZoneStats(binStr);
+    const lower  = binZoneStats(String(bin - 5));
+    const upper  = binZoneStats(String(bin + 5));
+    const poolDays = wC*center.days + (lower.days > 0 ? wN*lower.days : 0) + (upper.days > 0 ? wN*upper.days : 0);
+    if (poolDays === 0) return;
+    const effDays = poolDays / wC;
+    const vol = center.catches[zone] || 0;
+    const pooled = wC*vol + (lower.days > 0 ? wN*(lower.catches[zone]||0) : 0) + (upper.days > 0 ? wN*(upper.catches[zone]||0) : 0);
+    const smRate = pooled / poolDays;
+    const shrunk = (smRate * effDays + C * prior) / (effDays + C);
+    const score = Math.round(
+      scaleScore(shrunk, p90Rate, maxRate) * SCORE_CFG.rate +
+      scaleScore(vol,    p90Vol,  maxVol)  * SCORE_CFG.vol
+    );
+    results.push({ bin, score, catches: vol, days: center.days });
+  });
+
+  results.sort((a,b) => b.score - a.score || b.catches - a.catches);
+  return results.slice(0,1);
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────
+function update() {
+  const scores = computeScores();
+  const container = document.getElementById('zoneList');
+  container.innerHTML = '';
+
+  if (!scores) {
+    const placeholderRing = '<div class="zone-row" style="opacity:0.35;pointer-events:none">'
+      + '<div class="mini-ring">' + drawRing(0,'#e2e8f0') + '<div class="mnum" style="color:#e2e8f0">–</div></div>'
+      + '<div class="zone-info"><div class="zone-name" style="color:#cbd5e0">–</div><div class="zone-catches">–</div></div>'
+      + '</div>';
+    container.innerHTML = placeholderRing + placeholderRing + placeholderRing;
+    document.getElementById('statBox').innerHTML =
+      '<div class="stat-item"><span class="stat-num">–</span><span class="stat-lbl">Fangster</span></div>' +
+      '<div class="stat-item"><span class="stat-num">–</span><span class="stat-lbl">Dager</span></div>' +
+      '<div class="stat-item"><span class="stat-num">–</span><span class="stat-lbl">Per dag</span></div>';
+    document.getElementById('totalScoreBox').innerHTML =
+      '<div style="position:relative;display:inline-flex;align-items:center;justify-content:center">'
+      + drawRing(0, '#e2e8f0')
+      + '<div class="mnum" style="position:absolute;color:#e2e8f0;font-size:0.85rem;font-weight:800">–</div>'
+      + '</div>'
+      + '<div class="total-score-lbl">Score</div>';
+    updateMap(null);
+    return;
+  }
+
+  const top3 = ZONES.slice().sort((a,b) => {
+    const scoreDiff = scores[b].score - scores[a].score;
+    if (scoreDiff !== 0) return scoreDiff;
+    return scores[b].catches - scores[a].catches;
+  }).slice(0,3);
+  const st = computeStats();
+  top3.forEach(zone => {
+    const {score, catches} = scores[zone];
+    const col = scoreColor(score);
+    const perDay = st.totalDays > 0 ? (catches / st.totalDays).toFixed(2) : '–';
+    const row = document.createElement('div');
+    row.className = 'zone-row' + (zone === activeZone ? ' active' : '');
+    row.innerHTML =
+      '<div class="mini-ring">'+drawRing(score,col)+'<div class="mnum" style="color:'+col+'">'+score+'</div></div>'
+      +'<div class="zone-info">'
+      +'<div class="zone-name">'+zone+'</div>'
+      +'<div class="zone-catches">'+perDay+' fangster/dag</div>'
+      +(ZONE_COORDS[zone] ? '<div class="zone-map-hint">📍 Klikk for å vise på kart</div>' : '')
+      +'</div>';
+    if (ZONE_COORDS[zone]) {
+      row.addEventListener('click', () => selectZone(zone));
+    }
+    container.appendChild(row);
+  });
+
+  const fly = (flyOnly ? 'Kun flue · ' : '') + (laksOnly ? 'Kun laks · ' : '');
+  const yLo = Math.min(yearLo,yearHi), yHi = Math.max(yearLo,yearHi);
+  const mLo = Math.min(monthLo,monthHi), mHi = Math.max(monthLo,monthHi);
+  const yrLbl = yLo === yHi ? String(yLo) : yLo + '–' + yHi;
+  const moLbl = mLo === mHi ? MONTH_NAMES[mLo] : MONTH_NAMES[mLo] + '–' + MONTH_NAMES[mHi];
+
+  updateMap(scores);
+  if (activeZone) showZoneInfo(activeZone, false); // kun oppdater innhold, ikke scroll (kalles ved hver slider-endring)
+
+  // Oppdater statistikk-boks
+  const perDayStr = st.perDay > 0 ? st.perDay.toFixed(2) : '\u2013';
+  document.getElementById('statBox').innerHTML =
+    '<div class="stat-item"><span class="stat-num">' + st.totalCatches + '</span><span class="stat-lbl">Fangster</span></div>' +
+    '<div class="stat-item"><span class="stat-num">' + st.totalDays + '</span><span class="stat-lbl">Dager</span></div>' +
+    '<div class="stat-item"><span class="stat-num">' + perDayStr + '</span><span class="stat-lbl">Per dag</span></div>';
+
+  // Total score = elvas egen score, beregnet paa elvas samlede fangstrate
+  // (ikke lenger et snitt av sonescorene - se computeRiverScore).
+  const riverScore = computeRiverScore() ?? 0;
+  const riverCol = scoreColor(riverScore);
+  document.getElementById('totalScoreBox').innerHTML =
+    '<div style="position:relative;display:inline-flex;align-items:center;justify-content:center">'
+    + drawRing(riverScore, riverCol)
+    + '<div class="mnum" style="position:absolute;color:' + riverCol + ';font-size:0.85rem;font-weight:800">' + riverScore + '</div>'
+    + '</div>'
+    + '<div class="total-score-lbl">Score</div>';
+}
+
+// ── MAP ───────────────────────────────────────────────────────────────────
+function initMap() {
+  if (map) return;
+  const container = document.getElementById('map');
+  container.style.height = '320px';
+  map = L.map('map', {zoomControl: true}).setView([58.292383, 8.188960], 10);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap', maxZoom: 17
+  }).addTo(map);
+
+  setTimeout(() => map.invalidateSize(), 50);
+  setTimeout(() => map.invalidateSize(), 300);
+
+  // "Hvor er jeg?"-kontroll oppe til høyre
+  const LocControl = L.Control.extend({
+    options: { position: 'topright' },
+    onAdd: function() {
+      const btn = L.DomUtil.create('button', '');
+      btn.innerHTML = '📍 Hvor er jeg?';
+      btn.style.cssText = 'background:#fff;color:#333;border:2px solid rgba(0,0,0,0.2);border-radius:4px;padding:5px 10px;font-size:0.75rem;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:none;';
+      btn.title = 'Vis min posisjon på kartet';
+      L.DomEvent.on(btn, 'click', L.DomEvent.stopPropagation);
+      L.DomEvent.on(btn, 'click', () => {
+        btn.innerHTML = '⏳ Søker...';
+        btn.disabled = true;
+        map.locate({ setView: true, maxZoom: 14 });
+      });
+      return btn;
+    }
+  });
+  new LocControl().addTo(map);
+
+  let _myLocMarker = null;
+  map.on('locationfound', (e) => {
+    if (_myLocMarker) _myLocMarker.remove();
+    _myLocMarker = L.circleMarker(e.latlng, {
+      radius: 8, color: '#e53e3e', fillColor: '#e53e3e',
+      fillOpacity: 0.9, weight: 2
+    }).addTo(map).bindTooltip('📍 Du er her', { permanent: false, direction: 'top', className: 'mtip' });
+    document.querySelector('.leaflet-control button') && (document.querySelectorAll('.leaflet-control button')[document.querySelectorAll('.leaflet-control button').length - 1].innerHTML = '📍 Hvor er jeg?');
+    const locBtn = document.querySelector('[title="Vis min posisjon på kartet"]');
+    if (locBtn) { locBtn.innerHTML = '📍 Hvor er jeg?'; locBtn.disabled = false; }
+  });
+  map.on('locationerror', () => {
+    const locBtn = document.querySelector('[title="Vis min posisjon på kartet"]');
+    if (locBtn) { locBtn.innerHTML = '📍 Hvor er jeg?'; locBtn.disabled = false; }
+    alert('Posisjon ikke tilgjengelig. Sjekk at du har gitt tilgang til posisjon i nettleseren.');
+  });
+
+  ZONES.forEach(zone => {
+    const zc = ZONE_COORDS[zone]; if (!zc) return;
+
+    const startMk = L.marker(zc.s, {icon: makeStartIcon('–', '#94a3b8', false, false), zIndexOffset: 10}).addTo(map);
+    startMk.bindTooltip(zone, {permanent: true, direction: 'top', className: 'zone-label', offset: [0, 0]});
+    startMk.closeTooltip();
+    startMk.on('click', () => { selectZone(zone); if (activeZone === zone) showZoneInfo(zone); });
+
+    const endMk = L.marker(zc.e, {icon: makeEndIcon(), opacity: 0, zIndexOffset: 5, interactive: false}).addTo(map);
+    endMk.bindTooltip(zone + ' · slutt', {permanent: false, direction: 'top', className: 'mtip'});
+
+    mapLayers[zone] = {startMk, endMk};
+  });
+
+  function updateLabelVisibility() {
+    const show = map.getZoom() >= LABEL_ZOOM_THRESHOLD;
+    Object.values(mapLayers).forEach(({ startMk }) => {
+      if (show) startMk.openTooltip(); else startMk.closeTooltip();
+    });
+  }
+  updateLabelVisibility();
+  map.on('zoomend', updateLabelVisibility);
+
+}
+
+function addPhotoMarkers() {
+  if (!map) return;
+  photoMarkers.forEach(({ mk }) => mk.remove());
+  photoMarkers = [];
+  PHOTOS.forEach((photo, idx) => {
+    const icon = makePhotoIcon(false);
+    const mk = L.marker([photo.lat, photo.lon], { icon, zIndexOffset: 200, opacity: 0 }).addTo(map);
+    mk.bindTooltip('📷 Vis bilde', { permanent: false, direction: 'top', className: 'mtip' });
+    mk.on('click', (e) => { L.DomEvent.stopPropagation(e); openZoneMedia(photo.zone, photo); });
+    photoMarkers.push({ mk, zone: photo.zone, photosIdx: idx });
+  });
+}
+
+async function fetchPhotos() {
+  try {
+    const res = await fetch(PHOTOS_URL);
+    if (!res.ok) return;
+    PHOTOS = await res.json();
+    PHOTOS.forEach(p => p.mtype = 'photo');
+    addPhotoMarkers();
+    updateMap(computeScores());
+  } catch(e) { /* bilder er valgfrie – feiler stille */ }
+}
+
+function addVideoMarkers() {
+  if (!map) return;
+  videoMarkers.forEach(({ mk }) => mk.remove());
+  videoMarkers = [];
+  VIDEOS.forEach((video) => {
+    const mk = L.marker([video.lat, video.lon], { icon: makeVideoIcon(), zIndexOffset: 250, opacity: 0 }).addTo(map);
+    mk.bindTooltip('Vis video', { permanent: false, direction: 'top', className: 'mtip' });
+    mk.on('click', (e) => { L.DomEvent.stopPropagation(e); openZoneMedia(video.zone, video); });
+    videoMarkers.push({ mk, zone: video.zone, video });
+  });
+}
+
+async function fetchVideos() {
+  try {
+    const res = await fetch(VIDEOS_URL);
+    if (!res.ok) return;
+    VIDEOS = await res.json();
+    VIDEOS.forEach(v => v.mtype = 'video');
+    addVideoMarkers();
+    updateMap(computeScores());
+  } catch(e) { /* videoer er valgfrie – feiler stille */ }
+}
+
+
+function makeVideoIcon() {
+  return L.divIcon({
+    html: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+      <circle cx="10" cy="10" r="9" fill="#c53030" stroke="white" stroke-width="1.5"/>
+      <polygon points="8,6 8,14 15,10" fill="white"/>
+    </svg>`,
+    className: '',
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+    tooltipAnchor: [0, -12],
+  });
+}
+function makePhotoIcon(active) {
+  const size = active ? 24 : 16;
+  const r = active ? 11 : 7;
+  const stroke = active ? 2.5 : 1.5;
+  const fs = active ? 12 : 8;
+  const y = active ? 17 : 11.5;
+  const fill = active ? '#276749' : '#0f2d4a';
+  const ring = active ? `<circle cx="${size/2}" cy="${size/2}" r="${r+3}" fill="none" stroke="white" stroke-width="2.5" opacity="0.6"/>` : '';
+  return L.divIcon({
+    html: `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+      ${ring}
+      <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="${fill}" stroke="white" stroke-width="${stroke}"/>
+      <text x="${size/2}" y="${y}" text-anchor="middle" fill="white" font-size="${fs}">📷</text>
+    </svg>`,
+    className: '',
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2],
+    tooltipAnchor: [0, -10],
+  });
+}
+function makeStartIcon(label, color, isSelected, isDimmed) {
+  const size = isSelected ? 36 : 30;
+  const fs = isSelected ? 11 : 9;
+  const opacity = isDimmed ? 0.50 : 1;
+  const stroke = isSelected ? '#fff' : 'rgba(0,0,0,0.15)';
+  const sw = isSelected ? 2.5 : 1.5;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" opacity="${opacity}">
+    <circle cx="${size/2}" cy="${size/2}" r="${size/2-2}" fill="${color}" stroke="${stroke}" stroke-width="${sw}"/>
+    <text x="${size/2}" y="${size/2+fs*0.38}" text-anchor="middle" fill="#fff" font-size="${fs}" font-weight="700" font-family="Segoe UI,sans-serif">${label}</text>
+  </svg>`;
+  return L.divIcon({html: svg, className: '', iconSize: [size,size], iconAnchor: [size/2,size/2], tooltipAnchor: [0,-size/2]});
+}
+
+function makeEndIcon(color) {
+  const col = color || '#475569';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21">
+    <circle cx="10.5" cy="10.5" r="8.5" fill="${col}" stroke="#fff" stroke-width="2"/>
+    <line x1="6.5" y1="10.5" x2="14.5" y2="10.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+  </svg>`;
+  return L.divIcon({html: svg, className: '', iconSize: [21,21], iconAnchor: [10.5,10.5]});
+}
+
+function updateMap(scores) {
+  if (!map) return;
+  ZONES.forEach(zone => {
+    const l = mapLayers[zone]; if (!l) return;
+    const isSelected = zone === activeZone;
+    const isDimmed = activeZone !== null && !isSelected;
+    const sc = scores ? (scores[zone]?.score || 0) : 0;
+    const col = isDimmed ? '#94a3b8' : (scores ? scoreColor(sc) : '#94a3b8');
+    const scoreText = scores ? String(sc) : '–';
+    l.startMk.setIcon(makeStartIcon(scoreText, col, isSelected, isDimmed));
+    l.startMk.setZIndexOffset(isSelected ? 100 : 10);
+    l.endMk.setIcon(makeEndIcon(col));
+    l.endMk.setOpacity(isSelected ? 1 : 0);
+    if (l.endMk._icon) l.endMk._icon.style.pointerEvents = isSelected ? 'auto' : 'none';
+    const priceInfo = PRICES[zone];
+    const priceLbl = priceInfo && priceInfo.dogn ? priceInfo.dogn + ' kr' : null;
+    const tipHtml = priceLbl
+      ? zone + '<br><span style="color:' + priceColor(priceInfo.dogn) + '">' + priceLbl + '</span>'
+      : zone;
+    l.startMk.setTooltipContent(tipHtml);
+  });
+  // Show photo markers only when their zone is active
+  photoMarkers.forEach(({ mk, zone, photosIdx }) => {
+    const show = activeZone === zone && mediaPassesFilter(PHOTOS[photosIdx]);
+    mk.setOpacity(show ? 1 : 0);
+    if (mk._icon) mk._icon.style.pointerEvents = show ? 'auto' : 'none';
+  });
+  videoMarkers.forEach(({ mk, zone, video }) => {
+    const show = activeZone === zone && mediaPassesFilter(video);
+    mk.setOpacity(show ? 1 : 0);
+    if (mk._icon) mk._icon.style.pointerEvents = show ? 'auto' : 'none';
+  });
+}
+
+function selectZone(zone) {
+  if (activeZone === zone) {
+    activeZone = null;
+    document.getElementById('mapTitle').textContent = '🗺 Kart';
+    // Behold kartets posisjon/zoom som den var for den lukkede sonen - ikke zoom ut.
+    closeMedia();
+    closeZoneInfo();
+  } else {
+    activeZone = zone;
+    document.getElementById('mapTitle').textContent = '🗺 ' + zone;
+    closeMedia(); // lukk ev. åpent bilde/video fra forrige sone
+    const zc = ZONE_COORDS[zone];
+    if (zc) map.fitBounds([zc.s, zc.e], {padding: [50,50], animate: true, maxZoom: 14});
+  }
+  update();
+}
+
+function showZoneInfo(zone, scrollTo = true) {
+  const info = ZONE_INFO[zone];
+  if (!info) return;
+  const scores = computeScores();
+  const score = scores ? (scores[zone]?.score ?? 0) : 0;
+  const catches = scores ? (scores[zone]?.catches ?? 0) : 0;
+  const col = scoreColor(score);
+
+  const yLo = Math.min(yearLo,yearHi), yHi = Math.max(yearLo,yearHi);
+  const mLo = Math.min(monthLo,monthHi), mHi = Math.max(monthLo,monthHi);
+  const yrLbl = yLo===yHi ? String(yLo) : yLo+'–'+yHi;
+  const moLbl = mLo===mHi ? MONTH_NAMES[mLo] : MONTH_NAMES[mLo]+'–'+MONTH_NAMES[mHi];
+
+  const topBins = computeZoneBinScores(zone);
+  let topBinsHtml = '';
+  if (topBins.length) {
+    const tb = topBins[0];
+    const bc = scoreColor(tb.score);
+    const label = tb.bin >= 85 ? '85+' : tb.bin + '–' + (tb.bin + 5);
+    const perDay = tb.days > 0 ? (tb.catches / tb.days).toFixed(2).replace('.', ',') : '–';
+    topBinsHtml = '<div class="zi-topbins-hdr">Beste vannføring for sonen</div>'
+      + '<div class="zi-topbin-row">' + drawMiniRing(tb.score, bc)
+      + '<span class="zi-topbin-txt">' + label + ' m³/s</span></div>'
+      + '<div class="zi-topbin-stats">'
+      + tb.catches + (tb.catches === 1 ? ' fangst' : ' fangster')
+      + ' · ' + tb.days + (tb.days === 1 ? ' dag' : ' dager')
+      + ' · ' + perDay + ' per dag</div>';
+  }
+
+  const boom = BOOM_DAYS[zone];
+  let boomTxt;
+  if (boom) {{
+    const bd = new Date(boom.date + 'T00:00:00');
+    const dateLbl = bd.getDate() + '. ' + MONTH_NAMES_FULL[bd.getMonth()] + ' ' + bd.getFullYear();
+    boomTxt = dateLbl + ' — ' + boom.count + ' fangster'
+      + (boom.flow != null ? ' (' + boom.flow + ' m³/s)' : '');
+  }} else {{
+    boomTxt = 'Ingen rekorddag verdt å nevne';
+  }}
+
+  let rekordlaksHtml = '';
+  const rekord = REKORDLAKS_DATA[zone];
+  if (rekord) {{
+    const rd = new Date(rekord.dato + 'T00:00:00');
+    const rekordDateLbl = rd.getDate() + '. ' + MONTH_NAMES_FULL[rd.getMonth()] + ' ' + rd.getFullYear();
+    const vektStr = rekord.vekt.toFixed(1).replace('.', ',');
+    rekordlaksHtml = '<div class="zi-record-txt">REKORDLAKS - ' + vektStr + ' kg (' + rekordDateLbl + ')</div>';
+  }}
+
+  const boomColHtml = '<div style="display:flex;gap:8px;align-items:center;">'
+    + '<span class="zi-boom-icon">🏆</span>'
+    + '<div><div class="zi-boom-hdr">Rekorddag</div>'
+    + '<div class="zi-boom-txt">' + boomTxt + '</div>'
+    + rekordlaksHtml + '</div>'
+    + '</div>';
+
+  const toolRating = ZONE_TOOL_RATING[zone];
+  let toolColHtml = '';
+  if (toolRating && toolRating.length) {
+    toolColHtml = '<div><div class="zi-tool-hdr">Beste redskap</div>'
+      + toolRating.map(t => '<div class="zi-tool-row"><span class="zi-tool-name">' + t.name
+        + '</span><span class="zi-tool-stars">' + '★'.repeat(t.stars) + '</span></div>').join('')
+      + '</div>';
+  }
+
+  let boomHtml = '<div class="zi-boom"><div class="zi-boom-cols">'
+    + '<div class="zi-boom-col" style="flex:1.6">' + boomColHtml + '</div>'
+    + (toolColHtml ? '<div class="zi-boom-col">' + toolColHtml + '</div>' : '')
+    + '</div></div>';
+
+  const priceInfo = PRICES[zone];
+  let priceHtml = '';
+  if (priceInfo) {
+    const parts = [];
+    if (priceInfo.dogn) parts.push(priceInfo.dogn + ' kr døgnkort');
+    if (priceInfo.sesong) parts.push(priceInfo.sesong + ' kr sesongkort');
+    if (parts.length) priceHtml = '<div class="zi-price">' + parts.join(' · ') + '</div>';
+  }
+
+  document.getElementById('ziTitle').textContent = '📍 ' + info.name;
+  document.getElementById('ziBody').innerHTML = `
+    <div class="zi-score-row">
+      <div class="zi-score-num" style="color:${col}">${score}</div>
+      <div class="zi-score-label">Score (${yrLbl} · ${moLbl} · ${currentFlow >= 85 ? '85+' : currentFlow + '–' + (currentFlow+5)} m³/s)<br>${catches === 1 ? '1 fangst' : catches + ' fangster'} i utvalget</div>
+      <div class="zi-topbins">${topBinsHtml}</div>
+    </div>
+    ${boomHtml}
+    <div class="zi-desc">${info.desc}</div>
+    <div class="zi-row"><span class="zi-label">Redskap</span><span class="zi-val">${info.redskap}</span></div>
+    <div class="zi-row"><span class="zi-label">Sesong</span><span class="zi-val">${info.sesong}</span></div>
+    <div class="zi-row"><span class="zi-label">Merknader</span><span class="zi-val">${info.merknader}</span></div>
+    <a class="zi-link" href="https://www.google.com/maps/dir/?api=1&destination=${ZONE_COORDS[zone]?.s[0]},${ZONE_COORDS[zone]?.s[1]}&travelmode=driving" target="_blank">🗺 Veibeskrivelse hit ↗</a>
+    ${priceHtml}
+    <a class="zi-link" href="${info.kortUrl}" target="_blank">🎫 Kjøp fiskekort ↗</a>
+    <div class="zi-sources">Kilder: <a href="https://www.inatur.no/laksefiske/56978820e4b0fc575c11475a" target="_blank">inatur.no</a> · <a href="https://lakseelver.no/nb/elver/tovdalselva/about" target="_blank">lakseelver.no</a> · <a href="https://laksebors.inatur.no/bors/5" target="_blank">laksebørsen</a></div>
+  `;
+  const panel = document.getElementById('zoneInfoPanel');
+  panel.classList.add('visible');
+  if (scrollTo) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeZoneInfo() {
+  document.getElementById('zoneInfoPanel').classList.remove('visible');
+}
+
+let _activeMediaIdx = 0;
+let _activeZoneMedia = [];
+let _activeMediaZone = null;
+let flowFilterOn = false;
+
+function mediaFlow(m) {
+  return (m.vannforing !== undefined && m.vannforing !== null) ? m.vannforing : FLOW_LOOKUP[m.dateISO];
+}
+function mediaPassesFilter(m) {
+  if (!flowFilterOn) return true;
+  const f = mediaFlow(m);
+  if (f === undefined || f === null) return false;
+  const bin = f >= 55 ? 55 : Math.floor(f / 5) * 5;
+  return bin === currentFlow;
+}
+function flowChipLabel() {
+  return flowFilterOn
+    ? '💧 Kun ' + (currentFlow >= 85 ? '85+' : currentFlow + '–' + (currentFlow + 5)) + ' m³/s'
+    : '💧 Alle vannføringer';
+}
+function toggleFlowFilter() {
+  flowFilterOn = !flowFilterOn;
+  update();               // oppdaterer markørsynlighet på kartet
+  _rebuildZoneMedia();
+}
+function _rebuildZoneMedia() {
+  const chip = document.getElementById('flowChip');
+  chip.textContent = flowChipLabel();
+  chip.classList.toggle('on', flowFilterOn);
+  if (!document.getElementById('photoPanel').classList.contains('visible')) return;
+  const cur = _activeZoneMedia[_activeMediaIdx];
+  _activeZoneMedia = [...PHOTOS, ...VIDEOS]
+    .filter(m => m.zone === _activeMediaZone && mediaPassesFilter(m))
+    .sort((a, b) => a.lat - b.lat);
+  const pos = cur ? _activeZoneMedia.indexOf(cur) : -1;
+  _activeMediaIdx = pos >= 0 ? pos : 0;
+  _renderMedia();
+}
+
+function openZoneMedia(zone, target) {
+  _activeMediaZone = zone;
+  const chip = document.getElementById('flowChip');
+  chip.textContent = flowChipLabel();
+  chip.classList.toggle('on', flowFilterOn);
+  _activeZoneMedia = [...PHOTOS, ...VIDEOS]
+    .filter(m => m.zone === zone && mediaPassesFilter(m))
+    .sort((a, b) => a.lat - b.lat);
+  const posInGroup = target ? _activeZoneMedia.indexOf(target) : 0;
+  _activeMediaIdx = posInGroup >= 0 ? posInGroup : 0;
+  _renderMedia();
+  document.getElementById('photoPanel').classList.add('visible');
+  document.getElementById('photoPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function showMedia(idx) {
+  if (idx < 0 || idx >= _activeZoneMedia.length) return;
+  _activeMediaIdx = idx;
+  _renderMedia();
+}
+
+function _renderMedia() {
+  const p = _activeZoneMedia[_activeMediaIdx];
+  const n = _activeZoneMedia.length;
+  if (!p) {
+    document.getElementById('photoImg').style.display = 'none';
+    const vb = document.getElementById('videoBox');
+    vb.innerHTML = ''; vb.style.display = 'none';
+    document.getElementById('photoTitle').textContent = '📷 ' + (_activeMediaZone || '');
+    document.getElementById('photoCounter').textContent = '0';
+    document.getElementById('photoCap').textContent = 'Ingen bilder eller videoer ved denne vannføringen i denne sonen.';
+    document.getElementById('dirLink').style.display = 'none';
+    const pb = document.getElementById('photoPrev'), nb = document.getElementById('photoNext');
+    pb.disabled = nb.disabled = true;
+    pb.style.opacity = nb.style.opacity = '0.3';
+    return;
+  }
+
+  const img = document.getElementById('photoImg');
+  const vbox = document.getElementById('videoBox');
+  vbox.innerHTML = '';   // stopper ev. pågående avspilling
+  const isVideo = p.mtype === 'video';
+  img.style.display = isVideo ? 'none' : 'block';
+  vbox.style.display = isVideo ? 'block' : 'none';
+  if (isVideo) {
+    vbox.innerHTML = '<div class="video-thumb" onclick="playVideo(this, \'' + p.youtubeId + '\')">'
+      + '<img src="https://i.ytimg.com/vi/' + p.youtubeId + '/hqdefault.jpg" alt="" loading="lazy">'
+      + '<div class="video-play">▶</div>'
+      + '<button class="video-fs-btn" onclick="event.stopPropagation(); openFullscreen();" title="Vis i fullskjerm">⛶</button></div>';
+  } else {
+    img.src = BILDE_BASE + p.file;
+  }
+  document.getElementById('photoTitle').textContent = (isVideo ? '🎬 ' : '📷 ') + p.zone + (p.id ? ' · ' + p.id : '');
+  document.getElementById('photoCounter').textContent = n > 1 ? (_activeMediaIdx + 1) + ' / ' + n : '';
+
+  const flowVal = (p.vannforing !== undefined && p.vannforing !== null) ? p.vannforing : FLOW_LOOKUP[p.dateISO];
+  const flowStr = flowVal !== undefined ? flowVal + ' m³/s' : 'Vannstand ukjent';
+  const dateStr = p.dateISO ? new Date(p.dateISO).toLocaleDateString('nb-NO', {day:'numeric', month:'long', year:'numeric'}) : '';
+  document.getElementById('photoCap').textContent = p.caption + (dateStr ? ' · ' + dateStr : '') + ' · ' + flowStr;
+  const dirLink = document.getElementById('dirLink');
+  const destLat = (p.adkomstLat !== undefined && p.adkomstLat !== null) ? p.adkomstLat : p.lat;
+  const destLon = (p.adkomstLon !== undefined && p.adkomstLon !== null) ? p.adkomstLon : p.lon;
+  dirLink.href = 'https://www.google.com/maps/dir/?api=1&destination=' + destLat + ',' + destLon + '&travelmode=driving';
+  dirLink.title = (p.adkomstLat !== undefined && p.adkomstLat !== null) ? 'Ruter til nærmeste adkomstpunkt (ikke bildets/videoens eksakte posisjon)' : '';
+  dirLink.style.display = 'inline-block';
+
+  const prevBtn = document.getElementById('photoPrev');
+  const nextBtn = document.getElementById('photoNext');
+  prevBtn.disabled = _activeMediaIdx === 0;
+  prevBtn.style.opacity = _activeMediaIdx === 0 ? '0.3' : '1';
+  nextBtn.disabled = _activeMediaIdx >= n - 1;
+  nextBtn.style.opacity = _activeMediaIdx >= n - 1 ? '0.3' : '1';
+
+  // Uthev aktiv markør på kartet
+  const activePhoto = _activeZoneMedia[_activeMediaIdx];
+  photoMarkers.forEach(({ mk, zone, photosIdx }) => {
+    if (activeZone !== zone) return; // only update visible markers
+    const isActive = PHOTOS[photosIdx] === activePhoto;
+    mk.setIcon(makePhotoIcon(isActive));
+    mk.setZIndexOffset(isActive ? 300 : 200);
+  });
+  videoMarkers.forEach(({ mk, zone, video }) => {
+    if (activeZone !== zone) return;
+    mk.setZIndexOffset(video === activePhoto ? 300 : 250);
+  });
+
+  // Sentrer kartet på aktiv markør
+  if (activePhoto) {
+    map.panTo([activePhoto.lat, activePhoto.lon], { animate: true, duration: 0.4 });
+  }
+}
+function closeMedia() {
+  document.getElementById('photoPanel').classList.remove('visible');
+  const vbox = document.getElementById('videoBox');
+  vbox.innerHTML = ''; vbox.style.display = 'none';
+  _activeZoneMedia = [];
+  photoMarkers.forEach(({ mk }) => mk.setIcon(makePhotoIcon(false)));
+}
+function playVideo(el, ytId) {
+  el.outerHTML = '<iframe class="video-frame" src="https://www.youtube-nocookie.com/embed/' + ytId
+    + '?autoplay=1&rel=0&enablejsapi=1" title="Video" loading="lazy" '
+    + 'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'hidden') return;
+  document.querySelectorAll('iframe.video-frame').forEach(f => {
+    try {
+      f.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":[]}', 'https://www.youtube-nocookie.com');
+    } catch (e) { /* ignorer */ }
+  });
+});
+
+function _fsNeighborIdx(delta) {
+  const idx = _activeMediaIdx + delta;
+  if (idx < 0 || idx >= _activeZoneMedia.length) return -1;
+  return idx;
+}
+function _updateFsNav() {
+  const prevBtn = document.getElementById('fsPrev');
+  const nextBtn = document.getElementById('fsNext');
+  if (!prevBtn || !nextBtn) return;
+  prevBtn.disabled = _fsNeighborIdx(-1) === -1;
+  nextBtn.disabled = _fsNeighborIdx(1) === -1;
+}
+function openFullscreen() {
+  if (!_activeZoneMedia.length) return;
+  const p = _activeZoneMedia[_activeMediaIdx];
+  if (!p) return;
+  const fsImg = document.getElementById('fsImg');
+  const fsVideoWrap = document.getElementById('fsVideoWrap');
+  const isVideo = p.mtype === 'video';
+  fsImg.style.display = isVideo ? 'none' : 'block';
+  fsVideoWrap.style.display = isVideo ? 'block' : 'none';
+  if (isVideo) {
+    fsVideoWrap.innerHTML = '<iframe class="video-frame" src="https://www.youtube-nocookie.com/embed/' + p.youtubeId
+      + '?autoplay=1&rel=0&enablejsapi=1" title="Video" loading="lazy" '
+      + 'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+    fsImg.src = '';
+  } else {
+    fsVideoWrap.innerHTML = ''; // stopper ev. pågående avspilling
+    fsImg.src = BILDE_BASE + p.file;
+  }
+  const flowVal = (p.vannforing !== undefined && p.vannforing !== null) ? p.vannforing : FLOW_LOOKUP[p.dateISO];
+  const flowStr = flowVal !== undefined ? flowVal + ' m³/s' : 'Vannstand ukjent';
+  document.getElementById('fsCap').textContent = p.caption + ' · ' + flowStr;
+  document.getElementById('photoFs').classList.add('open');
+  _updateFsNav();
+}
+function closeFullscreen() {
+  document.getElementById('photoFs').classList.remove('open');
+  document.getElementById('fsVideoWrap').innerHTML = ''; // stopper avspilling
+}
+function fsNav(delta) {
+  const idx = _fsNeighborIdx(delta);
+  if (idx === -1) return;
+  showMedia(idx);
+  openFullscreen();
+}
+document.addEventListener('keydown', (e) => {
+  const fs = document.getElementById('photoFs');
+  if (!fs || !fs.classList.contains('open')) return;
+  if (e.key === 'ArrowLeft') fsNav(-1);
+  else if (e.key === 'ArrowRight') fsNav(1);
+  else if (e.key === 'Escape') closeFullscreen();
+});
+
+// ── NVE ───────────────────────────────────────────────────────────────────
+async function fetchNVE() {
+  try {
+    const res = await fetch(NVE_CACHE_URL);
+    if (!res.ok) throw new Error('cache ikke tilgjengelig');
+    const json = await res.json();
+    const obs = json.data[0].observations.filter(o => o.value !== null);
+    if (!obs.length) throw new Error('no data');
+
+    // Current value
+    const val = obs[obs.length - 1].value;
+    liveFlow = val;
+    renderFiskemelding();
+    document.getElementById('tovdalFlow').textContent = val.toFixed(1);
+    document.getElementById('tovdalStatus').innerHTML = '<span style="color:#68d391">✅ Live NVE</span>';
+    const bin = Math.floor(val/5)*5;
+    currentFlow = Math.max(0, Math.min(85, bin));
+    document.getElementById('flowSlider').value = currentFlow;
+    onFlowChange(currentFlow);
+
+    // Trend: compare to 3 hours ago
+    const val3h = obs.length >= 4 ? obs[obs.length - 4].value : null;
+    const trendEl = document.getElementById('trendBadge');
+    const lblEl   = document.getElementById('trendLabel');
+    if (val3h !== null) {
+      const diff = val - val3h;
+      if (diff > 0.5)       { trendEl.textContent = '↑'; trendEl.style.color = '#68d391'; lblEl.textContent = 'Stigende siste 3t'; }
+      else if (diff < -0.5) { trendEl.textContent = '↓'; trendEl.style.color = '#fc8181'; lblEl.textContent = 'Synkende siste 3t'; }
+      else                  { trendEl.textContent = '→'; trendEl.style.color = '#94a3b8'; lblEl.textContent = 'Stabil siste 3t'; }
+    }
+
+    // Sparkline
+    drawSparkline(obs.map(o => o.value));
+    return;
+  } catch(e) {
+    document.getElementById('tovdalFlow').textContent = '–';
+    document.getElementById('tovdalStatus').innerHTML = '<span style="color:#fc8181">⚠️ NVE ikke tilgjengelig</span>';
+  }
+}
+
+function renderFiskemelding() {
+  if (fmSum24 === null) return;   // venter paa nedbørdata
+  const el = document.getElementById('fiskemelding');
+  const title = document.getElementById('fmTitle');
+  const text = document.getElementById('fmText');
+  const r24 = Math.round(fmSum24);
+  const r48 = Math.round(fmSum48);
+  const toert = liveFlow !== null && liveFlow < FM_LOW_FLOW;
+  const qTxt = liveFlow !== null ? liveFlow.toFixed(1) + ' m³/s' : 'dagens nivå';
+
+  if (fmSum24 >= 10) {
+    if (toert) {
+      title.textContent = '🌧️ Regn i vente – men tørt utgangspunkt';
+      text.textContent = `Ca. ${r24} mm neste døgn, men med ${qTxt} i elva suger nedbørfeltet opp mesteparten. Historisk gir slike hendelser under ${FM_LOW_FLOW} m³/s bare rundt 12 % stigning – mot 40 % når elva står høyere.`;
+    } else {
+      title.textContent = '🌧️ Gode forhold i vente';
+      text.textContent = `Ca. ${r24} mm regn neste døgn gir trolig stigende vann. Elva svarer normalt samme døgn og dagen etter – historisk rundt 40 % stigning fra ${qTxt}.`;
+    }
+  } else if (fmSum24 >= 3) {
+    title.textContent = '🌦️ Litt regn i vente';
+    text.textContent = toert
+      ? `Ca. ${r24} mm neste døgn – trolig lite merkbart så lenge elva ligger under ${FM_LOW_FLOW} m³/s.`
+      : `Ca. ${r24} mm neste døgn – mulig svak stigning i dag og i morgen.`;
+  } else if (fmSum48 >= 10) {
+    title.textContent = '🌧️ Regn om 1–2 døgn';
+    text.textContent = `Ca. ${r48} mm ventet i morgen/overimorgen – stigning i vente fra samme døgn regnet kommer.`;
+  } else {
+    title.textContent = '☀️ Tørt i vente';
+    text.textContent = 'Lite nedbør neste 48 t – forvent stabilt eller sakte synkende vann.';
+  }
+  el.style.display = 'block';
+}
+
+async function fetchNedbor() {
+  try {
+    const res = await fetch(NEDBOR_CACHE_URL);
+    if (!res.ok) return;
+    const json = await res.json();
+    const ts = json.properties.timeseries;
+    const now = Date.now();
+    const H24 = now + 24*3600*1000;
+    const H48 = now + 48*3600*1000;
+
+    // Summer nedbør neste 24t og 24-48t. Foretrekk next_1_hours; bruk next_6_hours
+    // kun der timeoppløsning mangler (hopper da 6t frem for å unngå dobbelttelling).
+    let sum24 = 0, sum48 = 0;
+    let i = 0;
+    while (i < ts.length) {
+      const t = new Date(ts[i].time).getTime();
+      if (t >= H48) break;
+      const d = ts[i].data;
+      let mm = null, span = 1;
+      if (d.next_1_hours) { mm = d.next_1_hours.details.precipitation_amount; span = 1; }
+      else if (d.next_6_hours) { mm = d.next_6_hours.details.precipitation_amount; span = 6; }
+      if (mm !== null && t >= now - 3600*1000) {
+        if (t < H24) sum24 += mm; else sum48 += mm;
+      }
+      i += span;
+    }
+
+    fmSum24 = sum24;
+    fmSum48 = sum48;
+    renderFiskemelding();
+  } catch(e) { /* fiskemelding er valgfri – feiler stille */ }
+}
+
+function drawSparkline(values) {
+  const svg = document.getElementById('sparkSvg');
+  if (!svg || !values.length) return;
+  const W = 200, H = 32, pad = 2;
+  // 0-forankret y-akse med fast minimumstak (SPARK_CFG.max): lav uke ser lav ut,
+  // en flomuke løfter taket dynamisk. Skala-taket vises som tall på y-aksen,
+  // og median sesongvannføring (SPARK_CFG.normal) som stiplet referanselinje.
+  const min = 0;
+  const max = Math.max(SPARK_CFG.max, ...values);
+  const range = max || 1;
+  const pts = values.map((v, i) => {
+    const x = pad + (i / (values.length - 1)) * (W - pad * 2);
+    const y = H - pad - ((v - min) / range) * (H - pad * 2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+  // Area fill
+  const areaPoints = `${pad},${H} ` + pts.join(' ') + ` ${W-pad},${H}`;
+  const yNorm = (H - pad - ((SPARK_CFG.normal - min) / range) * (H - pad * 2)).toFixed(1);
+  svg.innerHTML =
+    `<defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">` +
+    `<stop offset="0%" stop-color="#68d391" stop-opacity="0.4"/>` +
+    `<stop offset="100%" stop-color="#68d391" stop-opacity="0.05"/>` +
+    `</linearGradient></defs>` +
+    `<line x1="${pad}" y1="${yNorm}" x2="${W-pad}" y2="${yNorm}" stroke="#9ae6b4" stroke-opacity="0.45" stroke-width="0.8" stroke-dasharray="3,3"/>` +
+    `<polygon points="${areaPoints}" fill="url(#sg)"/>` +
+    `<polyline points="${pts.join(' ')}" fill="none" stroke="#68d391" stroke-width="1.5" stroke-linejoin="round"/>` +
+    `<text x="${pad+1}" y="7" font-size="6.5" fill="#9ae6b4" fill-opacity="0.65" font-family="inherit">${Math.round(max)}</text>`;
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+initMap();
+onFlowChange(5);
+onYearChange();
+onMonthChange();
+// Init stat boxes with placeholders so header never collapses
+document.getElementById('statBox').innerHTML =
+  '<div class="stat-item"><span class="stat-num">–</span><span class="stat-lbl">Fangster</span></div>' +
+  '<div class="stat-item"><span class="stat-num">–</span><span class="stat-lbl">Dager</span></div>' +
+  '<div class="stat-item"><span class="stat-num">–</span><span class="stat-lbl">Per dag</span></div>';
+document.getElementById('totalScoreBox').innerHTML =
+  '<div style="position:relative;display:inline-flex;align-items:center;justify-content:center">'
+  + drawRing(0, '#e2e8f0')
+  + '<div class="mnum" style="position:absolute;color:#e2e8f0;font-size:0.85rem;font-weight:800">–</div>'
+  + '</div>'
+  + '<div class="total-score-lbl">Score</div>';
+fetchNVE().then(() => update());
+fetchNedbor();
+fetchPhotos();
+fetchVideos();
+window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
+</script>
+
+
+
+
+
+
+<div class="photo-panel" id="photoPanel">
+  <div class="photo-hdr">
+    <span id="photoTitle">📷 Bilde</span>
+    <div style="display:flex; align-items:center; gap:6px;">
+      <button id="flowChip" class="flow-chip" onclick="toggleFlowFilter()" title="Vis kun bilder/videoer tatt ved vannføringen valgt i slideren">💧 Alle vannføringer</button>
+      <button onclick="closeMedia()" style="background:none;border:none;color:#94a3b8;font-size:1rem;cursor:pointer;margin-left:4px;">×</button>
+    </div>
+  </div>
+  <div class="photo-nav-row">
+    <button class="pg-nav-btn" id="photoPrev" onclick="showMedia(_activeMediaIdx-1)" title="Forrige (sør)">&#8595;</button>
+    <span id="photoCounter" style="font-size:0.72rem; color:#64748b;"></span>
+    <button class="pg-nav-btn" id="photoNext" onclick="showMedia(_activeMediaIdx+1)" title="Neste (nord)">&#8593;</button>
+  </div>
+  <img class="photo-img" id="photoImg" src="" alt="" onclick="openFullscreen()" style="cursor:zoom-in">
+  <div id="videoBox" style="display:none"></div>
+  <div class="photo-cap" id="photoCap"></div>
+  <a class="dir-link" id="dirLink" href="#" target="_blank" rel="noopener" style="display:none">🚗 Ta meg dit ↗</a>
+</div>
+
+<div class="photo-fs" id="photoFs" onclick="closeFullscreen()">
+  <button class="fs-close" onclick="closeFullscreen()">×</button>
+  <button class="fs-nav fs-nav-prev" id="fsPrev" onclick="event.stopPropagation(); fsNav(-1)" title="Forrige (sør)">‹</button>
+  <img id="fsImg" src="" alt="">
+  <div id="fsVideoWrap" style="display:none; width:100%; max-width:900px;"></div>
+  <button class="fs-nav fs-nav-next" id="fsNext" onclick="event.stopPropagation(); fsNav(1)" title="Neste (nord)">›</button>
+  <div class="fs-cap" id="fsCap"></div>
+</div>
+
+
+
+<div class="zone-info-panel" id="zoneInfoPanel">
+  <div class="zi-hdr">
+    <span class="zi-hdr-title" id="ziTitle">Soneinfo</span>
+    <button onclick="closeZoneInfo()">×</button>
+  </div>
+  <div class="zi-body" id="ziBody"></div>
+</div>
+
+<div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.003</span><br>
+  <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
+</div>
+
+</body>
+</html>
