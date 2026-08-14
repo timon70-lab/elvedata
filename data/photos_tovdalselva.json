@@ -1,1 +1,16 @@
-[]
+[
+ {
+  "id": "T-001",
+  "lat": 58.34506999972223,
+  "lon": 8.234991699999998,
+  "file": "Sone4og5_20230709_1328.jpg",
+  "caption": "Sone 4 og 5",
+  "zone": "Sone 4 og 5",
+  "dateISO": "2023-07-09",
+  "timeUTC": "11:28",
+  "locId": "Sone 4 og 5",
+  "vannforing": 43,
+  "autoSone": false,
+  "soneAvstandM": 666
+ }
+]
