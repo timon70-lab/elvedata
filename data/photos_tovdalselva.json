@@ -68,5 +68,19 @@
   "vannforing": 100,
   "autoSone": true,
   "soneAvstandM": 140
+ },
+ {
+  "id": "T-006",
+  "lat": 58.32354409972223,
+  "lon": 8.196476699722222,
+  "file": "Sone3_20240504_1217.jpg",
+  "caption": "Sone 3",
+  "zone": "Sone 3",
+  "dateISO": "2024-05-04",
+  "timeUTC": "10:17",
+  "locId": "Sone 3",
+  "vannforing": 100,
+  "autoSone": true,
+  "soneAvstandM": 212
  }
 ]
