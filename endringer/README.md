@@ -23,4 +23,4 @@ Konsolidering utløses av én av to hendelser — ikke av «når det passer»:
 
 | Udokumenterte filer | Sist konsolidert |
 |---|---|
-| 3 | aldri |
+| 4 | aldri |
