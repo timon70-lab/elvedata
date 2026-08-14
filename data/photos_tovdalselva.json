@@ -12,5 +12,19 @@
   "vannforing": 43,
   "autoSone": false,
   "soneAvstandM": 666
+ },
+ {
+  "id": "T-002",
+  "lat": 58.3475794,
+  "lon": 8.236046399722222,
+  "file": "Sone4og5_20230709_1415.jpg",
+  "caption": "Sone 4 og 5",
+  "zone": "Sone 4 og 5",
+  "dateISO": "2023-07-09",
+  "timeUTC": "12:15",
+  "locId": "Sone 4 og 5",
+  "vannforing": 43,
+  "autoSone": true,
+  "soneAvstandM": 598
  }
 ]
