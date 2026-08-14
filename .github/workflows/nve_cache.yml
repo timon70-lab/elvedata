@@ -40,9 +40,13 @@ jobs:
             -H "X-API-Key: $NVE_API_KEY" \
             "https://hydapi.nve.no/api/v1/Observations?StationId=22.22.0&Parameter=1001&ResolutionTime=60&ReferenceTime=P7D/" \
             -o data/vannforing_sygna.json
+          curl -s \
+            -H "X-API-Key: $NVE_API_KEY" \
+            "https://hydapi.nve.no/api/v1/Observations?StationId=20.3.0&Parameter=1001&ResolutionTime=60&ReferenceTime=P7D/" \
+            -o data/vannforing_tovdalselva.json
           python3 -c "
           import json
-          for fn, navn in [('data/vannforing.json','Audna/Gaupefossen'), ('data/vannforing_lygna.json','Lygna/Tingvatn'), ('data/vannforing_mandalselva.json','Mandalselva/Kjølemo'), ('data/vannforing_otra.json','Otra/Heisel'), ('data/vannforing_sygna.json','Sygna/Søgne')]:
+          for fn, navn in [('data/vannforing.json','Audna/Gaupefossen'), ('data/vannforing_lygna.json','Lygna/Tingvatn'), ('data/vannforing_mandalselva.json','Mandalselva/Kjølemo'), ('data/vannforing_otra.json','Otra/Heisel'), ('data/vannforing_sygna.json','Sygna/Søgne'), ('data/vannforing_tovdalselva.json','Tovdalselva/Flakksvann')]:
               with open(fn) as f:
                   d = json.load(f)
               obs = d['data'][0]['observations']
@@ -63,9 +67,13 @@ jobs:
             -H "User-Agent: audna-dashboard github.com/timon70-lab/audna" \
             "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=58.155136&lon=7.835791" \
             -o data/nedbor_sygna.json
+          curl -s \
+            -H "User-Agent: audna-dashboard github.com/timon70-lab/audna" \
+            "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=58.6020&lon=8.4181" \
+            -o data/nedbor_tovdalselva.json
           python3 -c "
           import json
-          for fn, navn in [('data/nedbor.json','Audna/Konsmo-punkt'), ('data/nedbor_lygna.json','Lygna/Eiken-punkt'), ('data/nedbor_sygna.json','Sygna/Nodeland-punkt')]:
+          for fn, navn in [('data/nedbor.json','Audna/Konsmo-punkt'), ('data/nedbor_lygna.json','Lygna/Eiken-punkt'), ('data/nedbor_sygna.json','Sygna/Nodeland-punkt'), ('data/nedbor_tovdalselva.json','Tovdalselva/Hynnekleiv-punkt')]:
               with open(fn) as f:
                   d = json.load(f)
               ts = d['properties']['timeseries']
@@ -76,7 +84,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/vannforing.json data/vannforing_lygna.json data/vannforing_mandalselva.json data/vannforing_otra.json data/vannforing_sygna.json data/nedbor.json data/nedbor_lygna.json data/nedbor_sygna.json
+          git add data/vannforing.json data/vannforing_lygna.json data/vannforing_mandalselva.json data/vannforing_otra.json data/vannforing_sygna.json data/vannforing_tovdalselva.json data/nedbor.json data/nedbor_lygna.json data/nedbor_sygna.json data/nedbor_tovdalselva.json
           if git diff --cached --quiet; then
             echo "Ingen endringer aa committe."
             exit 0
