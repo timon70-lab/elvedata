@@ -6,6 +6,10 @@ Referanseimplementasjon: `computeScores()` og `scaleScore()` i hver elvs `index.
 Denne beskrivelsen skal til enhver tid stemme med koden — endres den ene, må den andre
 følge etter.
 
+> ⚠️ **Sist konsolidert: ingen konsolidering utført ennå.**
+> Endringer etter 2026-07-13 er dokumentert i [`docs/endringer/`](endringer/README.md)
+> og er **ikke** innarbeidet her ennå. Sjekk der før du stoler på detaljer i denne fila.
+
 ---
 
 ## Problemet som skal løses

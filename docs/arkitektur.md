@@ -2,6 +2,10 @@
 
 Oversikt over hvordan Elvedata er satt sammen, og hvorfor.
 
+> ⚠️ **Sist konsolidert: ingen konsolidering utført ennå.**
+> Endringer etter 2026-07-13 er dokumentert i [`docs/endringer/`](endringer/README.md)
+> og er **ikke** innarbeidet her ennå. Sjekk der før du stoler på detaljer i denne fila.
+
 ---
 
 ## Kort oppsummert

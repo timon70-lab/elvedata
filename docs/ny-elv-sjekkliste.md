@@ -5,6 +5,10 @@
 >
 > Skal **ikke** trigges i Cowork — se begrunnelse under punkt 4.
 
+> ⚠️ **Sist konsolidert: ingen konsolidering utført ennå.**
+> Endringer etter 2026-07-13 er dokumentert i [`docs/endringer/`](endringer/README.md)
+> og er **ikke** innarbeidet her ennå. Sjekk der før du stoler på detaljer i denne fila.
+
 ---
 
 ## 1. Datagrunnlag som må være på plass før bygging starter
