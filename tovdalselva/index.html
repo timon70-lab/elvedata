@@ -1160,7 +1160,7 @@ function mediaPassesFilter(m) {
   if (!flowFilterOn) return true;
   const f = mediaFlow(m);
   if (f === undefined || f === null) return false;
-  const bin = f >= 55 ? 55 : Math.floor(f / 5) * 5;
+  const bin = f >= 85 ? 85 : Math.floor(f / 5) * 5;   // samlebin 85+ som slideren
   return bin === currentFlow;
 }
 function flowChipLabel() {
@@ -1556,7 +1556,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.003</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.004</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
