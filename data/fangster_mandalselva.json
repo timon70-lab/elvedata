@@ -1,6 +1,20 @@
 [
  {
   "dato": "2026-08-14",
+  "sone": "Sone 2 - Furuholmen",
+  "vekt": 1.7,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-14",
+  "sone": "Sone 2 - Furuholmen",
+  "vekt": 2,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-14",
   "sone": "Sone 3",
   "vekt": 1.7,
   "agn": "Meitemark",
