@@ -2,6 +2,13 @@
  {
   "dato": "2026-08-14",
   "sone": "Sone 3",
+  "vekt": 1.7,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-14",
+  "sone": "Sone 3",
   "vekt": 2.1,
   "agn": "Meitemark",
   "art": "Laks"
@@ -25,6 +32,20 @@
   "sone": "Delomr 2, Fossefjellene syd",
   "vekt": 2.5,
   "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-13",
+  "sone": "Sone 4",
+  "vekt": 1.1,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-13",
+  "sone": "Sone 4",
+  "vekt": 1.6,
+  "agn": "Flue",
   "art": "Laks"
  },
  {
@@ -144,6 +165,13 @@
   "sone": "Sone 3",
   "vekt": 2.3,
   "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-12",
+  "sone": "Sone 3",
+  "vekt": 1.2,
+  "agn": "Meitemark",
   "art": "Laks"
  },
  {
