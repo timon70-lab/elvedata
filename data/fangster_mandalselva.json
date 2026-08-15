@@ -1,6 +1,13 @@
 [
  {
   "dato": "2026-08-15",
+  "sone": "Hauge A",
+  "vekt": 1.5,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-15",
   "sone": "Holmesland C",
   "vekt": 4,
   "agn": "Sluk",
@@ -143,6 +150,13 @@
   "dato": "2026-08-14",
   "sone": "Delomr 2, Fossefjellene syd",
   "vekt": 2.5,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-13",
+  "sone": "Hauge B1",
+  "vekt": 1.8,
   "agn": "Sluk",
   "art": "Laks"
  },
