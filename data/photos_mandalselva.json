@@ -5394,5 +5394,19 @@
   "vannforing": 27,
   "autoSone": true,
   "soneAvstandM": 310
+ },
+ {
+  "id": "M-373",
+  "lat": 58.33414444444445,
+  "lon": 7.528794444444444,
+  "file": "Sone4_20260808_2044.jpg",
+  "caption": "Sone 4",
+  "zone": "Sone 4",
+  "dateISO": "2026-08-08",
+  "timeUTC": "18:44",
+  "locId": "Sone 4",
+  "vannforing": 27,
+  "autoSone": true,
+  "soneAvstandM": 286
  }
 ]
