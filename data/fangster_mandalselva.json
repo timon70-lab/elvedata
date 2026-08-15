@@ -1,6 +1,13 @@
 [
  {
   "dato": "2026-08-15",
+  "sone": "Holmesland C",
+  "vekt": 4,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-15",
   "sone": "Sone 3",
   "vekt": 2,
   "agn": "Sluk",
