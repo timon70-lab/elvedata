@@ -36,6 +36,20 @@
  },
  {
   "dato": "2026-08-14",
+  "sone": "Bringsdal C",
+  "vekt": 2,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-14",
+  "sone": "Bringsdal C",
+  "vekt": 1.8,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-14",
   "sone": "Sone 3",
   "vekt": 2.5,
   "agn": "Meitemark",
