@@ -206,16 +206,25 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 #mapFs.fs-on .map-header { display:none; }
 #mapFs.fs-on .map-panel { display:block; }
 #mapFs.fs-on #map { position:absolute !important; top:0 !important; right:0 !important; bottom:0 !important; left:0 !important; width:auto !important; height:auto !important; }
-#mapFs.fs-on #fsCtrlBox { display:flex; flex-direction:column; align-items:stretch; gap:12px; position:absolute; top:88px; left:10px; z-index:9600; width:330px; max-width:calc(100vw - 28px); background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:14px 16px; box-shadow:0 4px 18px rgba(0,0,0,0.28); }
+#mapFs.fs-on #fsCtrlBox { display:flex; flex-direction:column; align-items:stretch; gap:12px; position:absolute; top:10px; left:56px; z-index:9600; width:330px; max-width:calc(100vw - 70px); background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:14px 16px; box-shadow:0 4px 18px rgba(0,0,0,0.28); }
 #mapFs.fs-on #fsCtrlBox .ctrl-row { width:100%; gap:10px; flex-wrap:nowrap; }
 #mapFs.fs-on #fsCtrlBox .ctrl-row > input[type=range] { width:auto; flex:1 1 auto; min-width:0; }
 #mapFs.fs-on #fsCtrlBox .flow-chip { align-self:flex-start; }
 #mapFs.fs-on #fsExitBtn { display:block; position:absolute; top:12px; right:12px; z-index:9600; background:#fff; color:#276749; border:none; border-radius:8px; font-size:0.72rem; font-weight:700; padding:8px 12px; cursor:pointer; box-shadow:0 2px 14px rgba(0,0,0,0.3); }
 #mapFs.fs-on #fsHint { display:block; position:absolute; left:12px; bottom:12px; z-index:9600; background:rgba(255,255,255,0.85); color:#1a202c; font-size:0.62rem; padding:5px 10px; border-radius:6px; }
-#mapFs.fs-on #photoPanel { position:absolute; right:12px; bottom:12px; z-index:9600; width:310px; max-width:calc(100vw - 24px); max-height:calc(100vh - 24px); overflow:auto; margin-top:0; }
+#mapFs.fs-on #photoPanel { position:absolute; right:12px; bottom:12px; z-index:9600; width:465px; max-width:calc(100vw - 24px); max-height:calc(100vh - 24px); overflow:auto; margin-top:0; }
+#mapFs.fs-on #photoPanel .photo-img { max-height:420px; }
 #mapFs.fs-on #photoFs { z-index:9900; }
 /* Gi plass til «Avslutt fullskjerm» over Leaflets topright-kontroller */
 #mapFs.fs-on .leaflet-top.leaflet-right { margin-top:46px; }
+@media (max-width: 520px) {
+  #mapFs.fs-on #fsCtrlBox { width:172px; max-width:calc(100vw - 60px); padding:8px 10px; gap:7px; border-radius:10px; top:10px; left:50px; }
+  #mapFs.fs-on #fsCtrlBox .ctrl-row { gap:6px; }
+  #mapFs.fs-on #fsCtrlBox .ctrl-row label { display:none; }
+  #mapFs.fs-on #fsCtrlBox .ctrl-row > input[type=range] { flex:1 1 auto; min-width:0; }
+  #mapFs.fs-on #fsCtrlBox .ctrl-val { font-size:0.62rem; min-width:0; }
+  #mapFs.fs-on #fsCtrlBox .flow-chip { font-size:0.58rem; padding:4px 8px; }
+}
 </style>
 <script data-goatcounter="https://elvedata.goatcounter.com/count"
         data-goatcounter-settings='{"allow_local": false}'
@@ -732,6 +741,7 @@ function initMap() {
       L.DomEvent.on(btn, 'click', () => {
         btn.innerHTML = '⏳ Søker...';
         btn.disabled = true;
+        _locatingInProgress = true;
         map.locate({ setView: true, maxZoom: 14 });
       });
       return btn;
@@ -740,6 +750,7 @@ function initMap() {
   new LocControl().addTo(map);
 
   let _myLocMarker = null;
+  let _locatingInProgress = false;
   map.on('locationfound', (e) => {
     if (_myLocMarker) _myLocMarker.remove();
     _myLocMarker = L.circleMarker(e.latlng, {
@@ -749,10 +760,12 @@ function initMap() {
     document.querySelector('.leaflet-control button') && (document.querySelectorAll('.leaflet-control button')[document.querySelectorAll('.leaflet-control button').length - 1].innerHTML = '📍 Hvor er jeg?');
     const locBtn = document.querySelector('[title="Vis min posisjon på kartet"]');
     if (locBtn) { locBtn.innerHTML = '📍 Hvor er jeg?'; locBtn.disabled = false; }
+    _locatingInProgress = false;
   });
   map.on('locationerror', () => {
     const locBtn = document.querySelector('[title="Vis min posisjon på kartet"]');
     if (locBtn) { locBtn.innerHTML = '📍 Hvor er jeg?'; locBtn.disabled = false; }
+    _locatingInProgress = false;
     alert('Posisjon ikke tilgjengelig. Sjekk at du har gitt tilgang til posisjon i nettleseren.');
   });
 
@@ -1463,7 +1476,13 @@ function toggleMapFullscreen() {
 
 function _onMapFsChange() {
   var fsEl = document.fullscreenElement || document.webkitFullscreenElement;
-  if (!fsEl && _mapFsOn) _teardownMapFs();
+  if (fsEl || !_mapFsOn) return;
+  if (typeof _locatingInProgress !== 'undefined' && _locatingInProgress) {
+    // Ekte fullskjerm falt bort pga. tillatelsesdialogen for posisjon, ikke fordi
+    // brukeren ba om aa lukke. Behold CSS-overlayet - _teardownMapFs() kjores IKKE her.
+    return;
+  }
+  _teardownMapFs();
 }
 document.addEventListener('fullscreenchange', _onMapFsChange);
 document.addEventListener('webkitfullscreenchange', _onMapFsChange);
@@ -1524,7 +1543,7 @@ window.addEventListener('resize', function () {
   <div class="zi-body" id="ziBody"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.030</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.035</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
