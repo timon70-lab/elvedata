@@ -9,6 +9,13 @@
  {
   "dato": "2026-08-15",
   "sone": "Sone 3",
+  "vekt": 2,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-15",
+  "sone": "Sone 3",
   "vekt": 4.15,
   "agn": "Sluk",
   "art": "Laks"
@@ -46,6 +53,13 @@
   "sone": "Sone 3",
   "vekt": 2,
   "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-14",
+  "sone": "Steinshylen",
+  "vekt": 2,
+  "agn": "Flue",
   "art": "Laks"
  },
  {
