@@ -1,1 +1,16 @@
-[]
+[
+ {
+  "dato": "2026-08-15",
+  "sone": "Sone 5A",
+  "vekt": 2,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-15",
+  "sone": "Sone 5A",
+  "vekt": 1.4,
+  "agn": "Sluk",
+  "art": "Laks"
+ }
+]
