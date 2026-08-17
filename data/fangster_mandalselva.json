@@ -71,6 +71,13 @@
  },
  {
   "dato": "2026-08-15",
+  "sone": "Sone 3",
+  "vekt": 1.5,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-15",
   "sone": "Fuskeland D",
   "vekt": 3.5,
   "agn": "Sluk",
