@@ -269,7 +269,7 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
   <div class="panel-body">
     <div class="zone-list" id="zoneList"></div>
     <div class="ctrl-col">
-      <div class="ctrl-row">
+      <div class="ctrl-row" id="flowCtrlRow">
         <label>Vannføring</label>
         <input type="range" id="flowSlider" min="0" max="55" step="5" value="5" oninput="onFlowChange(this.value)">
         <span class="ctrl-val" id="flowVal">5–10 m³/s</span>
@@ -1782,7 +1782,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.052</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.053</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
