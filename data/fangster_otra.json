@@ -1,6 +1,48 @@
 [
  {
   "dato": "2026-08-17",
+  "sone": "Sone 4A",
+  "vekt": 2,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-17",
+  "sone": "Sone 3A",
+  "vekt": 1.35,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-17",
+  "sone": "Sone 3B Hageodden",
+  "vekt": 1.4,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-17",
+  "sone": "Sone 3B Hageodden",
+  "vekt": 1.8,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-17",
+  "sone": "Sone 4A",
+  "vekt": 1.7,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-17",
+  "sone": "Sone 5A Blå",
+  "vekt": 2.4,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-17",
   "sone": "Sone 5B Rød",
   "vekt": 2.5,
   "agn": "Flue",
@@ -45,13 +87,6 @@
   "dato": "2026-08-17",
   "sone": "Sone 4A",
   "vekt": 5,
-  "agn": "Meitemark",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-17",
-  "sone": "Sone 4A",
-  "vekt": 1.7,
   "agn": "Meitemark",
   "art": "Laks"
  },
