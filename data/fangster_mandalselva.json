@@ -1,6 +1,13 @@
 [
  {
   "dato": "2026-08-17",
+  "sone": "Bjåhylen",
+  "vekt": 13,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-17",
   "sone": "Delomr 4, Steinshylen",
   "vekt": 2.5,
   "agn": "Flue",
