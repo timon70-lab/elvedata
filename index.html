@@ -41,7 +41,7 @@
   .catch-label { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2px; background: rgba(255,255,255,0.92); color: #0f2d4a; font-size: 0.6rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; white-space: nowrap; border: 1px solid rgba(0,0,0,0.12); pointer-events: none; }
   /* Vannforingsmerke over markoren. Bolget underkant (variant D) gir
      vann-assosiasjon uten aa ta plass fra selve tallet. */
-  .flow-label { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 4px; background: rgba(10,34,56,0.94); color: #7fd4f0; font-size: 0.6rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; white-space: nowrap; border: 1px solid rgba(127,212,240,0.35); pointer-events: none; }
+  .flow-label { position: absolute; bottom: 78%; left: 12%; transform: translateX(-50%); background: rgba(10,34,56,0.94); color: #7fd4f0; font-size: 0.6rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; white-space: nowrap; border: 1px solid rgba(127,212,240,0.35); pointer-events: none; }
   .flow-label::after { content: ''; position: absolute; left: -1px; right: -1px; bottom: -4px; height: 5px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='5' viewBox='0 0 16 5'%3E%3Cpath d='M0 2.5 Q 4 0 8 2.5 T 16 2.5' fill='none' stroke='%237fd4f0' stroke-width='1.5'/%3E%3C/svg%3E"); background-repeat: repeat-x; }
   .popup-card .pc-catches { margin-top: 10px; padding-top: 8px; border-top: 1px solid #e2e8f0; }
   .popup-card .pc-catches-title a { color: inherit; text-decoration: none; }
@@ -253,13 +253,26 @@ function nearestBinScore(table, bin, maxBin) {
   return null;
 }
 
-// Felles sesong-vurdering: 'score' = i sesong, 'opening' = før sesongstart, 'closed' = etter sesongslutt
+// Antall dager til neste forekomst av en MM-DD-dato (ruller over til neste år
+// hvis datoen allerede er passert i år). Brukes til "opening"-vinduet under.
+function daysUntilNextOccurrence(md, now) {
+  const m = Math.floor(md / 100), d = md % 100;
+  const today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let dt = new Date(now.getFullYear(), m - 1, d);
+  if (dt < today0) dt = new Date(now.getFullYear() + 1, m - 1, d);
+  return Math.round((dt - today0) / 86400000);
+}
+
+// Felles sesong-vurdering: 'score' = i sesong, 'opening' = innen 30 dager før
+// sesongstart, 'closed' = ellers (rett etter sesongslutt, eller >30 dager til åpning)
+const OPENING_WINDOW_DAYS = 30;
 function seasonPhase(seasonStart, seasonEnd, now) {
   const today = (now.getMonth() + 1) * 100 + now.getDate();
   const start = parseMD(seasonStart);
   const end = parseMD(seasonEnd);
   if (today >= start && today <= end) return { phase: 'score' };
-  if (today < start) return { phase: 'opening', date: start };
+  const daysToStart = daysUntilNextOccurrence(start, now);
+  if (daysToStart <= OPENING_WINDOW_DAYS) return { phase: 'opening', date: start };
   return { phase: 'closed', date: start };
 }
 
@@ -512,7 +525,7 @@ loadNewsTicker();
 </script>
 
 <div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.043</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.044</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
