@@ -1775,14 +1775,14 @@
   "lat": 58.147794,
   "lon": 7.365617,
   "file": "Sone5A_20260815_2041_2.jpg",
-  "caption": "Sone 5A",
-  "zone": "Sone 5A",
+  "caption": "Sone 5B",
+  "zone": "Sone 5B",
   "dateISO": "2026-08-15",
   "timeUTC": "18:41",
-  "locId": "Sone 5A",
-  "vannforing": 0.2,
-  "autoSone": true,
-  "soneAvstandM": 178
+  "locId": "Sone 5B",
+  "vannforing": 0,
+  "autoSone": false,
+  "soneAvstandM": 456
  },
  {
   "id": "A-139",
