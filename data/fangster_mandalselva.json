@@ -8,6 +8,13 @@
  },
  {
   "dato": "2026-08-16",
+  "sone": "Fuskeland B",
+  "vekt": 1.6,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-16",
   "sone": "Sone 3",
   "vekt": 5,
   "agn": "Flue",
@@ -18,6 +25,13 @@
   "sone": "Sone 3",
   "vekt": 1.8,
   "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-15",
+  "sone": "Bringsdal C",
+  "vekt": 2.3,
+  "agn": "Meitemark",
   "art": "Laks"
  },
  {
