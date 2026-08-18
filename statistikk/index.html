@@ -119,7 +119,21 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
   </div>
 </div>
 
-<!-- 4. VEKTFORDELING -->
+<!-- 4. LAKS PER DØGN -->
+<div class="panel">
+  <div class="panel-header">
+    <span class="panel-name">Laks per døgn</span>
+    <span class="panel-sub">Fangstrate gjennom hele perioden for én elv om gangen. Regnet bare på døgn med måleverdi fra NVE – der serien brytes, mangler vi vannføring.</span>
+  </div>
+  <div class="panel-body">
+    <div class="pill-row" id="ratePills"></div>
+    <div class="pill-row" id="granPills"></div>
+    <svg id="rateChart" viewBox="0 0 340 200" role="img" aria-label="Laks per døgn gjennom perioden"></svg>
+    <div class="readout" id="rateReadout"><span class="hint">Dra eller trykk i figuren for å lese av tall.</span></div>
+  </div>
+</div>
+
+<!-- 5. VEKTFORDELING -->
 <div class="panel">
   <div class="panel-header">
     <span class="panel-name">Størrelsen på fisken</span>
@@ -142,7 +156,7 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
 </div>
 
 <div class="foot">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.001</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.002</span><br>
   <span style="font-size:0.6rem;">Data: Inatur.no (fangst) · NVE HydAPI (vannføring)</span>
 </div>
 
@@ -354,16 +368,17 @@ function showFlowAt(idx) {
   box.innerHTML = parts.join('');
 }
 
-function bindScrub(svgId, handler) {
+function bindScrub(svgId, getGeom, handler) {
   const svg = document.getElementById(svgId);
   const move = ev => {
-    if (!flowGeom) return;
+    const g = getGeom();
+    if (!g || g.n < 2) return;
     const r = svg.getBoundingClientRect();
     const cx = (ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left;
     const vx = cx / r.width * 340;
-    const rel = (vx - flowGeom.L) / flowGeom.pw;
-    const i = Math.round(rel * (flowGeom.n - 1));
-    handler(Math.max(0, Math.min(flowGeom.n - 1, i)));
+    const rel = (vx - g.L) / g.pw;
+    const i = Math.round(rel * (g.n - 1));
+    handler(Math.max(0, Math.min(g.n - 1, i)));
   };
   let dragging = false;
   svg.addEventListener('pointerdown', ev => {
@@ -513,7 +528,163 @@ function drawYearTable() {
     '<div class="hint" style="margin-top:6px">Endring = siste sesong mot elvas eget snitt for 2016–2018. * = ufullstendig sesong i datagrunnlaget.</div>');
 }
 
-// ── 4. VEKTFORDELING ───────────────────────────────────────────────────
+// ── 4. LAKS PER DØGN ───────────────────────────────────────────────────
+let rateRiver = 'audna';
+let gran = 'halvmnd';
+let rateGeom = null;
+
+const GRAN = [['halvmnd', 'Per halvmåned'], ['sesong', 'Per sesong']];
+
+function ratePoints() {
+  const r = DB.elver[rateRiver];
+  if (gran === 'sesong') {
+    const y0 = r.aarsserie[0].aar;
+    return r.aarsserie.filter(a => a.rate !== null).map(a => ({
+      slot: a.aar - y0, aar: a.aar, rate: a.rate,
+      fangst: a.antall_vf, dager: a.dager, lbl: 'Sesongen ' + a.aar
+    }));
+  }
+  const y0 = Math.min(...r.tidsserie.map(t => t.aar));
+  return r.tidsserie.filter(t => t.rate !== null).map(t => ({
+    slot: (t.aar - y0) * BUCKETS.length + BUCKETS.indexOf(t.bucket),
+    aar: t.aar, rate: t.rate, fangst: t.fangst, dager: t.dager,
+    lbl: BUCKET_LBL[t.bucket] + ' ' + t.aar
+  }));
+}
+
+function drawRatePills() {
+  const host = document.getElementById('ratePills');
+  host.textContent = '';
+  ORDER.forEach(key => {
+    if (!DB.elver[key]) return;
+    const b = document.createElement('button');
+    b.className = 'pill' + (key === rateRiver ? ' active' : '');
+    b.textContent = DB.elver[key].navn;
+    b.onclick = () => { rateRiver = key; drawRatePills(); drawRate(); };
+    host.appendChild(b);
+  });
+  const g = document.getElementById('granPills');
+  g.textContent = '';
+  GRAN.forEach(([k, lbl]) => {
+    const b = document.createElement('button');
+    b.className = 'pill' + (k === gran ? ' active' : '');
+    b.textContent = lbl;
+    b.onclick = () => { gran = k; drawRatePills(); drawRate(); };
+    g.appendChild(b);
+  });
+}
+
+function niceMax(v) {
+  if (v <= 0) return 1;
+  const p = Math.pow(10, Math.floor(Math.log10(v)));
+  return Math.ceil(v / p * 2) / 2 * p;
+}
+
+function drawRate() {
+  const svg = document.getElementById('rateChart');
+  svg.textContent = '';
+  const W = 340, H = 200, L = 32, R = 8, T = 12, B = 30;
+  const pw = W - L - R, ph = H - T - B;
+  const col = COLORS[rateRiver];
+  const pts = ratePoints();
+
+  if (!pts.length) {
+    const t = el('text', {x: W/2, y: T + ph/2, 'text-anchor':'middle', class:'axb'});
+    t.textContent = 'Ingen data';
+    svg.appendChild(t);
+    rateGeom = null;
+    showRateAt(null);
+    return;
+  }
+
+  const slots = Math.max(...pts.map(p => p.slot)) + 1;
+  const mx = niceMax(Math.max(...pts.map(p => p.rate)));
+  const xOf = i => L + (slots === 1 ? pw/2 : (i/(slots-1)) * pw);
+  const yOf = v => T + ph - (v/mx) * ph;
+
+  [0, 0.5, 1].forEach(f => {
+    const y = yOf(mx*f);
+    svg.appendChild(el('line', {x1: L, y1: y.toFixed(1), x2: W-R, y2: y.toFixed(1), class:'grid'}));
+    const t = el('text', {x: L-5, y: (y+3).toFixed(1), 'text-anchor':'end', class:'ax'});
+    t.textContent = nf(mx*f, mx < 5 ? 1 : 0);
+    svg.appendChild(t);
+  });
+  const yl = el('text', {x: 2, y: T-4, class:'ax'});
+  yl.textContent = 'laks/døgn';
+  svg.appendChild(yl);
+
+  // årsskiller og -merkelapper
+  const years = [...new Set(pts.map(p => p.aar))].sort();
+  const y0 = years[0];
+  years.forEach(y => {
+    const i = gran === 'sesong' ? (y - y0) : (y - y0) * BUCKETS.length;
+    const x = xOf(i);
+    if (gran === 'halvmnd' && y !== y0) {
+      svg.appendChild(el('line', {x1: x.toFixed(1), y1: T, x2: x.toFixed(1), y2: T+ph,
+        stroke: '#edf2f7', 'stroke-width': 1}));
+    }
+    if (years.length > 8 && (y - y0) % 2) return;
+    const t = el('text', {x: (x + (gran === 'halvmnd' ? 8 : 0)).toFixed(1), y: H-12,
+      'text-anchor': gran === 'halvmnd' ? 'start' : 'middle', class:'ax'});
+    t.textContent = String(y).slice(2);
+    svg.appendChild(t);
+  });
+  const xl = el('text', {x: (L+pw/2).toFixed(1), y: H-2, 'text-anchor':'middle', class:'ax'});
+  xl.textContent = gran === 'halvmnd' ? 'halvmåneder, juni–september' : 'sesonger';
+  svg.appendChild(xl);
+
+  const guide = el('line', {x1: -10, y1: T, x2: -10, y2: T+ph, stroke:'#cbd5e0',
+    'stroke-width': 1, 'stroke-dasharray': '3 3'});
+  svg.appendChild(guide);
+
+  // linjen brytes der påfølgende punkt ikke ligger inntil hverandre i tid
+  let d = '', prev = null, prevYear = null;
+  pts.forEach(p => {
+    const join = prev !== null && p.slot === prev + 1 && (gran === 'sesong' || p.aar === prevYear);
+    d += (join ? 'L' : 'M') + xOf(p.slot).toFixed(1) + ' ' + yOf(p.rate).toFixed(1) + ' ';
+    prev = p.slot; prevYear = p.aar;
+  });
+  svg.appendChild(el('path', {d: d.trim(), fill:'none', stroke: col, 'stroke-width': 2,
+    'stroke-linejoin':'round', 'stroke-linecap':'round'}));
+  pts.forEach(p => svg.appendChild(el('circle', {
+    cx: xOf(p.slot).toFixed(1), cy: yOf(p.rate).toFixed(1),
+    r: gran === 'sesong' ? 3 : 1.8, fill: col, opacity: p.dager < 8 ? 0.3 : 1
+  })));
+
+  rateGeom = {guide, pts, slots, n: slots, xOf, L, pw};
+  showRateAt(null);
+}
+
+function showRateAt(slot) {
+  const box = document.getElementById('rateReadout');
+  if (!rateGeom) {
+    box.innerHTML = '<span class="hint">Ingen data å lese av.</span>';
+    return;
+  }
+  if (slot === null) {
+    rateGeom.guide.setAttribute('x1', -10);
+    rateGeom.guide.setAttribute('x2', -10);
+    box.innerHTML = '<span class="hint">Dra eller trykk i figuren for å lese av tall.</span>';
+    return;
+  }
+  let best = null;
+  rateGeom.pts.forEach(p => {
+    if (best === null || Math.abs(p.slot - slot) < Math.abs(best.slot - slot)) best = p;
+  });
+  if (!best) return;
+  const x = rateGeom.xOf(best.slot).toFixed(1);
+  rateGeom.guide.setAttribute('x1', x);
+  rateGeom.guide.setAttribute('x2', x);
+  box.innerHTML = '<div class="ro-head">' + esc(best.lbl) + '</div><div class="ro-grid">' +
+    '<div class="ro-item"><span class="sw" style="background:' + COLORS[rateRiver] + '"></span>' +
+    esc(DB.elver[rateRiver].navn) + ' <b>' + rateFmt(best.rate) + '</b></div>' +
+    '<div class="ro-item" style="color:#94a3b8">laks per døgn</div>' +
+    '<div class="ro-item" style="color:#94a3b8">' + nf(best.fangst) + ' laks</div>' +
+    '<div class="ro-item" style="color:#94a3b8">' + best.dager + ' døgn målt</div></div>' +
+    (best.dager < 8 ? '<div class="hint" style="margin-top:4px">Få måledøgn – raten er usikker.</div>' : '');
+}
+
+// ── 5. VEKTFORDELING ───────────────────────────────────────────────────
 function drawWeightPills() {
   const host = document.getElementById('weightPills');
   host.textContent = '';
@@ -596,8 +767,10 @@ function boot() {
 
   drawProfiles();
   drawPeriodPills(); drawFlowLegend(); drawFlow();
-  bindScrub('flowChart', showFlowAt);
+  bindScrub('flowChart', () => flowGeom, showFlowAt);
+  bindScrub('rateChart', () => rateGeom, showRateAt);
   drawIndex(); drawYearSmalls(); drawYearTable();
+  drawRatePills(); drawRate();
   drawWeightPills(); drawWeightLegend(); drawWeight();
 }
 
