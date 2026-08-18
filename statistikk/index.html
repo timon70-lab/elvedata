@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Statistikk – Sørlandselvene</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f4f8; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px 12px 40px; }
+h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #94a3b8; margin-bottom: 16px; text-align: center; }
+
+.banner { width: 100%; max-width: 480px; background: #0f2d4a; border-radius: 14px; padding: 14px 18px; margin-bottom: 14px; }
+.back-link { display: inline-flex; align-items: center; gap: 4px; font-size: 0.62rem; color: #7fd4f0; text-decoration: none; margin-bottom: 5px; }
+.back-link:hover { color: #a8e4f5; text-decoration: underline; }
+.rname { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #9ae6b4; margin-bottom: 6px; }
+.lede { font-size: 0.72rem; color: #cbd5e1; line-height: 1.55; }
+.lede strong { color: #fff; }
+.banner-meta { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 0.6rem; color: #4a6fa5; line-height: 1.5; }
+
+.panel { width: 100%; max-width: 480px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 14px; }
+.panel-header { padding: 11px 14px 9px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; }
+.panel-name { font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #276749; display: block; }
+.panel-sub { font-size: 0.6rem; color: #718096; line-height: 1.5; margin-top: 3px; display: block; }
+.panel-body { padding: 12px 14px 14px; }
+
+.pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.pill { padding: 5px 11px; border-radius: 6px; border: 1.5px solid #e2e8f0; background: white; color: #94a3b8; font-size: 0.68rem; font-weight: 700; cursor: pointer; transition: all 0.18s; user-select: none; }
+.pill.active { background: #276749; color: white; border-color: #276749; }
+.pill:focus-visible { outline: 2px solid #276749; outline-offset: 2px; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.lg { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 5px; border: 1.5px solid #e2e8f0; font-size: 0.63rem; font-weight: 700; color: #4a5568; cursor: pointer; user-select: none; background: white; }
+.lg .sw { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+.lg.off { opacity: 0.38; }
+.lg:focus-visible { outline: 2px solid #276749; outline-offset: 2px; }
+
+svg { display: block; width: 100%; height: auto; touch-action: pan-y; }
+.ax { font-size: 8px; fill: #94a3b8; font-family: 'Segoe UI', system-ui, sans-serif; }
+.axb { font-size: 8px; fill: #4a5568; font-weight: 700; font-family: 'Segoe UI', system-ui, sans-serif; }
+.grid { stroke: #edf2f7; stroke-width: 1; }
+
+.readout { margin-top: 8px; border-top: 1px solid #edf2f7; padding-top: 8px; font-size: 0.65rem; color: #4a5568; min-height: 54px; }
+.readout .ro-head { font-weight: 700; color: #1a202c; margin-bottom: 4px; font-size: 0.67rem; }
+.ro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px; }
+.ro-item { display: flex; align-items: center; gap: 5px; font-variant-numeric: tabular-nums; }
+.ro-item .sw { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.ro-item b { margin-left: auto; }
+.hint { font-size: 0.6rem; color: #a0aec0; font-style: italic; }
+
+.sm-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+@media (min-width: 430px) { .sm-grid { grid-template-columns: repeat(3, 1fr); } }
+.sm { min-width: 0; }
+.sm-title { font-size: 0.68rem; font-weight: 800; margin-bottom: 1px; }
+.sm-note { font-size: 0.57rem; color: #94a3b8; margin-bottom: 4px; line-height: 1.35; min-height: 22px; }
+
+table.tbl { width: 100%; border-collapse: collapse; font-size: 0.66rem; font-variant-numeric: tabular-nums; }
+table.tbl th { text-align: right; font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 700; padding: 0 0 5px; }
+table.tbl th:first-child, table.tbl td:first-child { text-align: left; }
+table.tbl td { text-align: right; padding: 4px 0; border-top: 1px solid #edf2f7; color: #4a5568; }
+table.tbl td:first-child { font-weight: 700; color: #1a202c; }
+.warn { color: #b7791f; font-weight: 700; }
+
+.method { width: 100%; max-width: 480px; background: #fffaf0; border: 1px solid #fbd38d; border-radius: 12px; padding: 12px 14px; font-size: 0.65rem; color: #744210; line-height: 1.6; }
+.method h2 { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: #975a16; margin-bottom: 6px; }
+.method p { margin-bottom: 7px; }
+.method p:last-child { margin-bottom: 0; }
+
+.foot { width: 100%; max-width: 480px; text-align: center; padding: 16px 0 24px; font-size: 0.65rem; color: #94a3b8; }
+.err { padding: 20px 14px; font-size: 0.72rem; color: #9b2c2c; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<h1>Elvesona · Statistikk</h1>
+
+<div class="banner">
+  <a class="back-link" href="../">← Tilbake til oversiktskartet</a>
+  <div class="rname">Sørlandselvene</div>
+  <div class="lede">Ti sesonger med registrert laksefangst, holdt opp mot daglig vannføring. <strong>Seks elver</strong> – Audna, Lygna, Mandalselva, Otra, Sygna og Tovdalselva.</div>
+  <div class="banner-meta" id="meta">Laster data …</div>
+</div>
+
+<!-- 1. SESONGPROFIL -->
+<div class="panel">
+  <div class="panel-header">
+    <span class="panel-name">Når på sesongen</span>
+    <span class="panel-sub">Andel av sesongfangsten per halvmåned. Hver elv er skalert til sin egen topp, så formen kan sammenlignes selv om elvene er svært ulike i størrelse.</span>
+  </div>
+  <div class="panel-body">
+    <div class="sm-grid" id="profGrid"></div>
+  </div>
+</div>
+
+<!-- 2. VANNFØRINGSRESPONS -->
+<div class="panel">
+  <div class="panel-header">
+    <span class="panel-name">Vannføringsrespons</span>
+    <span class="panel-sub">Fangstrate mot vannføring. Hver elv måles i sine egne vannføringsdeler – fra de tørreste 10 % av sesongdøgnene til de våteste – og indekseres til sin egen beste del = 100.</span>
+  </div>
+  <div class="panel-body">
+    <div class="pill-row" id="periodPills"></div>
+    <svg id="flowChart" viewBox="0 0 340 210" role="img" aria-label="Fangstrate mot vannføring"></svg>
+    <div class="readout" id="flowReadout"><span class="hint">Dra eller trykk i figuren for å lese av tall.</span></div>
+    <div class="legend" id="flowLegend"></div>
+  </div>
+</div>
+
+<!-- 3. ÅRSSERIEN -->
+<div class="panel">
+  <div class="panel-header">
+    <span class="panel-name">Sesong for sesong</span>
+    <span class="panel-sub">Registrert laks per sesong. Fellinjen viser alle elvene samlet, indeksert mot sitt eget snitt for 2016–2018.</span>
+  </div>
+  <div class="panel-body">
+    <svg id="indexChart" viewBox="0 0 340 150" role="img" aria-label="Samlet fangstindeks per sesong"></svg>
+    <div class="sm-grid" id="yearGrid" style="margin-top:14px"></div>
+    <table class="tbl" id="yearTable" style="margin-top:14px"></table>
+  </div>
+</div>
+
+<!-- 4. VEKTFORDELING -->
+<div class="panel">
+  <div class="panel-header">
+    <span class="panel-name">Størrelsen på fisken</span>
+    <span class="panel-sub">Andel smålaks (under 3 kg), mellomlaks (3–7 kg) og storlaks (over 7 kg) per sesong.</span>
+  </div>
+  <div class="panel-body">
+    <div class="pill-row" id="weightPills"></div>
+    <svg id="weightChart" viewBox="0 0 340 190" role="img" aria-label="Størrelsesfordeling per sesong"></svg>
+    <div class="legend" id="weightLegend"></div>
+    <div class="hint" style="margin-top:7px">Tallet under hvert år er antall laks fordelingen bygger på. * = under 20 fisk, altfor tynt til å tolkes.</div>
+  </div>
+</div>
+
+<div class="method">
+  <h2>Om tallene</h2>
+  <p><strong>Dette er registrert fangst, ikke bestand.</strong> Vi har ingen data på hvor mange som fisket. En sone eller en sesong kan ha få fisk fordi det var få fisk – eller fordi det var få fiskere. Tallene sier hva som ble meldt inn, ikke hvor mye laks som gikk opp.</p>
+  <p><strong>Vannføringsresponsen henger delvis sammen med tidspunkt.</strong> Høy vannføring kommer ofte i høysesongen, så en stigende kurve kan skyldes begge deler. Derfor kan figuren deles i juni–juli og august–september: holder stigningen seg innenfor én periode, er det vannføringen som driver den.</p>
+  <p><strong>Vannføringsseriene er ikke like lange.</strong> Fangstrater regnes bare på døgn der vi har måleverdi fra NVE. Otra mangler hele 2019 – det året vises med antall, men uten rate. Audna og Lygna har tynn dekning i september.</p>
+  <p><strong>Registreringskulturen varierer.</strong> Enkelte elver har mange fangster ført på den 1. i måneden, samlet inn i etterkant. Det påvirker døgnanalyser, ikke sesongtotaler.</p>
+</div>
+
+<div class="foot">
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.001</span><br>
+  <span style="font-size:0.6rem;">Data: Inatur.no (fangst) · NVE HydAPI (vannføring)</span>
+</div>
+
+<script>
+const DATA_URL = '../data/statistikk.json';
+
+const COLORS = {
+  audna: '#276749', lygna: '#2b6cb0', mandalselva: '#b7791f',
+  otra: '#9b2c2c', sygna: '#6b46c1', tovdalselva: '#2c7a7b'
+};
+const ORDER = ['audna','lygna','mandalselva','otra','sygna','tovdalselva'];
+const BUCKETS = ['06-1','06-2','07-1','07-2','08-1','08-2','09-1','09-2'];
+const BUCKET_LBL = {
+  '06-1':'1.–15. juni','06-2':'16.–30. juni','07-1':'1.–15. juli','07-2':'16.–31. juli',
+  '08-1':'1.–15. august','08-2':'16.–31. august','09-1':'1.–15. september','09-2':'16.–30. september'
+};
+const BUCKET_TICK = { '06-1':'J','07-1':'J','08-1':'A','09-1':'S' };
+const WCLASS = [
+  ['sma','Under 3 kg','#9ae6b4'],
+  ['mellom','3–7 kg','#38a169'],
+  ['stor','Over 7 kg','#22543d']
+];
+
+let DB = null;
+let period = 'flowkurve';
+let hidden = {};
+let weightRiver = 'audna';
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const el = document.createElementNS ? (t,a) => {
+  const n = document.createElementNS('http://www.w3.org/2000/svg', t);
+  for (const k in a) if (a[k] !== null && a[k] !== undefined) n.setAttribute(k, a[k]);
+  return n;
+} : null;
+
+function nf(n, d) { return n === null || n === undefined ? '–' : n.toLocaleString('nb-NO', {minimumFractionDigits: d||0, maximumFractionDigits: d||0}); }
+function rateFmt(v) { return v === null || v === undefined ? '–' : nf(v, v < 1 ? 2 : 1); }
+
+// ── 1. SESONGPROFIL ────────────────────────────────────────────────────
+function drawProfiles() {
+  const host = document.getElementById('profGrid');
+  host.textContent = '';
+  ORDER.forEach(key => {
+    const r = DB.elver[key];
+    if (!r) return;
+    const vals = BUCKETS.map(b => r.sesongprofil.laks[b] || 0);
+    const total = vals.reduce((a,b) => a+b, 0);
+    const max = Math.max(...vals, 1);
+    const topIdx = vals.indexOf(Math.max(...vals));
+
+    const wrap = document.createElement('div');
+    wrap.className = 'sm';
+    const t = document.createElement('div');
+    t.className = 'sm-title'; t.style.color = COLORS[key]; t.textContent = r.navn;
+    const n = document.createElement('div');
+    n.className = 'sm-note';
+    n.textContent = 'Topp: ' + BUCKET_LBL[BUCKETS[topIdx]];
+    wrap.appendChild(t); wrap.appendChild(n);
+
+    const W = 100, H = 46, pad = 1.5;
+    const svg = el('svg', {viewBox: '0 0 ' + W + ' ' + (H+9), role: 'img'});
+    svg.setAttribute('aria-label', r.navn + ': sesongprofil, topp ' + BUCKET_LBL[BUCKETS[topIdx]]);
+    const bw = W / BUCKETS.length;
+    BUCKETS.forEach((b, i) => {
+      const h = Math.max(vals[i] > 0 ? 1 : 0, (vals[i] / max) * H);
+      svg.appendChild(el('rect', {
+        x: (i*bw + pad).toFixed(2), y: (H - h).toFixed(2),
+        width: (bw - pad*2).toFixed(2), height: h.toFixed(2),
+        fill: COLORS[key], opacity: i === topIdx ? 1 : 0.42, rx: 0.8
+      }));
+      if (BUCKET_TICK[b]) {
+        const tx = el('text', {x: (i*bw + bw).toFixed(2), y: H+7, 'text-anchor':'middle', class:'ax'});
+        tx.textContent = BUCKET_TICK[b];
+        svg.appendChild(tx);
+      }
+    });
+    svg.appendChild(el('line', {x1:0, y1:H, x2:W, y2:H, class:'grid'}));
+    wrap.appendChild(svg);
+
+    const sum = document.createElement('div');
+    sum.className = 'sm-note';
+    sum.style.minHeight = '0';
+    sum.style.marginTop = '3px';
+    sum.textContent = nf(total) + ' laks totalt';
+    wrap.appendChild(sum);
+    host.appendChild(wrap);
+  });
+}
+
+// ── 2. VANNFØRINGSRESPONS ──────────────────────────────────────────────
+const PERIODS = [
+  ['flowkurve', 'Hele sesongen'],
+  ['flowkurve_tidlig', 'Juni–juli'],
+  ['flowkurve_sen', 'Aug–sep']
+];
+
+function drawPeriodPills() {
+  const host = document.getElementById('periodPills');
+  host.textContent = '';
+  PERIODS.forEach(([k, lbl]) => {
+    const b = document.createElement('button');
+    b.className = 'pill' + (k === period ? ' active' : '');
+    b.textContent = lbl;
+    b.onclick = () => { period = k; drawPeriodPills(); drawFlow(); };
+    host.appendChild(b);
+  });
+}
+
+function drawFlowLegend() {
+  const host = document.getElementById('flowLegend');
+  host.textContent = '';
+  ORDER.forEach(key => {
+    if (!DB.elver[key]) return;
+    const b = document.createElement('button');
+    b.className = 'lg' + (hidden[key] ? ' off' : '');
+    b.setAttribute('aria-pressed', hidden[key] ? 'false' : 'true');
+    const sw = document.createElement('span');
+    sw.className = 'sw'; sw.style.background = COLORS[key];
+    b.appendChild(sw);
+    b.appendChild(document.createTextNode(DB.elver[key].navn));
+    b.onclick = () => { hidden[key] = !hidden[key]; drawFlowLegend(); drawFlow(); };
+    host.appendChild(b);
+  });
+}
+
+let flowGeom = null;
+
+function drawFlow() {
+  const svg = document.getElementById('flowChart');
+  svg.textContent = '';
+  const W = 340, H = 210, L = 30, R = 8, T = 12, B = 30;
+  const pw = W - L - R, ph = H - T - B;
+
+  const series = ORDER.filter(k => DB.elver[k] && !hidden[k]).map(k => {
+    const pts = DB.elver[k][period].filter(p => p.dager > 0);
+    const mx = Math.max(...pts.map(p => p.rate || 0), 0);
+    return {key: k, navn: DB.elver[k].navn, pts, mx};
+  }).filter(s => s.pts.length && s.mx > 0);
+
+  // gridlinjer + y-akse (indeks 0-100)
+  [0, 25, 50, 75, 100].forEach(v => {
+    const y = T + ph - (v/100) * ph;
+    svg.appendChild(el('line', {x1: L, y1: y.toFixed(1), x2: W-R, y2: y.toFixed(1), class: 'grid'}));
+    const t = el('text', {x: L-5, y: (y+3).toFixed(1), 'text-anchor':'end', class:'ax'});
+    t.textContent = v;
+    svg.appendChild(t);
+  });
+  const yl = el('text', {x: 2, y: T-4, class: 'ax'});
+  yl.textContent = 'indeks';
+  svg.appendChild(yl);
+
+  const n = series.length ? series[0].pts.length : 10;
+  const xOf = i => L + (n === 1 ? pw/2 : (i/(n-1)) * pw);
+
+  // x-akse
+  [[0, 'tørrest'], [n-1, 'våtest']].forEach(([i, lbl]) => {
+    const t = el('text', {x: xOf(i).toFixed(1), y: H-14, 'text-anchor': i === 0 ? 'start' : 'end', class:'axb'});
+    t.textContent = lbl;
+    svg.appendChild(t);
+  });
+  const t2 = el('text', {x: (L+pw/2).toFixed(1), y: H-3, 'text-anchor':'middle', class:'ax'});
+  t2.textContent = 'vannføringsdeler av sesongdøgnene';
+  svg.appendChild(t2);
+
+  // scrub-guide
+  const guide = el('line', {x1: -10, y1: T, x2: -10, y2: T+ph, stroke: '#cbd5e0', 'stroke-width': 1, 'stroke-dasharray': '3 3'});
+  svg.appendChild(guide);
+
+  series.forEach(s => {
+    const d = s.pts.map((p, i) => (i ? 'L' : 'M') + xOf(i).toFixed(1) + ' ' + (T + ph - ((p.rate/s.mx)) * ph).toFixed(1)).join(' ');
+    svg.appendChild(el('path', {d, fill: 'none', stroke: COLORS[s.key], 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round'}));
+    s.pts.forEach((p, i) => svg.appendChild(el('circle', {
+      cx: xOf(i).toFixed(1), cy: (T + ph - (p.rate/s.mx) * ph).toFixed(1), r: 2, fill: COLORS[s.key]
+    })));
+  });
+
+  flowGeom = {svg, guide, series, n, xOf, L, pw};
+  if (!series.length) {
+    const t = el('text', {x: W/2, y: T + ph/2, 'text-anchor':'middle', class:'axb'});
+    t.textContent = 'Ingen elver valgt';
+    svg.appendChild(t);
+  }
+  showFlowAt(null);
+}
+
+function showFlowAt(idx) {
+  const box = document.getElementById('flowReadout');
+  if (!flowGeom) return;
+  if (idx === null || !flowGeom.series.length) {
+    flowGeom.guide.setAttribute('x1', -10);
+    flowGeom.guide.setAttribute('x2', -10);
+    box.innerHTML = '<span class="hint">Dra eller trykk i figuren for å lese av tall.</span>';
+    return;
+  }
+  const x = flowGeom.xOf(idx).toFixed(1);
+  flowGeom.guide.setAttribute('x1', x);
+  flowGeom.guide.setAttribute('x2', x);
+  const parts = ['<div class="ro-head">Vannføringsdel ' + (idx+1) + ' av ' + flowGeom.n +
+    ' <span style="font-weight:400;color:#94a3b8">· laks per døgn</span></div><div class="ro-grid">'];
+  flowGeom.series.forEach(s => {
+    const p = s.pts[idx];
+    if (!p) return;
+    const span = p.lo === p.hi ? nf(p.lo,1) : nf(p.lo,1) + '–' + nf(p.hi,1);
+    parts.push('<div class="ro-item"><span class="sw" style="background:' + COLORS[s.key] + '"></span>' +
+      esc(s.navn) + ' <b>' + rateFmt(p.rate) + '</b></div>' +
+      '<div class="ro-item" style="color:#94a3b8">' + span + ' m³/s · ' + p.dager + ' d</div>');
+  });
+  parts.push('</div>');
+  box.innerHTML = parts.join('');
+}
+
+function bindScrub(svgId, handler) {
+  const svg = document.getElementById(svgId);
+  const move = ev => {
+    if (!flowGeom) return;
+    const r = svg.getBoundingClientRect();
+    const cx = (ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left;
+    const vx = cx / r.width * 340;
+    const rel = (vx - flowGeom.L) / flowGeom.pw;
+    const i = Math.round(rel * (flowGeom.n - 1));
+    handler(Math.max(0, Math.min(flowGeom.n - 1, i)));
+  };
+  let dragging = false;
+  svg.addEventListener('pointerdown', ev => {
+    dragging = true;
+    if (svg.setPointerCapture) svg.setPointerCapture(ev.pointerId);
+    move(ev); ev.preventDefault();
+  });
+  svg.addEventListener('pointermove', ev => { if (dragging) { move(ev); ev.preventDefault(); } });
+  ['pointerup','pointercancel','pointerleave'].forEach(e =>
+    svg.addEventListener(e, () => { dragging = false; }));
+}
+
+// ── 3. ÅRSSERIEN ───────────────────────────────────────────────────────
+function allYears() {
+  const s = new Set();
+  ORDER.forEach(k => DB.elver[k] && DB.elver[k].aarsserie.forEach(a => s.add(a.aar)));
+  return [...s].sort();
+}
+
+function drawIndex() {
+  const svg = document.getElementById('indexChart');
+  svg.textContent = '';
+  const W = 340, H = 150, L = 30, R = 8, T = 12, B = 26;
+  const pw = W - L - R, ph = H - T - B;
+
+  const years = allYears().filter(y => {
+    let c = 0;
+    ORDER.forEach(k => { const a = DB.elver[k] && DB.elver[k].aarsserie.find(x => x.aar === y); if (a && a.antall) c++; });
+    return c >= 3;   // fellinjen krever minst tre elver med data
+  });
+
+  const idx = years.map(y => {
+    const vals = [];
+    ORDER.forEach(k => {
+      const ser = DB.elver[k] && DB.elver[k].aarsserie;
+      if (!ser) return;
+      const base = [2016,2017,2018].map(b => (ser.find(x => x.aar === b) || {}).antall).filter(v => v);
+      const cur = (ser.find(x => x.aar === y) || {}).antall;
+      if (base.length === 3 && cur !== undefined) vals.push(cur / (base.reduce((a,b)=>a+b,0)/3) * 100);
+    });
+    return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+  });
+
+  const mx = Math.max(...idx.filter(v => v !== null), 100);
+  const yOf = v => T + ph - (v/mx) * ph;
+  const xOf = i => L + (i/(years.length-1)) * pw;
+
+  [0, 50, 100].forEach(v => {
+    if (v > mx) return;
+    const y = yOf(v);
+    svg.appendChild(el('line', {x1: L, y1: y.toFixed(1), x2: W-R, y2: y.toFixed(1),
+      class: 'grid', stroke: v === 100 ? '#cbd5e0' : null, 'stroke-dasharray': v === 100 ? '3 3' : null}));
+    const t = el('text', {x: L-5, y: (y+3).toFixed(1), 'text-anchor':'end', class:'ax'});
+    t.textContent = v;
+    svg.appendChild(t);
+  });
+
+  const d = idx.map((v, i) => (i ? 'L' : 'M') + xOf(i).toFixed(1) + ' ' + yOf(v).toFixed(1)).join(' ');
+  svg.appendChild(el('path', {d, fill: 'none', stroke: '#0f2d4a', 'stroke-width': 2.5, 'stroke-linejoin':'round'}));
+  idx.forEach((v, i) => {
+    svg.appendChild(el('circle', {cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: 2.8, fill: '#0f2d4a'}));
+    if (i === 0 || i === idx.length-1) {
+      const t = el('text', {x: xOf(i).toFixed(1), y: (yOf(v)-7).toFixed(1),
+        'text-anchor': i === 0 ? 'start' : 'end', class:'axb'});
+      t.textContent = Math.round(v);
+      svg.appendChild(t);
+    }
+  });
+  years.forEach((y, i) => {
+    if (i % 2 && i !== years.length-1) return;
+    const t = el('text', {x: xOf(i).toFixed(1), y: H-9, 'text-anchor':'middle', class:'ax'});
+    t.textContent = String(y).slice(2);
+    svg.appendChild(t);
+  });
+  const lbl = el('text', {x: 2, y: T-4, class:'ax'});
+  lbl.textContent = '2016–18 = 100';
+  svg.appendChild(lbl);
+}
+
+function drawYearSmalls() {
+  const host = document.getElementById('yearGrid');
+  host.textContent = '';
+  const years = allYears();
+  ORDER.forEach(key => {
+    const r = DB.elver[key];
+    if (!r) return;
+    const map = {};
+    r.aarsserie.forEach(a => map[a.aar] = a);
+    const max = Math.max(...r.aarsserie.map(a => a.antall), 1);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'sm';
+    const t = document.createElement('div');
+    t.className = 'sm-title'; t.style.color = COLORS[key]; t.textContent = r.navn;
+    const last = r.aarsserie[r.aarsserie.length-1];
+    const n = document.createElement('div');
+    n.className = 'sm-note';
+    n.textContent = 'Topp ' + nf(max) + ' · sist ' + nf(last.antall) + ' (' + last.aar + ')';
+    wrap.appendChild(t); wrap.appendChild(n);
+
+    const W = 100, H = 44;
+    const svg = el('svg', {viewBox: '0 0 ' + W + ' ' + (H+9), role:'img'});
+    svg.setAttribute('aria-label', r.navn + ': registrert laks per sesong');
+    const bw = W / years.length;
+    years.forEach((y, i) => {
+      const a = map[y];
+      if (!a) return;
+      const h = Math.max(a.antall > 0 ? 1 : 0, (a.antall/max) * H);
+      svg.appendChild(el('rect', {
+        x: (i*bw + 1).toFixed(2), y: (H-h).toFixed(2),
+        width: (bw-2).toFixed(2), height: h.toFixed(2),
+        fill: COLORS[key], opacity: a.delvis ? 0.4 : 0.85, rx: 0.8
+      }));
+    });
+    svg.appendChild(el('line', {x1:0, y1:H, x2:W, y2:H, class:'grid'}));
+    [0, years.length-1].forEach(i => {
+      const tx = el('text', {x: (i*bw + bw/2).toFixed(2), y: H+7,
+        'text-anchor': i === 0 ? 'start' : 'end', class:'ax'});
+      tx.textContent = String(years[i]).slice(2);
+      svg.appendChild(tx);
+    });
+    wrap.appendChild(svg);
+    host.appendChild(wrap);
+  });
+}
+
+function drawYearTable() {
+  const t = document.getElementById('yearTable');
+  const years = allYears();
+  const rows = ['<tr><th>Elv</th><th>Beste</th><th>Siste</th><th>Endring</th><th>Laks/døgn</th></tr>'];
+  ORDER.forEach(key => {
+    const r = DB.elver[key];
+    if (!r) return;
+    const ser = r.aarsserie;
+    const best = ser.reduce((a,b) => b.antall > a.antall ? b : a);
+    const last = ser[ser.length-1];
+    const base = [2016,2017,2018].map(b => (ser.find(x => x.aar === b) || {}).antall).filter(v => v);
+    const chg = base.length === 3 ? Math.round(last.antall / (base.reduce((a,b)=>a+b,0)/3) * 100 - 100) : null;
+    rows.push('<tr><td>' + esc(r.navn) + '</td>' +
+      '<td>' + nf(best.antall) + ' <span style="color:#94a3b8">(' + best.aar + ')</span></td>' +
+      '<td>' + nf(last.antall) + ' <span style="color:#94a3b8">(' + last.aar + (last.delvis ? '*' : '') + ')</span></td>' +
+      '<td class="' + (chg !== null && chg < -40 ? 'warn' : '') + '">' + (chg === null ? '–' : (chg > 0 ? '+' : '') + chg + ' %') + '</td>' +
+      '<td>' + rateFmt(last.rate) + '</td></tr>');
+  });
+  t.innerHTML = rows.join('');
+  t.insertAdjacentHTML('afterend',
+    '<div class="hint" style="margin-top:6px">Endring = siste sesong mot elvas eget snitt for 2016–2018. * = ufullstendig sesong i datagrunnlaget.</div>');
+}
+
+// ── 4. VEKTFORDELING ───────────────────────────────────────────────────
+function drawWeightPills() {
+  const host = document.getElementById('weightPills');
+  host.textContent = '';
+  ORDER.forEach(key => {
+    if (!DB.elver[key]) return;
+    const b = document.createElement('button');
+    b.className = 'pill' + (key === weightRiver ? ' active' : '');
+    b.textContent = DB.elver[key].navn;
+    b.onclick = () => { weightRiver = key; drawWeightPills(); drawWeight(); };
+    host.appendChild(b);
+  });
+}
+
+function drawWeightLegend() {
+  const host = document.getElementById('weightLegend');
+  host.textContent = '';
+  WCLASS.forEach(([k, lbl, col]) => {
+    const s = document.createElement('span');
+    s.className = 'lg'; s.style.cursor = 'default';
+    const sw = document.createElement('span');
+    sw.className = 'sw'; sw.style.background = col;
+    s.appendChild(sw);
+    s.appendChild(document.createTextNode(lbl));
+    host.appendChild(s);
+  });
+}
+
+function drawWeight() {
+  const svg = document.getElementById('weightChart');
+  svg.textContent = '';
+  const W = 340, H = 190, L = 26, R = 8, T = 12, B = 30;
+  const pw = W - L - R, ph = H - T - B;
+  const v = DB.elver[weightRiver].vekt;
+  const years = Object.keys(v).sort();
+
+  [0, 50, 100].forEach(p => {
+    const y = T + ph - (p/100) * ph;
+    svg.appendChild(el('line', {x1: L, y1: y.toFixed(1), x2: W-R, y2: y.toFixed(1), class:'grid'}));
+    const t = el('text', {x: L-5, y: (y+3).toFixed(1), 'text-anchor':'end', class:'ax'});
+    t.textContent = p + '%';
+    svg.appendChild(t);
+  });
+
+  const bw = pw / years.length;
+  years.forEach((y, i) => {
+    const c = v[y];
+    const tot = c.sma + c.mellom + c.stor;
+    if (!tot) return;
+    let acc = 0;
+    WCLASS.forEach(([k, lbl, col]) => {
+      const frac = c[k] / tot;
+      const h = frac * ph;
+      svg.appendChild(el('rect', {
+        x: (L + i*bw + 2).toFixed(2), y: (T + ph - acc - h).toFixed(2),
+        width: (bw - 4).toFixed(2), height: h.toFixed(2), fill: col,
+        opacity: tot < 20 ? 0.35 : 1
+      }));
+      acc += h;
+    });
+    const tx = el('text', {x: (L + i*bw + bw/2).toFixed(2), y: H-16, 'text-anchor':'middle', class:'ax'});
+    tx.textContent = String(y).slice(2);
+    svg.appendChild(tx);
+    const tn = el('text', {x: (L + i*bw + bw/2).toFixed(2), y: H-6, 'text-anchor':'middle', class:'ax'});
+    tn.textContent = (tot < 1000 ? tot : Math.round(tot/100)/10 + 'k') + (tot < 20 ? '*' : '');
+    svg.appendChild(tn);
+  });
+  const lbl = el('text', {x: 2, y: H-6, class:'ax'});
+  lbl.textContent = 'n';
+  svg.appendChild(lbl);
+}
+
+// ── OPPSTART ───────────────────────────────────────────────────────────
+function boot() {
+  const yrs = allYears();
+  const totLaks = ORDER.reduce((a, k) => a + (DB.elver[k]
+    ? Object.values(DB.elver[k].sesongprofil.laks).reduce((x,y)=>x+y, 0) : 0), 0);
+  document.getElementById('meta').textContent =
+    nf(totLaks) + ' registrerte laks · sesongene ' + yrs[0] + '–' + yrs[yrs.length-1] +
+    ' · juni–september · oppdatert ' + DB.generert;
+
+  drawProfiles();
+  drawPeriodPills(); drawFlowLegend(); drawFlow();
+  bindScrub('flowChart', showFlowAt);
+  drawIndex(); drawYearSmalls(); drawYearTable();
+  drawWeightPills(); drawWeightLegend(); drawWeight();
+}
+
+fetch(DATA_URL)
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(j => { DB = j; boot(); })
+  .catch(e => {
+    document.getElementById('meta').textContent = 'Fikk ikke lastet statistikkdata.';
+    document.querySelectorAll('.panel-body').forEach(p => {
+      p.innerHTML = '<div class="err">Statistikkdataene lot seg ikke hente (' + esc(e.message) +
+        '). Last siden på nytt, eller prøv igjen senere.</div>';
+    });
+  });
+</script>
+
+</body>
+</html>
