@@ -64,6 +64,13 @@
  },
  {
   "dato": "2026-08-16",
+  "sone": "Bringsdal B",
+  "vekt": 1.2,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-16",
   "sone": "Fuskeland B",
   "vekt": 1.6,
   "agn": "Flue",
