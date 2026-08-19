@@ -23,6 +23,13 @@
  {
   "dato": "2026-08-18",
   "sone": "Sone 3",
+  "vekt": 1.5,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-18",
+  "sone": "Sone 3",
   "vekt": 1.2,
   "agn": "Flue",
   "art": "Laks"
