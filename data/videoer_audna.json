@@ -11,5 +11,16 @@
     "vannforing": 26,
     "adkomstLat": 58.1294724049944,
     "adkomstLon": 7.3569436186717
+  },
+  {
+    "id": "V-002",
+    "zone": "Sone 5A",
+    "lat": 58.130092,
+    "lon": 7.364833,
+    "youtubeId": "QYN9jrdqSQA",
+    "caption": "Sone 5A · Video",
+    "dateISO": "2026-08-15",
+    "timeUTC": "17:17",
+    "vannforing": 0
   }
 ]
