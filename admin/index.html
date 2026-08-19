@@ -272,7 +272,7 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
       </select>
     </label>
     <label>Sone <select id="vidSone"><option value="">— laster soner … —</option></select></label>
-    <label style="grid-column:1/-1">📂 Autoutfyll fra videofil — leses kun lokalt i nettleseren, lastes ikke opp
+    <label style="grid-column:1/-1">📂 Autoutfyll fra videofil — GoPro-telemetri (GPMF), telefonvideo (©xyz) og filklokke leses kun lokalt i nettleseren, filen lastes ikke opp
       <input type="file" id="vidFil" accept="video/mp4,video/quicktime,.mp4,.mov" onchange="lesVideofil(event)"></label>
     <label style="grid-column:1/-1">YouTube-lenke eller video-ID
       <input type="text" id="vidYt" placeholder="https://youtu.be/… eller 11-tegns ID"></label>
@@ -623,60 +623,374 @@ function parseYouTubeId(input) {
   return m ? m[1] : null;
 }
 
+/* ---------- MP4/MOV-lesing ----------
+   Atomene leses via file.slice() slik at store GoPro-filer (flere GB)
+   aldri lastes inn i minnet samtidig. Kritisk på mobil. */
+
+function fourccAt(u8, off) {
+  return String.fromCharCode(u8[off], u8[off + 1], u8[off + 2], u8[off + 3]);
+}
+
+async function readBytes(file, start, len) {
+  if (start < 0 || start >= file.size) return new Uint8Array(0);
+  const end = Math.min(file.size, start + len);
+  return new Uint8Array(await file.slice(start, end).arrayBuffer());
+}
+
+// Skanner toppnivå-atomene ved å lese kun 16-byte headere - hopper over mdat
+async function finnToppAtom(file, want) {
+  let pos = 0;
+  while (pos + 8 <= file.size) {
+    const h = await readBytes(file, pos, 16);
+    if (h.length < 8) break;
+    const dv = new DataView(h.buffer, h.byteOffset, h.length);
+    let size = dv.getUint32(0), hdr = 8;
+    const typ = fourccAt(h, 4);
+    if (size === 1) { if (h.length < 16) break; size = Number(dv.getBigUint64(8)); hdr = 16; }
+    else if (size === 0) size = file.size - pos;
+    if (size < hdr) break;
+    if (typ === want) return { start: pos, size: size, hdr: hdr };
+    pos += size;
+  }
+  return null;
+}
+
+function atomBarn(buf, dv, start, end) {
+  const out = [];
+  let pos = start;
+  while (pos + 8 <= end) {
+    let size = dv.getUint32(pos), hdr = 8;
+    const typ = fourccAt(buf, pos + 4);
+    if (size === 1) { size = Number(dv.getBigUint64(pos + 8)); hdr = 16; }
+    else if (size === 0) size = end - pos;
+    if (size < hdr || pos + size > end) break;
+    out.push({ typ: typ, start: pos, end: pos + size, data: pos + hdr });
+    pos += size;
+  }
+  return out;
+}
+
+function finnAtom(buf, dv, start, end, sti) {
+  let liste = atomBarn(buf, dv, start, end);
+  let node = null;
+  for (const navn of sti) {
+    node = liste.find(a => a.typ === navn);
+    if (!node) return null;
+    liste = atomBarn(buf, dv, node.data, node.end);
+  }
+  return node;
+}
+
+/* ---------- stbl-tabeller: sample-posisjoner inne i mdat ---------- */
+function lesStsz(dv, a) {
+  const fast = dv.getUint32(a.data + 4);
+  const antall = dv.getUint32(a.data + 8);
+  const out = [];
+  for (let i = 0; i < antall; i++) out.push(fast > 0 ? fast : dv.getUint32(a.data + 12 + i * 4));
+  return out;
+}
+
+function lesStsc(dv, a) {
+  const n = dv.getUint32(a.data + 4);
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const o = a.data + 8 + i * 12;
+    out.push({ first: dv.getUint32(o), spc: dv.getUint32(o + 4) });
+  }
+  return out;
+}
+
+function lesChunkOffsets(dv, stco, co64) {
+  const a = stco || co64;
+  if (!a) return [];
+  const n = dv.getUint32(a.data + 4);
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    out.push(stco ? dv.getUint32(a.data + 8 + i * 4) : Number(dv.getBigUint64(a.data + 8 + i * 8)));
+  }
+  return out;
+}
+
+function sampleTabell(sizes, stsc, chunks) {
+  const out = [];
+  let idx = 0;
+  for (let c = 0; c < chunks.length && idx < sizes.length; c++) {
+    let spc = stsc.length ? stsc[0].spc : 1;
+    for (let i = 0; i < stsc.length; i++) { if (stsc[i].first <= c + 1) spc = stsc[i].spc; else break; }
+    let off = chunks[c];
+    for (let s = 0; s < spc && idx < sizes.length; s++) {
+      out.push({ off: off, size: sizes[idx] });
+      off += sizes[idx];
+      idx++;
+    }
+  }
+  return out;
+}
+
+// Finner GoPro-telemetrisporet: trak der stsd-formatet er 'gpmd'
+function finnGpmdSamples(buf, dv, moovStart, moovEnd) {
+  for (const trak of atomBarn(buf, dv, moovStart, moovEnd).filter(a => a.typ === 'trak')) {
+    const stbl = finnAtom(buf, dv, trak.data, trak.end, ['mdia', 'minf', 'stbl']);
+    if (!stbl) continue;
+    const barn = atomBarn(buf, dv, stbl.data, stbl.end);
+    const stsd = barn.find(a => a.typ === 'stsd');
+    if (!stsd || stsd.data + 16 > stsd.end) continue;
+    if (fourccAt(buf, stsd.data + 12) !== 'gpmd') continue;
+    const stsz = barn.find(a => a.typ === 'stsz');
+    const stsc = barn.find(a => a.typ === 'stsc');
+    const stco = barn.find(a => a.typ === 'stco');
+    const co64 = barn.find(a => a.typ === 'co64');
+    if (!stsz || !stsc || (!stco && !co64)) continue;
+    return sampleTabell(lesStsz(dv, stsz), lesStsc(dv, stsc), lesChunkOffsets(dv, stco, co64));
+  }
+  return null;
+}
+
+/* ---------- GPMF (GoPro Metadata Format) ----------
+   KLV: [4 byte FourCC][1 byte type][1 byte structstørrelse][2 byte repeat]
+   Data padres til 4-byte grense. Type 0x00 = nøstet container. */
+
+function gpmfTypeSize(t) {
+  return { 0x62: 1, 0x42: 1, 0x63: 1, 0x64: 8, 0x66: 4, 0x46: 4, 0x6A: 8,
+           0x4A: 8, 0x6C: 4, 0x4C: 4, 0x73: 2, 0x53: 2, 0x55: 1 }[t] || 1;
+}
+
+function gpmfLesTall(dv, off, t) {
+  switch (t) {
+    case 0x62: return dv.getInt8(off);
+    case 0x42: return dv.getUint8(off);
+    case 0x73: return dv.getInt16(off);
+    case 0x53: return dv.getUint16(off);
+    case 0x6C: return dv.getInt32(off);
+    case 0x4C: return dv.getUint32(off);
+    case 0x66: return dv.getFloat32(off);
+    case 0x64: return dv.getFloat64(off);
+    case 0x6A: return Number(dv.getBigInt64(off));
+    case 0x4A: return Number(dv.getBigUint64(off));
+    default: return null;
+  }
+}
+
+function gpmfTallListe(dv, it) {
+  const es = gpmfTypeSize(it.type);
+  const n = Math.floor(it.len / es);
+  const out = [];
+  for (let i = 0; i < n; i++) out.push(gpmfLesTall(dv, it.data + i * es, it.type));
+  return out;
+}
+
+function gpmfTekst(dv, it) {
+  let s = '';
+  for (let i = 0; i < it.len; i++) s += String.fromCharCode(dv.getUint8(it.data + i));
+  return s.replace(/\0/g, '').trim();
+}
+
+function gpmfBarn(dv, start, end) {
+  const out = [];
+  let pos = start;
+  while (pos + 8 <= end) {
+    const key = String.fromCharCode(dv.getUint8(pos), dv.getUint8(pos + 1),
+                                    dv.getUint8(pos + 2), dv.getUint8(pos + 3));
+    const type = dv.getUint8(pos + 4);
+    const len = dv.getUint8(pos + 5) * dv.getUint16(pos + 6);
+    const data = pos + 8;
+    if (data + len > end) break;
+    out.push({ key: key, type: type, data: data, len: len });
+    pos = data + ((len + 3) & ~3);
+  }
+  return out;
+}
+
+function gpmfStrm(dv, start, end, ut) {
+  const felt = {};
+  for (const n of gpmfBarn(dv, start, end)) if (!felt[n.key]) felt[n.key] = n;
+  const g5 = felt['GPS5'], g9 = felt['GPS9'];
+  if (!g5 && !g9) return;
+
+  const scal = felt['SCAL'] ? gpmfTallListe(dv, felt['SCAL']) : [];
+  const div = (i) => {
+    if (!scal.length) return 1;
+    const v = i < scal.length ? scal[i] : scal[0];
+    return v || 1;
+  };
+
+  let tid = null;
+  if (felt['GPSU']) {
+    const m = gpmfTekst(dv, felt['GPSU']).match(/^(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/);
+    if (m) tid = Date.UTC(2000 + (+m[1]), (+m[2]) - 1, +m[3], +m[4], +m[5], +m[6]);
+  }
+
+  if (g5) {
+    // GPS5: lat, lon, høyde, 2D-fart, 3D-fart. Fix og presisjon gjelder hele pakken.
+    const fix = felt['GPSF'] ? (gpmfTallListe(dv, felt['GPSF'])[0] || 0) : 0;
+    const dop = felt['GPSP'] ? (gpmfTallListe(dv, felt['GPSP'])[0] || 0) / 100 : null;
+    const es = gpmfTypeSize(g5.type);
+    const n = Math.floor(g5.len / (es * 5));
+    const pts = [];
+    for (let i = 0; i < n; i++) {
+      const b = g5.data + i * es * 5;
+      const lat = gpmfLesTall(dv, b, g5.type) / div(0);
+      const lon = gpmfLesTall(dv, b + es, g5.type) / div(1);
+      if (lat && lon) pts.push([lat, lon]);
+    }
+    if (pts.length) ut.push({ pts: pts, fix: fix, dop: dop, tid: tid });
+  }
+
+  if (g9) {
+    // GPS9 (Hero11+): sammensatt type, feltformat oppgitt i TYPE.
+    // Rekkefølge: lat, lon, høyde, 2D, 3D, dager, sekunder, DOP, fix - fix er per sample.
+    const fmt = (felt['TYPE'] ? gpmfTekst(dv, felt['TYPE']) : '') || 'lllllllSS';
+    const sizes = fmt.split('').map(c => gpmfTypeSize(c.charCodeAt(0)));
+    const stride = sizes.reduce((a, b) => a + b, 0);
+    if (stride > 0) {
+      const n = Math.floor(g9.len / stride);
+      const pts = [];
+      let beste = 0, dop = null;
+      for (let i = 0; i < n; i++) {
+        let off = g9.data + i * stride;
+        const v = [];
+        for (let j = 0; j < fmt.length; j++) { v.push(gpmfLesTall(dv, off, fmt.charCodeAt(j))); off += sizes[j]; }
+        const f = v.length > 8 ? v[8] : 3;
+        const lat = v[0] / div(0), lon = v[1] / div(1);
+        if (f > beste) beste = f;
+        if (v.length > 7) { const d = v[7] / div(7); if (dop === null || d < dop) dop = d; }
+        if (f >= 2 && lat && lon) pts.push([lat, lon]);
+      }
+      if (pts.length) ut.push({ pts: pts, fix: beste, dop: dop, tid: tid });
+    }
+  }
+}
+
+function gpmfHentGps(dv, start, end, ut) {
+  for (const node of gpmfBarn(dv, start, end)) {
+    if (node.type !== 0) continue;
+    if (node.key === 'STRM') gpmfStrm(dv, node.data, node.data + node.len, ut);
+    else gpmfHentGps(dv, node.data, node.data + node.len, ut);
+  }
+}
+
+function medianTall(a) {
+  const s = a.slice().sort((x, y) => x - y);
+  const m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+
+// Leser gpmd-samples enkeltvis. Sample-ene er spredt utover mdat (interleaved
+// med video), så de kan ikke hentes i én sammenhengende slice.
+const GPMD_MAKS_SAMPLES = 120;
+
+async function lesGoproGps(file, samples, status) {
+  let fallback = null;
+  const grense = Math.min(samples.length, GPMD_MAKS_SAMPLES);
+  for (let i = 0; i < grense; i++) {
+    if (i > 0 && i % 20 === 0) status('Leter etter GPS-lås i telemetrien … (' + i + '/' + grense + ')');
+    const s = samples[i];
+    if (!s.size || s.size > 4 * 1024 * 1024) continue;
+    let u8;
+    try { u8 = await readBytes(file, s.off, s.size); } catch (e) { continue; }
+    if (u8.length < 8) continue;
+    const dv = new DataView(u8.buffer, u8.byteOffset, u8.length);
+    const ut = [];
+    try { gpmfHentGps(dv, 0, u8.length, ut); } catch (e) { continue; }
+    for (const e of ut) {
+      const lat = medianTall(e.pts.map(p => p[0]));
+      const lon = medianTall(e.pts.map(p => p[1]));
+      const treff = { lat: lat, lon: lon, fix: e.fix, dop: e.dop, tid: e.tid, sample: i };
+      if (e.fix >= 2) return treff;
+      if (!fallback) fallback = treff;
+    }
+  }
+  return fallback;
+}
+
+/* ---------- Autoutfylling fra videofil ---------- */
 async function lesVideofil(ev) {
   const file = ev.target.files[0];
   if (!file) return;
   setVidStatus('Leser metadata fra ' + file.name + ' …', false);
   try {
-    const buf = new Uint8Array(await file.arrayBuffer());
-    const dv = new DataView(buf.buffer);
-    // Finn toppnivå-atomet moov (metadata skal kun søkes der, ikke i mdat)
-    let pos = 0, moovStart = -1, moovEnd = -1;
-    while (pos + 8 <= buf.length) {
-      let size = dv.getUint32(pos);
-      const typ = String.fromCharCode(buf[pos+4], buf[pos+5], buf[pos+6], buf[pos+7]);
-      let hdr = 8;
-      if (size === 1) { size = Number(dv.getBigUint64(pos + 8)); hdr = 16; }
-      if (size < hdr) break;
-      if (typ === 'moov') { moovStart = pos; moovEnd = pos + size; break; }
-      pos += size;
-    }
-    if (moovStart < 0) throw new Error('fant ikke moov-atom (er dette en MP4/MOV?)');
+    const moov = await finnToppAtom(file, 'moov');
+    if (!moov) throw new Error('fant ikke moov-atom (er dette en MP4/MOV?)');
+    const mbuf = await readBytes(file, moov.start, moov.size);
+    const mdv = new DataView(mbuf.buffer, mbuf.byteOffset, mbuf.length);
+    const moovSlutt = mbuf.length;
 
-    // ©xyz (0xA9,'x','y','z') med ISO6709-streng: [2 byte lengde][2 byte språk][streng]
-    let lat = null, lon = null;
-    for (let i = moovStart; i < moovEnd - 4; i++) {
-      if (buf[i] === 0xA9 && buf[i+1] === 0x78 && buf[i+2] === 0x79 && buf[i+3] === 0x7A) {
-        const len = dv.getUint16(i + 4);
-        const str = new TextDecoder().decode(buf.slice(i + 8, i + 8 + len));
-        const m = str.match(/([+-]\d+(?:\.\d+)?)([+-]\d+(?:\.\d+)?)/);
-        if (m) { lat = parseFloat(m[1]); lon = parseFloat(m[2]); }
-        break;
+    let lat = null, lon = null, kilde = '', fix = null, dop = null;
+    let dtUTC = null, tidKilde = '';
+
+    // 1) GoPro GPMF: telemetrisporet 'gpmd'. Sample-dataene ligger i mdat,
+    //    så vi må gå veien om stsz/stsc/stco for å finne dem.
+    let samples = null;
+    try { samples = finnGpmdSamples(mbuf, mdv, moov.hdr, moovSlutt); } catch (e) { samples = null; }
+    if (samples && samples.length) {
+      setVidStatus('GoPro-telemetri funnet — leser GPS …', false);
+      const g = await lesGoproGps(file, samples, (m) => setVidStatus(m, false));
+      if (g && g.fix >= 2) {
+        lat = +g.lat.toFixed(6); lon = +g.lon.toFixed(6);
+        fix = g.fix; dop = g.dop;
+        kilde = 'GoPro GPMF';
+        if (g.tid) { dtUTC = new Date(g.tid); tidKilde = 'GPS-klokke'; }
+      } else if (g) {
+        setVidStatus('GoPro-telemetri funnet, men kameraet hadde ikke satellittlås under opptaket — koordinatene er upålitelige og fylles ikke inn.', true);
       }
     }
 
-    // mvhd: creation_time (sekunder siden 1904-01-01 UTC)
-    let dtUTC = null;
-    for (let i = moovStart; i < moovEnd - 4; i++) {
-      if (buf[i] === 0x6D && buf[i+1] === 0x76 && buf[i+2] === 0x68 && buf[i+3] === 0x64) {
-        const ver = buf[i + 4];
-        const secs = ver === 0 ? dv.getUint32(i + 8) : Number(dv.getBigUint64(i + 8));
-        if (secs > 0) dtUTC = new Date((secs - 2082844800) * 1000);   // 1904→1970-offset
-        break;
+    // 2) ©xyz i moov (ISO6709) — telefoner og enkelte kameraer
+    if (lat === null) {
+      for (let i = moov.hdr; i < moovSlutt - 4; i++) {
+        if (mbuf[i] === 0xA9 && mbuf[i + 1] === 0x78 && mbuf[i + 2] === 0x79 && mbuf[i + 3] === 0x7A) {
+          const len = mdv.getUint16(i + 4);
+          const str = new TextDecoder().decode(mbuf.slice(i + 8, i + 8 + len));
+          const m = str.match(/([+-]\d+(?:\.\d+)?)([+-]\d+(?:\.\d+)?)/);
+          if (m) { lat = parseFloat(m[1]); lon = parseFloat(m[2]); kilde = 'MP4 ©xyz'; }
+          break;
+        }
+      }
+    }
+
+    // 3) mvhd creation_time (sekunder siden 1904-01-01) — brukes bare om
+    //    GPS-klokka mangler, siden kameraer ofte skriver lokal tid her.
+    if (!dtUTC) {
+      for (let i = moov.hdr; i < moovSlutt - 4; i++) {
+        if (mbuf[i] === 0x6D && mbuf[i + 1] === 0x76 && mbuf[i + 2] === 0x68 && mbuf[i + 3] === 0x64) {
+          const ver = mbuf[i + 4];
+          const secs = ver === 0 ? mdv.getUint32(i + 8) : Number(mdv.getBigUint64(i + 8));
+          if (secs > 0) { dtUTC = new Date((secs - 2082844800) * 1000); tidKilde = 'filklokke'; }
+          break;
+        }
       }
     }
 
     const deler = [];
     if (lat !== null && lon !== null) {
       document.getElementById('vidKoord').value = lat + ', ' + lon;
-      deler.push('posisjon ' + lat + ', ' + lon);
+      let t = 'posisjon ' + lat + ', ' + lon + ' (' + kilde;
+      if (fix) t += ', ' + (fix >= 3 ? '3D-lås' : '2D-lås');
+      if (dop) t += ', DOP ' + dop.toFixed(1);
+      deler.push(t + ')');
+
+      const best = findNearestZone(lat, lon);
+      if (best) {
+        const elvSel = document.getElementById('vidElv');
+        if (elvSel.value !== best.elv) { elvSel.value = best.elv; fyllSoner(); }
+        const soneEl = document.getElementById('vidSone');
+        if (soneEl) {
+          soneEl.value = best.zone;
+          if (soneEl.value === best.zone) {
+            deler.push('sone ' + RIVER_NAMES[best.elv] + ' / ' + best.zone + ' (' + best.dist + ' m fra sonelinjen)');
+          } else {
+            deler.push('nærmeste sone ' + RIVER_NAMES[best.elv] + ' / ' + best.zone
+              + ' (' + best.dist + ' m) — velg selv i lista');
+          }
+        }
+      }
     }
     if (dtUTC && !isNaN(dtUTC)) {
       document.getElementById('vidDato').value = dtUTC.toISOString().slice(0, 10);
       document.getElementById('vidTid').value = dtUTC.toISOString().slice(11, 16);
-      deler.push('tidspunkt ' + dtUTC.toISOString().slice(0, 16).replace('T', ' ') + ' UTC');
+      deler.push('tidspunkt ' + dtUTC.toISOString().slice(0, 16).replace('T', ' ') + ' UTC (' + tidKilde + ')');
     }
-    if (!deler.length) throw new Error('ingen posisjons- eller tidsdata funnet i filen — sjekk at posisjonslagring er på i kameraappen');
+    if (!deler.length) throw new Error('ingen posisjons- eller tidsdata funnet i filen — sjekk at GPS var på i kameraet, og at filen ikke er reeksportert (Quik, Messenger o.l. fjerner telemetrien)');
     setVidStatus('Autoutfylt: ' + deler.join(' · ') + '. ✓', false);
     if (dtUTC && localStorage.getItem(NVE_KEY)) hentVannforing();
   } catch (e) {
