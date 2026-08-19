@@ -1,6 +1,13 @@
 [
  {
   "dato": "2026-08-19",
+  "sone": "Fuskeland B",
+  "vekt": 2.4,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-19",
   "sone": "Sone 3",
   "vekt": 1.5,
   "agn": "Flue",
