@@ -124,33 +124,5 @@
   "vekt": 1.5,
   "agn": "Flue",
   "art": "Laks"
- },
- {
-  "dato": "2026-08-16",
-  "sone": "Bringsdal B",
-  "vekt": 1.2,
-  "agn": "Sluk",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-16",
-  "sone": "Fuskeland B",
-  "vekt": 1.6,
-  "agn": "Flue",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-16",
-  "sone": "Sone 3",
-  "vekt": 5,
-  "agn": "Flue",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-16",
-  "sone": "Sone 3",
-  "vekt": 1.8,
-  "agn": "Sluk",
-  "art": "Laks"
  }
 ]
