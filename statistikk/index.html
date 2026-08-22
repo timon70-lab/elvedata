@@ -161,13 +161,14 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
 <!-- 4. LAKS PER DØGN -->
 <div class="panel">
   <div class="panel-header">
-    <span class="panel-name">Laks per døgn</span>
-    <span class="panel-sub">Registrert laks per døgn per sesong, én elv om gangen. Hvert år deles på antall døgn den sesongen faktisk varte, så år med kortere sesong ikke ser dårligere ut enn de var.</span>
+    <span class="panel-name">Laks per døgn – % av eget toppår</span>
+    <span class="panel-sub">Registrert laks per døgn per sesong, skalert mot elvas egen beste sesong. Hvert år deles på antall døgn den sesongen faktisk varte, så år med kortere sesong ikke ser dårligere ut enn de var. Den sorte linjen er summen av alle seks. Trykk «Spill av» for å se kurvene tegnes opp.</span>
   </div>
   <div class="panel-body">
-    <div class="pill-row" id="ratePills"></div>
-    <svg id="rateChart" viewBox="0 0 340 200" role="img" aria-label="Laks per døgn gjennom perioden"></svg>
-    <div class="readout" id="rateReadout"><span class="hint">Dra eller trykk i figuren for å lese av tall.</span></div>
+    <button id="rateReplay" class="pill active" style="width:100%;text-align:center;margin-bottom:12px">↻ Spill av</button>
+    <svg id="rateChart" viewBox="0 0 340 205" role="img" aria-label="Laks per døgn per sesong som prosent av hver elvs beste år, 2016 til 2025, med sumlinje for alle elver"></svg>
+    <div class="legend" id="rateLegend"></div>
+    <div class="readout" id="rateReadout"><span class="hint">Trykk «Spill av» for å se kurvene tegnes opp fra 2016.</span></div>
   </div>
 </div>
 
@@ -198,7 +199,7 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
 </div>
 
 <div class="foot">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.006</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.007</span><br>
   <span style="font-size:0.6rem;">Data: Inatur.no (fangst) · NVE HydAPI (vannføring)</span>
 </div>
 
@@ -855,140 +856,138 @@ function drawYearTable() {
     '<div class="hint" style="margin-top:6px">Endring = siste sesong mot elvas eget snitt for 2016–2018. Laks/døgn deles på sesongens faktiske lengde. * = ufullstendig sesong, † = estimert sesonglengde.</div>');
 }
 
-// ── 4. LAKS PER DØGN ───────────────────────────────────────────────────
-let rateRiver = 'audna';
-let rateGeom = null;
+// ── 4. LAKS PER DØGN (% av eget toppår) ─────────────────────────────────
+let rateOff = { sum: false };
+let rateRunning = false;
 
-function ratePoints() {
-  const ser = DB.elver[rateRiver].aarsserie;
-  const y0 = ser[0].aar;
-  return ser.filter(a => a.rate !== null).map(a => ({
-    slot: a.aar - y0, aar: a.aar, rate: a.rate,
-    fangst: a.antall, dager: a.dager, delvis: a.delvis,
-    estimert: a.estimert, start: a.start, slutt: a.slutt,
-    lbl: 'Sesongen ' + a.aar
-  }));
-}
-
-function drawRatePills() {
-  const host = document.getElementById('ratePills');
-  host.textContent = '';
-  ORDER.forEach(key => {
-    if (!DB.elver[key]) return;
-    const b = document.createElement('button');
-    b.className = 'pill' + (key === rateRiver ? ' active' : '');
-    b.textContent = DB.elver[key].navn;
-    b.onclick = () => { rateRiver = key; drawRatePills(); drawRate(); };
-    host.appendChild(b);
-  });
-}
-
-function niceMax(v) {
-  if (v <= 0) return 1;
-  const p = Math.pow(10, Math.floor(Math.log10(v)));
-  return Math.ceil(v / p * 2) / 2 * p;
+function rateYears() {
+  const s = new Set();
+  ORDER.forEach(k => DB.elver[k] && DB.elver[k].aarsserie.forEach(a => { if (a.aar <= 2025 && a.rate !== null && a.rate !== undefined) s.add(a.aar); }));
+  return [...s].sort((a, b) => a - b);
 }
 
 function drawRate() {
   const svg = document.getElementById('rateChart');
-  svg.textContent = '';
-  const W = 340, H = 200, L = 32, R = 8, T = 12, B = 30;
-  const pw = W - L - R, ph = H - T - B;
-  const col = COLORS[rateRiver];
-  const pts = ratePoints();
+  if (!svg) return null;
+  const years = rateYears();
+  const W = 340, H = 205, L = 40, R = 10, T = 10, B = 32, pw = W - L - R, ph = H - T - B;
+  const xOf = i => L + (i / (years.length - 1)) * pw;
+  const yOf = v => T + ph - (v / 100) * ph;
 
-  if (!pts.length) {
-    const t = el('text', {x: W/2, y: T + ph/2, 'text-anchor':'middle', class:'axb'});
-    t.textContent = 'Ingen data';
-    svg.appendChild(t);
-    rateGeom = null;
-    showRateAt(null);
-    return;
-  }
-
-  const slots = Math.max(...pts.map(p => p.slot)) + 1;
-  const mx = niceMax(Math.max(...pts.map(p => p.rate)));
-  const xOf = i => L + (slots === 1 ? pw/2 : (i/(slots-1)) * pw);
-  const yOf = v => T + ph - (v/mx) * ph;
-
-  [0, 0.5, 1].forEach(f => {
-    const y = yOf(mx*f);
-    svg.appendChild(el('line', {x1: L, y1: y.toFixed(1), x2: W-R, y2: y.toFixed(1), class:'grid'}));
-    const t = el('text', {x: L-5, y: (y+3).toFixed(1), 'text-anchor':'end', class:'ax'});
-    t.textContent = nf(mx*f, mx < 5 ? 1 : 0);
-    svg.appendChild(t);
+  const pct = {}, max = {};
+  ORDER.forEach(k => {
+    const r = DB.elver[k];
+    if (!r) return;
+    const map = {};
+    r.aarsserie.forEach(a => { if (a.rate !== null && a.rate !== undefined) map[a.aar] = a.rate; });
+    const vals = years.map(y => map[y] || 0);
+    max[k] = Math.max(...vals, 0.001);
+    pct[k] = vals.map(v => v / max[k] * 100);
   });
-  const yl = el('text', {x: 2, y: T-4, class:'ax'});
-  yl.textContent = 'laks/døgn';
+  const sumVals = years.map((y) => ORDER.reduce((s, k) => {
+    if (!pct[k]) return s;
+    const a = DB.elver[k].aarsserie.find(a => a.aar === y);
+    return s + (a && a.rate !== null && a.rate !== undefined ? a.rate : 0);
+  }, 0));
+  const sumMax = Math.max(...sumVals, 0.001);
+  const sumPct = sumVals.map(v => v / sumMax * 100);
+
+  svg.textContent = '';
+  [0, 25, 50, 75, 100].forEach(v => {
+    const y = yOf(v);
+    svg.appendChild(el('line', { x1: L, y1: y.toFixed(1), x2: W - R, y2: y.toFixed(1), class: 'grid', stroke: v === 100 ? '#cbd5e0' : null, 'stroke-dasharray': v === 100 ? '3 3' : null }));
+    const t = el('text', { x: L - 10, y: (y + 3.5).toFixed(1), 'text-anchor': 'end', class: 'ax' });
+    t.textContent = v + '%'; svg.appendChild(t);
+  });
+  years.forEach((y, i) => {
+    const t = el('text', { x: xOf(i).toFixed(1), y: H - 6, 'text-anchor': 'middle', class: 'ax' });
+    t.textContent = y; svg.appendChild(t);
+  });
+
+  const paths = [];
+  ORDER.forEach(k => {
+    if (rateOff[k] || !pct[k]) return;
+    const pts = pct[k].map((v, i) => [xOf(i), yOf(v)]);
+    const p = el('path', { d: animSmoothPath(pts), fill: 'none', stroke: COLORS[k], 'stroke-width': 3, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
+    svg.appendChild(p); paths.push(p);
+    pct[k].forEach((v, i) => {
+      const top = Math.abs(v - 100) < 0.01;
+      svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.8 : 2.6, fill: top ? '#fcfcfb' : COLORS[k], stroke: top ? COLORS[k] : null, 'stroke-width': top ? 2.2 : null, opacity: 0, class: 'dot', 'data-x': xOf(i) }));
+    });
+  });
+  if (!rateOff.sum) {
+    const pts = sumPct.map((v, i) => [xOf(i), yOf(v)]);
+    const sp = el('path', { d: animSmoothPath(pts), fill: 'none', stroke: '#1a202c', 'stroke-width': 3.4, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
+    svg.appendChild(sp); paths.push(sp);
+    sumPct.forEach((v, i) => {
+      const top = Math.abs(v - 100) < 0.01;
+      svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.8 : 2.6, fill: top ? '#fcfcfb' : '#1a202c', stroke: '#1a202c', 'stroke-width': top ? 2.2 : 0, opacity: 0, class: 'dot', 'data-x': xOf(i) }));
+    });
+  }
+  const yl = el('text', { x: xOf(0).toFixed(1), y: T + ph + 9, 'text-anchor': 'middle', class: 'axb', id: 'rateYrFollow', opacity: 0 });
   svg.appendChild(yl);
 
-  // årsskiller og -merkelapper
-  const years = [...new Set(pts.map(p => p.aar))].sort();
-  const y0 = years[0];
-  years.forEach(y => {
-    const t = el('text', {x: xOf(y - y0).toFixed(1), y: H-12, 'text-anchor':'middle', class:'ax'});
-    t.textContent = String(y).slice(2);
-    svg.appendChild(t);
-  });
-  const xl = el('text', {x: (L+pw/2).toFixed(1), y: H-2, 'text-anchor':'middle', class:'ax'});
-  xl.textContent = 'sesonger, juni–september';
-  svg.appendChild(xl);
-
-  const guide = el('line', {x1: -10, y1: T, x2: -10, y2: T+ph, stroke:'#cbd5e0',
-    'stroke-width': 1, 'stroke-dasharray': '3 3'});
-  svg.appendChild(guide);
-
-  // linjen brytes der påfølgende punkt ikke ligger inntil hverandre i tid
-  let d = '', prev = null, prevYear = null;
-  pts.forEach(p => {
-    const join = prev !== null && p.slot === prev + 1;
-    d += (join ? 'L' : 'M') + xOf(p.slot).toFixed(1) + ' ' + yOf(p.rate).toFixed(1) + ' ';
-    prev = p.slot; prevYear = p.aar;
-  });
-  svg.appendChild(el('path', {d: d.trim(), fill:'none', stroke: col, 'stroke-width': 2,
-    'stroke-linejoin':'round', 'stroke-linecap':'round'}));
-  pts.forEach(p => svg.appendChild(el('circle', {
-    cx: xOf(p.slot).toFixed(1), cy: yOf(p.rate).toFixed(1),
-    r: 3, fill: col, opacity: (p.delvis || p.estimert) ? 0.4 : 1
-  })));
-
-  rateGeom = {guide, pts, slots, n: slots, xOf, L, pw};
-  showRateAt(null);
+  return { paths, years, xOf, L, R, W, sumVals, sumMax };
 }
 
-function showRateAt(slot) {
-  const box = document.getElementById('rateReadout');
-  if (!rateGeom) {
-    box.innerHTML = '<span class="hint">Ingen data å lese av.</span>';
-    return;
+function runRate() {
+  const svg = document.getElementById('rateChart');
+  if (!svg || rateRunning) return;
+  const g = drawRate();
+  if (!g) return;
+  rateRunning = true;
+  const dots = [...svg.querySelectorAll('.dot')];
+  const yrFollow = document.getElementById('rateYrFollow');
+  const ro = document.getElementById('rateReadout');
+  const pw = g.W - g.L - g.R;
+  g.paths.forEach(p => { const len = p.getTotalLength(); p.style.strokeDasharray = len; p.style.strokeDashoffset = len; p.dataset.len = len; });
+  const t0 = performance.now(), DUR = 7600;
+  function step(now) {
+    const t = Math.min((now - t0) / DUR, 1);
+    const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    g.paths.forEach(p => { p.style.strokeDashoffset = (+p.dataset.len) * (1 - e); });
+    const x = g.L + e * pw;
+    dots.forEach(d => { if (+d.dataset.x <= x + 0.5) d.setAttribute('opacity', 1); });
+    const i = Math.min(Math.round(e * (g.years.length - 1)), g.years.length - 1);
+    const clampedX = Math.min(Math.max(x, g.L + 14), g.W - g.R - 14);
+    yrFollow.setAttribute('x', clampedX.toFixed(1));
+    yrFollow.setAttribute('opacity', t < 1 ? 1 : 0);
+    yrFollow.textContent = g.years[i];
+    if (t < 1) { ro.innerHTML = ''; }
+    else {
+      const shown = ORDER.filter(k => !rateOff[k] && DB.elver[k]).map(k => DB.elver[k].navn).join(' · ');
+      const last = g.years.length - 1;
+      ro.innerHTML = '<div class="ro-head">Vist</div>' +
+        (shown || 'ingen elver valgt') + (rateOff.sum ? '' : ' · Alle elver') +
+        (rateOff.sum ? '' : '<br><span class="hint">Sum ' + g.years[last] + ': ' + rateFmt(g.sumVals[last]) + ' laks/døgn (toppår ' + rateFmt(g.sumMax) + ')</span>');
+    }
+    if (t < 1) requestAnimationFrame(step); else rateRunning = false;
   }
-  if (slot === null) {
-    rateGeom.guide.setAttribute('x1', -10);
-    rateGeom.guide.setAttribute('x2', -10);
-    box.innerHTML = '<span class="hint">Dra eller trykk i figuren for å lese av tall.</span>';
-    return;
-  }
-  let best = null;
-  rateGeom.pts.forEach(p => {
-    if (best === null || Math.abs(p.slot - slot) < Math.abs(best.slot - slot)) best = p;
+  requestAnimationFrame(step);
+}
+
+function drawRateLegend() {
+  const host = document.getElementById('rateLegend');
+  if (!host) return;
+  host.textContent = '';
+  ORDER.forEach(key => {
+    const r = DB.elver[key];
+    if (!r) return;
+    const b = document.createElement('div');
+    b.className = 'lg' + (rateOff[key] ? ' off' : '');
+    b.tabIndex = 0;
+    const sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = COLORS[key];
+    b.appendChild(sw); b.appendChild(document.createTextNode(r.navn));
+    b.onclick = () => { rateOff[key] = !rateOff[key]; drawRateLegend(); if (!rateRunning) drawRate(); };
+    host.appendChild(b);
   });
-  if (!best) return;
-  const x = rateGeom.xOf(best.slot).toFixed(1);
-  rateGeom.guide.setAttribute('x1', x);
-  rateGeom.guide.setAttribute('x2', x);
-  box.innerHTML = '<div class="ro-head">' + esc(best.lbl) +
-    ' <span style="font-weight:400;color:#94a3b8">· ' + esc(best.start) + '–' + esc(best.slutt) +
-    '</span></div><div class="ro-grid">' +
-    '<div class="ro-item"><span class="sw" style="background:' + COLORS[rateRiver] + '"></span>' +
-    esc(DB.elver[rateRiver].navn) + ' <b>' + rateFmt(best.rate) + '</b></div>' +
-    '<div class="ro-item" style="color:#94a3b8">laks per døgn</div>' +
-    '<div class="ro-item" style="color:#94a3b8">' + nf(best.fangst) + ' laks</div>' +
-    '<div class="ro-item" style="color:#94a3b8">' + best.dager + ' døgn sesong</div></div>' +
-    (best.estimert
-      ? '<div class="hint" style="margin-top:4px">For få registreringer til å lese sesonglengden ut av loggen – elvas medianvindu er brukt.</div>'
-      : best.delvis
-        ? '<div class="hint" style="margin-top:4px">Sesongen er ikke ferdig – raten kan endre seg.</div>'
-        : '');
+  const b = document.createElement('div');
+  b.className = 'lg' + (rateOff.sum ? ' off' : '');
+  b.tabIndex = 0;
+  const sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = '#1a202c';
+  b.appendChild(sw); b.appendChild(document.createTextNode('Alle elver'));
+  b.onclick = () => { rateOff.sum = !rateOff.sum; drawRateLegend(); if (!rateRunning) drawRate(); };
+  host.appendChild(b);
 }
 
 // ── 5. VEKTFORDELING ───────────────────────────────────────────────────
@@ -1090,9 +1089,9 @@ function boot() {
 
   drawPeriodPills(); drawFlowLegend(); drawFlow();
   bindScrub('flowChart', () => flowGeom, showFlowAt);
-  bindScrub('rateChart', () => rateGeom, showRateAt);
   drawIndex(); drawYearSmalls(); drawYearTable();
-  drawRatePills(); drawRate();
+  drawRateLegend(); drawRate();
+  document.getElementById('rateReplay').onclick = runRate;
   drawWeightPills(); drawWeightLegend(); drawWeight();
 }
 
