@@ -18,6 +18,15 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .banner-meta { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 0.6rem; color: #4a6fa5; line-height: 1.5; }
 
 .panel { width: 100%; max-width: 480px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 14px; }
+
+.grid-wrap { width: 100%; max-width: 480px; }
+@media (min-width: 700px) {
+  .grid-wrap { max-width: 980px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; align-items: start; }
+  .grid-wrap .panel { max-width: none; margin-bottom: 0; }
+}
+@media (min-width: 1040px) {
+  .grid-wrap { max-width: 1480px; grid-template-columns: repeat(3, 1fr); }
+}
 .panel-header { padding: 11px 14px 9px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; }
 .panel-name { font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #276749; display: block; }
 .panel-sub { font-size: 0.6rem; color: #718096; line-height: 1.5; margin-top: 3px; display: block; }
@@ -80,6 +89,8 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
   <div class="lede">Ti sesonger med registrert laksefangst, holdt opp mot daglig vannføring. <strong>Seks elver</strong> – Audna, Lygna, Mandalselva, Otra, Sygna og Tovdalselva.</div>
   <div class="banner-meta" id="meta">Laster data …</div>
 </div>
+
+<div class="grid-wrap">
 
 <!-- 1. SESONGPROFIL -->
 <div class="panel">
@@ -158,6 +169,8 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
     <div class="legend" id="weightLegend"></div>
     <div class="hint" style="margin-top:7px">Tallet under hvert år er antall laks fordelingen bygger på. * = under 20 fisk, altfor tynt til å tolkes.</div>
   </div>
+</div>
+
 </div>
 
 <div class="method">
