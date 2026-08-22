@@ -106,6 +106,20 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
   </div>
 </div>
 
+<!-- 2b. ANIMERT ÅRSFANGST -->
+<div class="panel">
+  <div class="panel-header">
+    <span class="panel-name">Antall laks – % av eget toppår</span>
+    <span class="panel-sub">Hver elv skalert mot sin egen beste sesong. Den sorte linjen er summen av alle seks. Trykk «Spill av» for å se kurvene tegnes opp.</span>
+  </div>
+  <div class="panel-body">
+    <button id="animReplay" class="pill active" style="width:100%;text-align:center;margin-bottom:12px">↻ Spill av</button>
+    <svg id="animChart" viewBox="0 0 340 205" role="img" aria-label="Antall registrert laks per sesong som prosent av hver elvs beste år, 2016 til 2025, med sumlinje for alle elver"></svg>
+    <div class="legend" id="animLegend"></div>
+    <div class="readout" id="animReadout"><span class="hint">Trykk «Spill av» for å se fangsttallene tegnes opp fra 2016.</span></div>
+  </div>
+</div>
+
 <!-- 3. ÅRSSERIEN -->
 <div class="panel">
   <div class="panel-header">
@@ -156,7 +170,7 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
 </div>
 
 <div class="foot">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.004</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.005</span><br>
   <span style="font-size:0.6rem;">Data: Inatur.no (fangst) · NVE HydAPI (vannføring)</span>
 </div>
 
@@ -389,6 +403,148 @@ function bindScrub(svgId, getGeom, handler) {
   svg.addEventListener('pointermove', ev => { if (dragging) { move(ev); ev.preventDefault(); } });
   ['pointerup','pointercancel','pointerleave'].forEach(e =>
     svg.addEventListener(e, () => { dragging = false; }));
+}
+
+// ── 2b. ANIMERT ÅRSFANGST (% av eget toppår) ────────────────────────────
+let animOff = { sum: false };
+let animRunning = false;
+
+function animYears() {
+  const s = new Set();
+  ORDER.forEach(k => DB.elver[k] && DB.elver[k].aarsserie.forEach(a => { if (a.aar <= 2025) s.add(a.aar); }));
+  return [...s].sort();
+}
+
+function animSmoothPath(pts) {
+  if (pts.length < 3) return 'M' + pts.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L');
+  let d = 'M' + pts[0][0].toFixed(1) + ' ' + pts[0][1].toFixed(1) + ' ';
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i === 0 ? 0 : i - 1], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(i + 2, pts.length - 1)];
+    const c1x = p1[0] + (p2[0] - p0[0]) / 6, c1y = p1[1] + (p2[1] - p0[1]) / 6;
+    const c2x = p2[0] - (p3[0] - p1[0]) / 6, c2y = p2[1] - (p3[1] - p1[1]) / 6;
+    d += 'C' + c1x.toFixed(1) + ' ' + c1y.toFixed(1) + ' ' + c2x.toFixed(1) + ' ' + c2y.toFixed(1) + ' ' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1) + ' ';
+  }
+  return d;
+}
+
+function drawAnim() {
+  const svg = document.getElementById('animChart');
+  if (!svg) return null;
+  const years = animYears();
+  const W = 340, H = 205, L = 40, R = 10, T = 10, B = 32, pw = W - L - R, ph = H - T - B;
+  const xOf = i => L + (i / (years.length - 1)) * pw;
+  const yOf = v => T + ph - (v / 100) * ph;
+
+  const pct = {}, max = {};
+  ORDER.forEach(k => {
+    const r = DB.elver[k];
+    if (!r) return;
+    const map = {};
+    r.aarsserie.forEach(a => map[a.aar] = a.antall || 0);
+    const vals = years.map(y => map[y] || 0);
+    max[k] = Math.max(...vals, 1);
+    pct[k] = vals.map(v => v / max[k] * 100);
+  });
+  const sumVals = years.map((y, i) => ORDER.reduce((s, k) => s + (pct[k] ? (DB.elver[k].aarsserie.find(a => a.aar === y) || {}).antall || 0 : 0), 0));
+  const sumMax = Math.max(...sumVals, 1);
+  const sumPct = sumVals.map(v => v / sumMax * 100);
+
+  svg.textContent = '';
+  [0, 25, 50, 75, 100].forEach(v => {
+    const y = yOf(v);
+    svg.appendChild(el('line', { x1: L, y1: y.toFixed(1), x2: W - R, y2: y.toFixed(1), class: 'grid', stroke: v === 100 ? '#cbd5e0' : null, 'stroke-dasharray': v === 100 ? '3 3' : null }));
+    const t = el('text', { x: L - 10, y: (y + 3.5).toFixed(1), 'text-anchor': 'end', class: 'ax' });
+    t.textContent = v + '%'; svg.appendChild(t);
+  });
+  years.forEach((y, i) => {
+    const t = el('text', { x: xOf(i).toFixed(1), y: H - 6, 'text-anchor': 'middle', class: 'ax' });
+    t.textContent = y; svg.appendChild(t);
+  });
+
+  const paths = [];
+  ORDER.forEach(k => {
+    if (animOff[k] || !pct[k]) return;
+    const pts = pct[k].map((v, i) => [xOf(i), yOf(v)]);
+    const p = el('path', { d: animSmoothPath(pts), fill: 'none', stroke: COLORS[k], 'stroke-width': 3, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
+    svg.appendChild(p); paths.push(p);
+    pct[k].forEach((v, i) => {
+      const top = Math.abs(v - 100) < 0.01;
+      svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.8 : 2.6, fill: top ? '#fcfcfb' : COLORS[k], stroke: top ? COLORS[k] : null, 'stroke-width': top ? 2.2 : null, opacity: 0, class: 'dot', 'data-x': xOf(i) }));
+    });
+  });
+  if (!animOff.sum) {
+    const pts = sumPct.map((v, i) => [xOf(i), yOf(v)]);
+    const sp = el('path', { d: animSmoothPath(pts), fill: 'none', stroke: '#1a202c', 'stroke-width': 3.4, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
+    svg.appendChild(sp); paths.push(sp);
+    sumPct.forEach((v, i) => {
+      const top = Math.abs(v - 100) < 0.01;
+      svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.8 : 2.6, fill: top ? '#fcfcfb' : '#1a202c', stroke: '#1a202c', 'stroke-width': top ? 2.2 : 0, opacity: 0, class: 'dot', 'data-x': xOf(i) }));
+    });
+  }
+  const yl = el('text', { x: xOf(0).toFixed(1), y: T + ph + 9, 'text-anchor': 'middle', class: 'axb', id: 'animYrFollow', opacity: 0 });
+  svg.appendChild(yl);
+
+  return { paths, years, xOf, L, R, W, sumVals, sumMax };
+}
+
+function runAnim() {
+  const svg = document.getElementById('animChart');
+  if (!svg || animRunning) return;
+  const g = drawAnim();
+  if (!g) return;
+  animRunning = true;
+  const dots = [...svg.querySelectorAll('.dot')];
+  const yrFollow = document.getElementById('animYrFollow');
+  const ro = document.getElementById('animReadout');
+  const pw = g.W - g.L - g.R;
+  g.paths.forEach(p => { const len = p.getTotalLength(); p.style.strokeDasharray = len; p.style.strokeDashoffset = len; p.dataset.len = len; });
+  const t0 = performance.now(), DUR = 7600;
+  function step(now) {
+    const t = Math.min((now - t0) / DUR, 1);
+    const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    g.paths.forEach(p => { p.style.strokeDashoffset = (+p.dataset.len) * (1 - e); });
+    const x = g.L + e * pw;
+    dots.forEach(d => { if (+d.dataset.x <= x + 0.5) d.setAttribute('opacity', 1); });
+    const i = Math.min(Math.round(e * (g.years.length - 1)), g.years.length - 1);
+    const clampedX = Math.min(Math.max(x, g.L + 14), g.W - g.R - 14);
+    yrFollow.setAttribute('x', clampedX.toFixed(1));
+    yrFollow.setAttribute('opacity', t < 1 ? 1 : 0);
+    yrFollow.textContent = g.years[i];
+    if (t < 1) { ro.innerHTML = ''; }
+    else {
+      const shown = ORDER.filter(k => !animOff[k] && DB.elver[k]).map(k => DB.elver[k].navn).join(' · ');
+      const last = g.years.length - 1;
+      ro.innerHTML = '<div class="ro-head">Vist</div>' +
+        (shown || 'ingen elver valgt') + (animOff.sum ? '' : ' · Alle elver') +
+        (animOff.sum ? '' : '<br><span class="hint">Sum ' + g.years[last] + ': ' + g.sumVals[last].toLocaleString('nb-NO') + ' laks (toppår ' + g.sumMax.toLocaleString('nb-NO') + ')</span>');
+    }
+    if (t < 1) requestAnimationFrame(step); else animRunning = false;
+  }
+  requestAnimationFrame(step);
+}
+
+function drawAnimLegend() {
+  const host = document.getElementById('animLegend');
+  if (!host) return;
+  host.textContent = '';
+  ORDER.forEach(key => {
+    const r = DB.elver[key];
+    if (!r) return;
+    const b = document.createElement('div');
+    b.className = 'lg' + (animOff[key] ? ' off' : '');
+    b.tabIndex = 0;
+    const sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = COLORS[key];
+    b.appendChild(sw); b.appendChild(document.createTextNode(r.navn));
+    b.onclick = () => { animOff[key] = !animOff[key]; drawAnimLegend(); if (!animRunning) drawAnim(); };
+    host.appendChild(b);
+  });
+  const b = document.createElement('div');
+  b.className = 'lg' + (animOff.sum ? ' off' : '');
+  b.tabIndex = 0;
+  const sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = '#1a202c';
+  b.appendChild(sw); b.appendChild(document.createTextNode('Alle elver'));
+  b.onclick = () => { animOff.sum = !animOff.sum; drawAnimLegend(); if (!animRunning) drawAnim(); };
+  host.appendChild(b);
 }
 
 // ── 3. ÅRSSERIEN ───────────────────────────────────────────────────────
@@ -746,6 +902,8 @@ function boot() {
     ' · juni–september · oppdatert ' + DB.generert;
 
   drawProfiles();
+  drawAnimLegend(); drawAnim();
+  document.getElementById('animReplay').onclick = runAnim;
   drawPeriodPills(); drawFlowLegend(); drawFlow();
   bindScrub('flowChart', () => flowGeom, showFlowAt);
   bindScrub('rateChart', () => rateGeom, showRateAt);
