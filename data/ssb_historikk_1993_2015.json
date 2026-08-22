@@ -1,0 +1,571 @@
+{
+  "generert": "2026-08-22",
+  "kilde": "SSB tabell 08991 – Elvefiske. Fangst, etter elv, år og bruk (avliva + gjenutsett laks summert)",
+  "merknad": "Dekker perioden før fangstloggene (2016–2025) begynner. Kombineres med data/statistikk.json sin aarsserie for sammenhengende serie 1993–2025. sygna = SSB 'Songdalselva'.",
+  "elver": {
+    "audna": [
+      {
+        "aar": 1993,
+        "antall": 156
+      },
+      {
+        "aar": 1994,
+        "antall": 473
+      },
+      {
+        "aar": 1995,
+        "antall": 304
+      },
+      {
+        "aar": 1996,
+        "antall": 399
+      },
+      {
+        "aar": 1997,
+        "antall": 198
+      },
+      {
+        "aar": 1998,
+        "antall": 1093
+      },
+      {
+        "aar": 1999,
+        "antall": 0
+      },
+      {
+        "aar": 2000,
+        "antall": 1224
+      },
+      {
+        "aar": 2001,
+        "antall": 486
+      },
+      {
+        "aar": 2002,
+        "antall": 543
+      },
+      {
+        "aar": 2003,
+        "antall": 561
+      },
+      {
+        "aar": 2004,
+        "antall": 1169
+      },
+      {
+        "aar": 2005,
+        "antall": 919
+      },
+      {
+        "aar": 2006,
+        "antall": 1252
+      },
+      {
+        "aar": 2007,
+        "antall": 793
+      },
+      {
+        "aar": 2008,
+        "antall": 696
+      },
+      {
+        "aar": 2009,
+        "antall": 954
+      },
+      {
+        "aar": 2010,
+        "antall": 98
+      },
+      {
+        "aar": 2011,
+        "antall": 1231
+      },
+      {
+        "aar": 2012,
+        "antall": 1079
+      },
+      {
+        "aar": 2013,
+        "antall": 800
+      },
+      {
+        "aar": 2014,
+        "antall": 445
+      },
+      {
+        "aar": 2015,
+        "antall": 994
+      }
+    ],
+    "lygna": [
+      {
+        "aar": 1993,
+        "antall": 1
+      },
+      {
+        "aar": 1994,
+        "antall": 13
+      },
+      {
+        "aar": 1995,
+        "antall": 7
+      },
+      {
+        "aar": 1996,
+        "antall": 8
+      },
+      {
+        "aar": 1997,
+        "antall": 17
+      },
+      {
+        "aar": 1998,
+        "antall": 125
+      },
+      {
+        "aar": 1999,
+        "antall": 0
+      },
+      {
+        "aar": 2000,
+        "antall": 188
+      },
+      {
+        "aar": 2001,
+        "antall": 290
+      },
+      {
+        "aar": 2002,
+        "antall": 346
+      },
+      {
+        "aar": 2003,
+        "antall": 510
+      },
+      {
+        "aar": 2004,
+        "antall": 682
+      },
+      {
+        "aar": 2005,
+        "antall": 688
+      },
+      {
+        "aar": 2006,
+        "antall": 378
+      },
+      {
+        "aar": 2007,
+        "antall": 297
+      },
+      {
+        "aar": 2008,
+        "antall": 270
+      },
+      {
+        "aar": 2009,
+        "antall": 648
+      },
+      {
+        "aar": 2010,
+        "antall": 472
+      },
+      {
+        "aar": 2011,
+        "antall": 917
+      },
+      {
+        "aar": 2012,
+        "antall": 851
+      },
+      {
+        "aar": 2013,
+        "antall": 601
+      },
+      {
+        "aar": 2014,
+        "antall": 452
+      },
+      {
+        "aar": 2015,
+        "antall": 586
+      }
+    ],
+    "mandalselva": [
+      {
+        "aar": 1993,
+        "antall": 233
+      },
+      {
+        "aar": 1994,
+        "antall": 1276
+      },
+      {
+        "aar": 1995,
+        "antall": 113
+      },
+      {
+        "aar": 1996,
+        "antall": 601
+      },
+      {
+        "aar": 1997,
+        "antall": 476
+      },
+      {
+        "aar": 1998,
+        "antall": 1247
+      },
+      {
+        "aar": 1999,
+        "antall": 1134
+      },
+      {
+        "aar": 2000,
+        "antall": 2294
+      },
+      {
+        "aar": 2001,
+        "antall": 4742
+      },
+      {
+        "aar": 2002,
+        "antall": 3113
+      },
+      {
+        "aar": 2003,
+        "antall": 3306
+      },
+      {
+        "aar": 2004,
+        "antall": 2778
+      },
+      {
+        "aar": 2005,
+        "antall": 5153
+      },
+      {
+        "aar": 2006,
+        "antall": 5244
+      },
+      {
+        "aar": 2007,
+        "antall": 2184
+      },
+      {
+        "aar": 2008,
+        "antall": 2792
+      },
+      {
+        "aar": 2009,
+        "antall": 2023
+      },
+      {
+        "aar": 2010,
+        "antall": 2690
+      },
+      {
+        "aar": 2011,
+        "antall": 2491
+      },
+      {
+        "aar": 2012,
+        "antall": 3180
+      },
+      {
+        "aar": 2013,
+        "antall": 1927
+      },
+      {
+        "aar": 2014,
+        "antall": 2174
+      },
+      {
+        "aar": 2015,
+        "antall": 3204
+      }
+    ],
+    "otra": [
+      {
+        "aar": 1993,
+        "antall": 742
+      },
+      {
+        "aar": 1994,
+        "antall": 1668
+      },
+      {
+        "aar": 1995,
+        "antall": 987
+      },
+      {
+        "aar": 1996,
+        "antall": 589
+      },
+      {
+        "aar": 1997,
+        "antall": 886
+      },
+      {
+        "aar": 1998,
+        "antall": 2684
+      },
+      {
+        "aar": 1999,
+        "antall": 1039
+      },
+      {
+        "aar": 2000,
+        "antall": 1501
+      },
+      {
+        "aar": 2001,
+        "antall": 3429
+      },
+      {
+        "aar": 2002,
+        "antall": 2260
+      },
+      {
+        "aar": 2003,
+        "antall": 2962
+      },
+      {
+        "aar": 2004,
+        "antall": 2429
+      },
+      {
+        "aar": 2005,
+        "antall": 4758
+      },
+      {
+        "aar": 2006,
+        "antall": 4944
+      },
+      {
+        "aar": 2007,
+        "antall": 2063
+      },
+      {
+        "aar": 2008,
+        "antall": 2571
+      },
+      {
+        "aar": 2009,
+        "antall": 1429
+      },
+      {
+        "aar": 2010,
+        "antall": 2996
+      },
+      {
+        "aar": 2011,
+        "antall": 1968
+      },
+      {
+        "aar": 2012,
+        "antall": 1548
+      },
+      {
+        "aar": 2013,
+        "antall": 1584
+      },
+      {
+        "aar": 2014,
+        "antall": 2289
+      },
+      {
+        "aar": 2015,
+        "antall": 1689
+      }
+    ],
+    "sygna": [
+      {
+        "aar": 1993,
+        "antall": 0
+      },
+      {
+        "aar": 1994,
+        "antall": 0
+      },
+      {
+        "aar": 1995,
+        "antall": 0
+      },
+      {
+        "aar": 1996,
+        "antall": 0
+      },
+      {
+        "aar": 1997,
+        "antall": 0
+      },
+      {
+        "aar": 1998,
+        "antall": 0
+      },
+      {
+        "aar": 1999,
+        "antall": 14
+      },
+      {
+        "aar": 2000,
+        "antall": 17
+      },
+      {
+        "aar": 2001,
+        "antall": 0
+      },
+      {
+        "aar": 2002,
+        "antall": 0
+      },
+      {
+        "aar": 2003,
+        "antall": 3
+      },
+      {
+        "aar": 2004,
+        "antall": 35
+      },
+      {
+        "aar": 2005,
+        "antall": 20
+      },
+      {
+        "aar": 2006,
+        "antall": 15
+      },
+      {
+        "aar": 2007,
+        "antall": 10
+      },
+      {
+        "aar": 2008,
+        "antall": 16
+      },
+      {
+        "aar": 2009,
+        "antall": 41
+      },
+      {
+        "aar": 2010,
+        "antall": 0
+      },
+      {
+        "aar": 2011,
+        "antall": 18
+      },
+      {
+        "aar": 2012,
+        "antall": 68
+      },
+      {
+        "aar": 2013,
+        "antall": 49
+      },
+      {
+        "aar": 2014,
+        "antall": 105
+      },
+      {
+        "aar": 2015,
+        "antall": 106
+      }
+    ],
+    "tovdalselva": [
+      {
+        "aar": 1993,
+        "antall": 24
+      },
+      {
+        "aar": 1994,
+        "antall": 0
+      },
+      {
+        "aar": 1995,
+        "antall": 26
+      },
+      {
+        "aar": 1996,
+        "antall": 17
+      },
+      {
+        "aar": 1997,
+        "antall": 14
+      },
+      {
+        "aar": 1998,
+        "antall": 43
+      },
+      {
+        "aar": 1999,
+        "antall": 0
+      },
+      {
+        "aar": 2000,
+        "antall": 95
+      },
+      {
+        "aar": 2001,
+        "antall": 147
+      },
+      {
+        "aar": 2002,
+        "antall": 109
+      },
+      {
+        "aar": 2003,
+        "antall": 134
+      },
+      {
+        "aar": 2004,
+        "antall": 197
+      },
+      {
+        "aar": 2005,
+        "antall": 550
+      },
+      {
+        "aar": 2006,
+        "antall": 703
+      },
+      {
+        "aar": 2007,
+        "antall": 368
+      },
+      {
+        "aar": 2008,
+        "antall": 533
+      },
+      {
+        "aar": 2009,
+        "antall": 559
+      },
+      {
+        "aar": 2010,
+        "antall": 588
+      },
+      {
+        "aar": 2011,
+        "antall": 894
+      },
+      {
+        "aar": 2012,
+        "antall": 581
+      },
+      {
+        "aar": 2013,
+        "antall": 543
+      },
+      {
+        "aar": 2014,
+        "antall": 334
+      },
+      {
+        "aar": 2015,
+        "antall": 667
+      }
+    ]
+  }
+}
