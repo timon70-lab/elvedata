@@ -1,5 +1,12 @@
 [
  {
+  "dato": "2026-08-23",
+  "sone": "Sone 3",
+  "vekt": 3.1,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
   "dato": "2026-08-22",
   "sone": "Sone 3",
   "vekt": 1.7,
