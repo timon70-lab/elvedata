@@ -553,9 +553,11 @@ function sesongFmt(md) {
 function sesongFor(zone) {
   if (!SESONG) return '';
   const o = (SESONG.soner && SESONG.soner[zone]) || null;
+  const tillegg = (o ? (o.tillegg || '') : (SESONG.tillegg || '')).trim();
+  // Stengt sone: elvas datoer gjelder ikke, kun sonens egen tekst vises.
+  if (o && o.stengt) return tillegg;
   const start = sesongFmt((o && o.start) || SESONG.start);
   const slutt = sesongFmt((o && o.slutt) || SESONG.slutt);
-  const tillegg = (o ? (o.tillegg || '') : (SESONG.tillegg || '')).trim();
   if (!start || !slutt) return tillegg;
   return start + ' \u2013 ' + slutt + (tillegg ? ' ' + tillegg : '');
 }
@@ -1809,7 +1811,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.054</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.055</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
