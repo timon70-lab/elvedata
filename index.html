@@ -302,6 +302,29 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 const now = new Date();
 
+// Sesongdatoene i RIVERS over er fallback. data/sesong.json (skrevet av admin/index.html)
+// er kilden naar den er tilgjengelig — den overstyrer seasonStart/seasonEnd per elv.
+// Feiler hentingen, beholdes fallback-verdiene og kartet fungerer som for.
+const MD_RE = /^\d{2}-\d{2}$/;
+
+async function lastSesong() {
+  try {
+    const res = await fetch('data/sesong.json', { cache: 'no-cache' });
+    if (!res.ok) return;
+    const j = await res.json();
+    if (!j || !j.elver) return;
+    RIVERS.forEach(function (r) {
+      const e = j.elver[r.id];
+      if (!e) return;
+      if (MD_RE.test(e.start || '')) r.seasonStart = e.start;
+      if (MD_RE.test(e.slutt || '')) r.seasonEnd = e.slutt;
+    });
+  } catch (e) {
+    /* beholder hardkodede fallback-datoer */
+  }
+}
+
+function tegnElver() {
 RIVERS.forEach((river) => {
   const st = riverState(river, now);
 
@@ -451,6 +474,9 @@ RIVERS.forEach((river) => {
 
   render();
 });
+}
+
+lastSesong().then(tegnElver);
 </script>
 
 <script>
@@ -525,7 +551,7 @@ loadNewsTicker();
 </script>
 
 <div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.044</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.045</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
