@@ -299,7 +299,6 @@ const ZONE_INFO = {
     name: "Sone 1 – Sjøen til Knarrestad",
     desc: "Nederste sone, ca. 6 km fra utløpet i Topdalsfjorden opp til Knarrestad et par hundre meter nedstrøms Boen Gård. Relativt stilleflytende med mye vegetasjon langs breddene, og mye innmark og bebyggelse. Elvas viktigste strekning for reproduksjon av sjøørret — 81 % av fangstene her er sjøørret — og kan til tider gi svært godt sjøørretfiske.",
     redskap: "Sluk og flue · mark i flomperioder",
-    sesong: "1. juni – 31. august",
     kortUrl: "https://www.inatur.no/laksefiske/56978820e4b0fc575c11475a",
     merknader: "Fiskeforbud fra land uten grunneiers tillatelse. Unntak: Tveit Prestegård og Knarrestad. Båtfiske tillatt på hele strekningen, dorging tillatt. Soneskillet er merket med skilt."
   },
@@ -307,7 +306,6 @@ const ZONE_INFO = {
     name: "Sone 2 – Buestad til Krageboen",
     desc: "Ca. 1,3 km fra Buestad opp til Krageboen, ca. 100 m oppstrøms Boen bru. Flere gode høler og stryk samt to fosser, og variert fiske gjennom hele sona. Elvas mest fangstrike sone med 1363 registrerte laks 2016–2025.",
     redskap: "Flue, sluk, mark",
-    sesong: "1. juni – 31. august",
     kortUrl: "https://www.inatur.no/laksefiske/56978820e4b0fc575c11475a",
     merknader: "Flue og dupp er IKKE tillatt i sone 2. Østsida er forbeholdt privat fiske. Fredet fra «Blakken» og ca. 100 m oppstrøms Boen bru — merket med skilt. Fjell og svaberg blir glatte i regnvær."
   },
@@ -315,7 +313,6 @@ const ZONE_INFO = {
     name: "Sone 3 – Boenfossen til Flaksvann",
     desc: "Fra fisketelleren ved Boenfossen, ca. 200 m oppstrøms Boen bru, og opp til midten av Flaksvann. Både stilleflytende partier og mer urolige stryk, særlig i øvre del. Meget godt egnet for fluefiske etter både ørret og laks, men har også partier som passer for sluk og mark.",
     redskap: "Flue, sluk, mark",
-    sesong: "1. juni – 31. august",
     kortUrl: "https://www.inatur.no/laksefiske/56978820e4b0fc575c11475a",
     merknader: "Fisketeller ved Boenfossen registrerer oppgangen."
   },
@@ -323,7 +320,6 @@ const ZONE_INFO = {
     name: "Sone 4 og 5 – Flaksvann til Herefossfjorden",
     desc: "Øverste del av lakseførende strekning, fra Flaksvann og opp til Herefossfjorden der laksens ferd ender. Variert med flere stryk, høler og mindre fosser, og god plass for både flue-, sluk- og markfiskere.",
     redskap: "Flue, sluk, mark",
-    sesong: "1. juni – 31. august",
     kortUrl: "https://www.inatur.no/laksefiske/56978820e4b0fc575c11475a",
     merknader: "Innenfor sonen ligger tre egne dagskortsoner: Laksefoss, Buhølen og Teinefoss. Ordinært sonekort er IKKE gyldig i disse."
   },
@@ -331,7 +327,6 @@ const ZONE_INFO = {
     name: "Laksefoss – dagskortsone",
     desc: "Egen dagskortsone innenfor sone 4. Fossestryk med begrenset antall kort. Den eneste sonen i elva der mark er det mest fangstrike redskapet.",
     redskap: "Mark, flue, sluk",
-    sesong: "1. juni – 31. august",
     kortUrl: "https://www.inatur.no/laksefiske/56978820e4b0fc575c11475a",
     merknader: "Eget dagskort — ordinært sone 4-kort er ikke gyldig her."
   },
@@ -339,7 +334,6 @@ const ZONE_INFO = {
     name: "Buhølen – dagskortsone",
     desc: "Egen dagskortsone innenfor sone 4, like nedstrøms Laksefoss. Høl med rolig strøm der fisken samler seg.",
     redskap: "Flue, sluk, mark",
-    sesong: "1. juni – 31. august",
     kortUrl: "https://www.inatur.no/laksefiske/56978820e4b0fc575c11475a",
     merknader: "Eget dagskort — ordinært sone 4-kort er ikke gyldig her."
   },
@@ -347,7 +341,6 @@ const ZONE_INFO = {
     name: "Teinefoss – fluefiskesone",
     desc: "Egen dagskortsone innenfor sone 4, forbeholdt fluefiske. 98 % av fangstene her er tatt på flue. Kort strekning, høyest kortpris i elva.",
     redskap: "Kun flue",
-    sesong: "1. juni – 31. august",
     kortUrl: "https://www.inatur.no/laksefiske/56978820e4b0fc575c11475a",
     merknader: "Eget dagskort — ordinært sone 4-kort er ikke gyldig her. Fluefiske."
   }
@@ -388,6 +381,54 @@ const BILDE_BASE = '../bilder/tovdalselva/';
 const LABEL_ZOOM_THRESHOLD = 13; // Sonenavn-etiketter vises først fra dette zoomnivået
 const PHOTOS_URL = '../data/photos_tovdalselva.json';
 const VIDEOS_URL = '../data/videoer_tovdalselva.json';
+const SESONG_URL = '../data/sesong.json';
+const SESONG_ELV = 'tovdalselva';
+
+// Sesongtekst hentes fra data/sesong.json (skrevet av admin/index.html).
+// Ingen hardkodet fallback: er filen utilgjengelig eller mangler datoer,
+// skjules Sesong-raden helt framfor aa vise noe som kan vaere feil.
+const SESONG_MND = ['januar','februar','mars','april','mai','juni','juli','august',
+                    'september','oktober','november','desember'];
+let SESONG = null;
+
+async function fetchSesong() {
+  try {
+    const res = await fetch(SESONG_URL, { cache: 'no-cache' });
+    if (!res.ok) return;
+    const j = await res.json();
+    if (j && j.elver && j.elver[SESONG_ELV]) SESONG = j.elver[SESONG_ELV];
+  } catch (e) {
+    SESONG = null;
+  }
+  if (activeZone) showZoneInfo(activeZone, false);
+}
+
+function sesongFmt(md) {
+  if (!/^\d{2}-\d{2}$/.test(md || '')) return null;
+  const d = md.split('-');
+  return parseInt(d[1], 10) + '. ' + SESONG_MND[parseInt(d[0], 10) - 1];
+}
+
+// Bygger visningsteksten for en sone: elvas datoer med mindre sonen overstyrer,
+// pluss eventuelt tillegg. Returnerer tom streng naar raden skal skjules.
+function sesongFor(zone) {
+  if (!SESONG) return '';
+  const o = (SESONG.soner && SESONG.soner[zone]) || null;
+  const tillegg = (o ? (o.tillegg || '') : (SESONG.tillegg || '')).trim();
+  // Stengt sone: elvas datoer gjelder ikke, kun sonens egen tekst vises.
+  if (o && o.stengt) return tillegg;
+  const start = sesongFmt((o && o.start) || SESONG.start);
+  const slutt = sesongFmt((o && o.slutt) || SESONG.slutt);
+  if (!start || !slutt) return tillegg;
+  return start + ' \u2013 ' + slutt + (tillegg ? ' ' + tillegg : '');
+}
+
+function sesongRad(zone) {
+  const t = sesongFor(zone);
+  if (!t) return '';
+  return '<div class="zi-row"><span class="zi-label">Sesong</span>'
+       + '<span class="zi-val">' + t + '</span></div>';
+}
 
 /* ---------- Sentral konfig (data/config.json) — scoringsparametre ---------- */
 const PRICES = {"Sone 1": {"dogn": 170, "sesong": 1250}, "Sone 2": {"dogn": 380}, "Sone 3": {"dogn": 390, "sesong": 2450}, "Sone 4 og 5": {"dogn": 290, "sesong": 2450}, "Teinefoss Fluefiske": {"dogn": 710}, "Buhølen": {"dogn": 410}, "Laksefoss": {"dogn": 410}};
@@ -1132,7 +1173,7 @@ function showZoneInfo(zone, scrollTo = true) {
     ${boomHtml}
     <div class="zi-desc">${info.desc}</div>
     <div class="zi-row"><span class="zi-label">Redskap</span><span class="zi-val">${info.redskap}</span></div>
-    <div class="zi-row"><span class="zi-label">Sesong</span><span class="zi-val">${info.sesong}</span></div>
+    ${sesongRad(zone)}
     <div class="zi-row"><span class="zi-label">Merknader</span><span class="zi-val">${info.merknader}</span></div>
     <a class="zi-link" href="https://www.google.com/maps/dir/?api=1&destination=${ZONE_COORDS[zone]?.s[0]},${ZONE_COORDS[zone]?.s[1]}&travelmode=driving" target="_blank">🗺 Veibeskrivelse hit ↗</a>
     ${priceHtml}
@@ -1507,6 +1548,7 @@ document.getElementById('totalScoreBox').innerHTML =
   + '<div class="total-score-lbl">Score</div>';
 fetchNVE().then(() => update());
 fetchNedbor();
+fetchSesong();
 fetchPhotos();
 fetchVideos();
 window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
@@ -1556,7 +1598,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.004</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.005</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
