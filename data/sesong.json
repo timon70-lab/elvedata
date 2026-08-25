@@ -1,0 +1,94 @@
+{
+  "_meta": {
+    "endret": "2026-08-25",
+    "av": "admin",
+    "notat": "Strukturerte datoer (MM-DD) + eget tilleggsfelt. Leses av bade oversiktskartet (start/slutt) og elvedashbordene (visningstekst + tillegg). Sone-verdier med null arver elvas datoer.",
+    "format": {
+      "start": "MM-DD, sesongstart",
+      "slutt": "MM-DD, sesongslutt",
+      "tillegg": "Fritekst som limes pa etter datointervallet ved visning. Tom streng = ingen tillegg.",
+      "soner": "Kun soner som avviker. start/slutt = null betyr arv fra elvas datoer."
+    }
+  },
+  "elver": {
+    "audna": {
+      "start": "06-01",
+      "slutt": "08-31",
+      "tillegg": "",
+      "soner": {
+        "Sone4": { "start": null, "slutt": null, "tillegg": "(stengt kl. 23–04)" }
+      }
+    },
+    "lygna": {
+      "start": "06-15",
+      "slutt": "08-30",
+      "tillegg": "",
+      "soner": {}
+    },
+    "mandalselva": {
+      "start": "06-01",
+      "slutt": "08-31",
+      "tillegg": "",
+      "soner": {
+        "Sone 4":           { "start": "06-01", "slutt": "09-15", "tillegg": "" },
+        "Bjåhylen":         { "start": "06-01", "slutt": "09-15", "tillegg": "" },
+        "Klevelandsfossen": { "start": "06-01", "slutt": "09-15", "tillegg": "" },
+        "Laksehylen":       { "start": "06-01", "slutt": "09-15", "tillegg": "" },
+        "Nodehylen":        { "start": "06-01", "slutt": "09-15", "tillegg": "" },
+        "Steinshylen":      { "start": "06-01", "slutt": "09-15", "tillegg": "" },
+        "Strædethylen":     { "start": "06-01", "slutt": "09-15", "tillegg": "" }
+      }
+    },
+    "otra": {
+      "start": "06-15",
+      "slutt": "08-17",
+      "tillegg": "(2026)",
+      "soner": {
+        "Sone 5B Rød": { "start": "07-01", "slutt": "08-17", "tillegg": "(2026) — forsinket start i denne sonen" },
+        "Sone 5B Øst": { "start": null, "slutt": null, "tillegg": "—", "stengt": true }
+      }
+    },
+    "sygna": {
+      "start": "07-15",
+      "slutt": "09-15",
+      "tillegg": "",
+      "soner": {}
+    },
+    "tovdalselva": {
+      "start": "06-01",
+      "slutt": "08-31",
+      "tillegg": "",
+      "soner": {}
+    },
+    "storelva": {
+      "start": "08-01",
+      "slutt": "09-15",
+      "tillegg": "",
+      "soner": {}
+    },
+    "nidelva": {
+      "start": "06-15",
+      "slutt": "09-15",
+      "tillegg": "",
+      "soner": {}
+    },
+    "kvina": {
+      "start": "06-01",
+      "slutt": "08-15",
+      "tillegg": "",
+      "soner": {}
+    },
+    "sireana": {
+      "start": "07-01",
+      "slutt": "08-31",
+      "tillegg": "",
+      "soner": {}
+    },
+    "bjerkreimselva": {
+      "start": "06-01",
+      "slutt": "09-20",
+      "tillegg": "",
+      "soner": {}
+    }
+  }
+}
