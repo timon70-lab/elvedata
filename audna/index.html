@@ -335,7 +335,6 @@ const ZONE_INFO = {
     name: 'Sone 1 – Nedre Audna',
     desc: 'Nederste sone fra sjøen og opp. Stor del brakkvannssone, best egnet for båtfiske etter sjøørret og laks ved innsiget. Tilgjengelig fra Vigeland og ned mot Sniksfjorden.',
     redskap: 'Flue, sluk, mark',
-    sesong: '1. juni – 31. august',
     kortUrl: 'https://www.scanatura.no/webshop?id=621',
     merknader: 'Stengt onsdager. Ungdom under 18 år fisker gratis.'
   },
@@ -343,7 +342,6 @@ const ZONE_INFO = {
     name: 'Sone 2 – Gaupefossen',
     desc: 'Regnes av mange som den beste sonen i Audna. Gaupefossen gir gode fiskeforhold med varierte strømdrag. Sone 2 er delt i 2a, 2c og 2d. Vannstandsmåler Gaupefossen er referansepunktet for hele elva.',
     redskap: 'Flue, sluk, mark',
-    sesong: '1. juni – 31. august',
     kortUrl: 'https://www.scanatura.no/webshop?id=621',
     merknader: 'Stengt onsdager (unntatt sone 2d). Begrenset antall fiskeplasser.'
   },
@@ -351,7 +349,6 @@ const ZONE_INFO = {
     name: 'Sone 3 – Haga',
     desc: 'Rolige og stilleflytende partier mellom Gaupefossen og Melhusfossen. God flueelv med fine høler. Tilgjengelig for alle, men fisket kan være følsomt for lav vannstand.',
     redskap: 'Flue, sluk, mark',
-    sesong: '1. juni – 31. august',
     kortUrl: 'https://www.scanatura.no/webshop?id=621',
     merknader: 'Stengt onsdager. Koster ikke for ungdom under 18 år.'
   },
@@ -359,7 +356,6 @@ const ZONE_INFO = {
     name: 'Sone 4 – Melhusfossen',
     desc: 'Den mest kjente og prestisjetunge plassen i Audna. Melhusfossen er betraktet som den beste fiskeplassen av mange lokale. Privat grunneierfiske fra én side, kortsalg på den andre.',
     redskap: 'Flue, mark (sirkelkrok påbudt). Slukforbud øverst, sluk tillatt nederst.',
-    sesong: '1. juni – 31. august (stengt kl. 23–04)',
     kortUrl: 'https://www.scanatura.no/webshop?id=621',
     merknader: 'Sirkelkrok påbudt siden 2017. Desinfeksjonsstasjon på stedet. Stengt onsdager.'
   },
@@ -367,7 +363,6 @@ const ZONE_INFO = {
     name: 'Sone 5A – Nedre del',
     desc: 'Nedre del av den lange sone 5-strekningen. Rolige partier med stilleflytende elv og gode høler. Godt egnet for fluefiske. Lavt fiskepress sammenlignet med sone 2 og 4.',
     redskap: 'Flue, sluk, mark',
-    sesong: '1. juni – 31. august',
     kortUrl: 'https://www.scanatura.no/webshop?id=621',
     merknader: 'Stengt onsdager.'
   },
@@ -375,7 +370,6 @@ const ZONE_INFO = {
     name: 'Sone 5B – Øvre del',
     desc: 'Øvre del av sone 5. Lang og fin strekning med varierende karakter. Fisket er noe mer følsomt for lav vannstand enn de nedre sonene, men byr på gode muligheter i normal til høy vannføring.',
     redskap: 'Flue, sluk, mark',
-    sesong: '1. juni – 31. august',
     kortUrl: 'https://www.scanatura.no/webshop?id=621',
     merknader: 'Stengt onsdager.'
   },
@@ -383,7 +377,6 @@ const ZONE_INFO = {
     name: 'Sone 5 – Midt-Audna',
     desc: 'Lang strekning med stilleflytende partier og spredte stryk. Lite fiskepress. Krever noe høyere vannstand for optimalt fiske, men god elv for den som vil ha ro.',
     redskap: 'Flue, sluk, mark',
-    sesong: '1. juni – 31. august',
     kortUrl: 'https://www.scanatura.no/webshop?id=621',
     merknader: 'Stengt onsdager.'
   },
@@ -391,7 +384,6 @@ const ZONE_INFO = {
     name: 'Sone 6 – Øvre Audna',
     desc: 'Øvre del av lakseførende strekning med varierte fiskemuligheter. God elv for fluefiskere. Augustlaksen kan gi fine fangster i god vannstand.',
     redskap: 'Flue, sluk, mark',
-    sesong: '1. juni – 31. august',
     kortUrl: 'https://www.scanatura.no/webshop?id=621',
     merknader: 'Stengt onsdager.'
   },
@@ -399,7 +391,6 @@ const ZONE_INFO = {
     name: 'Sone 7 – Gislefoss',
     desc: 'Gislefoss er den mest kjente fiskeplassen i øvre Audna. Det ble tatt en laks på 13,2 kg her i 2009. God strøm og fine høler. Litt bedre strømdrag enn mange nedre soner.',
     redskap: 'Flue, sluk, mark',
-    sesong: '1. juni – 31. august',
     kortUrl: 'https://www.scanatura.no/webshop?id=621',
     merknader: 'Stengt onsdager. Koster for ungdom under 18 år.'
   },
@@ -407,7 +398,6 @@ const ZONE_INFO = {
     name: 'Sone 8 – Øvre strekning',
     desc: 'Øverste tilgjengelige sone, nær Ytre Øydnevann. Gjennomgående litt bedre strømdrag enn sone 5. Enda mindre fiskepress enn mellomsonene. Best i en god og våt sommer med augustlaks.',
     redskap: 'Flue, sluk, mark',
-    sesong: '1. juni – 31. august',
     kortUrl: 'https://www.scanatura.no/webshop?id=621',
     merknader: 'Stengt onsdager. Fisket mer følsomt for lav vannstand.'
   }
@@ -452,6 +442,54 @@ const BILDE_BASE = '../bilder/audna/';
 const LABEL_ZOOM_THRESHOLD = 13; // Sonenavn-etiketter vises først fra dette zoomnivået
 const PHOTOS_URL = '../data/photos_audna.json';
 const VIDEOS_URL = '../data/videoer_audna.json';
+const SESONG_URL = '../data/sesong.json';
+const SESONG_ELV = 'audna';
+
+// Sesongtekst hentes fra data/sesong.json (skrevet av admin/index.html).
+// Ingen hardkodet fallback: er filen utilgjengelig eller mangler datoer,
+// skjules Sesong-raden helt framfor aa vise noe som kan vaere feil.
+const SESONG_MND = ['januar','februar','mars','april','mai','juni','juli','august',
+                    'september','oktober','november','desember'];
+let SESONG = null;
+
+async function fetchSesong() {
+  try {
+    const res = await fetch(SESONG_URL, { cache: 'no-cache' });
+    if (!res.ok) return;
+    const j = await res.json();
+    if (j && j.elver && j.elver[SESONG_ELV]) SESONG = j.elver[SESONG_ELV];
+  } catch (e) {
+    SESONG = null;
+  }
+  if (activeZone) showZoneInfo(activeZone, false);
+}
+
+function sesongFmt(md) {
+  if (!/^\d{2}-\d{2}$/.test(md || '')) return null;
+  const d = md.split('-');
+  return parseInt(d[1], 10) + '. ' + SESONG_MND[parseInt(d[0], 10) - 1];
+}
+
+// Bygger visningsteksten for en sone: elvas datoer med mindre sonen overstyrer,
+// pluss eventuelt tillegg. Returnerer tom streng naar raden skal skjules.
+function sesongFor(zone) {
+  if (!SESONG) return '';
+  const o = (SESONG.soner && SESONG.soner[zone]) || null;
+  const tillegg = (o ? (o.tillegg || '') : (SESONG.tillegg || '')).trim();
+  // Stengt sone: elvas datoer gjelder ikke, kun sonens egen tekst vises.
+  if (o && o.stengt) return tillegg;
+  const start = sesongFmt((o && o.start) || SESONG.start);
+  const slutt = sesongFmt((o && o.slutt) || SESONG.slutt);
+  if (!start || !slutt) return tillegg;
+  return start + ' \u2013 ' + slutt + (tillegg ? ' ' + tillegg : '');
+}
+
+function sesongRad(zone) {
+  const t = sesongFor(zone);
+  if (!t) return '';
+  return '<div class="zi-row"><span class="zi-label">Sesong</span>'
+       + '<span class="zi-val">' + t + '</span></div>';
+}
 
 /* ---------- Sentral konfig (data/config.json) — scoringsparametre ---------- */
 const PRICES = {"Sone 5A":{"dogn":400,"sesong":3500},"Sone 5B":{"dogn":350,"sesong":3000},"Sone1":{"dogn":250,"sesong":1200},"Sone2":{"dogn":350,"sesong":2900},"Sone3":{"dogn":250},"Sone4":{"dogn":1200},"Sone6":{"dogn":300,"sesong":3000},"Sone7":{"dogn":450},"Sone8":{"dogn":250,"sesong":1500}};
@@ -1183,7 +1221,7 @@ function showZoneInfo(zone, scrollTo = true) {
     ${boomHtml}
     <div class="zi-desc">${info.desc}</div>
     <div class="zi-row"><span class="zi-label">Redskap</span><span class="zi-val">${info.redskap}</span></div>
-    <div class="zi-row"><span class="zi-label">Sesong</span><span class="zi-val">${info.sesong}</span></div>
+    ${sesongRad(zone)}
     <div class="zi-row"><span class="zi-label">Merknader</span><span class="zi-val">${info.merknader}</span></div>
     <a class="zi-link" href="https://www.google.com/maps/dir/?api=1&destination=${ZONE_COORDS[zone]?.s[0]},${ZONE_COORDS[zone]?.s[1]}&travelmode=driving" target="_blank">🗺 Veibeskrivelse hit ↗</a>
     ${priceHtml}
@@ -1646,6 +1684,7 @@ document.getElementById('totalScoreBox').innerHTML =
   + '<div class="total-score-lbl">Score</div>';
 fetchNVE().then(() => update());
 fetchNedbor();
+fetchSesong();
 fetchPhotos();
 fetchVideos();
 window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
@@ -1695,7 +1734,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.152</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.153</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
