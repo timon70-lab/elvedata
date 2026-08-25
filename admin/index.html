@@ -118,6 +118,68 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
 .vid-type-badge { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; padding: 2px 6px;
         border-radius: 999px; white-space: nowrap; }
 .vid-type-badge.foto { background: #dbeafe; color: #1d4ed8; }
+/* ---- Sesong ---- */
+.ses-field { margin-bottom: 12px; }
+.ses-meta { font-size: 0.68rem; color: #94a3b8; margin-top: 2px; }
+.ses-date-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ses-date-pair { display: flex; gap: 6px; }
+.ses-date-pair select { padding: 8px 6px; border: 1px solid #cbd5e1; border-radius: 6px;
+        font-size: 0.85rem; background: #fff; color: #1a202c; }
+.ses-date-pair select:first-child { flex: 0 0 68px; }
+.ses-date-pair select:last-child { flex: 1; min-width: 0; }
+#sesElv, #sesPvSone, #sesAddZone { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1;
+        border-radius: 6px; font-size: 0.85rem; background: #fff; color: #1a202c; }
+#sesTillegg, #sesAddTillegg { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1;
+        border-radius: 6px; font-size: 0.85rem; }
+#sesTillegg:disabled { background: #f1f5f9; color: #94a3b8; }
+.ses-sec-hdr { display: flex; justify-content: space-between; align-items: baseline;
+        margin: 16px 0 6px; padding-top: 12px; border-top: 1px solid #f1f5f9; }
+.ses-sec-hdr h3 { font-size: 0.82rem; color: #334155; font-weight: 600; }
+.ses-count { font-size: 0.7rem; color: #94a3b8; }
+.ses-ovr-row { display: flex; align-items: center; gap: 8px; padding: 8px 0;
+        border-bottom: 1px solid #f1f5f9; }
+.ses-ovr-row:last-of-type { border-bottom: none; }
+.ses-ovr-meta { flex: 1; min-width: 0; }
+.ses-ovr-zone { font-size: 0.78rem; font-weight: 600; color: #1a202c;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ses-ovr-val { font-size: 0.72rem; color: #64748b;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ses-ovr-row button { background: #fee2e2; color: #b91c1c; padding: 5px 10px; font-size: 0.75rem; }
+.ses-ovr-row button:hover { background: #fecaca; }
+.ses-ovr-row button.edit-btn { background: #e0e7ff; color: #3730a3; }
+.ses-ovr-row button.edit-btn:hover { background: #c7d2fe; }
+.ses-ovr-empty { font-size: 0.75rem; color: #94a3b8; padding: 10px 0; }
+.ses-add-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;
+        padding: 10px; margin-top: 8px; }
+.ses-add-box label { font-size: 0.72rem; }
+.ses-add-actions { display: flex; gap: 8px; margin-top: 10px; }
+.ses-add-actions button { padding: 5px 12px; font-size: 0.78rem; border-radius: 5px; }
+.ses-add-actions .save { background: #dcfce7; color: #166534; }
+.ses-add-actions .save:hover { background: #bbf7d0; }
+.ses-add-actions .cancel { background: #f1f5f9; color: #475569; }
+.ses-nodash { font-size: 0.7rem; color: #6d28d9; background: #ede9fe; border-radius: 6px;
+        padding: 7px 10px; margin-bottom: 10px; line-height: 1.4; }
+#sesStatus { font-size: 0.8rem; margin-top: 10px; min-height: 1.2em; }
+#sesStatus.ok { color: #276749; }
+#sesStatus.err { color: #c53030; }
+.ses-pv { background: #0f172a; border-radius: 10px; padding: 14px; }
+.ses-pv-title { font-size: 0.72rem; color: #94a3b8; margin-bottom: 10px; }
+.ses-zi { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0;
+        border-bottom: 1px solid rgba(148,163,184,0.18); }
+.ses-zi:last-child { border-bottom: none; }
+.ses-zi-l { font-size: 0.74rem; color: #94a3b8; }
+.ses-zi-v { font-size: 0.78rem; color: #e2e8f0; text-align: right; }
+.ses-zi.avvik .ses-zi-l, .ses-zi.avvik .ses-zi-v { color: #7dd3fc; }
+.ses-pv-note { font-size: 0.7rem; color: #94a3b8; margin-top: 10px; line-height: 1.45;
+        border-top: 1px solid rgba(148,163,184,0.18); padding-top: 8px; }
+.ses-pv-note b { color: #cbd5e1; }
+.ses-mk { background: #1e293b; border-radius: 10px; padding: 14px; margin-top: 12px; }
+.ses-mk-row { display: flex; align-items: center; gap: 10px; }
+.ses-mk-dot { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center;
+        justify-content: center; color: #fff; font-weight: 700; font-size: 0.85rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.4); flex: 0 0 auto; background: #718096; }
+.ses-mk-txt { font-size: 0.76rem; color: #e2e8f0; line-height: 1.4; }
+.ses-mk-txt small { color: #94a3b8; font-size: 0.68rem; }
 .vid-type-badge.video { background: #ede9fe; color: #6d28d9; }
 #vidFilter, #listElv, #listSone { padding: 4px 8px; font-size: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; }
 #vidCount { font-size: 0.72rem; color: #64748b; white-space: nowrap; }
@@ -363,6 +425,126 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
 </div>
   </div>
 </div>
+
+<details class="card-details" id="sesongDetails">
+  <summary>📅 Sesong <span class="sum-hint">(markører på oversiktskartet + Sesong-raden i dashbordene)</span></summary>
+<div class="card">
+  <div class="layout">
+
+    <div class="col-left">
+      <div class="ses-field">
+        <label for="sesElv">Elv</label>
+        <select id="sesElv" onchange="sesByttElv()"></select>
+      </div>
+
+      <div id="sesNoDash" class="ses-nodash" style="display:none">
+        Denne elva har ikke dashboard — datoene brukes kun av oversiktskartet.
+        Tillegg og soneavvik er derfor deaktivert.
+      </div>
+
+      <div class="ses-date-grid">
+        <div>
+          <label>Sesongstart</label>
+          <div class="ses-date-pair">
+            <select id="sesStartD" onchange="sesOnDato()"></select><select id="sesStartM" onchange="sesOnDato()"></select>
+          </div>
+        </div>
+        <div>
+          <label>Sesongslutt</label>
+          <div class="ses-date-pair">
+            <select id="sesSluttD" onchange="sesOnDato()"></select><select id="sesSluttM" onchange="sesOnDato()"></select>
+          </div>
+        </div>
+      </div>
+      <div class="hint">Kun datoer. Disse styrer markørfasen på oversiktskartet.</div>
+
+      <div class="ses-field" style="margin-top:12px">
+        <label for="sesTillegg">Tillegg <span style="font-weight:400;color:#94a3b8">(valgfritt)</span></label>
+        <input type="text" id="sesTillegg" oninput="sesOnTillegg()" placeholder="f.eks. (stengt kl. 23–04)">
+        <div class="hint">Limes på etter datointervallet i dashbordet. Påvirker <b>ikke</b> kartet.</div>
+        <div class="ses-meta" id="sesMeta"></div>
+      </div>
+
+      <div id="sesOvrSection">
+        <div class="ses-sec-hdr">
+          <h3>Soneavvik</h3><span class="ses-count" id="sesOvrCount"></span>
+        </div>
+        <div class="hint" style="margin-top:0">En sone kan avvike på datoer, på tillegg, eller begge.</div>
+        <div id="sesOvrList"></div>
+
+        <div id="sesAddBox" class="ses-add-box" style="display:none">
+          <label>Sone
+            <select id="sesAddZone"></select>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#475569;margin-top:8px">
+            <input type="checkbox" id="sesAddArv" onchange="sesToggleArv()"> Arv datoer fra elva
+          </label>
+          <div id="sesAddDates" class="ses-date-grid" style="margin-top:6px">
+            <div>
+              <label>Start</label>
+              <div class="ses-date-pair"><select id="sesAddStartD"></select><select id="sesAddStartM"></select></div>
+            </div>
+            <div>
+              <label>Slutt</label>
+              <div class="ses-date-pair"><select id="sesAddSluttD"></select><select id="sesAddSluttM"></select></div>
+            </div>
+          </div>
+          <label style="margin-top:8px">Tillegg for denne sonen
+            <input type="text" id="sesAddTillegg" placeholder="valgfritt">
+          </label>
+          <div class="ses-add-actions">
+            <button class="save" onclick="sesLagreAvvik()">Lagre sone</button>
+            <button class="cancel" onclick="sesLukkAdd()">Avbryt</button>
+          </div>
+        </div>
+
+        <div class="save-row">
+          <button class="secondary" id="sesBtnAdd" onclick="sesApneAdd()">+ Legg til soneavvik</button>
+        </div>
+      </div>
+
+      <div class="warn">⚠️ Lagring skriver direkte til <b>data/sesong.json</b>. Datoene slår inn på
+      oversiktskartet umiddelbart — en feil her kan sette en elv til «stengt» midt i sesongen.</div>
+
+      <div class="save-row">
+        <button id="sesSaveBtn" onclick="sesLagre()" disabled>💾 Lagre til GitHub</button>
+        <button class="secondary" onclick="sesLast()">↺ Last på nytt</button>
+      </div>
+      <div id="sesStatus"></div>
+    </div>
+
+    <div class="col-right">
+      <h2 style="margin-bottom:8px">Forhåndsvisning</h2>
+      <div class="ses-field" id="sesSoneVelger">
+        <label for="sesPvSone">Vis sone (dashboard)</label>
+        <select id="sesPvSone" onchange="sesTegnPreview()"></select>
+      </div>
+
+      <div class="ses-pv" id="sesPvWrap">
+        <div class="ses-pv-title" id="sesPvTitle">Sone-infopanel</div>
+        <div class="ses-zi" id="sesPvRow"><span class="ses-zi-l">Sesong</span><span class="ses-zi-v" id="sesPvVal">—</span></div>
+        <div class="ses-pv-note" id="sesPvNote"></div>
+      </div>
+
+      <div class="ses-mk">
+        <div class="ses-pv-title">Markør på oversiktskartet</div>
+        <div class="ses-mk-row">
+          <div class="ses-mk-dot" id="sesMkDot">–</div>
+          <div class="ses-mk-txt" id="sesMkTxt"></div>
+        </div>
+        <div style="margin-top:10px">
+          <label style="color:#94a3b8">Simulert dato</label>
+          <div class="ses-date-pair">
+            <select id="sesSimD" onchange="sesTegnKart()"></select><select id="sesSimM" onchange="sesTegnKart()"></select>
+          </div>
+        </div>
+        <div class="hint" style="color:#94a3b8">Åpningsvinduet er 30 dager.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</details>
 
 <details class="card-details">
   <summary>⚖️ Scoringsparametre per elv <span class="sum-hint">(sjelden brukt)</span></summary>
@@ -2167,6 +2349,329 @@ if (localStorage.getItem(NVE_KEY)) {
 if (getToken()) {
   document.getElementById('tokenInput').placeholder = 'Token er lagret ✓ (lim inn nytt for å bytte)';
 }
+/* ======================= SESONG ======================= */
+const SESONG_PATH = 'data/sesong.json';
+const SES_MND = ['januar','februar','mars','april','mai','juni','juli','august',
+                 'september','oktober','november','desember'];
+const SES_NAVN = {
+  audna:'Audna', lygna:'Lygna', mandalselva:'Mandalselva', otra:'Otra',
+  sygna:'Sygna', tovdalselva:'Tovdalselva', storelva:'Storelva (Veg\u00e5rvassdraget)',
+  nidelva:'Nidelva (Arendal)', kvina:'Kvina', sireana:'Sire\u00e5na (Sira)',
+  bjerkreimselva:'Bjerkreimselva'
+};
+const SES_APNING_DAGER = 30;
+
+let sesData = null, sesSha = null, sesElv = null;
+
+function sesStatus(msg, isErr) {
+  const el = document.getElementById('sesStatus');
+  el.textContent = msg;
+  el.className = isErr ? 'err' : 'ok';
+}
+
+function sesFyllDag(sel) {
+  sel.innerHTML = '';
+  for (let d = 1; d <= 31; d++) sel.add(new Option(d, String(d).padStart(2,'0')));
+}
+function sesFyllMnd(sel) {
+  sel.innerHTML = '';
+  SES_MND.forEach((m,i) => sel.add(new Option(m, String(i+1).padStart(2,'0'))));
+}
+function sesSettDato(dId, mId, md) {
+  if (!md) return;
+  const p = String(md).split('-');
+  document.getElementById(mId).value = p[0];
+  document.getElementById(dId).value = p[1];
+}
+function sesLesDato(dId, mId) {
+  return document.getElementById(mId).value + '-' + document.getElementById(dId).value;
+}
+function sesFmt(md) {
+  const p = String(md).split('-');
+  return parseInt(p[1],10) + '. ' + SES_MND[parseInt(p[0],10)-1];
+}
+function sesHarDash(e) { return !!(SONER && SONER[e]); }
+
+async function sesLast() {
+  sesStatus('Henter sesong \u2026', false);
+  try {
+    const r = await fetchJsonFile(SESONG_PATH);
+    if (!r.sha || !r.list || !r.list.elver) {
+      sesStatus('data/sesong.json finnes ikke enn\u00e5 \u2014 last den opp f\u00f8rst.', true);
+      document.getElementById('sesSaveBtn').disabled = true;
+      return;
+    }
+    sesData = r.list;
+    sesSha = r.sha;
+    document.getElementById('sesSaveBtn').disabled = false;
+    sesInitKontroller();
+    sesStatus('Sesong lastet. \u2713', false);
+  } catch (e) {
+    sesStatus('Kunne ikke hente sesong: ' + e.message, true);
+  }
+}
+
+function sesInitKontroller() {
+  ['sesStartD','sesSluttD','sesAddStartD','sesAddSluttD','sesSimD']
+    .forEach(id => sesFyllDag(document.getElementById(id)));
+  ['sesStartM','sesSluttM','sesAddStartM','sesAddSluttM','sesSimM']
+    .forEach(id => sesFyllMnd(document.getElementById(id)));
+
+  const na = new Date();
+  sesSettDato('sesSimD','sesSimM',
+    String(na.getMonth()+1).padStart(2,'0') + '-' + String(na.getDate()).padStart(2,'0'));
+
+  const sel = document.getElementById('sesElv');
+  sel.innerHTML = '';
+  Object.keys(sesData.elver).forEach(k => {
+    const navn = SES_NAVN[k] || k;
+    sel.add(new Option(navn + (sesHarDash(k) ? '' : '  \u00b7 uten dashboard'), k));
+  });
+  sesElv = sel.value;
+  sesTegn(true);
+}
+
+function sesByttElv() {
+  sesElv = document.getElementById('sesElv').value;
+  sesLukkAdd();
+  sesTegn(true);
+}
+
+function sesOnDato() {
+  const e = sesData.elver[sesElv];
+  e.start = sesLesDato('sesStartD','sesStartM');
+  e.slutt = sesLesDato('sesSluttD','sesSluttM');
+  sesTegn(false);
+}
+
+function sesOnTillegg() {
+  sesData.elver[sesElv].tillegg = document.getElementById('sesTillegg').value;
+  sesTegn(false);
+}
+
+function sesTegn(sync) {
+  const e = sesData.elver[sesElv];
+  if (!e.soner) e.soner = {};
+  if (sync) {
+    sesSettDato('sesStartD','sesStartM', e.start);
+    sesSettDato('sesSluttD','sesSluttM', e.slutt);
+    document.getElementById('sesTillegg').value = e.tillegg || '';
+  }
+  const m = sesData._meta || {};
+  document.getElementById('sesMeta').textContent =
+    m.endret ? ('Sist endret ' + m.endret + (m.av ? ' \u00b7 ' + m.av : '')) : '';
+
+  const dash = sesHarDash(sesElv);
+  document.getElementById('sesNoDash').style.display = dash ? 'none' : '';
+  document.getElementById('sesOvrSection').style.display = dash ? '' : 'none';
+  document.getElementById('sesTillegg').disabled = !dash;
+  document.getElementById('sesSoneVelger').style.display = dash ? '' : 'none';
+  document.getElementById('sesPvWrap').style.display = dash ? '' : 'none';
+
+  if (dash) sesTegnAvvik();
+  sesTegnPreview();
+  sesTegnKart();
+}
+
+function sesTegnAvvik() {
+  const e = sesData.elver[sesElv];
+  const keys = Object.keys(e.soner);
+  document.getElementById('sesOvrCount').textContent =
+    keys.length === 0 ? 'ingen' : keys.length + (keys.length === 1 ? ' sone' : ' soner');
+
+  const list = document.getElementById('sesOvrList');
+  list.innerHTML = '';
+  if (keys.length === 0) {
+    list.innerHTML = '<div class="ses-ovr-empty">Ingen avvik \u2014 alle soner arver elvas sesong.</div>';
+  } else {
+    keys.forEach(z => {
+      const row = document.createElement('div');
+      row.className = 'ses-ovr-row';
+      row.innerHTML = '<div class="ses-ovr-meta"><div class="ses-ovr-zone"></div>'
+        + '<div class="ses-ovr-val"></div></div>'
+        + '<button class="edit-btn">Endre</button><button>Fjern</button>';
+      row.querySelector('.ses-ovr-zone').textContent = z;
+      row.querySelector('.ses-ovr-val').textContent = sesVisning(z);
+      const b = row.querySelectorAll('button');
+      b[0].onclick = () => sesApneAdd(z);
+      b[1].onclick = () => { delete e.soner[z]; sesTegn(false); };
+      list.appendChild(row);
+    });
+  }
+
+  const ss = document.getElementById('sesPvSone');
+  const forrige = ss.value;
+  const soner = (SONER && SONER[sesElv]) || [];
+  ss.innerHTML = '';
+  soner.forEach(z => ss.add(new Option(z + (e.soner[z] !== undefined ? '  \u27f5 avvik' : ''), z)));
+  ss.value = soner.indexOf(forrige) >= 0 ? forrige : (keys[0] || soner[0] || '');
+}
+
+function sesVisning(sone) {
+  const e = sesData.elver[sesElv];
+  const o = sone ? e.soner[sone] : undefined;
+  const st = (o && o.start) || e.start;
+  const sl = (o && o.slutt) || e.slutt;
+  const t = o ? (o.tillegg || '') : (e.tillegg || '');
+  if (!st || !sl) return t || '';
+  let s = sesFmt(st) + ' \u2013 ' + sesFmt(sl);
+  if (t) s += ' ' + t;
+  return s;
+}
+
+function sesTegnPreview() {
+  if (!sesHarDash(sesElv)) return;
+  const e = sesData.elver[sesElv];
+  const z = document.getElementById('sesPvSone').value;
+  const avvik = e.soner[z] !== undefined;
+  const tekst = sesVisning(z);
+  document.getElementById('sesPvTitle').textContent = (SES_NAVN[sesElv] || sesElv) + ' \u00b7 ' + z;
+  const row = document.getElementById('sesPvRow');
+  if (!tekst) {
+    row.style.display = 'none';
+    document.getElementById('sesPvNote').innerHTML =
+      'Tomt \u2014 <b>hele Sesong-raden skjules</b> i dashbordet.';
+  } else {
+    row.style.display = '';
+    row.className = 'ses-zi' + (avvik ? ' avvik' : '');
+    document.getElementById('sesPvVal').textContent = tekst;
+    document.getElementById('sesPvNote').innerHTML = avvik
+      ? ('Sonen har <b>eget avvik</b>' + (e.soner[z].start ? ' p\u00e5 datoer' : ', men arver elvas datoer') + '.')
+      : 'Arvet fra elvas sesong.';
+  }
+}
+
+function sesTegnKart() {
+  const e = sesData.elver[sesElv];
+  const dot = document.getElementById('sesMkDot');
+  const txt = document.getElementById('sesMkTxt');
+  if (!e.start || !e.slutt) {
+    dot.style.background = '#718096'; dot.textContent = '\u2013';
+    txt.innerHTML = (SES_NAVN[sesElv] || sesElv) + '<br>Ingen datoer satt.';
+    return;
+  }
+  const sim = sesLesDato('sesSimD','sesSimM');
+  const tall = md => parseInt(md.split('-')[0],10) * 100 + parseInt(md.split('-')[1],10);
+  const i = tall(sim), st = tall(e.start), sl = tall(e.slutt);
+  const aar = new Date().getFullYear();
+  const d0 = new Date(aar, parseInt(sim.split('-')[0],10)-1, parseInt(sim.split('-')[1],10));
+  let dt = new Date(aar, parseInt(e.start.split('-')[0],10)-1, parseInt(e.start.split('-')[1],10));
+  if (dt < d0) dt = new Date(aar+1, parseInt(e.start.split('-')[0],10)-1, parseInt(e.start.split('-')[1],10));
+  const dager = Math.round((dt - d0) / 86400000);
+
+  let farge, merke, note;
+  if (i >= st && i <= sl) {
+    farge = '#38a169'; merke = '62';
+    note = '<b>I sesong</b> \u2014 mark\u00f8ren viser score og vannf\u00f8ring.';
+  } else if (dager <= SES_APNING_DAGER) {
+    farge = '#d69e2e'; merke = '\u{1F4C5}';
+    note = '<b>\u00c5pner snart</b> \u2014 ' + dager + ' dager til ' + sesFmt(e.start) + '.';
+  } else {
+    farge = '#718096'; merke = '\u2715';
+    note = '<b>Stengt for sesongen</b> \u2014 \u00e5pner ' + sesFmt(e.start) + '.';
+  }
+  dot.style.background = farge;
+  dot.textContent = merke;
+  txt.innerHTML = (SES_NAVN[sesElv] || sesElv) + '<br>' + note
+    + '<br><small>Sesong: ' + sesFmt(e.start) + ' \u2013 ' + sesFmt(e.slutt) + '</small>';
+}
+
+function sesToggleArv() {
+  document.getElementById('sesAddDates').style.display =
+    document.getElementById('sesAddArv').checked ? 'none' : '';
+}
+
+function sesApneAdd(valgt) {
+  const e = sesData.elver[sesElv];
+  const soner = (SONER && SONER[sesElv]) || [];
+  const sel = document.getElementById('sesAddZone');
+  sel.innerHTML = '';
+  soner.forEach(z => { if (e.soner[z] === undefined || z === valgt) sel.add(new Option(z, z)); });
+  if (sel.options.length === 0) {
+    sesStatus('Alle soner har allerede avvik.', true);
+    return;
+  }
+  if (valgt) {
+    sel.value = valgt;
+    const o = e.soner[valgt];
+    document.getElementById('sesAddArv').checked = !o.start;
+    sesSettDato('sesAddStartD','sesAddStartM', o.start || e.start);
+    sesSettDato('sesAddSluttD','sesAddSluttM', o.slutt || e.slutt);
+    document.getElementById('sesAddTillegg').value = o.tillegg || '';
+  } else {
+    document.getElementById('sesAddArv').checked = false;
+    sesSettDato('sesAddStartD','sesAddStartM', e.start);
+    sesSettDato('sesAddSluttD','sesAddSluttM', e.slutt);
+    document.getElementById('sesAddTillegg').value = '';
+  }
+  sesToggleArv();
+  document.getElementById('sesAddBox').style.display = '';
+  document.getElementById('sesBtnAdd').disabled = true;
+  sesStatus('', false);
+}
+
+function sesLukkAdd() {
+  document.getElementById('sesAddBox').style.display = 'none';
+  document.getElementById('sesBtnAdd').disabled = false;
+}
+
+function sesLagreAvvik() {
+  const arv = document.getElementById('sesAddArv').checked;
+  sesData.elver[sesElv].soner[document.getElementById('sesAddZone').value] = {
+    start: arv ? null : sesLesDato('sesAddStartD','sesAddStartM'),
+    slutt: arv ? null : sesLesDato('sesAddSluttD','sesAddSluttM'),
+    tillegg: document.getElementById('sesAddTillegg').value
+  };
+  sesLukkAdd();
+  sesTegn(false);
+}
+
+function sesValider() {
+  const feil = [];
+  Object.keys(sesData.elver).forEach(k => {
+    const e = sesData.elver[k];
+    const navn = SES_NAVN[k] || k;
+    if (!/^\d{2}-\d{2}$/.test(e.start || '') || !/^\d{2}-\d{2}$/.test(e.slutt || '')) {
+      feil.push(navn + ': ugyldig dato');
+      return;
+    }
+    const t = md => parseInt(md.split('-')[0],10)*100 + parseInt(md.split('-')[1],10);
+    if (t(e.slutt) < t(e.start)) feil.push(navn + ': slutt er f\u00f8r start');
+    Object.keys(e.soner || {}).forEach(z => {
+      const o = e.soner[z];
+      if (o.start && o.slutt && t(o.slutt) < t(o.start)) {
+        feil.push(navn + ' / ' + z + ': slutt er f\u00f8r start');
+      }
+      if ((o.start && !o.slutt) || (!o.start && o.slutt)) {
+        feil.push(navn + ' / ' + z + ': b\u00e5de start og slutt m\u00e5 settes, eller ingen av dem');
+      }
+    });
+  });
+  return feil;
+}
+
+async function sesLagre() {
+  if (!getToken()) { sesStatus('Lagre token f\u00f8rst.', true); return; }
+  if (!sesData || !sesSha) { sesStatus('Last sesong f\u00f8rst.', true); return; }
+  const feil = sesValider();
+  if (feil.length) { sesStatus('Ikke lagret \u2014 ' + feil.join(' \u00b7 '), true); return; }
+
+  const btn = document.getElementById('sesSaveBtn');
+  btn.disabled = true;
+  sesStatus('Lagrer \u2026', false);
+  try {
+    if (!sesData._meta) sesData._meta = {};
+    sesData._meta.endret = todayStr();
+    sesData._meta.av = 'admin';
+    sesSha = await putJsonFile(SESONG_PATH, sesData,
+      'Sesong oppdatert via adminpanel', sesSha);
+    sesStatus('Lagret! \u2713 Kart og dashboard ser endringen ved neste sidelasting (Pages-cache ~10 min).', false);
+  } catch (e) {
+    sesStatus('Lagring feilet: ' + e.message, true);
+  }
+  btn.disabled = false;
+}
+
 loadConfig();
 </script>
 
