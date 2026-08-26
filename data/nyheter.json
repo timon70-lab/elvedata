@@ -61,5 +61,14 @@
     "link": "https://www.facebook.com/share/p/17MkCmGovk/",
     "startDate": "2026-08-02",
     "stopDate": "2026-08-16"
+  },
+  {
+    "id": "N-008",
+    "elv": "Mandalselva",
+    "sourceType": "side",
+    "headline": "Mandalselva stenger!",
+    "link": "https://lakseelver.no/nb/news/2026/08/fiskekortsalget-avsluttes-260826",
+    "startDate": "2026-08-26",
+    "stopDate": "2026-09-15"
   }
 ]
