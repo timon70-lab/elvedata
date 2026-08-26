@@ -1,6 +1,13 @@
 [
  {
   "dato": "2026-08-25",
+  "sone": "Steinshylen",
+  "vekt": 2.4,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-25",
   "sone": "Sone 3",
   "vekt": 2,
   "agn": "Flue",
