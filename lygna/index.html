@@ -1705,7 +1705,7 @@ async function fetchNedbor() {
       text.textContent = `Ca. ${r24} mm neste døgn – mulig svak stigning utover de neste døgnene.`;
     } else if (sum48 >= 10) {
       title.textContent = '🌧️ Regn om 1–2 døgn';
-      text.textContent = `Ca. ${r48} mm ventet i morgen/overimorgen – stigning i vente fra midten av uka.`;
+      text.textContent = `Ca. ${r48} mm ventet i morgen/overimorgen – stigning i vente 1–2 døgn etter regnet.`;
     } else {
       title.textContent = '☀️ Tørt i vente';
       text.textContent = 'Lite nedbør neste 48 t – Lygne-magasinet gir stabilt, sakte synkende vann.';
@@ -1811,7 +1811,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.055</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.056</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
