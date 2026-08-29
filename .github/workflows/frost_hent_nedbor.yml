@@ -1,0 +1,35 @@
+name: Frost - hent observert nedbør 2016-2025
+
+# Kjøres manuelt, og normalt bare én gang. Dette er engangsuthentingen av
+# historiske nedbørobservasjoner som kalibreringen skal bygges på.
+# Løpende påfylling av nye døgn kommer som en egen, daglig jobb senere.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  hent-nedbor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sjekk ut repo
+        uses: actions/checkout@v4
+
+      - name: Hent observert nedbør fra Frost
+        env:
+          # Secret heter MET_FROST_API i repoet; skriptet leser FROST_CLIENT_ID.
+          FROST_CLIENT_ID: ${{ secrets.MET_FROST_API }}
+          # Valgfri. Settes bare hvis Basic med tomt passord ikke godtas.
+          FROST_CLIENT_SECRET: ${{ secrets.MET_FROST_SECRET }}
+        run: |
+          python3 scripts/frost_hent_nedbor.py
+
+      - name: Commit datafilene
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/logg/nedbor_obs_*.csv
+          git diff --staged --quiet || git commit -m "Frost: observert nedbør 2016-2025"
+          git push
