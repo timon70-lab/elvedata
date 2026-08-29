@@ -107,28 +107,96 @@ def finn_auth():
     sys.exit(1)
 
 
-def hent_aar(stasjon, aar):
-    """Returnerer liste av (dato, mm, kvalitetskode) for sesongen."""
-    fra = '%d-%02d-%02d' % (aar, SESONG_FRA[0], SESONG_FRA[1])
-    til = '%d-%02d-%02d' % (aar, SESONG_TIL[0], SESONG_TIL[1])
-    params = {
+# Ulike mater a stille sporsmalet pa. Frost er kresen, og hvilken som
+# godtas varierer med stasjon og element. Skriptet prover dem i rekkefolge
+# pa en testkjoring, og bruker den forste som gir data.
+VARIANTER = [
+    ('med timeoffsets og fields', dict(timeoffsets=True,  fields=True)),
+    ('uten fields',               dict(timeoffsets=True,  fields=False)),
+    ('uten timeoffsets',          dict(timeoffsets=False, fields=True)),
+    ('bare det nodvendige',       dict(timeoffsets=False, fields=False)),
+]
+VALGT = None
+SISTE_FEIL = ''
+
+
+def _params(stasjon, fra, til, spec):
+    p = {
         'sources': stasjon,
         'elements': ELEMENT,
         'referencetime': fra + '/' + til,
-        'timeoffsets': TIDSOFFSET,
-        'fields': 'referenceTime,observations',
     }
+    if spec['timeoffsets']:
+        p['timeoffsets'] = TIDSOFFSET
+    if spec['fields']:
+        p['fields'] = 'referenceTime,observations'
+    return p
+
+
+def _kall(params):
+    """Returnerer (data, feiltekst). data er None ved feil."""
     url = BASE + '/observations/v0.jsonld?' + urllib.parse.urlencode(params)
     req = urllib.request.Request(url, headers={'Authorization': AUTH_HEADER,
                                                'User-Agent': BRUKERAGENT})
     try:
         with urllib.request.urlopen(req, timeout=90) as r:
-            d = json.loads(r.read().decode('utf-8'))
+            return json.loads(r.read().decode('utf-8')), ''
     except urllib.error.HTTPError as e:
-        if e.code == 404:
-            return []                    # ingen data for perioden
-        print('    HTTP %d for %s %d' % (e.code, stasjon, aar), file=sys.stderr)
-        return None                      # skiller feil fra tomt
+        kropp = e.read().decode('utf-8', 'replace')
+        try:
+            j = json.loads(kropp)
+            grunn = j.get('error', {}).get('reason') or j.get('error', {}).get('message') or ''
+        except Exception:
+            grunn = kropp[:200].replace('\n', ' ')
+        return None, 'HTTP %d: %s' % (e.code, grunn)
+    except Exception as e:
+        return None, str(e)
+
+
+def finn_variant():
+    """Prover spørringsvariantene på en stasjon vi vet har data."""
+    global VALGT, SISTE_FEIL
+    stasjon = STASJONER[6][1]          # Hynnekleiv, 0,2 km fra punktet
+    print('Tester sporringsvarianter mot %s (sesong 2024):' % stasjon)
+    forsokt = {}
+    for navn, spec in VARIANTER:
+        d, feil = _kall(_params(stasjon, '2024-06-01', '2024-08-31', spec))
+        if d is not None and d.get('data'):
+            print('  %-28s VIRKER (%d rader)' % (navn, len(d['data'])))
+            VALGT = spec
+            return
+        svar = feil or 'tomt svar'
+        print('  %-28s %s' % (navn, svar))
+        forsokt[navn] = svar
+        SISTE_FEIL = feil or SISTE_FEIL
+    print('\nFEIL: ingen sporringsvariant ga data.', file=sys.stderr)
+    print('Siste feil fra Frost: %s' % SISTE_FEIL, file=sys.stderr)
+    # Skriv diagnosen til fil ogsa, slik at den havner i repoet og kan deles
+    ut = 'data/logg/frost_dekning.md'
+    os.makedirs(os.path.dirname(ut), exist_ok=True)
+    with open(ut, 'w', encoding='utf-8') as f:
+        f.write('# Datadekning - OPPSLAG FEILET\n\n'
+                'Ingen av sporringsvariantene ga data fra Frost.\n\n'
+                '| Variant | Svar |\n|---|---|\n'
+                + '\n'.join('| %s | %s |' % (n, forsokt.get(n, '?'))
+                            for n, _ in VARIANTER)
+                + '\n\nElement: `%s`\nTimeOffset: `%s`\nTeststasjon: %s, sesong 2024\n'
+                % (ELEMENT, TIDSOFFSET, stasjon))
+    print('Skrev diagnose til %s' % ut)
+    sys.exit(1)
+
+
+def hent_aar(stasjon, aar):
+    """Returnerer liste av (dato, mm, kvalitetskode), eller None ved feil."""
+    global SISTE_FEIL
+    fra = '%d-%02d-%02d' % (aar, SESONG_FRA[0], SESONG_FRA[1])
+    til = '%d-%02d-%02d' % (aar, SESONG_TIL[0], SESONG_TIL[1])
+    d, feil = _kall(_params(stasjon, fra, til, VALGT))
+    if d is None:
+        if feil.startswith('HTTP 404'):
+            return []                    # ingen data for perioden er gyldig svar
+        SISTE_FEIL = feil
+        return None
     ut = []
     for rad in d.get('data', []):
         dato = rad.get('referenceTime', '')[:10]
@@ -139,6 +207,7 @@ def hent_aar(stasjon, aar):
 
 def main():
     finn_auth()
+    finn_variant()
     ventet = (30 + 31 + 31)              # 1. juni - 31. august
     linjer = ['# Datadekning for kandidatstasjonene', '',
               'Element: `%s`, timeOffset `%s` (dogn 06-06 UTC).' % (ELEMENT, TIDSOFFSET),
@@ -158,7 +227,7 @@ def main():
             rader = hent_aar(sid, aar)
             time.sleep(0.4)                       # vaer snill mot APIet
             if rader is None:
-                linjer.append('| %d | - | - | - | - | oppslag feilet |' % aar)
+                linjer.append('| %d | - | - | - | - | %s |' % (aar, SISTE_FEIL[:80]))
                 feilaar += 1
                 continue
             gyldige = [r for r in rader if r[1] is not None]
