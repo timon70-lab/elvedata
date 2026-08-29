@@ -9,149 +9,149 @@ med godkjent kvalitetskode (0-2).
 
 | Elv | Stasjon | Dekning | Kvalitet | Aar med feil |
 |---|---|---|---|---|
-| audna | Laudal - Kleiven (SN41175) | 0 % | 0 % | 10 |
-| audna | Kvineshei - Sorhelle (SN41860) | 0 % | 0 % | 10 |
-| lygna | Aseral - Kyrkjebygda (SN41480) | 0 % | 0 % | 10 |
-| lygna | Risnes i Fjotland (SN42520) | 0 % | 0 % | 10 |
-| sygna | Kristiansand - Somskleiva (SN39150) | 0 % | 0 % | 10 |
-| sygna | Kjevik (SN39040) | 0 % | 0 % | 10 |
-| tovdalselva | Hynnekleiv (SN38730) | 0 % | 0 % | 10 |
-| tovdalselva | Mykland (SN38600) | 0 % | 0 % | 10 |
+| audna | Laudal - Kleiven (SN41175) | 96 % | 99 % | 0 |
+| audna | Kvineshei - Sorhelle (SN41860) | 93 % | 99 % | 0 |
+| lygna | Aseral - Kyrkjebygda (SN41480) | 94 % | 100 % | 0 |
+| lygna | Risnes i Fjotland (SN42520) | 99 % | 100 % | 0 |
+| sygna | Kristiansand - Somskleiva (SN39150) | 90 % | 99 % | 0 |
+| sygna | Kjevik (SN39040) | 92 % | 96 % | 0 |
+| tovdalselva | Hynnekleiv (SN38730) | 99 % | 99 % | 0 |
+| tovdalselva | Mykland (SN38600) | 99 % | 100 % | 0 |
 
 
 ## Audna - Laudal - Kleiven (SN41175, 2.4 km)
 
 | Aar | Dogn | Dekning | Godkjent | Sum mm | Feil |
 |---|---|---|---|---|---|
-| 2016 | - | - | - | - | oppslag feilet |
-| 2017 | - | - | - | - | oppslag feilet |
-| 2018 | - | - | - | - | oppslag feilet |
-| 2019 | - | - | - | - | oppslag feilet |
-| 2020 | - | - | - | - | oppslag feilet |
-| 2021 | - | - | - | - | oppslag feilet |
-| 2022 | - | - | - | - | oppslag feilet |
-| 2023 | - | - | - | - | oppslag feilet |
-| 2024 | - | - | - | - | oppslag feilet |
-| 2025 | - | - | - | - | oppslag feilet |
+| 2016 | 64 | 70 % | 84 % | 285 | |
+| 2017 | 91 | 99 % | 100 % | 455 | |
+| 2018 | 91 | 99 % | 100 % | 326 | |
+| 2019 | 91 | 99 % | 100 % | 518 | |
+| 2020 | 91 | 99 % | 100 % | 529 | |
+| 2021 | 91 | 99 % | 100 % | 345 | |
+| 2022 | 91 | 99 % | 100 % | 201 | |
+| 2023 | 91 | 99 % | 100 % | 398 | |
+| 2024 | 91 | 99 % | 100 % | 561 | |
+| 2025 | 91 | 99 % | 100 % | 342 | |
 
-**Samlet: 0 % dekning, 0 % godkjent kvalitet.**
+**Samlet: 96 % dekning, 99 % godkjent kvalitet.**
 
 ## Audna - Kvineshei - Sorhelle (SN41860, 24.6 km)
 
 | Aar | Dogn | Dekning | Godkjent | Sum mm | Feil |
 |---|---|---|---|---|---|
-| 2016 | - | - | - | - | oppslag feilet |
-| 2017 | - | - | - | - | oppslag feilet |
-| 2018 | - | - | - | - | oppslag feilet |
-| 2019 | - | - | - | - | oppslag feilet |
-| 2020 | - | - | - | - | oppslag feilet |
-| 2021 | - | - | - | - | oppslag feilet |
-| 2022 | - | - | - | - | oppslag feilet |
-| 2023 | - | - | - | - | oppslag feilet |
-| 2024 | - | - | - | - | oppslag feilet |
-| 2025 | - | - | - | - | oppslag feilet |
+| 2016 | 91 | 99 % | 100 % | 489 | |
+| 2017 | 91 | 99 % | 99 % | 714 | |
+| 2018 | 91 | 99 % | 98 % | 381 | |
+| 2019 | 86 | 93 % | 100 % | 598 | |
+| 2020 | 79 | 86 % | 97 % | 682 | |
+| 2021 | 72 | 78 % | 96 % | 361 | |
+| 2022 | 91 | 99 % | 100 % | 352 | |
+| 2023 | 91 | 99 % | 100 % | 513 | |
+| 2024 | 91 | 99 % | 100 % | 660 | |
+| 2025 | 77 | 84 % | 100 % | 414 | |
 
-**Samlet: 0 % dekning, 0 % godkjent kvalitet.**
+**Samlet: 93 % dekning, 99 % godkjent kvalitet.**
 
 ## Lygna - Aseral - Kyrkjebygda (SN41480, 19.4 km)
 
 | Aar | Dogn | Dekning | Godkjent | Sum mm | Feil |
 |---|---|---|---|---|---|
-| 2016 | - | - | - | - | oppslag feilet |
-| 2017 | - | - | - | - | oppslag feilet |
-| 2018 | - | - | - | - | oppslag feilet |
-| 2019 | - | - | - | - | oppslag feilet |
-| 2020 | - | - | - | - | oppslag feilet |
-| 2021 | - | - | - | - | oppslag feilet |
-| 2022 | - | - | - | - | oppslag feilet |
-| 2023 | - | - | - | - | oppslag feilet |
-| 2024 | - | - | - | - | oppslag feilet |
-| 2025 | - | - | - | - | oppslag feilet |
+| 2016 | 91 | 99 % | 100 % | 380 | |
+| 2017 | 91 | 99 % | 100 % | 422 | |
+| 2018 | 91 | 99 % | 100 % | 319 | |
+| 2019 | 91 | 99 % | 100 % | 502 | |
+| 2020 | 91 | 99 % | 100 % | 526 | |
+| 2021 | 91 | 99 % | 100 % | 354 | |
+| 2022 | 91 | 99 % | 100 % | 266 | |
+| 2023 | 44 | 48 % | 100 % | 117 | |
+| 2024 | 91 | 99 % | 100 % | 569 | |
+| 2025 | 91 | 99 % | 100 % | 348 | |
 
-**Samlet: 0 % dekning, 0 % godkjent kvalitet.**
+**Samlet: 94 % dekning, 100 % godkjent kvalitet.**
 
 ## Lygna - Risnes i Fjotland (SN42520, 25.1 km)
 
 | Aar | Dogn | Dekning | Godkjent | Sum mm | Feil |
 |---|---|---|---|---|---|
-| 2016 | - | - | - | - | oppslag feilet |
-| 2017 | - | - | - | - | oppslag feilet |
-| 2018 | - | - | - | - | oppslag feilet |
-| 2019 | - | - | - | - | oppslag feilet |
-| 2020 | - | - | - | - | oppslag feilet |
-| 2021 | - | - | - | - | oppslag feilet |
-| 2022 | - | - | - | - | oppslag feilet |
-| 2023 | - | - | - | - | oppslag feilet |
-| 2024 | - | - | - | - | oppslag feilet |
-| 2025 | - | - | - | - | oppslag feilet |
+| 2016 | 91 | 99 % | 100 % | 394 | |
+| 2017 | 91 | 99 % | 100 % | 471 | |
+| 2018 | 91 | 99 % | 100 % | 401 | |
+| 2019 | 91 | 99 % | 100 % | 539 | |
+| 2020 | 91 | 99 % | 100 % | 549 | |
+| 2021 | 91 | 99 % | 100 % | 405 | |
+| 2022 | 91 | 99 % | 100 % | 312 | |
+| 2023 | 91 | 99 % | 100 % | 472 | |
+| 2024 | 91 | 99 % | 100 % | 568 | |
+| 2025 | 91 | 99 % | 100 % | 419 | |
 
-**Samlet: 0 % dekning, 0 % godkjent kvalitet.**
+**Samlet: 99 % dekning, 100 % godkjent kvalitet.**
 
 ## Sygna - Kristiansand - Somskleiva (SN39150, 12.7 km)
 
 | Aar | Dogn | Dekning | Godkjent | Sum mm | Feil |
 |---|---|---|---|---|---|
-| 2016 | - | - | - | - | oppslag feilet |
-| 2017 | - | - | - | - | oppslag feilet |
-| 2018 | - | - | - | - | oppslag feilet |
-| 2019 | - | - | - | - | oppslag feilet |
-| 2020 | - | - | - | - | oppslag feilet |
-| 2021 | - | - | - | - | oppslag feilet |
-| 2022 | - | - | - | - | oppslag feilet |
-| 2023 | - | - | - | - | oppslag feilet |
-| 2024 | - | - | - | - | oppslag feilet |
-| 2025 | - | - | - | - | oppslag feilet |
+| 2016 | 91 | 99 % | 100 % | 300 | |
+| 2017 | 78 | 85 % | 100 % | 148 | |
+| 2018 | 91 | 99 % | 100 % | 219 | |
+| 2019 | 70 | 76 % | 93 % | 194 | |
+| 2020 | 60 | 65 % | 100 % | 245 | |
+| 2021 | 91 | 99 % | 100 % | 257 | |
+| 2022 | 82 | 89 % | 100 % | 225 | |
+| 2023 | 86 | 93 % | 100 % | 287 | |
+| 2024 | 91 | 99 % | 100 % | 404 | |
+| 2025 | 91 | 99 % | 100 % | 254 | |
 
-**Samlet: 0 % dekning, 0 % godkjent kvalitet.**
+**Samlet: 90 % dekning, 99 % godkjent kvalitet.**
 
 ## Sygna - Kjevik (SN39040, 15.0 km)
 
 | Aar | Dogn | Dekning | Godkjent | Sum mm | Feil |
 |---|---|---|---|---|---|
-| 2016 | - | - | - | - | oppslag feilet |
-| 2017 | - | - | - | - | oppslag feilet |
-| 2018 | - | - | - | - | oppslag feilet |
-| 2019 | - | - | - | - | oppslag feilet |
-| 2020 | - | - | - | - | oppslag feilet |
-| 2021 | - | - | - | - | oppslag feilet |
-| 2022 | - | - | - | - | oppslag feilet |
-| 2023 | - | - | - | - | oppslag feilet |
-| 2024 | - | - | - | - | oppslag feilet |
-| 2025 | - | - | - | - | oppslag feilet |
+| 2016 | 91 | 99 % | 100 % | 274 | |
+| 2017 | 31 | 34 % | 3 % | 81 | |
+| 2018 | 91 | 99 % | 100 % | 181 | |
+| 2019 | 91 | 99 % | 97 % | 394 | |
+| 2020 | 91 | 99 % | 100 % | 348 | |
+| 2021 | 91 | 99 % | 100 % | 207 | |
+| 2022 | 91 | 99 % | 99 % | 250 | |
+| 2023 | 91 | 99 % | 99 % | 263 | |
+| 2024 | 91 | 99 % | 99 % | 387 | |
+| 2025 | 91 | 99 % | 100 % | 266 | |
 
-**Samlet: 0 % dekning, 0 % godkjent kvalitet.**
+**Samlet: 92 % dekning, 96 % godkjent kvalitet.**
 
 ## Tovdalselva - Hynnekleiv (SN38730, 0.2 km)
 
 | Aar | Dogn | Dekning | Godkjent | Sum mm | Feil |
 |---|---|---|---|---|---|
-| 2016 | - | - | - | - | oppslag feilet |
-| 2017 | - | - | - | - | oppslag feilet |
-| 2018 | - | - | - | - | oppslag feilet |
-| 2019 | - | - | - | - | oppslag feilet |
-| 2020 | - | - | - | - | oppslag feilet |
-| 2021 | - | - | - | - | oppslag feilet |
-| 2022 | - | - | - | - | oppslag feilet |
-| 2023 | - | - | - | - | oppslag feilet |
-| 2024 | - | - | - | - | oppslag feilet |
-| 2025 | - | - | - | - | oppslag feilet |
+| 2016 | 91 | 99 % | 100 % | 303 | |
+| 2017 | 91 | 99 % | 100 % | 354 | |
+| 2018 | 91 | 99 % | 93 % | 146 | |
+| 2019 | 91 | 99 % | 100 % | 375 | |
+| 2020 | 91 | 99 % | 100 % | 358 | |
+| 2021 | 91 | 99 % | 100 % | 169 | |
+| 2022 | 91 | 99 % | 100 % | 169 | |
+| 2023 | 91 | 99 % | 100 % | 293 | |
+| 2024 | 91 | 99 % | 100 % | 439 | |
+| 2025 | 91 | 99 % | 100 % | 194 | |
 
-**Samlet: 0 % dekning, 0 % godkjent kvalitet.**
+**Samlet: 99 % dekning, 99 % godkjent kvalitet.**
 
 ## Tovdalselva - Mykland (SN38600, 8.3 km)
 
 | Aar | Dogn | Dekning | Godkjent | Sum mm | Feil |
 |---|---|---|---|---|---|
-| 2016 | - | - | - | - | oppslag feilet |
-| 2017 | - | - | - | - | oppslag feilet |
-| 2018 | - | - | - | - | oppslag feilet |
-| 2019 | - | - | - | - | oppslag feilet |
-| 2020 | - | - | - | - | oppslag feilet |
-| 2021 | - | - | - | - | oppslag feilet |
-| 2022 | - | - | - | - | oppslag feilet |
-| 2023 | - | - | - | - | oppslag feilet |
-| 2024 | - | - | - | - | oppslag feilet |
-| 2025 | - | - | - | - | oppslag feilet |
+| 2016 | 91 | 99 % | 100 % | 297 | |
+| 2017 | 91 | 99 % | 100 % | 314 | |
+| 2018 | 91 | 99 % | 100 % | 158 | |
+| 2019 | 91 | 99 % | 100 % | 345 | |
+| 2020 | 91 | 99 % | 100 % | 284 | |
+| 2021 | 91 | 99 % | 100 % | 193 | |
+| 2022 | 91 | 99 % | 100 % | 157 | |
+| 2023 | 91 | 99 % | 100 % | 261 | |
+| 2024 | 91 | 99 % | 100 % | 381 | |
+| 2025 | 91 | 99 % | 100 % | 177 | |
 
-**Samlet: 0 % dekning, 0 % godkjent kvalitet.**
+**Samlet: 99 % dekning, 100 % godkjent kvalitet.**
 
