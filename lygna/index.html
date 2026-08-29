@@ -1704,6 +1704,14 @@ async function fetchNVE() {
       else                  { trendEl.textContent = '→'; trendEl.style.color = '#94a3b8'; lblEl.textContent = 'Stabil siste 3t'; }
     }
 
+    // Del vannforingen med fiskemeldingen, som trenger den for a regne ut
+    // forventet stigning. Dognendringen brukes til a skille fallende fra
+    // stillestaende vann i torre perioder.
+    liveFlow = val;
+    const val24h = obs.length >= 25 ? obs[obs.length - 25].value : null;
+    liveDiff24 = val24h !== null ? val - val24h : null;
+    oppdaterFiskemelding();
+
     // Sparkline
     drawSparkline(obs.map(o => o.value));
     return;
@@ -1711,6 +1719,109 @@ async function fetchNVE() {
     document.getElementById('lygnaFlow').textContent = '–';
     document.getElementById('lygnaStatus').innerHTML = '<span style="color:#fc8181">⚠️ NVE ikke tilgjengelig</span>';
   }
+}
+
+// ---------------------------------------------------------------------------
+// Fiskemelding
+//
+// Meldingen velges paa FORVENTET STIGNING, ikke paa nedbormengde alene.
+// Grunnlaget er 900 dogn med observert nedbor (MET Frost) koblet mot
+// dognvannforing (NVE) for sesongene 2016-2025, aggregert i samme 06-06-vindu.
+//
+// Funnet som gjorde om paa logikken: samme nedbormengde gir tre til fem ganger
+// storre respons naar feltet allerede er vatt. Under ca. 3 m3/s kollapser
+// responsen i Lygna til under en femtedel - uttorket grunn tar unna alt.
+// En fast terskel paa 10 mm var derfor riktig i omtrent en av tre situasjoner.
+//
+// Faktorene under er median stigning per mm, per kvartil av utgangsvannforing.
+//
+// Merk at nederste trinn bygger paa bare tre hendelser i tiaarsperioden -
+// saa lav har Lygna sjelden vaert naar det har regnet skikkelig. Retningen
+// er likevel entydig, og et forsiktig anslag er bedre enn et for hoyt.
+const RESPONS_GRENSER = [1.0, 3.0, 7.1, 13.9];                // m3/s
+const RESPONS_FAKTOR  = [0.008, 0.067, 0.281, 0.331, 0.491];  // m3/s per mm
+const SVAERT_LAV      = RESPONS_GRENSER[1];   // 3 m3/s
+const MAALSTIGNING    = 3.0;   // stigningen som skiller god fangst fra middels
+
+// Nedborsummer og live vannforing kommer fra hver sin asynkrone henting.
+// Begge kaller oppdaterFiskemelding(), som tegner naar det den trenger finnes.
+let nedborSum = null;   // { s24, s48, s72 }
+let liveFlow  = null;   // m3/s naa
+let liveDiff24 = null;  // endring siste dogn
+
+function responsFaktor(vf) {
+  for (let i = 0; i < RESPONS_GRENSER.length; i++) {
+    if (vf < RESPONS_GRENSER[i]) return RESPONS_FAKTOR[i];
+  }
+  return RESPONS_FAKTOR[RESPONS_FAKTOR.length - 1];
+}
+
+// Naar faller mesteparten? Styrer kun ordlyden, ikke terskelen.
+function naarKommer(s) {
+  const m = Math.max(s.s24, s.s48, s.s72);
+  if (m === s.s24) return 'neste d\u00f8gn';
+  if (m === s.s48) return 'i morgen/overimorgen';
+  return 'om 2\u20133 d\u00f8gn';
+}
+
+function oppdaterFiskemelding() {
+  const el = document.getElementById('fiskemelding');
+  const title = document.getElementById('fmTitle');
+  const text = document.getElementById('fmText');
+  if (!el || !nedborSum) return;
+
+  const s = nedborSum;
+  const tot = s.s24 + s.s48 + s.s72;
+  const mm = Math.round(tot);
+  const naar = naarKommer(s);
+
+  if (tot < 3) {
+    // Torr periode. Fangstloggen viser at stabilt vann er klart darligst
+    // (2,3 laks/dogn mot 7,5 paa fallende), saa de to skilles.
+    if (liveDiff24 !== null && liveDiff24 < -0.5) {
+      title.textContent = '\u{1F30A} T\u00f8rt, men fallende vann';
+      text.textContent = 'Lite nedb\u00f8r neste 72 t. Elva trekker seg tilbake etter h\u00f8yere vann '
+        + '\u2013 ofte bedre fiske enn n\u00e5r vannf\u00f8ringen st\u00e5r stille.';
+    } else {
+      title.textContent = '\u2600\ufe0f T\u00f8rt og stabilt';
+      text.textContent = 'Lite nedb\u00f8r neste 72 t. Lygne-magasinet holder vannf\u00f8ringen jevn '
+        + '\u2013 stillest\u00e5ende vann gir erfaringsmessig lite fisk.';
+    }
+    el.style.display = 'block';
+    return;
+  }
+
+  // Uten live vannforing kan forventet stigning ikke regnes ut. Da meldes
+  // bare mengden, uten a love noe om effekten.
+  if (liveFlow === null) {
+    title.textContent = '\u{1F326}\ufe0f Nedb\u00f8r i vente';
+    text.textContent = `Ca. ${mm} mm ventet ${naar}. Vannf\u00f8ringen er ikke tilgjengelig, `
+      + 'så effekten på elva er usikker.';
+    el.style.display = 'block';
+    return;
+  }
+
+  const forventet = tot * responsFaktor(liveFlow);
+
+  if (forventet >= MAALSTIGNING) {
+    title.textContent = '\u{1F327}\ufe0f Gode forhold i vente';
+    text.textContent = `Ca. ${mm} mm ventet ${naar}. Elva b\u00f8r stige merkbart `
+      + '\u2013 vent utslag 1\u20132 d\u00f8gn etter regnet.';
+  } else if (forventet >= 1) {
+    title.textContent = '\u{1F326}\ufe0f Noe stigning i vente';
+    text.textContent = `Ca. ${mm} mm ventet ${naar}. Stigningen blir trolig beskjeden, `
+      + 'men nok til \u00e5 sette liv i elva.';
+  } else if (liveFlow < SVAERT_LAV) {
+    // Den viktigste nye meldingen. Med elva under 3 m3/s tar uttorket grunn
+    // unna nesten alt: 29. juli 2018 ga 28 mm bare 0,20 m3/s stigning.
+    title.textContent = '\u{1F4A7} Regn i vente, men elva er sv\u00e6rt lav';
+    text.textContent = `Ca. ${mm} mm ventet ${naar}. Uttørket grunn tar unna det meste `
+      + '\u2013 stigningen blir trolig liten.';
+  } else {
+    title.textContent = '\u{1F326}\ufe0f Litt regn i vente';
+    text.textContent = `Ca. ${mm} mm ventet ${naar} \u2013 neppe nok til \u00e5 endre forholdene.`;
+  }
+  el.style.display = 'block';
 }
 
 async function fetchNedbor() {
@@ -1722,46 +1833,32 @@ async function fetchNedbor() {
     const now = Date.now();
     const H24 = now + 24*3600*1000;
     const H48 = now + 48*3600*1000;
+    const H72 = now + 72*3600*1000;
 
-    // Summer nedbør neste 24t og 24-48t. Foretrekk next_1_hours; bruk next_6_hours
-    // kun der timeoppløsning mangler (hopper da 6t frem for å unngå dobbelttelling).
-    let sum24 = 0, sum48 = 0;
+    // Summer nedbør i tre ikke-overlappende døgnbøtter. Foretrekk next_1_hours;
+    // bruk next_6_hours kun der timeoppløsning mangler (hopper da 6t frem for å
+    // unngå dobbelttelling). Timesverdiene er de mest konservative, og er samme
+    // kilde som kalibreringsloggen bruker.
+    let s24 = 0, s48 = 0, s72 = 0;
     let i = 0;
     while (i < ts.length) {
       const t = new Date(ts[i].time).getTime();
-      if (t >= H48) break;
+      if (t >= H72) break;
       const d = ts[i].data;
       let mm = null, span = 1;
       if (d.next_1_hours) { mm = d.next_1_hours.details.precipitation_amount; span = 1; }
       else if (d.next_6_hours) { mm = d.next_6_hours.details.precipitation_amount; span = 6; }
       if (mm !== null && t >= now - 3600*1000) {
-        if (t < H24) sum24 += mm; else sum48 += mm;
+        if (t < H24) s24 += mm; else if (t < H48) s48 += mm; else s72 += mm;
       }
       i += span;
     }
 
-    const el = document.getElementById('fiskemelding');
-    const title = document.getElementById('fmTitle');
-    const text = document.getElementById('fmText');
-    const r24 = Math.round(sum24);
-    const r48 = Math.round(sum48);
-
-    if (sum24 >= 10) {
-      title.textContent = '🌧️ Gode forhold i vente';
-      text.textContent = `Ca. ${r24} mm regn neste døgn. Lygna stiger gradvis – forvent økning over de neste 1–2 døgnene.`;
-    } else if (sum24 >= 3) {
-      title.textContent = '🌦️ Litt regn i vente';
-      text.textContent = `Ca. ${r24} mm neste døgn – mulig svak stigning utover de neste døgnene.`;
-    } else if (sum48 >= 10) {
-      title.textContent = '🌧️ Regn om 1–2 døgn';
-      text.textContent = `Ca. ${r48} mm ventet i morgen/overimorgen – stigning i vente 1–2 døgn etter regnet.`;
-    } else {
-      title.textContent = '☀️ Tørt i vente';
-      text.textContent = 'Lite nedbør neste 48 t – Lygne-magasinet gir stabilt, sakte synkende vann.';
-    }
-    el.style.display = 'block';
+    nedborSum = { s24: s24, s48: s48, s72: s72 };
+    oppdaterFiskemelding();
   } catch(e) { /* fiskemelding er valgfri – feiler stille */ }
 }
+
 
 function drawSparkline(values) {
   const svg = document.getElementById('sparkSvg');
@@ -1864,7 +1961,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.057</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.058</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
