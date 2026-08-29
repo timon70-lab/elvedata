@@ -481,8 +481,6 @@ let currentFlow = 25;
 // 2016-2025, nedbør fra MET Hynnekleiv SN38730 mot vannføring ved Flakksvann 20.3.0.
 // Etter >=10 mm nedbør er median stigning t+2 ca. +40 % naar elva staar over 10 m3/s,
 // men bare ca. +12 % under 10 m3/s - tørt nedbørfelt absorberer regnet.
-const FM_LOW_FLOW = 10;
-let liveFlow = null, fmSum24 = null, fmSum48 = null;
 let yearLo = 2016, yearHi = 2025;
 let monthLo = 6, monthHi = 9;
 let flyOnly = false;
@@ -1407,7 +1405,6 @@ async function fetchNVE() {
     // Current value
     const val = obs[obs.length - 1].value;
     liveFlow = val;
-    renderFiskemelding();
     document.getElementById('tovdalFlow').textContent = val.toFixed(1);
     document.getElementById('tovdalStatus').innerHTML = '<span style="color:#68d391">✅ Live NVE</span>';
     const bin = Math.floor(val/5)*5;
@@ -1426,6 +1423,13 @@ async function fetchNVE() {
       else                  { trendEl.textContent = '→'; trendEl.style.color = '#94a3b8'; lblEl.textContent = 'Stabil siste 3t'; }
     }
 
+    // Del vannforingen med fiskemeldingen, som trenger den for a regne ut
+    // forventet stigning. Dognendringen skiller fallende fra stillestaende vann.
+    liveFlow = val;
+    const val24h = obs.length >= 25 ? obs[obs.length - 25].value : null;
+    liveDiff24 = val24h !== null ? val - val24h : null;
+    oppdaterFiskemelding();
+
     // Sparkline
     drawSparkline(obs.map(o => o.value));
     return;
@@ -1435,35 +1439,95 @@ async function fetchNVE() {
   }
 }
 
-function renderFiskemelding() {
-  if (fmSum24 === null) return;   // venter paa nedbørdata
+// ---------------------------------------------------------------------------
+// Fiskemelding
+//
+// Meldingen velges paa FORVENTET STIGNING, ikke paa nedbormengde alene.
+// Grunnlaget er 95 nedbordogn 2016-2025: observert dognnedbor fra MET Frost
+// koblet mot dognvannforing fra NVE i samme 06-06-vindu.
+//
+// Funnet som gjorde om paa logikken: samme nedbormengde gir mange ganger
+// storre respons naar feltet allerede er vatt. Er elva svaert lav, tar
+// uttorket grunn unna nesten alt. En fast terskel paa 10 mm traff derfor
+// bare i noen av situasjonene.
+//
+// Faktorene er median stigning per mm, per niva av utgangsvannforing.
+// Nederste trinn hviler paa faa hendelser - retningen er sikker, tallet ikke.
+const RESPONS_GRENSER = [6.8, 11.2, 29.7, 55.8];   // m3/s
+const RESPONS_FAKTOR  = [0.04, 0.237, 0.237, 1.148, 1.293];   // m3/s per mm
+const SVAERT_LAV      = 11.2;   // under dette forklares uteblitt effekt med elva
+const MAALSTIGNING    = 3.0;   // fra fangstloggen: stigningen som gir tydelig utslag
+const MERKBAR_NEDBOR  = 10;    // mm - under dette handler meldingen om mengden
+
+let nedborSum = null;   // { s24, s48, s72 }
+let liveFlow  = null;   // m3/s naa
+let liveDiff24 = null;  // endring siste dogn
+
+function responsFaktor(vf) {
+  for (let i = 0; i < RESPONS_GRENSER.length; i++) {
+    if (vf < RESPONS_GRENSER[i]) return RESPONS_FAKTOR[i];
+  }
+  return RESPONS_FAKTOR[RESPONS_FAKTOR.length - 1];
+}
+
+// Naar faller mesteparten? Styrer kun ordlyden, ikke terskelen.
+function naarKommer(s) {
+  const m = Math.max(s.s24, s.s48, s.s72);
+  if (m === s.s24) return 'neste d\u00f8gn';
+  if (m === s.s48) return 'i morgen/overimorgen';
+  return 'om 2\u20133 d\u00f8gn';
+}
+
+function oppdaterFiskemelding() {
   const el = document.getElementById('fiskemelding');
   const title = document.getElementById('fmTitle');
   const text = document.getElementById('fmText');
-  const r24 = Math.round(fmSum24);
-  const r48 = Math.round(fmSum48);
-  const toert = liveFlow !== null && liveFlow < FM_LOW_FLOW;
-  const qTxt = liveFlow !== null ? liveFlow.toFixed(1) + ' m³/s' : 'dagens nivå';
+  if (!el || !nedborSum) return;
 
-  if (fmSum24 >= 10) {
-    if (toert) {
-      title.textContent = '🌧️ Regn i vente – men tørt utgangspunkt';
-      text.textContent = `Ca. ${r24} mm neste døgn, men med ${qTxt} i elva suger nedbørfeltet opp mesteparten. Historisk gir slike hendelser under ${FM_LOW_FLOW} m³/s bare rundt 12 % stigning – mot 40 % når elva står høyere.`;
+  const s = nedborSum;
+  const tot = s.s24 + s.s48 + s.s72;
+  const mm = Math.round(tot);
+  const naar = naarKommer(s);
+
+  if (tot < 3) {
+    // Fangstloggen viser at stillestaende vann er klart darligst, mens
+    // fallende vann - uttrekket etter en flom - fisker godt. De skilles.
+    if (liveDiff24 !== null && liveDiff24 < -0.5) {
+      title.textContent = '\u{1F30A} T\u00f8rt, men fallende vann';
+      text.textContent = 'Lite nedb\u00f8r neste 72 t. Elva trekker seg tilbake etter h\u00f8yere vann '
+        + '\u2013 ofte bedre fiske enn n\u00e5r vannf\u00f8ringen st\u00e5r stille.';
     } else {
-      title.textContent = '🌧️ Gode forhold i vente';
-      text.textContent = `Ca. ${r24} mm regn neste døgn gir trolig stigende vann. Elva svarer normalt samme døgn og dagen etter – historisk rundt 40 % stigning fra ${qTxt}.`;
+      title.textContent = '\u2600\ufe0f T\u00f8rt og stabilt';
+      text.textContent = 'Lite nedb\u00f8r neste 72 t. Vannf\u00f8ringen legger seg jevnt \u2013 stillest\u00e5ende vann gir erfaringsmessig lite fisk.';
     }
-  } else if (fmSum24 >= 3) {
-    title.textContent = '🌦️ Litt regn i vente';
-    text.textContent = toert
-      ? `Ca. ${r24} mm neste døgn – trolig lite merkbart så lenge elva ligger under ${FM_LOW_FLOW} m³/s.`
-      : `Ca. ${r24} mm neste døgn – mulig svak stigning i dag og i morgen.`;
-  } else if (fmSum48 >= 10) {
-    title.textContent = '🌧️ Regn om 1–2 døgn';
-    text.textContent = `Ca. ${r48} mm ventet i morgen/overimorgen – stigning i vente fra samme døgn regnet kommer.`;
+    el.style.display = 'block';
+    return;
+  }
+
+  if (liveFlow === null) {
+    title.textContent = '\u2614 Nedb\u00f8r i vente';
+    text.textContent = `Ca. ${mm} mm ventet ${naar}. Vannf\u00f8ringen er ikke tilgjengelig, `
+      + 'så effekten på elva er usikker.';
+    el.style.display = 'block';
+    return;
+  }
+
+  const forventet = tot * responsFaktor(liveFlow);
+
+  if (forventet >= MAALSTIGNING) {
+    title.textContent = '\u2614 Gode forhold i vente';
+    text.textContent = `Ca. ${mm} mm ventet ${naar}. Elva b\u00f8r stige merkbart.`;
+  } else if (forventet >= 1) {
+    title.textContent = '\u{1F4A6} Noe stigning i vente';
+    text.textContent = `Ca. ${mm} mm ventet ${naar}. Stigningen blir trolig beskjeden, `
+      + 'men nok til \u00e5 sette liv i elva.';
+  } else if (liveFlow < SVAERT_LAV && tot >= MERKBAR_NEDBOR) {
+    title.textContent = '\u{1F4A7} Regn i vente \u2013 elva er sv\u00e6rt lav';
+    text.textContent = `Ca. ${mm} mm ventet ${naar}. Uttørket grunn tar unna det meste `
+      + '\u2013 stigningen blir trolig liten.';
   } else {
-    title.textContent = '☀️ Tørt i vente';
-    text.textContent = 'Lite nedbør neste 48 t – forvent stabilt eller sakte synkende vann.';
+    title.textContent = '\u{1F302} Litt regn i vente';
+    text.textContent = `Ca. ${mm} mm ventet ${naar} \u2013 neppe nok til \u00e5 endre forholdene.`;
   }
   el.style.display = 'block';
 }
@@ -1477,29 +1541,32 @@ async function fetchNedbor() {
     const now = Date.now();
     const H24 = now + 24*3600*1000;
     const H48 = now + 48*3600*1000;
+    const H72 = now + 72*3600*1000;
 
-    // Summer nedbør neste 24t og 24-48t. Foretrekk next_1_hours; bruk next_6_hours
-    // kun der timeoppløsning mangler (hopper da 6t frem for å unngå dobbelttelling).
-    let sum24 = 0, sum48 = 0;
+    // Summer nedbør i tre ikke-overlappende døgnbøtter. Foretrekk next_1_hours;
+    // bruk next_6_hours kun der timeoppløsning mangler (hopper da 6t frem for å
+    // unngå dobbelttelling). Timesverdiene er de mest konservative, og er samme
+    // kilde som kalibreringen bygger på.
+    let s24 = 0, s48 = 0, s72 = 0;
     let i = 0;
     while (i < ts.length) {
       const t = new Date(ts[i].time).getTime();
-      if (t >= H48) break;
+      if (t >= H72) break;
       const d = ts[i].data;
       let mm = null, span = 1;
       if (d.next_1_hours) { mm = d.next_1_hours.details.precipitation_amount; span = 1; }
       else if (d.next_6_hours) { mm = d.next_6_hours.details.precipitation_amount; span = 6; }
       if (mm !== null && t >= now - 3600*1000) {
-        if (t < H24) sum24 += mm; else sum48 += mm;
+        if (t < H24) s24 += mm; else if (t < H48) s48 += mm; else s72 += mm;
       }
       i += span;
     }
 
-    fmSum24 = sum24;
-    fmSum48 = sum48;
-    renderFiskemelding();
+    nedborSum = { s24: s24, s48: s48, s72: s72 };
+    oppdaterFiskemelding();
   } catch(e) { /* fiskemelding er valgfri – feiler stille */ }
 }
+
 
 function drawSparkline(values) {
   const svg = document.getElementById('sparkSvg');
@@ -1598,7 +1665,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.005</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.006</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
