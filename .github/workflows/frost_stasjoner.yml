@@ -1,0 +1,32 @@
+name: Frost - finn nedbørstasjoner
+
+# Kjøres kun manuelt. Dette er et engangsoppslag som svarer på om det finnes
+# stasjoner nær nok, med høy nok oppløsning og lang nok historikk til at
+# kalibrering mot vannføringsseriene 2016-2025 lar seg gjøre.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  finn-stasjoner:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sjekk ut repo
+        uses: actions/checkout@v4
+
+      - name: Slå opp kandidatstasjoner i Frost
+        env:
+          # Secret heter MET_FROST_API i repoet; skriptet leser FROST_CLIENT_ID.
+          FROST_CLIENT_ID: ${{ secrets.MET_FROST_API }}
+        run: |
+          python3 scripts/frost_stasjoner.py
+
+      - name: Commit rapporten
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/logg/frost_stasjoner.md
+          git diff --staged --quiet || git commit -m "Frost: rapport over kandidatstasjoner"
+          git push
