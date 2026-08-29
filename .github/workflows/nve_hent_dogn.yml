@@ -15,6 +15,9 @@ jobs:
     steps:
       - name: Sjekk ut repo
         uses: actions/checkout@v4
+        with:
+          # Full historikk trengs for at rebase under push skal fungere.
+          fetch-depth: 0
 
       - name: Hent og aggreger vannføring
         env:
@@ -28,5 +31,21 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/logg/vannforing_dogn_*.csv
-          git diff --staged --quiet || git commit -m "NVE: døgnvannføring 2016-2025 (06-06 UTC)"
-          git push
+          if git diff --staged --quiet; then
+            echo "Ingenting å committe."
+            exit 0
+          fi
+          git commit -m "NVE: døgnvannføring 2016-2025 (06-06 UTC)"
+          # nve_cache.yml pusher hver time. Tar denne jobben lang nok tid,
+          # rekker den å flytte main, og pushen avvises. Hent inn og prøv igjen.
+          for forsok in 1 2 3 4 5; do
+            if git push; then
+              echo "Pushet på forsøk $forsok."
+              exit 0
+            fi
+            echo "Push avvist - henter endringer og prøver igjen ($forsok av 5)."
+            git pull --rebase --autostash origin main || exit 1
+            sleep 5
+          done
+          echo "Push feilet etter 5 forsøk." >&2
+          exit 1
