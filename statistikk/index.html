@@ -77,6 +77,28 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
 .foot { width: 100%; max-width: 480px; text-align: center; padding: 16px 0 24px; font-size: 0.65rem; color: #94a3b8; }
 .err { padding: 20px 14px; font-size: 0.72rem; color: #9b2c2c; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* --- sesongoppsummering (statisk innhold) --- */
+.so { width: 100%; max-width: 480px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 14px; }
+.so .panel-header { background: #fff5f5; border-bottom: 2px solid #fed7d7; }
+.so .panel-name { color: #9b2c2c; }
+.so-kpi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+.so-kpi div { background: #f7fafc; border-radius: 8px; padding: 7px 8px; }
+.so-kpi b { display: block; font-size: 0.92rem; font-weight: 800; color: #1a202c; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.so-kpi span { display: block; font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 700; margin-top: 2px; }
+.so-lede { font-size: 0.7rem; color: #2d3748; line-height: 1.6; margin-bottom: 12px; }
+.so-lede strong { color: #9b2c2c; }
+.so-cap { font-size: 0.58rem; color: #a0aec0; margin-top: 5px; line-height: 1.4; }
+.so details { border-top: 1px solid #edf2f7; }
+.so details > summary { list-style: none; cursor: pointer; padding: 9px 0 8px; font-size: 0.7rem; font-weight: 700; color: #276749; display: flex; align-items: center; gap: 6px; }
+.so details > summary::-webkit-details-marker { display: none; }
+.so details > summary::before { content: '+'; display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 4px; background: #f0fff4; color: #276749; font-weight: 800; font-size: 0.72rem; flex-shrink: 0; }
+.so details[open] > summary::before { content: '\2212'; }
+.so details > summary:focus-visible { outline: 2px solid #276749; outline-offset: 2px; }
+.so-txt { font-size: 0.66rem; color: #4a5568; line-height: 1.65; padding: 0 0 11px; }
+.so-txt p { margin-bottom: 7px; }
+.so-txt p:last-child { margin-bottom: 0; }
+.so-txt strong { color: #1a202c; }
 </style>
 </head>
 <body>
@@ -88,6 +110,117 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
   <div class="rname">Sørlandselvene</div>
   <div class="lede">Ti sesonger med registrert laksefangst, holdt opp mot daglig vannføring. <strong>Seks elver</strong> – Audna, Lygna, Mandalselva, Otra, Sygna og Tovdalselva.</div>
   <div class="banner-meta" id="meta">Laster data …</div>
+</div>
+
+<div class="so">
+  <div class="panel-header">
+    <span class="panel-name">Sesongoppsummering · Otra 2026</span>
+    <span class="panel-sub">Sesongen varte fra 15. juni til 17. august. Alle tidligere år er her klippet til nøyaktig samme 64-døgnsvindu, slik at tallene faktisk kan sammenlignes.</span>
+  </div>
+  <div class="panel-body">
+
+    <div class="so-kpi">
+      <div><b>548</b><span>laks</span></div>
+      <div><b>1&nbsp;352</b><span>kg totalt</span></div>
+      <div><b>8,6</b><span>laks per døgn</span></div>
+      <div><b>2,47</b><span>kg snittvekt</span></div>
+      <div><b>64,7</b><span>m³/s median</span></div>
+      <div><b>83</b><span>sjøørret</span></div>
+    </div>
+
+    <div class="so-lede">Otra fikk sin <strong>nest svakeste sesong</strong> i tiårsperioden. Det ble tatt 20 % mer laks enn i bunnåret 2025, men 32 % mindre enn snittet for 2016–2025 på 809 laks. Det ble registrert fisk alle 64 døgnene sesongen varte.</div>
+
+    <svg viewBox="0 0 340 150" role="img" aria-label="Antall registrert laks i Otra per sesong 2016 til 2026, målt i samme 64-døgnsvindu">
+    <line class="grid" x1="26" y1="128.0" x2="334" y2="128.0"/>
+    <text class="ax" x="22" y="131.0" text-anchor="end">0</text>
+    <line class="grid" x1="26" y1="98.5" x2="334" y2="98.5"/>
+    <text class="ax" x="22" y="101.5" text-anchor="end">350</text>
+    <line class="grid" x1="26" y1="69.0" x2="334" y2="69.0"/>
+    <text class="ax" x="22" y="72.0" text-anchor="end">700</text>
+    <line class="grid" x1="26" y1="39.5" x2="334" y2="39.5"/>
+    <text class="ax" x="22" y="42.5" text-anchor="end">1050</text>
+    <line class="grid" x1="26" y1="10.0" x2="334" y2="10.0"/>
+    <text class="ax" x="22" y="13.0" text-anchor="end">1400</text>
+    <rect x="31.3" y="66.0" width="17.4" height="62.0" rx="1.5" fill="#e2b3b3"/>
+    <text class="ax" x="40.0" y="141.0" text-anchor="middle">16</text>
+    <rect x="59.3" y="70.7" width="17.4" height="57.3" rx="1.5" fill="#e2b3b3"/>
+    <text class="ax" x="68.0" y="141.0" text-anchor="middle">17</text>
+    <rect x="87.3" y="75.8" width="17.4" height="52.2" rx="1.5" fill="#e2b3b3"/>
+    <text class="ax" x="96.0" y="141.0" text-anchor="middle">18</text>
+    <rect x="115.3" y="44.1" width="17.4" height="83.9" rx="1.5" fill="#e2b3b3"/>
+    <text class="ax" x="124.0" y="141.0" text-anchor="middle">19</text>
+    <rect x="143.3" y="18.8" width="17.4" height="109.2" rx="1.5" fill="#e2b3b3"/>
+    <text class="ax" x="152.0" y="141.0" text-anchor="middle">20</text>
+    <text class="axb" x="152.0" y="15.8" text-anchor="middle">1296</text>
+    <rect x="171.3" y="36.0" width="17.4" height="92.0" rx="1.5" fill="#e2b3b3"/>
+    <text class="ax" x="180.0" y="141.0" text-anchor="middle">21</text>
+    <rect x="199.3" y="59.2" width="17.4" height="68.8" rx="1.5" fill="#e2b3b3"/>
+    <text class="ax" x="208.0" y="141.0" text-anchor="middle">22</text>
+    <rect x="227.3" y="61.8" width="17.4" height="66.2" rx="1.5" fill="#e2b3b3"/>
+    <text class="ax" x="236.0" y="141.0" text-anchor="middle">23</text>
+    <rect x="255.3" y="76.1" width="17.4" height="51.9" rx="1.5" fill="#e2b3b3"/>
+    <text class="ax" x="264.0" y="141.0" text-anchor="middle">24</text>
+    <rect x="283.3" y="89.6" width="17.4" height="38.4" rx="1.5" fill="#e2b3b3"/>
+    <text class="ax" x="292.0" y="141.0" text-anchor="middle">25</text>
+    <text class="axb" x="292.0" y="86.6" text-anchor="middle">456</text>
+    <rect x="311.3" y="81.8" width="17.4" height="46.2" rx="1.5" fill="#9b2c2c"/>
+    <text class="axb" x="320.0" y="141.0" text-anchor="middle">26</text>
+    <text class="axb" x="320.0" y="78.8" text-anchor="middle">548</text>
+    </svg>
+    <div class="so-cap">Registrert laks per sesong, alle år målt 15.06–17.08. Toppåret 2020 ga 1 296 laks.</div>
+
+    <table class="tbl" style="margin-top:14px">
+      <tr><th>&nbsp;</th><th>2026</th><th>2025</th><th>Snitt 16–25</th></tr>
+      <tr><td>Laks</td><td>548</td><td>456</td><td>809</td></tr>
+      <tr><td>Samlet vekt</td><td>1 352 kg</td><td>1 103 kg</td><td>2 136 kg</td></tr>
+      <tr><td>Laks per døgn</td><td>8,6</td><td>7,1</td><td>12,6</td></tr>
+      <tr><td>Snittvekt</td><td>2,47 kg</td><td>2,42 kg</td><td>2,61 kg</td></tr>
+      <tr><td>Gjenutsatt</td><td>7,3 %</td><td>14,7 %</td><td>5,7 %</td></tr>
+      <tr><td>Sjøørret</td><td>83</td><td>100</td><td>80</td></tr>
+      <tr><td>Median vannføring</td><td>64,7 m³/s</td><td>65,4 m³/s</td><td>96,4 m³/s</td></tr>
+    </table>
+
+    <details style="margin-top:12px">
+      <summary>Vannføringen holdt seg lav hele veien</summary>
+      <div class="so-txt">
+        <p>Medianen for sesongen lå på 64,7 m³/s mot 96,4 historisk. <strong>61 % av døgnene lå under 70 m³/s</strong> – historisk er andelen 37,5 %. Den eneste skikkelige pulsen kom i åpningsuka, med 172 m³/s den 16. juni. Deretter sank elva jevnt, og bunnen kom 4. august med 54,3 m³/s.</p>
+        <p>Det interessante er at fisket ikke var dårligere enn normalt <strong>gitt</strong> vannføringen. På døgn mellom 50 og 75 m³/s ga 2026 ni laks per døgn, mot 9,5 historisk på samme vannføring – praktisk talt likt. Forskjellen ligger i at døgnene som historisk leverer 15–23 laks aldri kom: over 125 m³/s hadde 2026 fire døgn, mot godt over tjue i et normalår. Sesongen tapte ikke på dårlige dager. Den tapte på fraværet av gode.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Oppgangen fra 2025 er flere fiskere, ikke bedre fiske</summary>
+      <div class="so-txt">
+        <p>Fangstloggen inneholder 200 ulike fiskere i 2026, mot 173 i 2025 – en økning på 16 %. Fangst per fisker lå på 3,16, mot 3,23 året før. Med andre ord forklares nesten hele oppgangen på 20 % av at det var flere folk i elva, ikke av at hver enkelt fikk mer fisk.</p>
+        <p>Dette er en god påminnelse om hvorfor rå fangsttall er et usikkert mål på elvas tilstand. Tallet teller bare fiskere som faktisk meldte inn fangst, så det underestimerer innsatsen – men retningen er tydelig nok.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Fisken var småfallen</summary>
+      <div class="so-txt">
+        <p><strong>81,6 % av laksen veide under 3 kg.</strong> Klassen 2–3 kg alene sto for 33,8 % av fangsten, mot 18 % historisk. Det ble registrert 33 laks over 5 kg, mot et årssnitt på 77.</p>
+        <p>Største fisk var på 11,7 kg, tatt på meitemark i Sone 3A den 12. juli – og gjenutsatt.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Hvor fisken ble tatt</summary>
+      <div class="so-txt">
+        <p>Sone 4A (154 laks), Sone 5A Blå (128) og Sone 5B Rød (114) sto til sammen for 72 % av sesongfangsten. Sone 3A hentet seg noe inn fra fjoråret med 92 laks mot 65.</p>
+        <p>Fordelingen mellom soner sier like mye om hvor folk fisket som om hvor fisken sto, og bør leses deretter.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Om tallene</summary>
+      <div class="so-txt">
+        <p>Otra er en regulert elv. Vannføringen følger manøvreringen, ikke nedbøren, så oppsummeringen beskriver hva vannføringen gjorde med fisket – ikke hvorfor vannføringen ble som den ble.</p>
+        <p>Tallene bygger på fangstloggen slik den sto 18. august 2026, og på døgnverdier fra NVE-stasjonen Heisel. Sammenligningsårene er klippet til samme 64-døgnsvindu som 2026-sesongen, og avviker derfor fra sesongtotalene i figurene lenger nede på siden.</p>
+      </div>
+    </details>
+
+  </div>
 </div>
 
 <div class="grid-wrap">
@@ -199,7 +332,7 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
 </div>
 
 <div class="foot">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.007</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.008</span><br>
   <span style="font-size:0.6rem;">Data: Inatur.no (fangst) · NVE HydAPI (vannføring)</span>
 </div>
 
