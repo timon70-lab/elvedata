@@ -2,8 +2,43 @@
  {
   "dato": "2026-08-30",
   "sone": "Sone 3",
+  "vekt": 1.8,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-30",
+  "sone": "Sone 3",
+  "vekt": 2.8,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-30",
+  "sone": "Sone 3",
   "vekt": 2.5,
   "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-29",
+  "sone": "Sone 4",
+  "vekt": 2.1,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-29",
+  "sone": "Sone 3",
+  "vekt": 1.1,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-29",
+  "sone": "Sone 3",
+  "vekt": 1.4,
+  "agn": "Meitemark",
   "art": "Laks"
  },
  {
