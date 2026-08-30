@@ -36,6 +36,13 @@
  },
  {
   "dato": "2026-08-28",
+  "sone": "Steinshylen",
+  "vekt": 2,
+  "agn": "Meitemark",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-28",
   "sone": "Sone 3",
   "vekt": 2.5,
   "agn": "Flue",
