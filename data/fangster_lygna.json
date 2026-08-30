@@ -1,8 +1,22 @@
 [
  {
   "dato": "2026-08-30",
+  "sone": "Sone 9 Kvelland",
+  "vekt": 2,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-30",
   "sone": "Sone 6 Bergsaker",
   "vekt": 2.1,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-29",
+  "sone": "Sone 9 Kvelland",
+  "vekt": 1.6,
   "agn": "Sluk",
   "art": "Laks"
  },

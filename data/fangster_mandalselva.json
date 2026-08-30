@@ -57,6 +57,13 @@
  },
  {
   "dato": "2026-08-28",
+  "sone": "Sone 3",
+  "vekt": 2.5,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-28",
   "sone": "Nodehylen",
   "vekt": 2.5,
   "agn": "Flue",
@@ -95,13 +102,6 @@
   "sone": "Sone 3",
   "vekt": 1.6,
   "agn": "Meitemark",
-  "art": "Laks"
- },
- {
-  "dato": "2026-08-28",
-  "sone": "Sone 3",
-  "vekt": 2.5,
-  "agn": "Flue",
   "art": "Laks"
  },
  {
