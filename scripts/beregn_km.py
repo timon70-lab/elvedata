@@ -87,17 +87,27 @@ def les_senterlinje(elv):
 
 def les_zone_coords(elv):
     """Hentes fra dashbordet slik at kilden alltid er den samme som kartet
-    bruker. Feiler den, faller vi tilbake til projeksjon mot hele linja."""
+    bruker. Feiler den, faller vi tilbake til projeksjon mot hele linja.
+
+    Taaler baade ettlinjes JSON (Otra) og flerlinjes JS-objektliteral med
+    enkle fnutter og ufnuttede noekler (Audna)."""
     sti = os.path.join(ROOT, elv, 'index.html')
     if not os.path.exists(sti):
         return {}
     with open(sti, encoding='utf-8') as fh:
         html = fh.read()
-    m = re.search(r'^const ZONE_COORDS = (\{.*?\});$', html, re.M)
-    if not m:
+    start = html.find('const ZONE_COORDS = {')
+    if start < 0:
         return {}
+    slutt = html.find('};', start)
+    if slutt < 0:
+        return {}
+    blob = html[start + len('const ZONE_COORDS = '):slutt + 1]
+    blob = blob.replace("'", '"')
+    blob = re.sub(r'(\{|,)\s*([A-Za-z_][A-Za-z0-9_]*)\s*:', r'\1"\2":', blob)
+    blob = re.sub(r',(\s*[}\]])', r'\1', blob)      # etterslepende komma
     try:
-        return json.loads(m.group(1))
+        return json.loads(blob)
     except json.JSONDecodeError:
         return {}
 
