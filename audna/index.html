@@ -1313,13 +1313,26 @@ function toggleFlowFilter() {
   update();               // oppdaterer markørsynlighet på kartet
   _rebuildZoneMedia();
 }
+function mediaSort(a, b) {
+  // Sorterer langs elva: km = avstand fra munningen langs senterlinja
+  // (data/senterlinje_audna.geojson, beregnet av scripts/beregn_km.py).
+  // Faller tilbake til breddegrad for medier uten km, slik at registre
+  // som ennå ikke er kjørt gjennom skriptet oppfører seg som før.
+  const ak = (typeof a.km === 'number') ? a.km : null;
+  const bk = (typeof b.km === 'number') ? b.km : null;
+  if (ak !== null && bk !== null) return ak - bk || a.lat - b.lat;
+  if (ak !== null) return -1;
+  if (bk !== null) return 1;
+  return a.lat - b.lat;
+}
+
 function _rebuildZoneMedia() {
   _syncFlowChip();
   if (!document.getElementById('photoPanel').classList.contains('visible')) return;
   const cur = _activeZoneMedia[_activeMediaIdx];
   _activeZoneMedia = [...PHOTOS, ...VIDEOS]
     .filter(m => m.zone === _activeMediaZone && mediaPassesFilter(m))
-    .sort((a, b) => a.lat - b.lat);
+    .sort(mediaSort);
   const pos = cur ? _activeZoneMedia.indexOf(cur) : -1;
   _activeMediaIdx = pos >= 0 ? pos : 0;
   _renderMedia();
@@ -1330,7 +1343,7 @@ function openZoneMedia(zone, target) {
   _syncFlowChip();
   _activeZoneMedia = [...PHOTOS, ...VIDEOS]
     .filter(m => m.zone === zone && mediaPassesFilter(m))
-    .sort((a, b) => a.lat - b.lat);
+    .sort(mediaSort);
   const posInGroup = target ? _activeZoneMedia.indexOf(target) : 0;
   _activeMediaIdx = posInGroup >= 0 ? posInGroup : 0;
   _renderMedia();
@@ -1871,7 +1884,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.156</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.157</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
