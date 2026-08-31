@@ -1,26 +1,28 @@
 [
-  {
-    "id": "V-001",
-    "zone": "Sone 5A",
-    "lat": 58.129927,
-    "lon": 7.363705,
-    "youtubeId": "8Ajqy4mwy2c",
-    "caption": "Sone 5A · Fangst",
-    "dateISO": "2026-06-04",
-    "timeUTC": null,
-    "vannforing": 26,
-    "adkomstLat": 58.1294724049944,
-    "adkomstLon": 7.3569436186717
-  },
-  {
-    "id": "V-002",
-    "zone": "Sone 5A",
-    "lat": 58.130092,
-    "lon": 7.364833,
-    "youtubeId": "QYN9jrdqSQA",
-    "caption": "Sone 5A · Video",
-    "dateISO": "2026-08-15",
-    "timeUTC": "17:17",
-    "vannforing": 0
-  }
+ {
+  "id": "V-001",
+  "zone": "Sone 5A",
+  "lat": 58.129927,
+  "lon": 7.363705,
+  "youtubeId": "8Ajqy4mwy2c",
+  "caption": "Sone 5A · Fangst",
+  "dateISO": "2026-06-04",
+  "timeUTC": null,
+  "vannforing": 26,
+  "adkomstLat": 58.1294724049944,
+  "adkomstLon": 7.3569436186717,
+  "km": 12.48
+ },
+ {
+  "id": "V-002",
+  "zone": "Sone 5A",
+  "lat": 58.130092,
+  "lon": 7.364833,
+  "youtubeId": "QYN9jrdqSQA",
+  "caption": "Sone 5A · Video",
+  "dateISO": "2026-08-15",
+  "timeUTC": "17:17",
+  "vannforing": 0,
+  "km": 12.55
+ }
 ]

@@ -11,7 +11,8 @@
   "lon": 7.363481,
   "vannforing": 26,
   "adkomstLat": 58.1294724049944,
-  "adkomstLon": 7.3569436186717
+  "adkomstLon": 7.3569436186717,
+  "km": 12.47
  },
  {
   "id": "A-002",
@@ -23,7 +24,8 @@
   "locId": "Sone8",
   "lat": 58.270874,
   "lon": 7.351215,
-  "vannforing": 11
+  "vannforing": 11,
+  "km": 31.78
  },
  {
   "id": "A-003",
@@ -35,7 +37,8 @@
   "locId": "Sone8",
   "lat": 58.269466,
   "lon": 7.35207,
-  "vannforing": 11
+  "vannforing": 11,
+  "km": 31.62
  },
  {
   "id": "A-004",
@@ -49,7 +52,8 @@
   "lon": 7.351889,
   "vannforing": 11,
   "adkomstLat": 58.265334050459714,
-  "adkomstLon": 7.3515862031594965
+  "adkomstLon": 7.3515862031594965,
+  "km": 31.25
  },
  {
   "id": "A-005",
@@ -61,7 +65,8 @@
   "locId": "Sone8",
   "lat": 58.265235,
   "lon": 7.352226,
-  "vannforing": 11
+  "vannforing": 11,
+  "km": 31.09
  },
  {
   "id": "A-006",
@@ -75,7 +80,8 @@
   "lon": 7.345708,
   "vannforing": 11,
   "autoSone": false,
-  "soneAvstandM": 28
+  "soneAvstandM": 28,
+  "km": 28.32
  },
  {
   "id": "A-007",
@@ -89,7 +95,8 @@
   "lon": 7.345722,
   "vannforing": 11,
   "autoSone": false,
-  "soneAvstandM": 27
+  "soneAvstandM": 27,
+  "km": 28.32
  },
  {
   "id": "A-008",
@@ -103,7 +110,8 @@
   "lon": 7.345722,
   "vannforing": 11,
   "autoSone": false,
-  "soneAvstandM": 27
+  "soneAvstandM": 27,
+  "km": 28.32
  },
  {
   "id": "A-009",
@@ -115,7 +123,8 @@
   "locId": "Sone8",
   "lat": 58.258547,
   "lon": 7.345471,
-  "vannforing": 11
+  "vannforing": 11,
+  "km": 30.2
  },
  {
   "id": "A-010",
@@ -127,7 +136,8 @@
   "locId": "Sone8",
   "lat": 58.258573,
   "lon": 7.345426,
-  "vannforing": 11
+  "vannforing": 11,
+  "km": 30.21
  },
  {
   "id": "A-011",
@@ -139,7 +149,8 @@
   "locId": "Sone8",
   "lat": 58.258573,
   "lon": 7.345426,
-  "vannforing": 11
+  "vannforing": 11,
+  "km": 30.21
  },
  {
   "id": "A-012",
@@ -151,7 +162,8 @@
   "locId": "Sone8",
   "lat": 58.259488,
   "lon": 7.347211,
-  "vannforing": 11
+  "vannforing": 11,
+  "km": 30.36
  },
  {
   "id": "A-013",
@@ -165,7 +177,8 @@
   "lon": 7.34134,
   "vannforing": 20,
   "adkomstLat": 58.11890679091705,
-  "adkomstLon": 7.338873892278187
+  "adkomstLon": 7.338873892278187,
+  "km": 9.62
  },
  {
   "id": "A-014",
@@ -179,7 +192,8 @@
   "lon": 7.34134,
   "vannforing": 20,
   "adkomstLat": 58.11890679091705,
-  "adkomstLon": 7.338873892278187
+  "adkomstLon": 7.338873892278187,
+  "km": 9.62
  },
  {
   "id": "A-015",
@@ -191,7 +205,8 @@
   "locId": "Sone 5A",
   "lat": 58.127703,
   "lon": 7.356072,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 11.89
  },
  {
   "id": "A-016",
@@ -203,7 +218,8 @@
   "locId": "Sone 5B",
   "lat": 58.206869,
   "lon": 7.338345,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 23.9
  },
  {
   "id": "A-017",
@@ -215,7 +231,8 @@
   "locId": "Sone 5B",
   "lat": 58.207125,
   "lon": 7.338056,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 23.94
  },
  {
   "id": "A-018",
@@ -227,7 +244,8 @@
   "locId": "Sone 5B",
   "lat": 58.207125,
   "lon": 7.338056,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 23.94
  },
  {
   "id": "A-019",
@@ -239,7 +257,8 @@
   "locId": "Sone6",
   "lat": 58.219946,
   "lon": 7.340285,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 25.47
  },
  {
   "id": "A-020",
@@ -251,7 +270,8 @@
   "locId": "Sone6",
   "lat": 58.219946,
   "lon": 7.340285,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 25.47
  },
  {
   "id": "A-021",
@@ -263,7 +283,8 @@
   "locId": "Sone8",
   "lat": 58.268416,
   "lon": 7.353303,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 31.48
  },
  {
   "id": "A-022",
@@ -275,7 +296,8 @@
   "locId": "Sone8",
   "lat": 58.268416,
   "lon": 7.353303,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 31.48
  },
  {
   "id": "A-024",
@@ -287,7 +309,8 @@
   "locId": "Sone8",
   "lat": 58.24564,
   "lon": 7.34776,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 28.73
  },
  {
   "id": "A-025",
@@ -299,7 +322,8 @@
   "locId": "Sone8",
   "lat": 58.24563,
   "lon": 7.347742,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 28.73
  },
  {
   "id": "A-026",
@@ -311,7 +335,8 @@
   "locId": "Sone8",
   "lat": 58.246052,
   "lon": 7.347586,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 28.78
  },
  {
   "id": "A-027",
@@ -323,7 +348,8 @@
   "locId": "Sone8",
   "lat": 58.246052,
   "lon": 7.347586,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 28.78
  },
  {
   "id": "A-028",
@@ -335,7 +361,8 @@
   "locId": "Sone8",
   "lat": 58.246052,
   "lon": 7.347586,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 28.78
  },
  {
   "id": "A-029",
@@ -347,7 +374,8 @@
   "locId": "Sone8",
   "lat": 58.24681,
   "lon": 7.347736,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 28.86
  },
  {
   "id": "A-030",
@@ -359,7 +387,8 @@
   "locId": "Sone8",
   "lat": 58.242144,
   "lon": 7.345723,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 28.32
  },
  {
   "id": "A-031",
@@ -371,7 +400,8 @@
   "locId": "Sone8",
   "lat": 58.242146,
   "lon": 7.345723,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 28.32
  },
  {
   "id": "A-032",
@@ -383,7 +413,8 @@
   "locId": "Sone8",
   "lat": 58.242144,
   "lon": 7.345723,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 28.32
  },
  {
   "id": "A-033",
@@ -395,7 +426,8 @@
   "locId": "Sone7",
   "lat": 58.238806,
   "lon": 7.344557,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 27.93
  },
  {
   "id": "A-034",
@@ -407,7 +439,8 @@
   "locId": "Sone7",
   "lat": 58.238804,
   "lon": 7.344561,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 27.93
  },
  {
   "id": "A-035",
@@ -419,7 +452,8 @@
   "locId": "Sone7",
   "lat": 58.238804,
   "lon": 7.344561,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 27.93
  },
  {
   "id": "A-036",
@@ -431,7 +465,8 @@
   "locId": "Sone7",
   "lat": 58.237151,
   "lon": 7.346016,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 27.74
  },
  {
   "id": "A-037",
@@ -443,7 +478,8 @@
   "locId": "Sone6",
   "lat": 58.213375,
   "lon": 7.336295,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 24.64
  },
  {
   "id": "A-038",
@@ -455,7 +491,8 @@
   "locId": "Sone6",
   "lat": 58.213381,
   "lon": 7.336307,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 24.64
  },
  {
   "id": "A-039",
@@ -467,7 +504,8 @@
   "locId": "Sone 5B",
   "lat": 58.194346,
   "lon": 7.341593,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 22.23
  },
  {
   "id": "A-040",
@@ -479,7 +517,8 @@
   "locId": "Sone 5B",
   "lat": 58.194346,
   "lon": 7.341593,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 22.23
  },
  {
   "id": "A-041",
@@ -491,7 +530,8 @@
   "locId": "Sone 5B",
   "lat": 58.194346,
   "lon": 7.341593,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 22.23
  },
  {
   "id": "A-042",
@@ -503,7 +543,8 @@
   "locId": "Sone 5B",
   "lat": 58.191348,
   "lon": 7.34247,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 21.9
  },
  {
   "id": "A-043",
@@ -515,7 +556,8 @@
   "locId": "Sone 5B",
   "lat": 58.191348,
   "lon": 7.34247,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 21.9
  },
  {
   "id": "A-044",
@@ -527,7 +569,8 @@
   "locId": "Sone 5B",
   "lat": 58.191348,
   "lon": 7.34247,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 21.9
  },
  {
   "id": "A-045",
@@ -539,7 +582,8 @@
   "locId": "Sone 5A",
   "lat": 58.130965,
   "lon": 7.365929,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 12.67
  },
  {
   "id": "A-046",
@@ -551,7 +595,8 @@
   "locId": "Sone 5A",
   "lat": 58.130969,
   "lon": 7.365953,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 12.67
  },
  {
   "id": "A-047",
@@ -563,7 +608,8 @@
   "locId": "Sone 5A",
   "lat": 58.12973,
   "lon": 7.363353,
-  "vannforing": 20
+  "vannforing": 20,
+  "km": 12.46
  },
  {
   "id": "A-048",
@@ -577,7 +623,8 @@
   "lon": 7.340913,
   "vannforing": 16,
   "adkomstLat": 58.11890679091705,
-  "adkomstLon": 7.338873892278187
+  "adkomstLon": 7.338873892278187,
+  "km": 9.63
  },
  {
   "id": "A-049",
@@ -591,7 +638,8 @@
   "lon": 7.34146,
   "vannforing": 16,
   "adkomstLat": 58.11890679091705,
-  "adkomstLon": 7.338873892278187
+  "adkomstLon": 7.338873892278187,
+  "km": 9.63
  },
  {
   "id": "A-050",
@@ -603,7 +651,8 @@
   "locId": "Sone 5A",
   "lat": 58.126726,
   "lon": 7.339869,
-  "vannforing": 17
+  "vannforing": 17,
+  "km": 10.73
  },
  {
   "id": "A-051",
@@ -615,7 +664,8 @@
   "locId": "Sone 5A",
   "lat": 58.130016,
   "lon": 7.359765,
-  "vannforing": 17
+  "vannforing": 17,
+  "km": 12.23
  },
  {
   "id": "A-052",
@@ -627,7 +677,8 @@
   "locId": "Sone 5A",
   "lat": 58.130093,
   "lon": 7.359962,
-  "vannforing": 17
+  "vannforing": 17,
+  "km": 12.25
  },
  {
   "id": "A-057",
@@ -641,7 +692,8 @@
   "locId": "Sone 5A",
   "vannforing": 27.7,
   "autoSone": true,
-  "soneAvstandM": 1097
+  "soneAvstandM": 1097,
+  "km": 12.69
  },
  {
   "id": "A-058",
@@ -657,7 +709,8 @@
   "autoSone": true,
   "soneAvstandM": 1014,
   "adkomstLat": 58.1294724049944,
-  "adkomstLon": 7.3569436186717
+  "adkomstLon": 7.3569436186717,
+  "km": 12.44
  },
  {
   "id": "A-059",
@@ -672,7 +725,8 @@
   "vannforing": 26,
   "autoSone": false,
   "adkomstLat": 58.1294724049944,
-  "adkomstLon": 7.3569436186717
+  "adkomstLon": 7.3569436186717,
+  "km": 12.47
  },
  {
   "id": "A-060",
@@ -686,7 +740,8 @@
   "locId": "Sone 5A",
   "vannforing": 19.5,
   "autoSone": true,
-  "soneAvstandM": 773
+  "soneAvstandM": 773,
+  "km": 11.89
  },
  {
   "id": "A-061",
@@ -700,7 +755,8 @@
   "locId": "Sone 5B",
   "vannforing": 19.4,
   "autoSone": true,
-  "soneAvstandM": 12
+  "soneAvstandM": 12,
+  "km": 23.9
  },
  {
   "id": "A-062",
@@ -714,7 +770,8 @@
   "locId": "Sone 5B",
   "vannforing": 19.4,
   "autoSone": true,
-  "soneAvstandM": 21
+  "soneAvstandM": 21,
+  "km": 23.94
  },
  {
   "id": "A-063",
@@ -728,7 +785,8 @@
   "locId": "Sone6",
   "vannforing": 19.4,
   "autoSone": true,
-  "soneAvstandM": 257
+  "soneAvstandM": 257,
+  "km": 25.47
  },
  {
   "id": "A-064",
@@ -742,7 +800,8 @@
   "locId": "Sone8",
   "vannforing": 19.4,
   "autoSone": true,
-  "soneAvstandM": 39
+  "soneAvstandM": 39,
+  "km": 31.48
  },
  {
   "id": "A-065",
@@ -756,7 +815,8 @@
   "locId": "Sone7",
   "vannforing": 19.3,
   "autoSone": true,
-  "soneAvstandM": 175
+  "soneAvstandM": 175,
+  "km": 27.74
  },
  {
   "id": "A-066",
@@ -770,7 +830,8 @@
   "locId": "Sone6",
   "vannforing": 19.3,
   "autoSone": true,
-  "soneAvstandM": 0
+  "soneAvstandM": 0,
+  "km": 24.64
  },
  {
   "id": "A-067",
@@ -784,7 +845,8 @@
   "locId": "Sone 5B",
   "vannforing": 19.3,
   "autoSone": true,
-  "soneAvstandM": 176
+  "soneAvstandM": 176,
+  "km": 22.25
  },
  {
   "id": "A-068",
@@ -798,7 +860,8 @@
   "locId": "Sone 5A",
   "vannforing": 19.3,
   "autoSone": true,
-  "soneAvstandM": 1104
+  "soneAvstandM": 1104,
+  "km": 12.67
  },
  {
   "id": "A-069",
@@ -812,7 +875,8 @@
   "locId": "Sone 5A",
   "vannforing": 19.3,
   "autoSone": true,
-  "soneAvstandM": 1032
+  "soneAvstandM": 1032,
+  "km": 12.46
  },
  {
   "id": "A-070",
@@ -826,7 +890,8 @@
   "locId": "Sone8",
   "vannforing": 10.8,
   "autoSone": true,
-  "soneAvstandM": 48
+  "soneAvstandM": 48,
+  "km": 31.62
  },
  {
   "id": "A-071",
@@ -840,7 +905,8 @@
   "locId": "Sone8",
   "vannforing": 10.8,
   "autoSone": true,
-  "soneAvstandM": 48
+  "soneAvstandM": 48,
+  "km": 31.62
  },
  {
   "id": "A-072",
@@ -854,7 +920,8 @@
   "locId": "Sone8",
   "vannforing": 10.8,
   "autoSone": true,
-  "soneAvstandM": 116
+  "soneAvstandM": 116,
+  "km": 31.78
  },
  {
   "id": "A-073",
@@ -870,7 +937,8 @@
   "autoSone": false,
   "soneAvstandM": 383,
   "adkomstLat": 58.11890679091705,
-  "adkomstLon": 7.338873892278187
+  "adkomstLon": 7.338873892278187,
+  "km": 9.63
  },
  {
   "id": "A-074",
@@ -886,7 +954,8 @@
   "autoSone": false,
   "soneAvstandM": 414,
   "adkomstLat": 58.11890679091705,
-  "adkomstLon": 7.338873892278187
+  "adkomstLon": 7.338873892278187,
+  "km": 9.63
  },
  {
   "id": "A-075",
@@ -900,7 +969,8 @@
   "locId": "Sone 5A",
   "vannforing": 16.9,
   "autoSone": true,
-  "soneAvstandM": 5
+  "soneAvstandM": 5,
+  "km": 10.73
  },
  {
   "id": "A-076",
@@ -914,7 +984,8 @@
   "locId": "Sone 5A",
   "vannforing": 16.9,
   "autoSone": true,
-  "soneAvstandM": 5
+  "soneAvstandM": 5,
+  "km": 10.73
  },
  {
   "id": "A-077",
@@ -928,7 +999,8 @@
   "locId": "Sone 5A",
   "vannforing": 16.8,
   "autoSone": true,
-  "soneAvstandM": 848
+  "soneAvstandM": 848,
+  "km": 12.25
  },
  {
   "id": "A-078",
@@ -942,7 +1014,8 @@
   "locId": "Sone 5A",
   "vannforing": 16.8,
   "autoSone": true,
-  "soneAvstandM": 838
+  "soneAvstandM": 838,
+  "km": 12.23
  },
  {
   "id": "A-079",
@@ -956,7 +1029,8 @@
   "locId": "Sone 5A",
   "vannforing": 16.8,
   "autoSone": true,
-  "soneAvstandM": 844
+  "soneAvstandM": 844,
+  "km": 12.25
  },
  {
   "id": "A-080",
@@ -970,7 +1044,8 @@
   "locId": "Sone 5A",
   "vannforing": 8,
   "autoSone": false,
-  "soneAvstandM": 36
+  "soneAvstandM": 36,
+  "km": 10.71
  },
  {
   "id": "A-081",
@@ -984,7 +1059,8 @@
   "locId": "Sone 5A",
   "vannforing": 8,
   "autoSone": false,
-  "soneAvstandM": 36
+  "soneAvstandM": 36,
+  "km": 10.71
  },
  {
   "id": "A-082",
@@ -998,7 +1074,8 @@
   "locId": "Sone4",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 20
+  "soneAvstandM": 20,
+  "km": 10.61
  },
  {
   "id": "A-083",
@@ -1012,7 +1089,8 @@
   "locId": "Sone4",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 20
+  "soneAvstandM": 20,
+  "km": 10.61
  },
  {
   "id": "A-084",
@@ -1026,7 +1104,8 @@
   "locId": "Sone4",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 20
+  "soneAvstandM": 20,
+  "km": 10.61
  },
  {
   "id": "A-085",
@@ -1040,7 +1119,8 @@
   "locId": "Sone4",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 17
+  "soneAvstandM": 17,
+  "km": 10.6
  },
  {
   "id": "A-086",
@@ -1054,7 +1134,8 @@
   "locId": "Sone4",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 17
+  "soneAvstandM": 17,
+  "km": 10.6
  },
  {
   "id": "A-087",
@@ -1068,7 +1149,8 @@
   "locId": "Sone4",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 17
+  "soneAvstandM": 17,
+  "km": 10.6
  },
  {
   "id": "A-088",
@@ -1082,7 +1164,8 @@
   "locId": "Sone4",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 16
+  "soneAvstandM": 16,
+  "km": 10.58
  },
  {
   "id": "A-089",
@@ -1096,7 +1179,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 57
+  "soneAvstandM": 57,
+  "km": 10.68
  },
  {
   "id": "A-090",
@@ -1110,7 +1194,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 30
+  "soneAvstandM": 30,
+  "km": 10.72
  },
  {
   "id": "A-091",
@@ -1124,7 +1209,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 30
+  "soneAvstandM": 30,
+  "km": 10.72
  },
  {
   "id": "A-092",
@@ -1138,7 +1224,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 16
+  "soneAvstandM": 16,
+  "km": 10.75
  },
  {
   "id": "A-093",
@@ -1152,7 +1239,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 54
+  "soneAvstandM": 54,
+  "km": 10.69
  },
  {
   "id": "A-094",
@@ -1166,7 +1254,8 @@
   "locId": "Sone4",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 42
+  "soneAvstandM": 42,
+  "km": 10.65
  },
  {
   "id": "A-095",
@@ -1180,7 +1269,8 @@
   "locId": "Sone4",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 42
+  "soneAvstandM": 42,
+  "km": 10.65
  },
  {
   "id": "A-096",
@@ -1194,7 +1284,8 @@
   "locId": "Sone4",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 18
+  "soneAvstandM": 18,
+  "km": 10.63
  },
  {
   "id": "A-097",
@@ -1208,7 +1299,8 @@
   "locId": "Sone4",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 18
+  "soneAvstandM": 18,
+  "km": 10.63
  },
  {
   "id": "A-098",
@@ -1222,7 +1314,8 @@
   "locId": "Sone4",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 18
+  "soneAvstandM": 18,
+  "km": 10.63
  },
  {
   "id": "A-099",
@@ -1236,7 +1329,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 22
+  "soneAvstandM": 22,
+  "km": 10.76
  },
  {
   "id": "A-100",
@@ -1250,7 +1344,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 784
+  "soneAvstandM": 784,
+  "km": 12.16
  },
  {
   "id": "A-101",
@@ -1264,7 +1359,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 805
+  "soneAvstandM": 805,
+  "km": 12.22
  },
  {
   "id": "A-102",
@@ -1278,7 +1374,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 805
+  "soneAvstandM": 805,
+  "km": 12.22
  },
  {
   "id": "A-103",
@@ -1292,7 +1389,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 1056
+  "soneAvstandM": 1056,
+  "km": 12.73
  },
  {
   "id": "A-104",
@@ -1306,7 +1404,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 1056
+  "soneAvstandM": 1056,
+  "km": 12.73
  },
  {
   "id": "A-105",
@@ -1320,7 +1419,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 1056
+  "soneAvstandM": 1056,
+  "km": 12.73
  },
  {
   "id": "A-106",
@@ -1334,7 +1434,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 1056
+  "soneAvstandM": 1056,
+  "km": 12.73
  },
  {
   "id": "A-107",
@@ -1348,7 +1449,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 1056
+  "soneAvstandM": 1056,
+  "km": 12.73
  },
  {
   "id": "A-108",
@@ -1362,7 +1464,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 1056
+  "soneAvstandM": 1056,
+  "km": 12.73
  },
  {
   "id": "A-109",
@@ -1376,7 +1479,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 1056
+  "soneAvstandM": 1056,
+  "km": 12.73
  },
  {
   "id": "A-110",
@@ -1390,7 +1494,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 1094
+  "soneAvstandM": 1094,
+  "km": 12.55
  },
  {
   "id": "A-111",
@@ -1404,7 +1509,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 1094
+  "soneAvstandM": 1094,
+  "km": 12.55
  },
  {
   "id": "A-112",
@@ -1418,7 +1524,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 1147
+  "soneAvstandM": 1147,
+  "km": 12.56
  },
  {
   "id": "A-113",
@@ -1432,7 +1539,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 1147
+  "soneAvstandM": 1147,
+  "km": 12.56
  },
  {
   "id": "A-114",
@@ -1446,7 +1554,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 1147
+  "soneAvstandM": 1147,
+  "km": 12.56
  },
  {
   "id": "A-115",
@@ -1460,7 +1569,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 1085
+  "soneAvstandM": 1085,
+  "km": 12.53
  },
  {
   "id": "A-116",
@@ -1474,7 +1584,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 764
+  "soneAvstandM": 764,
+  "km": 12.07
  },
  {
   "id": "A-117",
@@ -1488,7 +1599,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 774
+  "soneAvstandM": 774,
+  "km": 12.04
  },
  {
   "id": "A-118",
@@ -1502,7 +1614,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 698
+  "soneAvstandM": 698,
+  "km": 11.98
  },
  {
   "id": "A-119",
@@ -1516,7 +1629,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 817
+  "soneAvstandM": 817,
+  "km": 12.17
  },
  {
   "id": "A-120",
@@ -1530,7 +1644,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 831
+  "soneAvstandM": 831,
+  "km": 12.22
  },
  {
   "id": "A-121",
@@ -1544,7 +1659,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 831
+  "soneAvstandM": 831,
+  "km": 12.22
  },
  {
   "id": "A-122",
@@ -1558,7 +1674,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 831
+  "soneAvstandM": 831,
+  "km": 12.22
  },
  {
   "id": "A-123",
@@ -1572,7 +1689,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 831
+  "soneAvstandM": 831,
+  "km": 12.22
  },
  {
   "id": "A-124",
@@ -1586,7 +1704,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 831
+  "soneAvstandM": 831,
+  "km": 12.22
  },
  {
   "id": "A-125",
@@ -1600,7 +1719,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 1109
+  "soneAvstandM": 1109,
+  "km": 12.73
  },
  {
   "id": "A-126",
@@ -1614,7 +1734,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 1109
+  "soneAvstandM": 1109,
+  "km": 12.73
  },
  {
   "id": "A-127",
@@ -1628,7 +1749,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 1051
+  "soneAvstandM": 1051,
+  "km": 12.76
  },
  {
   "id": "A-128",
@@ -1642,7 +1764,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 1051
+  "soneAvstandM": 1051,
+  "km": 12.76
  },
  {
   "id": "A-129",
@@ -1656,7 +1779,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 1051
+  "soneAvstandM": 1051,
+  "km": 12.76
  },
  {
   "id": "A-130",
@@ -1670,7 +1794,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 976
+  "soneAvstandM": 976,
+  "km": 12.82
  },
  {
   "id": "A-131",
@@ -1684,7 +1809,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 917
+  "soneAvstandM": 917,
+  "km": 12.95
  },
  {
   "id": "A-132",
@@ -1698,7 +1824,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 888
+  "soneAvstandM": 888,
+  "km": 13.02
  },
  {
   "id": "A-133",
@@ -1712,7 +1839,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 888
+  "soneAvstandM": 888,
+  "km": 13.02
  },
  {
   "id": "A-134",
@@ -1726,7 +1854,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 888
+  "soneAvstandM": 888,
+  "km": 13.02
  },
  {
   "id": "A-135",
@@ -1740,7 +1869,8 @@
   "locId": "Sone 5A",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 1070
+  "soneAvstandM": 1070,
+  "km": 12.87
  },
  {
   "id": "A-136",
@@ -1754,7 +1884,8 @@
   "locId": "Sone 5B",
   "vannforing": 0,
   "autoSone": false,
-  "soneAvstandM": 432
+  "soneAvstandM": 432,
+  "km": 14.66
  },
  {
   "id": "A-137",
@@ -1768,7 +1899,8 @@
   "locId": "Sone 5B",
   "vannforing": 0,
   "autoSone": false,
-  "soneAvstandM": 456
+  "soneAvstandM": 456,
+  "km": 14.64
  },
  {
   "id": "A-138",
@@ -1782,7 +1914,8 @@
   "locId": "Sone 5B",
   "vannforing": 0,
   "autoSone": false,
-  "soneAvstandM": 456
+  "soneAvstandM": 456,
+  "km": 14.64
  },
  {
   "id": "A-139",
@@ -1796,7 +1929,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 72
+  "soneAvstandM": 72,
+  "km": 16.75
  },
  {
   "id": "A-140",
@@ -1810,7 +1944,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 72
+  "soneAvstandM": 72,
+  "km": 16.75
  },
  {
   "id": "A-141",
@@ -1824,7 +1959,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 280
+  "soneAvstandM": 280,
+  "km": 23.16
  },
  {
   "id": "A-142",
@@ -1838,7 +1974,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 280
+  "soneAvstandM": 280,
+  "km": 23.16
  },
  {
   "id": "A-143",
@@ -1852,7 +1989,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 146
+  "soneAvstandM": 146,
+  "km": 22.91
  },
  {
   "id": "A-144",
@@ -1866,7 +2004,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 146
+  "soneAvstandM": 146,
+  "km": 22.91
  },
  {
   "id": "A-145",
@@ -1880,7 +2019,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 200
+  "soneAvstandM": 200,
+  "km": 22.98
  },
  {
   "id": "A-146",
@@ -1894,7 +2034,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 200
+  "soneAvstandM": 200,
+  "km": 22.98
  },
  {
   "id": "A-147",
@@ -1908,7 +2049,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 200
+  "soneAvstandM": 200,
+  "km": 22.98
  },
  {
   "id": "A-148",
@@ -1922,7 +2064,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 85
+  "soneAvstandM": 85,
+  "km": 18.18
  },
  {
   "id": "A-149",
@@ -1936,7 +2079,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.2,
   "autoSone": true,
-  "soneAvstandM": 85
+  "soneAvstandM": 85,
+  "km": 18.18
  },
  {
   "id": "A-150",
@@ -1950,7 +2094,8 @@
   "locId": "Sone 5A",
   "vannforing": null,
   "autoSone": true,
-  "soneAvstandM": 346
+  "soneAvstandM": 346,
+  "km": 14.43
  },
  {
   "id": "A-151",
@@ -1964,7 +2109,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 16
+  "soneAvstandM": 16,
+  "km": 18.14
  },
  {
   "id": "A-152",
@@ -1978,7 +2124,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 16
+  "soneAvstandM": 16,
+  "km": 18.14
  },
  {
   "id": "A-153",
@@ -1992,7 +2139,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 16
+  "soneAvstandM": 16,
+  "km": 18.14
  },
  {
   "id": "A-154",
@@ -2006,7 +2154,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 309
+  "soneAvstandM": 309,
+  "km": 17.79
  },
  {
   "id": "A-155",
@@ -2020,7 +2169,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 341
+  "soneAvstandM": 341,
+  "km": 17.74
  },
  {
   "id": "A-156",
@@ -2034,7 +2184,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 341
+  "soneAvstandM": 341,
+  "km": 17.74
  },
  {
   "id": "A-157",
@@ -2048,7 +2199,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 417
+  "soneAvstandM": 417,
+  "km": 19.81
  },
  {
   "id": "A-158",
@@ -2062,7 +2214,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 417
+  "soneAvstandM": 417,
+  "km": 19.81
  },
  {
   "id": "A-159",
@@ -2076,7 +2229,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 165
+  "soneAvstandM": 165,
+  "km": 22.24
  },
  {
   "id": "A-160",
@@ -2090,7 +2244,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 165
+  "soneAvstandM": 165,
+  "km": 22.24
  },
  {
   "id": "A-161",
@@ -2104,7 +2259,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 158
+  "soneAvstandM": 158,
+  "km": 22.26
  },
  {
   "id": "A-162",
@@ -2118,7 +2274,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 158
+  "soneAvstandM": 158,
+  "km": 22.26
  },
  {
   "id": "A-163",
@@ -2132,7 +2289,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 141
+  "soneAvstandM": 141,
+  "km": 22.39
  },
  {
   "id": "A-164",
@@ -2146,7 +2304,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 167
+  "soneAvstandM": 167,
+  "km": 22.27
  },
  {
   "id": "A-165",
@@ -2160,7 +2319,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 226
+  "soneAvstandM": 226,
+  "km": 22.01
  },
  {
   "id": "A-166",
@@ -2174,7 +2334,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 231
+  "soneAvstandM": 231,
+  "km": 21.9
  },
  {
   "id": "A-167",
@@ -2188,7 +2349,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 231
+  "soneAvstandM": 231,
+  "km": 21.9
  },
  {
   "id": "A-168",
@@ -2202,7 +2364,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 199
+  "soneAvstandM": 199,
+  "km": 21.86
  },
  {
   "id": "A-169",
@@ -2216,7 +2379,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 167
+  "soneAvstandM": 167,
+  "km": 21.83
  },
  {
   "id": "A-170",
@@ -2230,7 +2394,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 117
+  "soneAvstandM": 117,
+  "km": 21.3
  },
  {
   "id": "A-171",
@@ -2244,7 +2409,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 117
+  "soneAvstandM": 117,
+  "km": 21.3
  },
  {
   "id": "A-172",
@@ -2258,7 +2424,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 117
+  "soneAvstandM": 117,
+  "km": 21.3
  },
  {
   "id": "A-173",
@@ -2272,7 +2439,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 122
+  "soneAvstandM": 122,
+  "km": 21.29
  },
  {
   "id": "A-174",
@@ -2286,7 +2454,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 122
+  "soneAvstandM": 122,
+  "km": 21.29
  },
  {
   "id": "A-175",
@@ -2300,7 +2469,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 277
+  "soneAvstandM": 277,
+  "km": 21.14
  },
  {
   "id": "A-176",
@@ -2314,7 +2484,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 298
+  "soneAvstandM": 298,
+  "km": 21.12
  },
  {
   "id": "A-177",
@@ -2328,7 +2499,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 298
+  "soneAvstandM": 298,
+  "km": 21.12
  },
  {
   "id": "A-178",
@@ -2342,7 +2514,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 277
+  "soneAvstandM": 277,
+  "km": 21.14
  },
  {
   "id": "A-179",
@@ -2356,7 +2529,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 277
+  "soneAvstandM": 277,
+  "km": 21.14
  },
  {
   "id": "A-180",
@@ -2370,7 +2544,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 301
+  "soneAvstandM": 301,
+  "km": 21.11
  },
  {
   "id": "A-181",
@@ -2384,7 +2559,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 14
+  "soneAvstandM": 14,
+  "km": 24.2
  },
  {
   "id": "A-182",
@@ -2398,7 +2574,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 3
+  "soneAvstandM": 3,
+  "km": 24.21
  },
  {
   "id": "A-183",
@@ -2412,7 +2589,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 3
+  "soneAvstandM": 3,
+  "km": 24.21
  },
  {
   "id": "A-184",
@@ -2426,7 +2604,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 4
+  "soneAvstandM": 4,
+  "km": 24.3
  },
  {
   "id": "A-185",
@@ -2440,7 +2619,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 4
+  "soneAvstandM": 4,
+  "km": 24.3
  },
  {
   "id": "A-186",
@@ -2454,7 +2634,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 15
+  "soneAvstandM": 15,
+  "km": 24.4
  },
  {
   "id": "A-187",
@@ -2468,7 +2649,8 @@
   "locId": "Sone 5B",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 15
+  "soneAvstandM": 15,
+  "km": 24.4
  },
  {
   "id": "A-188",
@@ -2482,7 +2664,8 @@
   "locId": "Sone6",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 150
+  "soneAvstandM": 150,
+  "km": 24.94
  },
  {
   "id": "A-189",
@@ -2496,7 +2679,8 @@
   "locId": "Sone6",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 96
+  "soneAvstandM": 96,
+  "km": 25.01
  },
  {
   "id": "A-190",
@@ -2510,6 +2694,7 @@
   "locId": "Sone6",
   "vannforing": 0.1,
   "autoSone": true,
-  "soneAvstandM": 96
+  "soneAvstandM": 96,
+  "km": 25.01
  }
 ]
