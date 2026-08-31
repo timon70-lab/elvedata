@@ -43,6 +43,20 @@
  },
  {
   "dato": "2026-08-29",
+  "sone": "Bjåhylen",
+  "vekt": 1.7,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-29",
+  "sone": "Bjåhylen",
+  "vekt": 2.6,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-29",
   "sone": "Sone 3",
   "vekt": 3,
   "agn": "Flue",
