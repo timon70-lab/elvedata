@@ -11,7 +11,8 @@
   "locId": "Sone 4A",
   "vannforing": 98.3,
   "autoSone": true,
-  "soneAvstandM": 353
+  "soneAvstandM": 353,
+  "km": 12.11
  },
  {
   "id": "O-002",
@@ -25,7 +26,8 @@
   "locId": "Sone 4A",
   "vannforing": 98.3,
   "autoSone": true,
-  "soneAvstandM": 353
+  "soneAvstandM": 353,
+  "km": 12.11
  },
  {
   "id": "O-003",
@@ -39,7 +41,8 @@
   "locId": "Sone 4A",
   "vannforing": 98,
   "autoSone": false,
-  "soneAvstandM": 414
+  "soneAvstandM": 414,
+  "km": 12.18
  },
  {
   "id": "O-004",
@@ -53,7 +56,8 @@
   "locId": "Sone 4A",
   "vannforing": 98,
   "autoSone": false,
-  "soneAvstandM": 452
+  "soneAvstandM": 452,
+  "km": 12.22
  },
  {
   "id": "O-005",
@@ -69,7 +73,8 @@
   "autoSone": true,
   "soneAvstandM": 53,
   "adkomstLat": 58.24775016486354,
-  "adkomstLon": 7.953587920133379
+  "adkomstLon": 7.953587920133379,
+  "km": 14.87
  },
  {
   "id": "O-006",
@@ -85,7 +90,8 @@
   "autoSone": true,
   "soneAvstandM": 53,
   "adkomstLat": 58.24775016486354,
-  "adkomstLon": 7.953587920133379
+  "adkomstLon": 7.953587920133379,
+  "km": 14.87
  },
  {
   "id": "O-007",
@@ -101,7 +107,8 @@
   "autoSone": true,
   "soneAvstandM": 53,
   "adkomstLat": 58.24775016486354,
-  "adkomstLon": 7.953587920133379
+  "adkomstLon": 7.953587920133379,
+  "km": 14.87
  },
  {
   "id": "O-008",
@@ -117,7 +124,8 @@
   "autoSone": true,
   "soneAvstandM": 3,
   "adkomstLat": 58.24775016486354,
-  "adkomstLon": 7.953587920133379
+  "adkomstLon": 7.953587920133379,
+  "km": 14.95
  },
  {
   "id": "O-009",
@@ -133,7 +141,8 @@
   "autoSone": true,
   "soneAvstandM": 3,
   "adkomstLat": 58.24775016486354,
-  "adkomstLon": 7.953587920133379
+  "adkomstLon": 7.953587920133379,
+  "km": 14.95
  },
  {
   "id": "O-010",
@@ -149,7 +158,8 @@
   "autoSone": true,
   "soneAvstandM": 74,
   "adkomstLat": 58.24775016486354,
-  "adkomstLon": 7.953587920133379
+  "adkomstLon": 7.953587920133379,
+  "km": 14.84
  },
  {
   "id": "O-011",
@@ -165,7 +175,8 @@
   "autoSone": true,
   "soneAvstandM": 74,
   "adkomstLat": 58.24775016486354,
-  "adkomstLon": 7.953587920133379
+  "adkomstLon": 7.953587920133379,
+  "km": 14.84
  },
  {
   "id": "O-012",
@@ -179,7 +190,8 @@
   "locId": "Sone 4C Holmane",
   "vannforing": 100,
   "autoSone": true,
-  "soneAvstandM": 103
+  "soneAvstandM": 103,
+  "km": 13.35
  },
  {
   "id": "O-013",
@@ -193,7 +205,8 @@
   "locId": "Sone 4C Holmane",
   "vannforing": 100,
   "autoSone": true,
-  "soneAvstandM": 103
+  "soneAvstandM": 103,
+  "km": 13.35
  },
  {
   "id": "O-014",
@@ -207,7 +220,8 @@
   "locId": "Sone 4A",
   "vannforing": 100,
   "autoSone": false,
-  "soneAvstandM": 526
+  "soneAvstandM": 526,
+  "km": 13.35
  },
  {
   "id": "O-015",
@@ -221,7 +235,8 @@
   "locId": "Sone 4A",
   "vannforing": 100,
   "autoSone": false,
-  "soneAvstandM": 571
+  "soneAvstandM": 571,
+  "km": 12.29
  },
  {
   "id": "O-016",
@@ -235,7 +250,8 @@
   "locId": "Sone 4A",
   "vannforing": 100,
   "autoSone": false,
-  "soneAvstandM": 571
+  "soneAvstandM": 571,
+  "km": 12.29
  },
  {
   "id": "O-017",
@@ -249,7 +265,8 @@
   "locId": "Sone 4C Holmane",
   "vannforing": 98,
   "autoSone": true,
-  "soneAvstandM": 141
+  "soneAvstandM": 141,
+  "km": 13.86
  },
  {
   "id": "O-018",
@@ -263,7 +280,8 @@
   "locId": "Sone 4A",
   "vannforing": 98,
   "autoSone": false,
-  "soneAvstandM": 173
+  "soneAvstandM": 173,
+  "km": 13.86
  },
  {
   "id": "O-019",
@@ -279,7 +297,8 @@
   "autoSone": true,
   "soneAvstandM": 132,
   "adkomstLat": 58.24225947014511,
-  "adkomstLon": 7.948465708136386
+  "adkomstLon": 7.948465708136386,
+  "km": 13.93
  },
  {
   "id": "O-020",
@@ -295,7 +314,8 @@
   "autoSone": true,
   "soneAvstandM": 132,
   "adkomstLat": 58.24225947014511,
-  "adkomstLon": 7.948465708136386
+  "adkomstLon": 7.948465708136386,
+  "km": 13.93
  },
  {
   "id": "O-021",
@@ -309,7 +329,8 @@
   "locId": "Sone 4A",
   "vannforing": 98,
   "autoSone": false,
-  "soneAvstandM": 207
+  "soneAvstandM": 207,
+  "km": 13.83
  },
  {
   "id": "O-025",
@@ -323,7 +344,8 @@
   "locId": "Sone 5A Blå",
   "vannforing": 59.2,
   "autoSone": true,
-  "soneAvstandM": 39
+  "soneAvstandM": 39,
+  "km": 14.91
  },
  {
   "id": "O-026",
@@ -337,7 +359,8 @@
   "locId": "Sone 5A Blå",
   "vannforing": 60.7,
   "autoSone": true,
-  "soneAvstandM": 25
+  "soneAvstandM": 25,
+  "km": 14.25
  },
  {
   "id": "O-027",
@@ -353,7 +376,8 @@
   "autoSone": true,
   "soneAvstandM": 88,
   "adkomstLat": 58.24225947014511,
-  "adkomstLon": 7.948465708136386
+  "adkomstLon": 7.948465708136386,
+  "km": 13.94
  },
  {
   "id": "O-028",
@@ -369,7 +393,8 @@
   "autoSone": true,
   "soneAvstandM": 88,
   "adkomstLat": 58.24225947014511,
-  "adkomstLon": 7.948465708136386
+  "adkomstLon": 7.948465708136386,
+  "km": 13.94
  },
  {
   "id": "O-029",
@@ -383,7 +408,8 @@
   "locId": "Sone 4C Holmane",
   "vannforing": 67.8,
   "autoSone": true,
-  "soneAvstandM": 18
+  "soneAvstandM": 18,
+  "km": 13.8
  },
  {
   "id": "O-030",
@@ -397,7 +423,8 @@
   "locId": "Sone 4C Holmane",
   "vannforing": 67.8,
   "autoSone": true,
-  "soneAvstandM": 101
+  "soneAvstandM": 101,
+  "km": 13.69
  },
  {
   "id": "O-031",
@@ -411,7 +438,8 @@
   "locId": "Sone 4C Holmane",
   "vannforing": 67.8,
   "autoSone": true,
-  "soneAvstandM": 101
+  "soneAvstandM": 101,
+  "km": 13.69
  },
  {
   "id": "O-032",
@@ -425,7 +453,8 @@
   "locId": "Sone 4C Holmane",
   "vannforing": 67.8,
   "autoSone": true,
-  "soneAvstandM": 101
+  "soneAvstandM": 101,
+  "km": 13.69
  },
  {
   "id": "O-033",
@@ -439,7 +468,8 @@
   "locId": "Sone 4C Holmane",
   "vannforing": 67.8,
   "autoSone": true,
-  "soneAvstandM": 98
+  "soneAvstandM": 98,
+  "km": 13.43
  },
  {
   "id": "O-034",
@@ -453,7 +483,8 @@
   "locId": "Sone 4C Holmane",
   "vannforing": 67.8,
   "autoSone": true,
-  "soneAvstandM": 98
+  "soneAvstandM": 98,
+  "km": 13.43
  },
  {
   "id": "O-035",
@@ -467,7 +498,8 @@
   "locId": "Sone 5A Blå",
   "vannforing": 54.1,
   "autoSone": true,
-  "soneAvstandM": 14
+  "soneAvstandM": 14,
+  "km": 14.76
  },
  {
   "id": "O-036",
@@ -483,7 +515,8 @@
   "autoSone": true,
   "soneAvstandM": 111,
   "adkomstLat": 58.24775016486354,
-  "adkomstLon": 7.953587920133379
+  "adkomstLon": 7.953587920133379,
+  "km": 14.68
  },
  {
   "id": "O-037",
@@ -499,7 +532,8 @@
   "autoSone": true,
   "soneAvstandM": 111,
   "adkomstLat": 58.24775016486354,
-  "adkomstLon": 7.953587920133379
+  "adkomstLon": 7.953587920133379,
+  "km": 14.68
  },
  {
   "id": "O-038",
@@ -513,7 +547,8 @@
   "locId": "Sone 4B Ravnås",
   "vannforing": 99.8,
   "autoSone": true,
-  "soneAvstandM": 316
+  "soneAvstandM": 316,
+  "km": 12.2
  },
  {
   "id": "O-039",
@@ -527,7 +562,8 @@
   "locId": "Sone 4B Ravnås",
   "vannforing": 99.8,
   "autoSone": true,
-  "soneAvstandM": 316
+  "soneAvstandM": 316,
+  "km": 12.2
  },
  {
   "id": "O-040",
@@ -541,7 +577,8 @@
   "locId": "Sone 3B Hageodden",
   "vannforing": 99.8,
   "autoSone": true,
-  "soneAvstandM": 3
+  "soneAvstandM": 3,
+  "km": 9.56
  },
  {
   "id": "O-041",
@@ -555,7 +592,8 @@
   "locId": "Sone 5A Blå",
   "vannforing": 90.8,
   "autoSone": true,
-  "soneAvstandM": 15
+  "soneAvstandM": 15,
+  "km": 14.76
  },
  {
   "id": "O-042",
@@ -571,7 +609,8 @@
   "autoSone": true,
   "soneAvstandM": 130,
   "adkomstLat": 58.218839558256946,
-  "adkomstLon": 7.931854361959784
+  "adkomstLon": 7.931854361959784,
+  "km": 10.71
  },
  {
   "id": "O-043",
@@ -587,7 +626,8 @@
   "autoSone": true,
   "soneAvstandM": 130,
   "adkomstLat": 58.218839558256946,
-  "adkomstLon": 7.931854361959784
+  "adkomstLon": 7.931854361959784,
+  "km": 10.71
  },
  {
   "id": "O-044",
@@ -603,7 +643,8 @@
   "autoSone": true,
   "soneAvstandM": 130,
   "adkomstLat": 58.218839558256946,
-  "adkomstLon": 7.931854361959784
+  "adkomstLon": 7.931854361959784,
+  "km": 10.71
  },
  {
   "id": "O-045",
@@ -617,7 +658,8 @@
   "locId": "Sone 2",
   "vannforing": 95,
   "autoSone": true,
-  "soneAvstandM": 44
+  "soneAvstandM": 44,
+  "km": 8.92
  },
  {
   "id": "O-046",
@@ -631,7 +673,8 @@
   "locId": "Sone 2",
   "vannforing": 95,
   "autoSone": true,
-  "soneAvstandM": 44
+  "soneAvstandM": 44,
+  "km": 8.92
  },
  {
   "id": "O-047",
@@ -647,7 +690,8 @@
   "autoSone": true,
   "soneAvstandM": 170,
   "adkomstLat": 58.218839558256946,
-  "adkomstLon": 7.931854361959784
+  "adkomstLon": 7.931854361959784,
+  "km": 10.29
  },
  {
   "id": "O-048",
@@ -663,7 +707,8 @@
   "autoSone": true,
   "soneAvstandM": 170,
   "adkomstLat": 58.218839558256946,
-  "adkomstLon": 7.931854361959784
+  "adkomstLon": 7.931854361959784,
+  "km": 10.29
  },
  {
   "id": "O-049",
@@ -677,7 +722,8 @@
   "locId": "Sone 3A",
   "vannforing": 95,
   "autoSone": true,
-  "soneAvstandM": 12
+  "soneAvstandM": 12,
+  "km": 9.91
  },
  {
   "id": "O-050",
@@ -691,7 +737,8 @@
   "locId": "Sone 3A",
   "vannforing": 95,
   "autoSone": true,
-  "soneAvstandM": 12
+  "soneAvstandM": 12,
+  "km": 9.91
  },
  {
   "id": "O-051",
@@ -705,7 +752,8 @@
   "locId": "Sone 3A",
   "vannforing": 112.6,
   "autoSone": true,
-  "soneAvstandM": 199
+  "soneAvstandM": 199,
+  "km": 10.17
  },
  {
   "id": "O-052",
@@ -719,7 +767,8 @@
   "locId": "Sone 3A",
   "vannforing": 112.6,
   "autoSone": true,
-  "soneAvstandM": 199
+  "soneAvstandM": 199,
+  "km": 10.17
  },
  {
   "id": "O-053",
@@ -733,7 +782,8 @@
   "locId": "Sone 3A",
   "vannforing": 112.6,
   "autoSone": true,
-  "soneAvstandM": 177
+  "soneAvstandM": 177,
+  "km": 10.11
  },
  {
   "id": "O-054",
@@ -747,7 +797,8 @@
   "locId": "Sone 3A",
   "vannforing": 112.6,
   "autoSone": true,
-  "soneAvstandM": 150
+  "soneAvstandM": 150,
+  "km": 10.05
  },
  {
   "id": "O-055",
@@ -763,7 +814,8 @@
   "autoSone": true,
   "soneAvstandM": 6,
   "adkomstLat": 58.25303406610295,
-  "adkomstLon": 7.951835494008137
+  "adkomstLon": 7.951835494008137,
+  "km": 15.49
  },
  {
   "id": "O-056",
@@ -779,7 +831,8 @@
   "autoSone": true,
   "soneAvstandM": 6,
   "adkomstLat": 58.25303406610295,
-  "adkomstLon": 7.951835494008137
+  "adkomstLon": 7.951835494008137,
+  "km": 15.49
  },
  {
   "id": "O-057",
@@ -795,7 +848,8 @@
   "autoSone": true,
   "soneAvstandM": 4,
   "adkomstLat": 58.25303406610295,
-  "adkomstLon": 7.951835494008137
+  "adkomstLon": 7.951835494008137,
+  "km": 15.49
  },
  {
   "id": "O-058",
@@ -811,7 +865,8 @@
   "autoSone": true,
   "soneAvstandM": 29,
   "adkomstLat": 58.25303406610295,
-  "adkomstLon": 7.951835494008137
+  "adkomstLon": 7.951835494008137,
+  "km": 15.46
  },
  {
   "id": "O-059",
@@ -825,7 +880,8 @@
   "locId": "Sone 4A",
   "vannforing": 56,
   "autoSone": false,
-  "soneAvstandM": 543
+  "soneAvstandM": 543,
+  "km": 12.25
  },
  {
   "id": "O-060",
@@ -839,7 +895,8 @@
   "locId": "Sone 3A",
   "vannforing": 80,
   "autoSone": true,
-  "soneAvstandM": 154
+  "soneAvstandM": 154,
+  "km": 10.67
  },
  {
   "id": "O-061",
@@ -853,7 +910,8 @@
   "locId": "Sone 5A Blå",
   "vannforing": 81,
   "autoSone": true,
-  "soneAvstandM": 140
+  "soneAvstandM": 140,
+  "km": 14.36
  },
  {
   "id": "O-062",
@@ -867,7 +925,8 @@
   "locId": "Sone 3A",
   "vannforing": 81,
   "autoSone": true,
-  "soneAvstandM": 14
+  "soneAvstandM": 14,
+  "km": 9.9
  },
  {
   "id": "O-063",
@@ -881,7 +940,8 @@
   "locId": "Sone 3A",
   "vannforing": 64,
   "autoSone": true,
-  "soneAvstandM": 143
+  "soneAvstandM": 143,
+  "km": 10.67
  },
  {
   "id": "O-064",
@@ -895,7 +955,8 @@
   "locId": "Sone 3A",
   "vannforing": 65,
   "autoSone": true,
-  "soneAvstandM": 173
+  "soneAvstandM": 173,
+  "km": 10.12
  },
  {
   "id": "O-065",
@@ -909,7 +970,8 @@
   "locId": "Sone 3A",
   "vannforing": 65,
   "autoSone": true,
-  "soneAvstandM": 144
+  "soneAvstandM": 144,
+  "km": 9.97
  },
  {
   "id": "O-066",
@@ -923,7 +985,8 @@
   "locId": "Sone 3A",
   "vannforing": 64,
   "autoSone": true,
-  "soneAvstandM": 120
+  "soneAvstandM": 120,
+  "km": 10.79
  },
  {
   "id": "O-067",
@@ -937,7 +1000,8 @@
   "locId": "Sone 3A",
   "vannforing": 64,
   "autoSone": true,
-  "soneAvstandM": 120
+  "soneAvstandM": 120,
+  "km": 10.79
  },
  {
   "id": "O-068",
@@ -951,7 +1015,8 @@
   "locId": "Sone 3A",
   "vannforing": 67,
   "autoSone": true,
-  "soneAvstandM": 161
+  "soneAvstandM": 161,
+  "km": 10.25
  },
  {
   "id": "O-069",
@@ -965,6 +1030,7 @@
   "locId": "Sone 3A",
   "vannforing": 67,
   "autoSone": true,
-  "soneAvstandM": 131
+  "soneAvstandM": 131,
+  "km": 10.2
  }
 ]
