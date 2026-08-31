@@ -1,5 +1,12 @@
 [
  {
+  "dato": "2026-08-31",
+  "sone": "Delomr 4, Steinshylen",
+  "vekt": 2.6,
+  "agn": "Sluk",
+  "art": "Laks"
+ },
+ {
   "dato": "2026-08-30",
   "sone": "Delomr 3",
   "vekt": 4,
@@ -24,6 +31,13 @@
   "dato": "2026-08-30",
   "sone": "Sone 3",
   "vekt": 2.5,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-29",
+  "sone": "Sone 3",
+  "vekt": 3,
   "agn": "Flue",
   "art": "Laks"
  },
