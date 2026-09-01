@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: 'Release-tag med zip-vedlegg (undermapper per elv: audna/, lygna/, mandalselva/, otra/, sygna/)'
+        description: 'Release-tag med zip-vedlegg (undermapper per elv: audna/, lygna/, mandalselva/, otra/, sygna/, tovdalselva/)'
         required: true
         type: string
 
@@ -50,7 +50,7 @@ jobs:
         run: |
           echo "## Bulk foto-pipeline — ${{ inputs.release_tag }}" >> "$GITHUB_STEP_SUMMARY"
           NYE_MANUELL=""
-          for elv in audna lygna mandalselva otra sygna; do
+          for elv in audna lygna mandalselva otra sygna tovdalselva; do
             if [ -f "data/photos_${elv}.json" ] && ! git diff --quiet -- "data/photos_${elv}.json"; then
               # Innrykk (indent=1) gir 2 mellomrom foran "id" - mønsteret er bevisst
               # mellomrom-uavhengig ('^+ *"id":') så det tåler fremtidige formatendringer.
@@ -76,7 +76,7 @@ jobs:
           # Slett KUN de tomme per-elv-arbeidsmappene - bilder/innboks/manuell/
           # (GPS-/sone-/prosesseringsfeil) skal IKKE slettes, slik at feilede
           # bilder overlever i git og kan rettes/lastes opp på nytt manuelt.
-          for elv in audna lygna mandalselva otra sygna; do
+          for elv in audna lygna mandalselva otra sygna tovdalselva; do
             rm -rf "bilder/innboks/${elv}"
           done
 

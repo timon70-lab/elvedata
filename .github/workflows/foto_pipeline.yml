@@ -8,6 +8,7 @@ on:
       - 'bilder/innboks/lygna/**'
       - 'bilder/innboks/otra/**'
       - 'bilder/innboks/sygna/**'
+      - 'bilder/innboks/tovdalselva/**'
   workflow_dispatch:
 
 permissions:
