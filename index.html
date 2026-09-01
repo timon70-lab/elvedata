@@ -115,6 +115,34 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 const MONTH_ABBR_NO = ['','jan','feb','mar','apr','mai','jun','jul','aug','sep','okt','nov','des'];
+// --- Hendelsesmaaling (GoatCounter) ------------------------------------
+// Maaler tre steg i den samme reisen, slik at vi kan skille mellom
+// "folk finner ikke veien videre" og "folk faar svaret de trenger i popup-en":
+//   markor-{elv}     - markoeren ble aapnet
+//   elveside-{elv}   - "Aapne elvesiden" ble klikket
+//   laksebors-{elv}  - laksebors-lenken ble klikket
+// GoatCounter er cookiefritt og lagrer bare hendelsesnavnet - ingen
+// personopplysninger sendes. Maalingen er pakket i try/catch slik at den
+// aldri kan bryte kartet om count.js er blokkert av en annonseblokkerer.
+function tellHendelse(navn, tittel) {
+  try {
+    if (window.goatcounter && typeof window.goatcounter.count === 'function') {
+      window.goatcounter.count({ path: navn, title: tittel, event: true });
+    }
+  } catch (e) { /* maaling skal aldri kunne bryte kartet */ }
+}
+
+// Popup-innhold bygges dynamisk etter at count.js har kjoert, saa lenkene
+// kan ikke fanges av GoatCounters egen data-goatcounter-click. Vi delegerer
+// derfor fra document, som ogsaa fanger popup-er som aapnes senere.
+document.addEventListener('click', function (ev) {
+  const t = ev.target;
+  if (!t || !t.closest) return;
+  const lenke = t.closest('a[data-tell]');
+  if (!lenke) return;
+  tellHendelse(lenke.dataset.tell, lenke.dataset.tellTittel || 'Klikk');
+});
+
 const MONTH_NAMES_LONG = ['','januar','februar','mars','april','mai','juni','juli','august','september','oktober','november','desember'];
 
 function formatShort(md) {
@@ -404,6 +432,9 @@ RIVERS.forEach((river) => {
   marker.bindPopup(
     '<div class="popup-card"><p class="pc-title">' + river.name + '</p><p class="pc-flow">Laster…</p></div>'
   );
+  marker.on('popupopen', function () {
+    tellHendelse('markor-' + river.id, 'Markør åpnet: ' + river.name);
+  });
 
   async function render() {
     const el = marker.getElement();
@@ -417,7 +448,9 @@ RIVERS.forEach((river) => {
           '<p class="pc-title">' + river.name + '</p>' +
           '<p class="pc-status">Stengt for sesongen</p>' +
           '<p class="pc-substatus">Åpner ' + formatLong(st.date) + '</p>' +
-          '<a class="pc-link" href="' + river.dashboardUrl + '" target="_blank">Åpne elvesiden →</a>' +
+          '<a class="pc-link" href="' + river.dashboardUrl + '" target="_blank"' +
+            ' data-tell="elveside-' + river.id + '"' +
+            ' data-tell-tittel="Åpnet elveside: ' + river.name + '">Åpne elvesiden →</a>' +
         '</div>'
       );
       return;
@@ -429,7 +462,9 @@ RIVERS.forEach((river) => {
         '<div class="popup-card">' +
           '<p class="pc-title">' + river.name + '</p>' +
           '<p class="pc-status">Åpner ' + formatLong(st.date) + '</p>' +
-          '<a class="pc-link" href="' + river.dashboardUrl + '" target="_blank">Åpne elvesiden →</a>' +
+          '<a class="pc-link" href="' + river.dashboardUrl + '" target="_blank"' +
+            ' data-tell="elveside-' + river.id + '"' +
+            ' data-tell-tittel="Åpnet elveside: ' + river.name + '">Åpne elvesiden →</a>' +
         '</div>'
       );
       return;
@@ -470,7 +505,9 @@ RIVERS.forEach((river) => {
     const scoreStr = score !== null ? score : '–';
 
     const borsLink = (txt, r) => r.borsUrl
-      ? '<a href="' + r.borsUrl + '" target="_blank" rel="noopener" title="Åpne laksebørsen for ' + r.name + ' (siste fangster)">' + txt + ' \u2197</a>'
+      ? '<a href="' + r.borsUrl + '" target="_blank" rel="noopener"'
+        + ' data-tell="laksebors-' + r.id + '" data-tell-tittel="Åpnet laksebørs: ' + r.name + '"'
+        + ' title="Åpne laksebørsen for ' + r.name + ' (siste fangster)">' + txt + ' \u2197</a>'
       : txt;
     let catchesHtml = '';
     if (catches !== null) {
@@ -515,7 +552,9 @@ RIVERS.forEach((river) => {
           '<span class="pc-score-num" style="color:' + col + '">' + scoreStr + '</span>' +
           '<span class="pc-score-lbl">fiskescore<br>nå</span>' +
         '</div>' +
-        '<a class="pc-link" href="' + river.dashboardUrl + '" target="_blank">Åpne elvesiden →</a>' +
+        '<a class="pc-link" href="' + river.dashboardUrl + '" target="_blank"' +
+            ' data-tell="elveside-' + river.id + '"' +
+            ' data-tell-tittel="Åpnet elveside: ' + river.name + '">Åpne elvesiden →</a>' +
         catchesHtml +
       '</div>'
     );
@@ -600,7 +639,7 @@ loadNewsTicker();
 </script>
 
 <div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.046</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.047</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
