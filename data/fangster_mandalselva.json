@@ -22,6 +22,13 @@
  },
  {
   "dato": "2026-08-30",
+  "sone": "Sone 3",
+  "vekt": 4,
+  "agn": "Flue",
+  "art": "Laks"
+ },
+ {
+  "dato": "2026-08-30",
   "sone": "Delomr 4, Steinshylen",
   "vekt": 2.8,
   "agn": "Sluk",
