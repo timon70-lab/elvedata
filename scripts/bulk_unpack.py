@@ -8,7 +8,8 @@ Forventet zip-struktur: én undermappe per elv i roten av zip-en:
     audna/IMG_001.jpg
     mandalselva/IMG_002.jpg
     ...
-Gyldige elvenavn (små bokstaver): audna, lygna, mandalselva, otra, sygna.
+Gyldige elvenavn (små bokstaver): audna, lygna, mandalselva, otra, sygna,
+tovdalselva.
 Hvis zip-en har ett enkelt omslagsnivå (typisk Windows «Send til komprimert
 mappe»), hoppes det over automatisk. Ukjente mapper og løse filer i roten
 listes som advarsler og hoppes over.
@@ -19,7 +20,7 @@ import shutil
 import zipfile
 import tempfile
 
-RIVERS = ["audna", "lygna", "mandalselva", "otra", "sygna"]
+RIVERS = ["audna", "lygna", "mandalselva", "otra", "sygna", "tovdalselva"]
 IMG_EXT = (".jpg", ".jpeg", ".png")
 INBOX = "bilder/innboks"
 
@@ -93,7 +94,7 @@ def main():
         print(f"  ADVARSEL: {a}")
     if not total:
         sys.exit("Ingen bilder havnet i noen innboks - sjekk zip-strukturen "
-                 "(undermapper må hete audna/lygna/mandalselva/otra/sygna).")
+                 "(undermapper må hete audna/lygna/mandalselva/otra/sygna/tovdalselva).")
 
 
 if __name__ == "__main__":

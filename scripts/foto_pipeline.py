@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Foto-pipeline for Elvedata — flerelvs (Audna, Mandalselva, Lygna).
+Foto-pipeline for Elvedata — flerelvs (Audna, Lygna, Mandalselva, Otra, Sygna, Tovdalselva).
 Kjøres av GitHub Actions ved push til bilder/innboks/<elv>/.
 
 For hvert bilde i en elvs innboks:
@@ -82,6 +82,15 @@ RIVERS = {
         "id_prefix": "S",
         "date_rule": None,
         "zones": {"Alle \u00e5pne soner": [[58.076907, 7.816012], [58.218747, 7.759384]]},
+    },
+    "tovdalselva": {
+        "inbox": "bilder/innboks/tovdalselva",
+        "out": "bilder/tovdalselva",
+        "json": "data/photos_tovdalselva.json",
+        "station": "20.3.0",
+        "id_prefix": "T",
+        "date_rule": None,
+        "zones": {"Sone 1": [[58.194085, 8.072286], [58.236377, 8.132994]], "Sone 2": [[58.236529, 8.133025], [58.244813, 8.1393]], "Sone 3": [[58.247186, 8.141622], [58.328349, 8.2041]], "Sone 4 og 5": [[58.32931, 8.207531], [58.454377, 8.324595]], "Teinefoss Fluefiske": [[58.340993, 8.227803], [58.342484, 8.230194]], "Buhølen": [[58.384812, 8.266821], [58.391357, 8.272056]], "Laksefoss": [[58.39158, 8.272223], [58.402819, 8.282051]]},
     },
 }
 
