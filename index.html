@@ -37,6 +37,7 @@
   .popup-card .pc-score-lbl { font-size: 0.72rem; color: #64748b; }
   .popup-card .pc-status { font-size: 0.82rem; color: #1a202c; margin: 0 0 10px; font-weight: 600; }
   .popup-card .pc-substatus { font-size: 0.74rem; color: #64748b; margin: -6px 0 10px; }
+  .popup-card .pc-partial { font-size: 0.7rem; color: #975a16; background: #fffaf0; border-left: 3px solid #f6ad55; border-radius: 3px; padding: 5px 7px; margin: 0 0 8px; line-height: 1.4; }
   .popup-card a.pc-link { display: block; text-align: center; background: #0f2d4a; color: #fff; text-decoration: none; padding: 7px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; }
   .catch-label { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2px; background: rgba(255,255,255,0.92); color: #0f2d4a; font-size: 0.6rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; white-space: nowrap; border: 1px solid rgba(0,0,0,0.12); pointer-events: none; }
   /* Vannforingsmerke over markoren. Bolget underkant (variant D) gir
@@ -263,6 +264,21 @@ function daysUntilNextOccurrence(md, now) {
   return Math.round((dt - today0) / 86400000);
 }
 
+// Er vi utenfor elvas hovedsesong, men innenfor et forlenget sonevindu?
+// Returnerer en forklarende tekst, ellers tom streng.
+function delvisSesongTekst(river, now) {
+  if (!river.delvisSoner || !river.delvisSoner.length) return '';
+  const today = (now.getMonth() + 1) * 100 + now.getDate();
+  const hovedStart = parseMD(river.hovedStart);
+  const hovedSlutt = parseMD(river.hovedSlutt);
+  if (today >= hovedStart && today <= hovedSlutt) return '';
+  const n = river.delvisSoner.length;
+  const soner = n <= 3
+    ? river.delvisSoner.join(', ').replace(/, ([^,]*)$/, ' og $1')
+    : n + ' soner';
+  return 'Kun ' + soner + ' er åpne nå · til ' + formatLong(parseMD(river.seasonEnd));
+}
+
 // Felles sesong-vurdering: 'score' = i sesong, 'opening' = innen 30 dager før
 // sesongstart, 'closed' = ellers (rett etter sesongslutt, eller >30 dager til åpning)
 const OPENING_WINDOW_DAYS = 30;
@@ -318,6 +334,35 @@ async function lastSesong() {
       if (!e) return;
       if (MD_RE.test(e.start || '')) r.seasonStart = e.start;
       if (MD_RE.test(e.slutt || '')) r.seasonEnd = e.slutt;
+
+      // Soneavvik: en elv er aapen saa lenge minst én sone er aapen. Vi utvider
+      // derfor sesongvinduet til ytterpunktene av elva selv og alle soner som
+      // ikke er merket stengt. Er vinduet utvidet, husker vi elvenivaaets egne
+      // datoer slik at popup-en kan si fra om at bare utvalgte soner er aapne.
+      const soner = e.soner && typeof e.soner === 'object' ? e.soner : null;
+      if (!soner) return;
+      let tidligst = r.seasonStart, senest = r.seasonEnd;
+      let utvidetAv = [];
+      Object.keys(soner).forEach(function (navn) {
+        const s = soner[navn];
+        if (!s || s.stengt === true) return;
+        if (MD_RE.test(s.start || '') && s.start < tidligst) { tidligst = s.start; }
+        if (MD_RE.test(s.slutt || '') && s.slutt > senest) { senest = s.slutt; }
+      });
+      if (tidligst === r.seasonStart && senest === r.seasonEnd) return;
+      // Hvilke soner er det som holder elva aapen utenfor hovedsesongen?
+      Object.keys(soner).forEach(function (navn) {
+        const s = soner[navn];
+        if (!s || s.stengt === true) return;
+        const s0 = MD_RE.test(s.start || '') ? s.start : r.seasonStart;
+        const s1 = MD_RE.test(s.slutt || '') ? s.slutt : r.seasonEnd;
+        if (s0 < r.seasonStart || s1 > r.seasonEnd) utvidetAv.push(navn);
+      });
+      r.hovedStart = r.seasonStart;
+      r.hovedSlutt = r.seasonEnd;
+      r.delvisSoner = utvidetAv;
+      r.seasonStart = tidligst;
+      r.seasonEnd = senest;
     });
   } catch (e) {
     /* beholder hardkodede fallback-datoer */
@@ -458,9 +503,13 @@ RIVERS.forEach((river) => {
       }
     }
 
+    const delvis = delvisSesongTekst(river, now);
+    const delvisHtml = delvis ? '<p class="pc-partial">' + delvis + '</p>' : '';
+
     marker.setPopupContent(
       '<div class="popup-card">' +
         '<p class="pc-title">' + river.name + '</p>' +
+        delvisHtml +
         '<p class="pc-flow">Vannføring: ' + flowStr + '</p>' +
         '<div class="pc-score">' +
           '<span class="pc-score-num" style="color:' + col + '">' + scoreStr + '</span>' +
@@ -551,7 +600,7 @@ loadNewsTicker();
 </script>
 
 <div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.045</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.046</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
