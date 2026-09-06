@@ -241,6 +241,10 @@ table.rd-tbl { width:100%; border-collapse:collapse; font-size:0.66rem; font-var
 table.rd-tbl th { text-align:left; font-size:0.55rem; text-transform:uppercase; letter-spacing:0.04em;
   color:#94a3b8; font-weight:700; padding:0 0 4px; }
 table.rd-tbl th.r, table.rd-tbl td.r { text-align:right; }
+table.rd-tbl { table-layout:fixed; }
+table.rd-tbl th:nth-child(1), table.rd-tbl td:nth-child(1) { width:26px; color:#a0aec0; }
+table.rd-tbl th:nth-child(2), table.rd-tbl td:nth-child(2) { width:64px; padding-right:10px; }
+table.rd-tbl th:nth-child(3), table.rd-tbl td:nth-child(3) { width:74px; }
 table.rd-tbl td { padding:3px 0; border-top:1px solid #edf2f7; color:#4a5568; }
 table.rd-tbl td.w { font-weight:700; color:#1a202c; }
 table.rd-tbl tr.big td.w { color:#9b2c2c; }
@@ -253,6 +257,10 @@ table.rd-tbl tr.big td.w { color:#9b2c2c; }
 .rd-foot { font-size:0.58rem; color:#a0aec0; line-height:1.45; margin-top:13px;
   padding-top:9px; border-top:1px solid #edf2f7; }
 .rd svg { display:block; width:100%; height:auto; }
+.rd svg .ax { font-size:7.5px; fill:#94a3b8; font-family:'Segoe UI',system-ui,sans-serif; font-weight:400; }
+.rd svg .axb { font-size:7.5px; fill:#4a5568; font-weight:700; font-family:'Segoe UI',system-ui,sans-serif; }
+.rd svg .grid { stroke:#edf2f7; stroke-width:1; }
+.rd svg text { font-family:'Segoe UI',system-ui,sans-serif; }
 .zi-boom-txt { font-size:0.68rem; color:#744210; margin-top:1px; }
 .zi-record-txt { font-size:0.6rem; font-weight:700; color:#b7791f; margin-top:10px; }
 .zi-boom-cols { display:flex; gap:14px; width:100%; }
@@ -1939,7 +1947,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.159</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.160</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
