@@ -50,6 +50,16 @@ h1 { font-size: 1.25rem; margin-bottom: 4px; }
 #mediaDetails .layout .card { border-radius: 12px; margin-bottom: 0; }
 #mediaDetails[open] > summary { border-radius: 12px; margin-bottom: 0; }
 .sum-hint { font-weight: 400; font-size: 0.7rem; color: #94a3b8; }
+/* Forklaringsblokk for scoringsparametrene */
+.param-doc { font-size: 0.72rem; color: #475569; line-height: 1.5; background: #f8fafc;
+        border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; }
+.param-doc dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 5px 12px; }
+.param-doc dt { font-weight: 700; color: #1e293b; white-space: nowrap; }
+.param-doc dd { margin: 0; }
+.param-doc dd em { font-style: normal; color: #0f766e; font-weight: 600; }
+.param-doc .pd-foot { margin-top: 9px; padding-top: 8px; border-top: 1px solid #e2e8f0; color: #64748b; }
+@media (max-width: 620px) { .param-doc dl { grid-template-columns: 1fr; gap: 2px; }
+        .param-doc dd { margin-bottom: 6px; } }
 .card h2 { font-size: 0.95rem; margin-bottom: 10px; color: #2d3748; }
 label { font-size: 0.8rem; color: #475569; display: block; margin-bottom: 4px; }
 input[type="password"] { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1;
@@ -559,6 +569,36 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
   <summary>⚖️ Scoringsparametre per elv <span class="sum-hint">(sjelden brukt)</span></summary>
 <div class="card">
   <h2>⚖️ Scoringsparametre per elv</h2>
+  <div class="param-doc">
+    <dl>
+      <dt>rate / volum</dt>
+      <dd>Fordeler scoren mellom fangst per døgn og totalt antall fangster i vannføringsintervallet.
+          <em>Mer rate:</em> små soner som fisker effektivt på få døgn løftes.
+          <em>Mer volum:</em> store soner med mange fangster dominerer.</dd>
+
+      <dt>shrinkC soner</dt>
+      <dd>Hvor mange pseudo-døgn en sones tall trekkes mot elvesnittet når intervallet har lite data.
+          <em>Høyere:</em> tynne intervaller gir færre falske toppscorer.
+          <em>Lavere:</em> tallene følger rådata tettere, og få fangster gir større utslag.</dd>
+
+      <dt>shrinkC elv</dt>
+      <dd>Det samme for elvescoren. Elva har mer data enn en enkeltsone og tåler en lavere verdi.</dd>
+
+      <dt>knee</dt>
+      <dd>Hvilken score en god, men ikke ekstrem dag (P90-nivå) skal få.
+          <em>Høyere:</em> normaldager spres over et bredere spenn, toppen komprimeres hardere.
+          <em>Lavere:</em> normaldager får lavere score, og mer av skalaen spares til rekorddøgnene.</dd>
+
+      <dt>spark maks</dt>
+      <dd>Minste tak på sparkline-skalaen (m³/s). Påvirker kun visning.
+          <em>Høyere:</em> kurven flater ut. <em>Lavere:</em> små endringer blir tydeligere, men høy vannføring klippes.</dd>
+
+      <dt>spark normal</dt>
+      <dd>Stiplet referanselinje i sparkline (m³/s). Påvirker kun visning. Anbefalt: median sesongvannføring.</dd>
+    </dl>
+    <div class="pd-foot">Scoren regnes ut i nettleseren fra <code>data/config.json</code>, så endringer slår inn
+      med én gang de er lagret. Historiske fangsttall røres ikke — det er bare vektingen som endres.</div>
+  </div>
   <div id="rivers"><div class="hint">Laster config …</div></div>
   <div class="save-row">
     <button id="saveBtn" onclick="saveConfig()" disabled>💾 Lagre til GitHub</button>
