@@ -43,6 +43,12 @@ h1 { font-size: 1.25rem; margin-bottom: 4px; }
         padding: 10px 16px; list-style-position: inside; }
 .card-details[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
 .card-details .card { border-radius: 0 0 12px 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 0; }
+/* Media-seksjonen inneholder to kort side ved side i en .layout, ikke ett
+   sammenhengende kort. De skal derfor beholde full avrunding, og summary
+   skal ikke limes fast til noe. */
+#mediaDetails > .layout { margin-top: 10px; }
+#mediaDetails .layout .card { border-radius: 12px; margin-bottom: 0; }
+#mediaDetails[open] > summary { border-radius: 12px; margin-bottom: 0; }
 .sum-hint { font-weight: 400; font-size: 0.7rem; color: #94a3b8; }
 .card h2 { font-size: 0.95rem; margin-bottom: 10px; color: #2d3748; }
 label { font-size: 0.8rem; color: #475569; display: block; margin-bottom: 4px; }
@@ -313,6 +319,8 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
 </div>
 </details>
 
+<details class="card-details" id="mediaDetails" open>
+  <summary>🎬 Media <span class="sum-hint">(video og bilder — registrering og oversikt)</span></summary>
 <div class="layout">
   <div class="col-left">
     <div class="card tab-card">
@@ -425,6 +433,7 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
 </div>
   </div>
 </div>
+</details>
 
 <details class="card-details" id="sesongDetails">
   <summary>📅 Sesong <span class="sum-hint">(markører på oversiktskartet + Sesong-raden i dashbordene)</span></summary>
