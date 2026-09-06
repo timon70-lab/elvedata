@@ -196,6 +196,62 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .zi-boom { display:flex; gap:8px; align-items:center; margin-top:8px; padding:8px 10px; background:#fffbea; border:1px solid #fbd38d; border-radius:8px; }
 .zi-boom-icon { font-size:1.1rem; line-height:1; flex-shrink:0; }
 .zi-boom-hdr { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#975a16; }
+.zi-boom-hdr-row { display:flex; align-items:center; gap:7px; }
+.zi-boom-more { flex-shrink:0; background:#fbd38d; color:#744210; border:none; border-radius:5px;
+  font-size:0.55rem; font-weight:700; padding:2px 6px; cursor:pointer; font-family:inherit;
+  line-height:1.4; white-space:nowrap; }
+.zi-boom-more:hover { background:#f6ad55; }
+.zi-boom-more:focus-visible { outline:2px solid #975a16; outline-offset:2px; }
+
+/* --- Rekorddag-popup --- */
+.rd-overlay { position:fixed; inset:0; background:rgba(15,45,74,0.55); display:none;
+  align-items:flex-start; justify-content:center; padding:24px 12px; overflow-y:auto; z-index:1200; }
+.rd-overlay.open { display:flex; }
+.rd { width:100%; max-width:460px; background:#fff; border-radius:14px; overflow:hidden;
+  box-shadow:0 8px 32px rgba(0,0,0,0.25); }
+.rd-head { background:#fffbea; border-bottom:2px solid #fbd38d; padding:12px 14px; position:relative; }
+.rd-kicker { font-size:0.58rem; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:#975a16; }
+.rd-title { font-size:0.95rem; font-weight:800; color:#744210; margin-top:2px; }
+.rd-sub { font-size:0.63rem; color:#a1783c; margin-top:3px; }
+.rd-close { position:absolute; top:9px; right:10px; background:none; border:none; font-size:1.1rem;
+  color:#975a16; cursor:pointer; line-height:1; padding:3px 6px; border-radius:5px; }
+.rd-close:hover { background:#fbd38d; }
+.rd-body { padding:13px 14px 16px; }
+.rd-kpi { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-bottom:13px; }
+.rd-kpi div { background:#f7fafc; border-radius:7px; padding:6px 8px; }
+.rd-kpi b { display:block; font-size:0.85rem; font-weight:800; color:#1a202c;
+  font-variant-numeric:tabular-nums; line-height:1.2; }
+.rd-kpi span { display:block; font-size:0.52rem; text-transform:uppercase; letter-spacing:0.04em;
+  color:#94a3b8; font-weight:700; margin-top:2px; }
+.rd-h { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em;
+  color:#94a3b8; margin:14px 0 6px; }
+.rd-lede { font-size:0.68rem; color:#2d3748; line-height:1.55; background:#f0fff4;
+  border-left:3px solid #9ae6b4; border-radius:4px; padding:7px 9px; }
+.rd-lede strong { color:#22543d; }
+table.rd-tbl { width:100%; border-collapse:collapse; font-size:0.66rem;
+  font-variant-numeric:tabular-nums; table-layout:fixed; }
+table.rd-tbl th { text-align:left; font-size:0.55rem; text-transform:uppercase; letter-spacing:0.04em;
+  color:#94a3b8; font-weight:700; padding:0 0 4px; }
+table.rd-tbl th.r, table.rd-tbl td.r { text-align:right; }
+table.rd-tbl th:nth-child(1), table.rd-tbl td:nth-child(1) { width:26px; color:#a0aec0; }
+table.rd-tbl th:nth-child(2), table.rd-tbl td:nth-child(2) { width:64px; padding-right:10px; }
+table.rd-tbl th:nth-child(3), table.rd-tbl td:nth-child(3) { width:74px; }
+table.rd-tbl td { padding:3px 0; border-top:1px solid #edf2f7; color:#4a5568; }
+table.rd-tbl td.w { font-weight:700; color:#1a202c; }
+table.rd-tbl tr.big td.w { color:#9b2c2c; }
+.rd-scroll { max-height:210px; overflow-y:auto; }
+.rd-tag { display:inline-block; font-size:0.55rem; font-weight:700; padding:1px 5px; border-radius:4px;
+  background:#e6fffa; color:#234e52; }
+.rd-tag.so { background:#ebf4ff; color:#2a4365; }
+.rd-txt { font-size:0.68rem; color:#4a5568; line-height:1.5; }
+.rd-txt strong { color:#1a202c; }
+.rd-foot { font-size:0.58rem; color:#a0aec0; line-height:1.45; margin-top:13px;
+  padding-top:9px; border-top:1px solid #edf2f7; }
+.rd svg { display:block; width:100%; height:auto; }
+.rd svg .ax { font-size:7.5px; fill:#94a3b8; font-family:'Segoe UI',system-ui,sans-serif; font-weight:400; }
+.rd svg .axb { font-size:7.5px; fill:#4a5568; font-weight:700; font-family:'Segoe UI',system-ui,sans-serif; }
+.rd svg .grid { stroke:#edf2f7; stroke-width:1; }
+.rd svg text { font-family:'Segoe UI',system-ui,sans-serif; }
 .zi-boom-txt { font-size:0.68rem; color:#744210; margin-top:1px; }
 .zi-record-txt { font-size:0.6rem; font-weight:700; color:#b7791f; margin-top:10px; }
 .zi-boom-cols { display:flex; gap:14px; width:100%; }
@@ -603,6 +659,10 @@ function priceColor(price) {
   return 'hsl(' + hue.toFixed(0) + ', 70%, 38%)';
 }
 const ZONE_TOOL_RATING = {"Sone 9 Kvelland":[{"name":"Sluk","stars":3},{"name":"Flue","stars":2},{"name":"Mark","stars":1}],"Sone 5 Bringsjord":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 14 Rudjord":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 1 Bjerga og Fidja":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 8 Prestegården":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 15 Vemestad ytre":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 7":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 6 Bergsaker":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone12 Vegge":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 4 Berge øvre":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2}],"Sone 18 Kvås":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 17 Moi":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 16 Vemestad øvre":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 13 Gitlestad":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 2 Årnes":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 10 Grøvan og Foss":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 3 Kvavik":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Sone 11 Foss øvre":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2}],"Kvåsfossen til Gysfossen":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}],"Gysfossen til Lygne":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2}]};
+// Detaljer om hver sones rekorddag, brukt av "Les mer"-popup-en.
+// Soner med faerre enn 5 fangster paa rekorddagen er utelatt - da har
+// popup-en for lite aa vise. Fiskernavn lagres ikke; bare antallet.
+const REKORDDAG = {"Sone 9 Kvelland":{"dato":"2022-08-03","ant":41,"laks":35,"sjo":6,"kg":95.7,"snitt":2.73,"maks":6.0,"vf":5,"fangster":[[6.0,"Laks","Meitemark"],[5.7,"Laks","Sluk"],[5.5,"Laks","Stang"],[5.1,"Laks","Stang"],[5.0,"Laks","Sluk"],[5.0,"Laks","Sluk"],[4.9,"Laks","Meitemark"],[4.8,"Laks","Sluk"],[3.0,"Laks","Meitemark"],[2.8,"Laks","Flue"],[2.8,"Laks","Flue"],[2.5,"Laks","Sluk"],[2.5,"Laks","Stang"],[2.5,"Laks","Sluk"],[2.4,"Laks","Sluk"],[2.2,"Laks","Sluk"],[2.2,"Laks","Sluk"],[2.1,"Laks","Sluk"],[2.1,"Laks","Sluk"],[2.0,"Laks","Sluk"],[2.0,"Laks","Flue"],[2.0,"Laks","Flue"],[2.0,"Laks","Stang"],[2.0,"Laks","Sluk"],[1.9,"Laks","Sluk"],[1.8,"Laks","Meitemark"],[1.8,"Sjøørret","Sluk"],[1.8,"Sjøørret","Flue"],[1.8,"Laks","Sluk"],[1.7,"Laks","Flue"],[1.5,"Laks","Sluk"],[1.5,"Laks","Flue"],[1.5,"Sjøørret","Stang"],[1.5,"Laks","Meitemark"],[1.5,"Laks","Sluk"],[1.2,"Laks","Sluk"],[1.2,"Laks","Sluk"],[1.0,"Laks","Flue"],[0.6,"Sjøørret","Sluk"],[0.5,"Sjøørret","Sluk"],[0.5,"Sjøørret","Sluk"]],"rundt":[{"d":"30.7","n":1,"vf":2.6},{"d":"31.7","n":0,"vf":2.7},{"d":"1.8","n":0,"vf":3.1},{"d":"2.8","n":0,"vf":3.4},{"d":"3.8","n":41,"vf":5.0},{"d":"4.8","n":13,"vf":6.7},{"d":"5.8","n":7,"vf":7.5},{"d":"6.8","n":6,"vf":7.5},{"d":"7.8","n":5,"vf":7.0}],"redskap":{"Sluk":23,"Flue":8,"Meitemark":5,"Stang":5},"rang":[["2022-08-03",41],["2020-07-22",32],["2024-07-11",31]],"fiskere":28},"Sone 15 Vemestad ytre":{"dato":"2024-08-11","ant":9,"laks":9,"sjo":0,"kg":21.6,"snitt":2.4,"maks":4.3,"vf":13,"fangster":[[4.3,"Laks","Flue"],[3.0,"Laks","Flue"],[2.5,"Laks","Flue"],[2.3,"Laks","Sluk"],[2.0,"Laks","Flue"],[2.0,"Laks","Flue"],[1.9,"Laks","Flue"],[1.8,"Laks","Flue"],[1.8,"Laks","Flue"]],"rundt":[{"d":"7.8","n":0,"vf":2.2},{"d":"8.8","n":0,"vf":2.8},{"d":"9.8","n":3,"vf":4.6},{"d":"10.8","n":5,"vf":9.7},{"d":"11.8","n":9,"vf":13.9},{"d":"12.8","n":0,"vf":14.4},{"d":"13.8","n":0,"vf":12.9},{"d":"14.8","n":1,"vf":11.1},{"d":"15.8","n":1,"vf":10.2}],"redskap":{"Flue":8,"Sluk":1},"rang":[["2024-08-11",9],["2018-08-19",8],["2018-08-23",8]],"fiskere":6},"Sone 5 Bringsjord":{"dato":"2021-08-15","ant":10,"laks":8,"sjo":2,"kg":19.4,"snitt":2.42,"maks":3.6,"vf":14,"fangster":[[3.6,"Laks","Flue"],[3.5,"Laks","Flue"],[3.0,"Laks","Flue"],[2.0,"Laks","Flue"],[2.0,"Laks","Flue"],[1.9,"Laks","Flue"],[1.9,"Laks","Flue"],[1.5,"Laks","Flue"],[0.4,"Sjøørret","Flue"],[0.4,"Sjøørret","Flue"]],"rundt":[{"d":"11.8","n":1,"vf":12.7},{"d":"12.8","n":2,"vf":12.7},{"d":"13.8","n":2,"vf":11.5},{"d":"14.8","n":4,"vf":11.5},{"d":"15.8","n":10,"vf":14.3},{"d":"16.8","n":0,"vf":15.5},{"d":"17.8","n":0,"vf":14.6},{"d":"18.8","n":1,"vf":12.3},{"d":"19.8","n":0,"vf":10.3}],"redskap":{"Flue":10},"rang":[["2021-08-15",10],["2021-07-09",9],["2018-08-19",9]],"fiskere":7},"Sone 14 Rudjord":{"dato":"2016-07-28","ant":7,"laks":6,"sjo":1,"kg":17.3,"snitt":2.88,"maks":5.6,"vf":4,"fangster":[[5.6,"Laks","Flue"],[5.4,"Laks","Sluk"],[1.8,"Laks","Flue"],[1.8,"Laks","Flue"],[1.7,"Laks","Flue"],[1.0,"Laks","Flue"],[0.4,"Sjøørret","Flue"]],"rundt":[{"d":"24.7","n":0,"vf":3.0},{"d":"25.7","n":0,"vf":2.7},{"d":"26.7","n":0,"vf":2.6},{"d":"27.7","n":0,"vf":2.7},{"d":"28.7","n":7,"vf":4.4},{"d":"29.7","n":1,"vf":7.1},{"d":"30.7","n":5,"vf":12.5},{"d":"31.7","n":1,"vf":15.0},{"d":"1.8","n":0,"vf":15.6}],"redskap":{"Flue":6,"Sluk":1},"rang":[["2016-07-28",7],["2016-07-30",5],["2019-07-24",5]],"fiskere":5},"Sone 1 Bjerga og Fidja":{"dato":"2021-07-29","ant":6,"laks":4,"sjo":2,"kg":6.7,"snitt":1.68,"maks":2.0,"vf":11,"fangster":[[2.2,"Sjøørret","Flue"],[2.0,"Laks","Flue"],[2.0,"Laks","Flue"],[1.7,"Laks","Flue"],[1.5,"Sjøørret","Flue"],[1.0,"Laks","Flue"]],"rundt":[{"d":"25.7","n":2,"vf":1.6},{"d":"26.7","n":0,"vf":1.5},{"d":"27.7","n":0,"vf":1.7},{"d":"28.7","n":1,"vf":4.0},{"d":"29.7","n":6,"vf":11.8},{"d":"30.7","n":3,"vf":20.0},{"d":"31.7","n":2,"vf":20.0},{"d":"1.8","n":0,"vf":16.6},{"d":"2.8","n":0,"vf":13.5}],"redskap":{"Flue":6},"rang":[["2017-08-09",6],["2021-07-29",6],["2017-08-06",5]],"fiskere":1},"Sone 8 Prestegården":{"dato":"2018-08-11","ant":26,"laks":24,"sjo":2,"kg":56.0,"snitt":2.33,"maks":6.0,"vf":10,"fangster":[[6.0,"Laks","Flue"],[5.0,"Laks","Sluk"],[4.8,"Laks","Flue"],[4.5,"Laks","Flue"],[2.7,"Laks","Flue"],[2.2,"Laks","Flue"],[2.0,"Laks","Flue"],[2.0,"Laks","Flue"],[2.0,"Laks","Flue"],[2.0,"Laks","Flue"],[2.0,"Laks","Flue"],[2.0,"Laks","Flue"],[1.9,"Laks","Flue"],[1.8,"Laks","Flue"],[1.8,"Laks","Flue"],[1.8,"Laks","Flue"],[1.7,"Laks","Flue"],[1.7,"Laks","Flue"],[1.7,"Laks","Flue"],[1.5,"Laks","Flue"],[1.5,"Laks","Sluk"],[1.5,"Laks","Flue"],[1.2,"Laks","Flue"],[1.0,"Sjøørret","Sluk"],[0.9,"Sjøørret","Flue"],[0.7,"Laks","Flue"]],"rundt":[{"d":"7.8","n":0,"vf":0.9},{"d":"8.8","n":0,"vf":1.0},{"d":"9.8","n":1,"vf":1.0},{"d":"10.8","n":1,"vf":3.4},{"d":"11.8","n":26,"vf":10.7},{"d":"12.8","n":7,"vf":14.0},{"d":"13.8","n":0,"vf":13.5},{"d":"14.8","n":0,"vf":11.6},{"d":"15.8","n":5,"vf":9.8}],"redskap":{"Flue":23,"Sluk":3},"rang":[["2018-08-11",26],["2016-08-04",13],["2018-08-22",12]],"fiskere":13},"Sone 4 Berge øvre":{"dato":"2019-08-28","ant":6,"laks":1,"sjo":5,"kg":2.5,"snitt":2.5,"maks":2.5,"vf":13,"fangster":[[3.1,"Sjøørret","Flue"],[2.5,"Laks","Flue"],[1.2,"Sjøørret","Flue"],[1.0,"Sjøørret","Flue"],[0.8,"Sjøørret","Flue"],[0.5,"Sjøørret","Flue"]],"rundt":[{"d":"24.8","n":0,"vf":46.7},{"d":"25.8","n":4,"vf":34.6},{"d":"26.8","n":0,"vf":24.9},{"d":"27.8","n":0,"vf":18.3},{"d":"28.8","n":6,"vf":14.0},{"d":"29.8","n":0,"vf":11.1},{"d":"30.8","n":0,"vf":9.1},{"d":"31.8","n":0,"vf":8.4},{"d":"1.9","n":0,"vf":null}],"redskap":{"Flue":6},"rang":[["2019-08-28",6],["2018-08-11",6],["2018-08-10",4]],"fiskere":3},"Sone 7":{"dato":"2020-08-02","ant":5,"laks":5,"sjo":0,"kg":9.8,"snitt":1.96,"maks":2.7,"vf":23,"fangster":[[2.7,"Laks","Flue"],[2.7,"Laks","Flue"],[1.8,"Laks","Flue"],[1.5,"Laks","Sluk"],[1.1,"Laks","Flue"]],"rundt":[{"d":"29.7","n":0,"vf":74.9},{"d":"30.7","n":1,"vf":68.6},{"d":"31.7","n":1,"vf":50.4},{"d":"1.8","n":0,"vf":33.5},{"d":"2.8","n":5,"vf":23.2},{"d":"3.8","n":0,"vf":16.9},{"d":"4.8","n":0,"vf":12.7},{"d":"5.8","n":0,"vf":12.1},{"d":"6.8","n":2,"vf":16.6}],"redskap":{"Flue":4,"Sluk":1},"rang":[["2016-08-03",5],["2020-08-02",5],["2018-08-17",5]],"fiskere":2},"Sone 6 Bergsaker":{"dato":"2018-08-29","ant":10,"laks":9,"sjo":1,"kg":20.5,"snitt":2.28,"maks":5.5,"vf":13,"fangster":[[5.5,"Laks","Flue"],[2.7,"Laks","Flue"],[2.5,"Laks","Flue"],[2.2,"Laks","Flue"],[1.7,"Laks","Flue"],[1.6,"Laks","Flue"],[1.6,"Sjøørret","Flue"],[1.5,"Laks","Flue"],[1.4,"Laks","Flue"],[1.4,"Laks","Flue"]],"rundt":[{"d":"25.8","n":0,"vf":15.3},{"d":"26.8","n":2,"vf":13.7},{"d":"27.8","n":0,"vf":13.0},{"d":"28.8","n":0,"vf":13.9},{"d":"29.8","n":10,"vf":13.8},{"d":"30.8","n":3,"vf":20.9},{"d":"31.8","n":6,"vf":23.4},{"d":"1.9","n":0,"vf":null},{"d":"2.9","n":0,"vf":null}],"redskap":{"Flue":10},"rang":[["2018-08-29",10],["2020-07-25",9],["2019-07-04",7]],"fiskere":2},"Sone12 Vegge":{"dato":"2022-08-03","ant":8,"laks":8,"sjo":0,"kg":22.6,"snitt":2.83,"maks":8.0,"vf":5,"fangster":[[8.0,"Laks","Sluk"],[4.0,"Laks","Meitemark"],[3.0,"Laks","Flue"],[1.8,"Laks","Sluk"],[1.7,"Laks","Flue"],[1.6,"Laks","Stang"],[1.5,"Laks","Meitemark"],[1.0,"Laks","Flue"]],"rundt":[{"d":"30.7","n":0,"vf":2.6},{"d":"31.7","n":1,"vf":2.7},{"d":"1.8","n":0,"vf":3.1},{"d":"2.8","n":0,"vf":3.4},{"d":"3.8","n":8,"vf":5.0},{"d":"4.8","n":3,"vf":6.7},{"d":"5.8","n":3,"vf":7.5},{"d":"6.8","n":1,"vf":7.5},{"d":"7.8","n":2,"vf":7.0}],"redskap":{"Flue":3,"Sluk":2,"Meitemark":2,"Stang":1},"rang":[["2022-08-03",8],["2018-08-18",7],["2017-08-05",6]],"fiskere":8},"Sone 18 Kvås":{"dato":"2018-08-17","ant":18,"laks":18,"sjo":0,"kg":47.5,"snitt":2.64,"maks":5.4,"vf":21,"fangster":[[5.4,"Laks","Flue"],[5.2,"Laks","Sluk"],[5.0,"Laks","Sluk"],[4.5,"Laks","Meitemark"],[4.4,"Laks","Sluk"],[2.5,"Laks","Sluk"],[2.4,"Laks","Sluk"],[2.3,"Laks","Flue"],[2.3,"Laks","Flue"],[2.0,"Laks","Flue"],[2.0,"Laks","Sluk"],[1.9,"Laks","Flue"],[1.7,"Laks","Flue"],[1.6,"Laks","Flue"],[1.5,"Laks","Sluk"],[1.0,"Laks","Sluk"],[1.0,"Laks","Sluk"],[0.8,"Laks","Flue"]],"rundt":[{"d":"13.8","n":0,"vf":13.5},{"d":"14.8","n":0,"vf":11.6},{"d":"15.8","n":12,"vf":9.8},{"d":"16.8","n":7,"vf":9.6},{"d":"17.8","n":18,"vf":21.1},{"d":"18.8","n":12,"vf":34.3},{"d":"19.8","n":5,"vf":38.6},{"d":"20.8","n":0,"vf":32.8},{"d":"21.8","n":0,"vf":24.5}],"redskap":{"Sluk":9,"Flue":8,"Meitemark":1},"rang":[["2018-08-17",18],["2023-07-19",14],["2020-07-29",14]],"fiskere":11},"Sone 17 Moi":{"dato":"2025-08-06","ant":7,"laks":6,"sjo":1,"kg":16.7,"snitt":2.78,"maks":5.0,"vf":58,"fangster":[[5.0,"Laks","Flue"],[4.3,"Laks","Sluk"],[3.0,"Laks","Flue"],[1.5,"Laks","Flue"],[1.5,"Laks","Sluk"],[1.4,"Laks","Flue"],[1.2,"Sjøørret","Flue"]],"rundt":[{"d":"2.8","n":0,"vf":4.6},{"d":"3.8","n":0,"vf":4.8},{"d":"4.8","n":0,"vf":6.3},{"d":"5.8","n":0,"vf":23.8},{"d":"6.8","n":7,"vf":58.7},{"d":"7.8","n":0,"vf":54.2},{"d":"8.8","n":3,"vf":41.7},{"d":"9.8","n":1,"vf":32.2},{"d":"10.8","n":0,"vf":28.8}],"redskap":{"Flue":5,"Sluk":2},"rang":[["2018-08-18",7],["2025-08-06",7],["2018-08-30",6]],"fiskere":5},"Sone 16 Vemestad øvre":{"dato":"2025-08-06","ant":6,"laks":6,"sjo":0,"kg":13.3,"snitt":2.22,"maks":3.5,"vf":58,"fangster":[[3.5,"Laks","Sluk"],[2.5,"Laks","Sluk"],[2.1,"Laks","Flue"],[2.0,"Laks","Sluk"],[1.7,"Laks","Flue"],[1.5,"Laks","Sluk"]],"rundt":[{"d":"2.8","n":1,"vf":4.6},{"d":"3.8","n":0,"vf":4.8},{"d":"4.8","n":0,"vf":6.3},{"d":"5.8","n":0,"vf":23.8},{"d":"6.8","n":6,"vf":58.7},{"d":"7.8","n":1,"vf":54.2},{"d":"8.8","n":3,"vf":41.7},{"d":"9.8","n":0,"vf":32.2},{"d":"10.8","n":1,"vf":28.8}],"redskap":{"Sluk":4,"Flue":2},"rang":[["2025-08-06",6],["2019-08-21",6],["2019-08-18",6]],"fiskere":3},"Sone 10 Grøvan og Foss":{"dato":"2023-07-19","ant":7,"laks":7,"sjo":0,"kg":18.1,"snitt":2.59,"maks":4.9,"vf":46,"fangster":[[4.9,"Laks","Flue"],[3.2,"Laks","Flue"],[3.0,"Laks","Flue"],[2.2,"Laks","Flue"],[1.8,"Laks","Flue"],[1.6,"Laks","Flue"],[1.4,"Laks","Flue"]],"rundt":[{"d":"15.7","n":2,"vf":13.8},{"d":"16.7","n":0,"vf":16.6},{"d":"17.7","n":0,"vf":39.8},{"d":"18.7","n":0,"vf":57.8},{"d":"19.7","n":7,"vf":46.0},{"d":"20.7","n":2,"vf":32.0},{"d":"21.7","n":0,"vf":22.4},{"d":"22.7","n":1,"vf":16.4},{"d":"23.7","n":0,"vf":12.4}],"redskap":{"Flue":7},"rang":[["2023-07-19",7],["2022-08-03",5],["2023-07-13",5]],"fiskere":4},"Kvåsfossen til Gysfossen":{"dato":"2021-08-19","ant":8,"laks":6,"sjo":2,"kg":24.8,"snitt":4.13,"maks":6.0,"vf":10,"fangster":[[6.0,"Laks","Flue"],[5.0,"Laks","Flue"],[4.0,"Laks","Flue"],[3.5,"Laks","Flue"],[3.2,"Laks","Stang"],[3.1,"Laks","Flue"],[1.0,"Sjøørret","Flue"],[0.6,"Sjøørret","Flue"]],"rundt":[{"d":"15.8","n":4,"vf":14.3},{"d":"16.8","n":0,"vf":15.5},{"d":"17.8","n":0,"vf":14.6},{"d":"18.8","n":3,"vf":12.3},{"d":"19.8","n":8,"vf":10.3},{"d":"20.8","n":1,"vf":8.5},{"d":"21.8","n":5,"vf":7.0},{"d":"22.8","n":2,"vf":5.8},{"d":"23.8","n":0,"vf":4.8}],"redskap":{"Flue":7,"Stang":1},"rang":[["2021-08-19",8],["2022-08-04",6],["2022-08-03",5]],"fiskere":3}};
 const BOOM_DAYS = {"Sone 9 Kvelland":{"date":"2022-08-03","count":41,"flow":5},"Sone 15 Vemestad ytre":{"date":"2024-08-11","count":9,"flow":13},"Sone 5 Bringsjord":{"date":"2021-08-15","count":10,"flow":14},"Sone 14 Rudjord":{"date":"2016-07-28","count":7,"flow":4},"Sone 1 Bjerga og Fidja":{"date":"2021-07-29","count":6,"flow":11},"Sone 8 Prestegården":{"date":"2018-08-11","count":26,"flow":10},"Sone 4 Berge øvre":{"date":"2019-08-28","count":6,"flow":13},"Sone 7":{"date":"2020-08-02","count":5,"flow":23},"Sone 6 Bergsaker":{"date":"2018-08-29","count":10,"flow":13},"Sone12 Vegge":{"date":"2022-08-03","count":8,"flow":5},"Sone 18 Kvås":{"date":"2018-08-17","count":18,"flow":21},"Sone 17 Moi":{"date":"2025-08-06","count":7,"flow":58},"Sone 16 Vemestad øvre":{"date":"2025-08-06","count":6,"flow":58},"Sone 2 Årnes":{"date":"2018-08-31","count":4,"flow":23},"Sone 10 Grøvan og Foss":{"date":"2023-07-19","count":7,"flow":46},"Sone 3 Kvavik":{"date":"2018-08-02","count":4,"flow":0},"Sone 11 Foss øvre":{"date":"2018-08-30","count":4,"flow":20},"Kvåsfossen til Gysfossen":{"date":"2021-08-19","count":8,"flow":10},"Gysfossen til Lygne":{"date":"2025-07-31","count":3,"flow":6}};
 
 // Tyngste registrerte laks per sone (Art/Fisk=="Laks"), fra fangstloggen. Ved lik vekt vinner siste fangst.
@@ -1277,7 +1337,10 @@ function showZoneInfo(zone, scrollTo = true) {
 
   const boomColHtml = '<div style="display:flex;gap:8px;align-items:center;">'
     + '<span class="zi-boom-icon">🏆</span>'
-    + '<div><div class="zi-boom-hdr">Rekorddag</div>'
+    + '<div><div class="zi-boom-hdr-row"><span class="zi-boom-hdr">Rekorddag</span>'
+    + (REKORDDAG[zone] ? '<button class="zi-boom-more" onclick="openRekorddag(\''
+        + zone.replace(/'/g, "\\'") + '\')">Les mer &rarr;</button>' : '')
+    + '</div>'
     + '<div class="zi-boom-txt">' + boomTxt + '</div>'
     + rekordlaksHtml + '</div>'
     + '</div>';
@@ -1962,9 +2025,152 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.061</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.062</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
+<div class="rd-overlay" id="rdOverlay"
+     onclick="if(event.target===this)lukkRekorddag()"></div>
+<script>
+/* Rekorddag-popup. Bygger innholdet fra REKORDDAG naar den aapnes, slik at
+   ingenting rendres for soner brukeren aldri klikker paa. */
+function _rdNum(x, d) { return x == null ? '\u2013' : x.toFixed(d).replace('.', ','); }
+
+function _rdGraf(rundt) {
+  var ns = rundt.map(function (r) { return r.n; });
+  var vfs = rundt.filter(function (r) { return r.vf != null; }).map(function (r) { return r.vf; });
+  var maxN = Math.max.apply(null, ns) || 1;
+  var loV = vfs.length ? Math.min.apply(null, vfs) : 0;
+  var hiV = vfs.length ? Math.max.apply(null, vfs) : 1;
+  if (hiV - loV < 0.5) { hiV = loV + 0.5; }
+  var pad = (hiV - loV) * 0.25; loV -= pad; hiV += pad;
+  var xs = rundt.map(function (_, i) { return 42 + 32 * i; });
+  var top = 2, base = 68, mid = Math.floor(rundt.length / 2);
+  var s = '<svg viewBox="0 0 320 116" role="img" aria-label="Fangst og vannf\u00f8ring d\u00f8gnene rundt rekorddagen">';
+  [0, 0.5, 1].forEach(function (frac) {
+    var y = base - frac * (base - top);
+    s += '<line class="grid" x1="26" y1="' + y.toFixed(1) + '" x2="314" y2="' + y.toFixed(1) + '"/>'
+       + '<text class="ax" x="22" y="' + (y + 3).toFixed(1) + '" text-anchor="end">'
+       + Math.round(frac * maxN) + '</text>';
+  });
+  rundt.forEach(function (r, i) {
+    var h = (r.n / maxN) * (base - top);
+    s += '<rect x="' + (xs[i] - 10) + '" y="' + (base - h).toFixed(1) + '" width="20" height="'
+       + h.toFixed(1) + '" rx="1.5" fill="' + (i === mid ? '#9b2c2c' : '#e2b3b3') + '"/>';
+    if (i === mid && h > 14) {
+      s += '<text x="' + xs[i] + '" y="' + (base - h + 10).toFixed(1) + '" text-anchor="middle" '
+         + 'style="font-size:8px;font-weight:700;fill:#fff">' + r.n + '</text>';
+    }
+    s += '<text class="' + (i === mid ? 'axb' : 'ax') + '" x="' + xs[i]
+       + '" y="77" text-anchor="middle">' + r.d + '</text>';
+  });
+  var pts = [];
+  rundt.forEach(function (r, i) {
+    if (r.vf == null) { return; }
+    pts.push(xs[i] + ',' + (100 - (r.vf - loV) / (hiV - loV) * 14).toFixed(1));
+  });
+  if (pts.length > 1) {
+    s += '<text class="ax" x="26" y="88" style="fill:#3182ce">Vannf\u00f8ring</text>'
+       + '<polyline fill="none" stroke="#3182ce" stroke-width="1.6" stroke-linejoin="round" points="'
+       + pts.join(' ') + '"/>';
+    rundt.forEach(function (r, i) {
+      if (r.vf == null) { return; }
+      if (i === mid) {
+        s += '<circle cx="' + xs[i] + '" cy="'
+           + (100 - (r.vf - loV) / (hiV - loV) * 14).toFixed(1) + '" r="2.4" fill="#3182ce"/>';
+      }
+      s += '<text class="' + (i === mid ? 'axb' : 'ax') + '" x="' + xs[i] + '" y="112" '
+         + 'text-anchor="middle" style="fill:' + (i === mid ? '#2b6cb0' : '#3182ce') + '">'
+         + _rdNum(r.vf, 1) + '</text>';
+    });
+  }
+  return s + '</svg>';
+}
+
+function _rdLede(d) {
+  var mid = Math.floor(d.rundt.length / 2), r = d.rundt;
+  var naa = r[mid].vf, foer = r[1] ? r[1].vf : null;
+  var vann = '';
+  if (naa != null && foer != null) {
+    if (naa > foer * 1.15)      { vann = 'Dagen kom p\u00e5 <strong>stigende vann</strong>. Elva gikk fra ' + _rdNum(foer, 1) + ' til ' + _rdNum(naa, 1) + ' m\u00b3/s i l\u00f8pet av tre d\u00f8gn. '; }
+    else if (naa < foer * 0.85) { vann = 'Dagen kom p\u00e5 <strong>fallende vann</strong>, ned fra ' + _rdNum(foer, 1) + ' til ' + _rdNum(naa, 1) + ' m\u00b3/s p\u00e5 tre d\u00f8gn. '; }
+    else                        { vann = 'Vannf\u00f8ringen var <strong>stabil</strong> rundt ' + _rdNum(naa, 1) + ' m\u00b3/s i dagene f\u00f8r. '; }
+  }
+  var andre = r.filter(function (x, i) { return i !== mid; }).map(function (x) { return x.n; });
+  var best = andre.length ? Math.max.apply(null, andre) : 0;
+  var uke = best >= d.ant * 0.6
+    ? 'Hele uka fisket godt \u2013 beste nabod\u00f8gn ga ' + best + ' fangster, s\u00e5 rekorden var toppen av en oppgang.'
+    : 'D\u00f8gnene rundt var langt svakere \u2013 beste nabod\u00f8gn ga ' + best + ' fangster.';
+  return vann + uke;
+}
+
+function openRekorddag(zone) {
+  var d = REKORDDAG[zone];
+  if (!d) { return; }
+  var bd = new Date(d.dato + 'T00:00:00');
+  var UKEDAG = ['S\u00f8ndag','Mandag','Tirsdag','Onsdag','Torsdag','Fredag','L\u00f8rdag'];
+  var datoLbl = UKEDAG[bd.getDay()] + ' ' + bd.getDate() + '. '
+              + MONTH_NAMES_FULL[bd.getMonth()] + ' ' + bd.getFullYear();
+
+  var celler = [
+    '<div><b>' + d.laks + '</b><span>laks</span></div>',
+    '<div><b>' + _rdNum(d.kg, 1) + '</b><span>kg totalt</span></div>'
+  ];
+  if (d.fiskere != null) { celler.push('<div><b>' + d.fiskere + '</b><span>fiskere</span></div>'); }
+  else if (d.sjo) { celler.push('<div><b>' + d.sjo + '</b><span>sj\u00f8\u00f8rret</span></div>'); }
+  celler.push('<div><b>' + _rdNum(d.snitt, 2) + '</b><span>kg snitt</span></div>');
+  celler.push('<div><b>' + _rdNum(d.maks, 1) + '</b><span>kg st\u00f8rste</span></div>');
+  celler.push('<div><b>' + (d.vf == null ? '\u2013' : _rdNum(d.vf, 1)) + '</b><span>m\u00b3/s</span></div>');
+
+  var rader = d.fangster.map(function (r, i) {
+    var so = r[1] === 'Sj\u00f8\u00f8rret';
+    return '<tr' + (r[0] >= 5 ? ' class="big"' : '') + '><td>' + (i + 1) + '</td>'
+      + '<td class="r w">' + _rdNum(r[0], 1) + ' kg</td>'
+      + '<td><span class="rd-tag' + (so ? ' so' : '') + '">' + r[1] + '</span></td>'
+      + '<td>' + r[2] + '</td></tr>';
+  }).join('');
+
+  var redskap = Object.keys(d.redskap).sort(function (a, b) { return d.redskap[b] - d.redskap[a]; });
+  var redskapTxt = redskap.length === 1
+    ? 'Samtlige ' + d.ant + ' fangster kom p\u00e5 <strong>' + redskap[0].toLowerCase() + '</strong>.'
+    : redskap.map(function (k) { return '<strong>' + k + '</strong> ' + d.redskap[k]; }).join(' \u00b7 ');
+
+  var rang = d.rang.map(function (x, i) {
+    var dd = new Date(x[0] + 'T00:00:00');
+    return (i + 1) + '. ' + dd.getDate() + '. ' + MONTH_NAMES_FULL[dd.getMonth()] + ' '
+      + dd.getFullYear() + ' \u2014 ' + x[1] + ' fangster';
+  }).join('<br>');
+
+  document.getElementById('rdOverlay').innerHTML =
+    '<div class="rd">'
+    + '<div class="rd-head">'
+      + '<button class="rd-close" onclick="lukkRekorddag()" aria-label="Lukk">&#10005;</button>'
+      + '<div class="rd-kicker">&#127942; Rekorddag &middot; ' + zone + '</div>'
+      + '<div class="rd-title">' + datoLbl + '</div>'
+      + '<div class="rd-sub">St\u00f8rste fangstd\u00f8gn i ' + zone + ' i perioden 2016–2026</div>'
+    + '</div>'
+    + '<div class="rd-body">'
+      + '<div class="rd-kpi">' + celler.join('') + '</div>'
+      + '<div class="rd-lede">' + _rdLede(d) + '</div>'
+      + '<div class="rd-h">Dagene rundt</div>' + _rdGraf(d.rundt)
+      + '<div class="rd-h">Alle fangstene</div>'
+      + '<div class="rd-scroll"><table class="rd-tbl">'
+        + '<tr><th>#</th><th class="r">Vekt</th><th>Art</th><th>Redskap</th></tr>' + rader
+      + '</table></div>'
+      + '<div class="rd-h">Redskap</div><div class="rd-txt">' + redskapTxt + '</div>'
+      + '<div class="rd-h">Rangering</div><div class="rd-txt">' + rang + '</div>'
+      + '<div class="rd-foot">Fangstdata fra Inatur lakseb\u00f8rs, vannf\u00f8ring fra NVE-stasjon Tingvatn.</div>'
+    + '</div></div>';
+  document.getElementById('rdOverlay').classList.add('open');
+}
+
+function lukkRekorddag() {
+  document.getElementById('rdOverlay').classList.remove('open');
+}
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') { lukkRekorddag(); }
+});
+</script>
 </body>
 </html>

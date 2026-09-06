@@ -196,6 +196,62 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .zi-boom { display:flex; gap:8px; align-items:center; margin-top:8px; padding:8px 10px; background:#fffbea; border:1px solid #fbd38d; border-radius:8px; }
 .zi-boom-icon { font-size:1.1rem; line-height:1; flex-shrink:0; }
 .zi-boom-hdr { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#975a16; }
+.zi-boom-hdr-row { display:flex; align-items:center; gap:7px; }
+.zi-boom-more { flex-shrink:0; background:#fbd38d; color:#744210; border:none; border-radius:5px;
+  font-size:0.55rem; font-weight:700; padding:2px 6px; cursor:pointer; font-family:inherit;
+  line-height:1.4; white-space:nowrap; }
+.zi-boom-more:hover { background:#f6ad55; }
+.zi-boom-more:focus-visible { outline:2px solid #975a16; outline-offset:2px; }
+
+/* --- Rekorddag-popup --- */
+.rd-overlay { position:fixed; inset:0; background:rgba(15,45,74,0.55); display:none;
+  align-items:flex-start; justify-content:center; padding:24px 12px; overflow-y:auto; z-index:1200; }
+.rd-overlay.open { display:flex; }
+.rd { width:100%; max-width:460px; background:#fff; border-radius:14px; overflow:hidden;
+  box-shadow:0 8px 32px rgba(0,0,0,0.25); }
+.rd-head { background:#fffbea; border-bottom:2px solid #fbd38d; padding:12px 14px; position:relative; }
+.rd-kicker { font-size:0.58rem; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:#975a16; }
+.rd-title { font-size:0.95rem; font-weight:800; color:#744210; margin-top:2px; }
+.rd-sub { font-size:0.63rem; color:#a1783c; margin-top:3px; }
+.rd-close { position:absolute; top:9px; right:10px; background:none; border:none; font-size:1.1rem;
+  color:#975a16; cursor:pointer; line-height:1; padding:3px 6px; border-radius:5px; }
+.rd-close:hover { background:#fbd38d; }
+.rd-body { padding:13px 14px 16px; }
+.rd-kpi { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-bottom:13px; }
+.rd-kpi div { background:#f7fafc; border-radius:7px; padding:6px 8px; }
+.rd-kpi b { display:block; font-size:0.85rem; font-weight:800; color:#1a202c;
+  font-variant-numeric:tabular-nums; line-height:1.2; }
+.rd-kpi span { display:block; font-size:0.52rem; text-transform:uppercase; letter-spacing:0.04em;
+  color:#94a3b8; font-weight:700; margin-top:2px; }
+.rd-h { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em;
+  color:#94a3b8; margin:14px 0 6px; }
+.rd-lede { font-size:0.68rem; color:#2d3748; line-height:1.55; background:#f0fff4;
+  border-left:3px solid #9ae6b4; border-radius:4px; padding:7px 9px; }
+.rd-lede strong { color:#22543d; }
+table.rd-tbl { width:100%; border-collapse:collapse; font-size:0.66rem;
+  font-variant-numeric:tabular-nums; table-layout:fixed; }
+table.rd-tbl th { text-align:left; font-size:0.55rem; text-transform:uppercase; letter-spacing:0.04em;
+  color:#94a3b8; font-weight:700; padding:0 0 4px; }
+table.rd-tbl th.r, table.rd-tbl td.r { text-align:right; }
+table.rd-tbl th:nth-child(1), table.rd-tbl td:nth-child(1) { width:26px; color:#a0aec0; }
+table.rd-tbl th:nth-child(2), table.rd-tbl td:nth-child(2) { width:64px; padding-right:10px; }
+table.rd-tbl th:nth-child(3), table.rd-tbl td:nth-child(3) { width:74px; }
+table.rd-tbl td { padding:3px 0; border-top:1px solid #edf2f7; color:#4a5568; }
+table.rd-tbl td.w { font-weight:700; color:#1a202c; }
+table.rd-tbl tr.big td.w { color:#9b2c2c; }
+.rd-scroll { max-height:210px; overflow-y:auto; }
+.rd-tag { display:inline-block; font-size:0.55rem; font-weight:700; padding:1px 5px; border-radius:4px;
+  background:#e6fffa; color:#234e52; }
+.rd-tag.so { background:#ebf4ff; color:#2a4365; }
+.rd-txt { font-size:0.68rem; color:#4a5568; line-height:1.5; }
+.rd-txt strong { color:#1a202c; }
+.rd-foot { font-size:0.58rem; color:#a0aec0; line-height:1.45; margin-top:13px;
+  padding-top:9px; border-top:1px solid #edf2f7; }
+.rd svg { display:block; width:100%; height:auto; }
+.rd svg .ax { font-size:7.5px; fill:#94a3b8; font-family:'Segoe UI',system-ui,sans-serif; font-weight:400; }
+.rd svg .axb { font-size:7.5px; fill:#4a5568; font-weight:700; font-family:'Segoe UI',system-ui,sans-serif; }
+.rd svg .grid { stroke:#edf2f7; stroke-width:1; }
+.rd svg text { font-family:'Segoe UI',system-ui,sans-serif; }
 .zi-boom-txt { font-size:0.68rem; color:#744210; margin-top:1px; }
 .zi-record-txt { font-size:0.6rem; font-weight:700; color:#b7791f; margin-top:10px; }
 .zi-boom-cols { display:flex; gap:14px; width:100%; }
@@ -444,6 +500,10 @@ function priceColor(price) {
   return 'hsl(' + hue.toFixed(0) + ', 70%, 38%)';
 }
 const ZONE_TOOL_RATING = {"Alle åpne soner":[{"name":"Flue","stars":3},{"name":"Sluk","stars":2},{"name":"Mark","stars":1}]};
+// Detaljer om hver sones rekorddag, brukt av "Les mer"-popup-en.
+// Soner med faerre enn 5 fangster paa rekorddagen er utelatt - da har
+// popup-en for lite aa vise. Fiskernavn lagres ikke; bare antallet.
+const REKORDDAG = {"Alle åpne soner":{"dato":"2020-09-26","ant":57,"laks":14,"sjo":43,"kg":32.9,"snitt":2.35,"maks":4.5,"vf":9,"fangster":[[4.5,"Laks","Flue"],[4.0,"Laks","Flue"],[2.9,"Laks","Sluk"],[2.8,"Laks","Flue"],[2.5,"Laks","Flue"],[2.2,"Laks","Sluk"],[2.1,"Sjøørret","Flue"],[2.0,"Laks","Flue"],[2.0,"Laks","Flue"],[2.0,"Laks","Flue"],[2.0,"Laks","Flue"],[2.0,"Laks","Flue"],[1.9,"Sjøørret","Flue"],[1.8,"Sjøørret","Flue"],[1.5,"Laks","Flue"],[1.3,"Sjøørret","Flue"],[1.3,"Sjøørret","Flue"],[1.3,"Laks","Sluk"],[1.2,"Sjøørret","Flue"],[1.2,"Sjøørret","Flue"],[1.2,"Sjøørret","Flue"],[1.2,"Laks","Sluk"],[1.1,"Sjøørret","Flue"],[1.01,"Sjøørret","Flue"],[1.0,"Sjøørret","Flue"],[1.0,"Sjøørret","Flue"],[1.0,"Sjøørret","Flue"],[1.0,"Sjøørret","Flue"],[1.0,"Sjøørret","Flue"],[1.0,"Sjøørret","Flue"],[1.0,"Sjøørret","Flue"],[0.9,"Sjøørret","Flue"],[0.8,"Sjøørret","Flue"],[0.8,"Sjøørret","Flue"],[0.8,"Sjøørret","Flue"],[0.8,"Sjøørret","Flue"],[0.8,"Sjøørret","Flue"],[0.8,"Sjøørret","Flue"],[0.8,"Sjøørret","Flue"],[0.8,"Sjøørret","Flue"],[0.8,"Sjøørret","Flue"],[0.7,"Sjøørret","Flue"],[0.7,"Sjøørret","Flue"],[0.7,"Sjøørret","Flue"],[0.6,"Sjøørret","Flue"],[0.6,"Sjøørret","Sluk"],[0.6,"Sjøørret","Flue"],[0.6,"Sjøørret","Sluk"],[0.5,"Sjøørret","Sluk"],[0.5,"Sjøørret","Flue"],[0.5,"Sjøørret","Flue"],[0.5,"Sjøørret","Flue"],[0.5,"Sjøørret","Flue"],[0.5,"Sjøørret","Flue"],[0.4,"Sjøørret","Flue"],[0.4,"Sjøørret","Flue"],[0.4,"Sjøørret","Flue"]],"rundt":[{"d":"22.9","n":0,"vf":1.3},{"d":"23.9","n":0,"vf":1.4},{"d":"24.9","n":0,"vf":12.5},{"d":"25.9","n":49,"vf":18.1},{"d":"26.9","n":57,"vf":9.2},{"d":"27.9","n":31,"vf":6.4},{"d":"28.9","n":19,"vf":4.9},{"d":"29.9","n":8,"vf":4.3},{"d":"30.9","n":43,"vf":7.6}],"redskap":{"Flue":50,"Sluk":7},"rang":[["2020-09-26",57],["2020-09-25",49],["2020-09-30",43]]}};
 const BOOM_DAYS = {"Alle åpne soner": {"date": "2020-09-26", "count": 57, "flow": 9}};
 
 // Tyngste registrerte laks per sone (Art/Fisk=="Laks"), fra fangstloggen. Ved lik vekt vinner siste fangst.
@@ -1063,7 +1123,10 @@ function showZoneInfo(zone, scrollTo = true) {
 
   const boomColHtml = '<div style="display:flex;gap:8px;align-items:center;">'
     + '<span class="zi-boom-icon">🏆</span>'
-    + '<div><div class="zi-boom-hdr">Rekorddag</div>'
+    + '<div><div class="zi-boom-hdr-row"><span class="zi-boom-hdr">Rekorddag</span>'
+    + (REKORDDAG[zone] ? '<button class="zi-boom-more" onclick="openRekorddag(\''
+        + zone.replace(/'/g, "\\'") + '\')">Les mer &rarr;</button>' : '')
+    + '</div>'
     + '<div class="zi-boom-txt">' + boomTxt + '</div>'
     + rekordlaksHtml + '</div>'
     + '</div>';
@@ -1727,9 +1790,152 @@ window.addEventListener('resize', function () {
   <div class="zi-body" id="ziBody"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.038</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.039</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
+<div class="rd-overlay" id="rdOverlay"
+     onclick="if(event.target===this)lukkRekorddag()"></div>
+<script>
+/* Rekorddag-popup. Bygger innholdet fra REKORDDAG naar den aapnes, slik at
+   ingenting rendres for soner brukeren aldri klikker paa. */
+function _rdNum(x, d) { return x == null ? '\u2013' : x.toFixed(d).replace('.', ','); }
+
+function _rdGraf(rundt) {
+  var ns = rundt.map(function (r) { return r.n; });
+  var vfs = rundt.filter(function (r) { return r.vf != null; }).map(function (r) { return r.vf; });
+  var maxN = Math.max.apply(null, ns) || 1;
+  var loV = vfs.length ? Math.min.apply(null, vfs) : 0;
+  var hiV = vfs.length ? Math.max.apply(null, vfs) : 1;
+  if (hiV - loV < 0.5) { hiV = loV + 0.5; }
+  var pad = (hiV - loV) * 0.25; loV -= pad; hiV += pad;
+  var xs = rundt.map(function (_, i) { return 42 + 32 * i; });
+  var top = 2, base = 68, mid = Math.floor(rundt.length / 2);
+  var s = '<svg viewBox="0 0 320 116" role="img" aria-label="Fangst og vannf\u00f8ring d\u00f8gnene rundt rekorddagen">';
+  [0, 0.5, 1].forEach(function (frac) {
+    var y = base - frac * (base - top);
+    s += '<line class="grid" x1="26" y1="' + y.toFixed(1) + '" x2="314" y2="' + y.toFixed(1) + '"/>'
+       + '<text class="ax" x="22" y="' + (y + 3).toFixed(1) + '" text-anchor="end">'
+       + Math.round(frac * maxN) + '</text>';
+  });
+  rundt.forEach(function (r, i) {
+    var h = (r.n / maxN) * (base - top);
+    s += '<rect x="' + (xs[i] - 10) + '" y="' + (base - h).toFixed(1) + '" width="20" height="'
+       + h.toFixed(1) + '" rx="1.5" fill="' + (i === mid ? '#9b2c2c' : '#e2b3b3') + '"/>';
+    if (i === mid && h > 14) {
+      s += '<text x="' + xs[i] + '" y="' + (base - h + 10).toFixed(1) + '" text-anchor="middle" '
+         + 'style="font-size:8px;font-weight:700;fill:#fff">' + r.n + '</text>';
+    }
+    s += '<text class="' + (i === mid ? 'axb' : 'ax') + '" x="' + xs[i]
+       + '" y="77" text-anchor="middle">' + r.d + '</text>';
+  });
+  var pts = [];
+  rundt.forEach(function (r, i) {
+    if (r.vf == null) { return; }
+    pts.push(xs[i] + ',' + (100 - (r.vf - loV) / (hiV - loV) * 14).toFixed(1));
+  });
+  if (pts.length > 1) {
+    s += '<text class="ax" x="26" y="88" style="fill:#3182ce">Vannf\u00f8ring</text>'
+       + '<polyline fill="none" stroke="#3182ce" stroke-width="1.6" stroke-linejoin="round" points="'
+       + pts.join(' ') + '"/>';
+    rundt.forEach(function (r, i) {
+      if (r.vf == null) { return; }
+      if (i === mid) {
+        s += '<circle cx="' + xs[i] + '" cy="'
+           + (100 - (r.vf - loV) / (hiV - loV) * 14).toFixed(1) + '" r="2.4" fill="#3182ce"/>';
+      }
+      s += '<text class="' + (i === mid ? 'axb' : 'ax') + '" x="' + xs[i] + '" y="112" '
+         + 'text-anchor="middle" style="fill:' + (i === mid ? '#2b6cb0' : '#3182ce') + '">'
+         + _rdNum(r.vf, 1) + '</text>';
+    });
+  }
+  return s + '</svg>';
+}
+
+function _rdLede(d) {
+  var mid = Math.floor(d.rundt.length / 2), r = d.rundt;
+  var naa = r[mid].vf, foer = r[1] ? r[1].vf : null;
+  var vann = '';
+  if (naa != null && foer != null) {
+    if (naa > foer * 1.15)      { vann = 'Dagen kom p\u00e5 <strong>stigende vann</strong>. Elva gikk fra ' + _rdNum(foer, 1) + ' til ' + _rdNum(naa, 1) + ' m\u00b3/s i l\u00f8pet av tre d\u00f8gn. '; }
+    else if (naa < foer * 0.85) { vann = 'Dagen kom p\u00e5 <strong>fallende vann</strong>, ned fra ' + _rdNum(foer, 1) + ' til ' + _rdNum(naa, 1) + ' m\u00b3/s p\u00e5 tre d\u00f8gn. '; }
+    else                        { vann = 'Vannf\u00f8ringen var <strong>stabil</strong> rundt ' + _rdNum(naa, 1) + ' m\u00b3/s i dagene f\u00f8r. '; }
+  }
+  var andre = r.filter(function (x, i) { return i !== mid; }).map(function (x) { return x.n; });
+  var best = andre.length ? Math.max.apply(null, andre) : 0;
+  var uke = best >= d.ant * 0.6
+    ? 'Hele uka fisket godt \u2013 beste nabod\u00f8gn ga ' + best + ' fangster, s\u00e5 rekorden var toppen av en oppgang.'
+    : 'D\u00f8gnene rundt var langt svakere \u2013 beste nabod\u00f8gn ga ' + best + ' fangster.';
+  return vann + uke;
+}
+
+function openRekorddag(zone) {
+  var d = REKORDDAG[zone];
+  if (!d) { return; }
+  var bd = new Date(d.dato + 'T00:00:00');
+  var UKEDAG = ['S\u00f8ndag','Mandag','Tirsdag','Onsdag','Torsdag','Fredag','L\u00f8rdag'];
+  var datoLbl = UKEDAG[bd.getDay()] + ' ' + bd.getDate() + '. '
+              + MONTH_NAMES_FULL[bd.getMonth()] + ' ' + bd.getFullYear();
+
+  var celler = [
+    '<div><b>' + d.laks + '</b><span>laks</span></div>',
+    '<div><b>' + _rdNum(d.kg, 1) + '</b><span>kg totalt</span></div>'
+  ];
+  if (d.fiskere != null) { celler.push('<div><b>' + d.fiskere + '</b><span>fiskere</span></div>'); }
+  else if (d.sjo) { celler.push('<div><b>' + d.sjo + '</b><span>sj\u00f8\u00f8rret</span></div>'); }
+  celler.push('<div><b>' + _rdNum(d.snitt, 2) + '</b><span>kg snitt</span></div>');
+  celler.push('<div><b>' + _rdNum(d.maks, 1) + '</b><span>kg st\u00f8rste</span></div>');
+  celler.push('<div><b>' + (d.vf == null ? '\u2013' : _rdNum(d.vf, 1)) + '</b><span>m\u00b3/s</span></div>');
+
+  var rader = d.fangster.map(function (r, i) {
+    var so = r[1] === 'Sj\u00f8\u00f8rret';
+    return '<tr' + (r[0] >= 5 ? ' class="big"' : '') + '><td>' + (i + 1) + '</td>'
+      + '<td class="r w">' + _rdNum(r[0], 1) + ' kg</td>'
+      + '<td><span class="rd-tag' + (so ? ' so' : '') + '">' + r[1] + '</span></td>'
+      + '<td>' + r[2] + '</td></tr>';
+  }).join('');
+
+  var redskap = Object.keys(d.redskap).sort(function (a, b) { return d.redskap[b] - d.redskap[a]; });
+  var redskapTxt = redskap.length === 1
+    ? 'Samtlige ' + d.ant + ' fangster kom p\u00e5 <strong>' + redskap[0].toLowerCase() + '</strong>.'
+    : redskap.map(function (k) { return '<strong>' + k + '</strong> ' + d.redskap[k]; }).join(' \u00b7 ');
+
+  var rang = d.rang.map(function (x, i) {
+    var dd = new Date(x[0] + 'T00:00:00');
+    return (i + 1) + '. ' + dd.getDate() + '. ' + MONTH_NAMES_FULL[dd.getMonth()] + ' '
+      + dd.getFullYear() + ' \u2014 ' + x[1] + ' fangster';
+  }).join('<br>');
+
+  document.getElementById('rdOverlay').innerHTML =
+    '<div class="rd">'
+    + '<div class="rd-head">'
+      + '<button class="rd-close" onclick="lukkRekorddag()" aria-label="Lukk">&#10005;</button>'
+      + '<div class="rd-kicker">&#127942; Rekorddag &middot; ' + zone + '</div>'
+      + '<div class="rd-title">' + datoLbl + '</div>'
+      + '<div class="rd-sub">St\u00f8rste fangstd\u00f8gn i ' + zone + ' i perioden 2016–2025</div>'
+    + '</div>'
+    + '<div class="rd-body">'
+      + '<div class="rd-kpi">' + celler.join('') + '</div>'
+      + '<div class="rd-lede">' + _rdLede(d) + '</div>'
+      + '<div class="rd-h">Dagene rundt</div>' + _rdGraf(d.rundt)
+      + '<div class="rd-h">Alle fangstene</div>'
+      + '<div class="rd-scroll"><table class="rd-tbl">'
+        + '<tr><th>#</th><th class="r">Vekt</th><th>Art</th><th>Redskap</th></tr>' + rader
+      + '</table></div>'
+      + '<div class="rd-h">Redskap</div><div class="rd-txt">' + redskapTxt + '</div>'
+      + '<div class="rd-h">Rangering</div><div class="rd-txt">' + rang + '</div>'
+      + '<div class="rd-foot">Fangstdata fra Inatur lakseb\u00f8rs, vannf\u00f8ring fra NVE-stasjon Søgne.</div>'
+    + '</div></div>';
+  document.getElementById('rdOverlay').classList.add('open');
+}
+
+function lukkRekorddag() {
+  document.getElementById('rdOverlay').classList.remove('open');
+}
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') { lukkRekorddag(); }
+});
+</script>
 </body>
 </html>
