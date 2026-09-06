@@ -50,6 +50,11 @@ import requests
 from PIL import Image, ImageOps
 from PIL.ExifTags import GPSTAGS, TAGS
 
+# scripts/ ligger ikke paa importstien naar workflow kjoerer
+# "python scripts/issue_foto_pipeline.py" fra repo-rot.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import km_ref
+
 MANUAL_DIR = "bilder/innboks/manuell"
 MAX_WIDTH = 1600
 JPEG_QUALITY = 80
@@ -298,7 +303,7 @@ def close_issue():
     )
 
 
-def process_one_photo(local_path, name, cfg, photos):
+def process_one_photo(local_path, name, cfg, photos, ref=None, sone_int=None):
     """Kjør ett nedlastet bilde gjennom samme logikk som innboks-pipelinen.
        Returnerer en menneskelesbar statuslinje til issue-kommentaren."""
     try:
@@ -353,6 +358,7 @@ def process_one_photo(local_path, name, cfg, photos):
         "vannforing": vannforing,
         "autoSone": True,
         "soneAvstandM": dist_m,
+        "km": ref.km(lat, lon, zone, sone_int) if ref else None,
     })
     vf = f"{vannforing} m³/s" if vannforing is not None else "vannføring ukjent"
     return f"✅ {name} → {zone} ({vf})"
@@ -378,6 +384,12 @@ def main():
         print("Ingen bilde-URL-er funnet - avbryter uten å lukke issuen.")
         return
 
+    # Lineaerreferanse: km fra munningen langs senterlinja. Finnes ingen
+    # senterlinje for elva, settes km til None og dashbordet faller tilbake
+    # til breddegradssortering.
+    ref = km_ref.last(river_key)
+    sone_int = ref.sone_intervaller(cfg["zones"]) if ref else {}
+
     photos = []
     if os.path.exists(cfg["json"]):
         with open(cfg["json"], encoding="utf-8") as f:
@@ -396,7 +408,7 @@ def main():
             except Exception as e:
                 lines.append(f"❌ {name}: nedlasting feilet ({e})")
                 continue
-            lines.append(process_one_photo(local, name, cfg, photos))
+            lines.append(process_one_photo(local, name, cfg, photos, ref, sone_int))
 
     with open(cfg["json"], "w", encoding="utf-8") as f:
         json.dump(photos, f, ensure_ascii=False, indent=1)

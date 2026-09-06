@@ -19,6 +19,11 @@ import sys
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
+# scripts/ ligger ikke paa importstien naar workflow kjoerer
+# "python scripts/foto_pipeline.py" fra repo-rot.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import km_ref
+
 import requests
 from PIL import Image, ImageOps
 from PIL.ExifTags import GPSTAGS, TAGS
@@ -244,6 +249,15 @@ def process_river(key, cfg):
     os.makedirs(os.path.dirname(cfg["json"]), exist_ok=True)
 
     photos = []
+    # Lineaerreferanse: km fra munningen langs senterlinja. Finnes ingen
+    # senterlinje for elva, settes km til None og dashbordet faller tilbake
+    # til breddegradssortering.
+    ref = km_ref.last(key)
+    sone_int = ref.sone_intervaller(cfg["zones"]) if ref else {}
+    if ref:
+        print(f"  km: senterlinje lastet ({ref.lengde_m/1000:.2f} km, "
+              f"{len(sone_int)} soner med intervall).")
+
     if os.path.exists(cfg["json"]):
         with open(cfg["json"], encoding="utf-8") as f:
             photos = json.load(f)
@@ -315,6 +329,7 @@ def process_river(key, cfg):
             "vannforing": vannforing,
             "autoSone": True,
             "soneAvstandM": dist_m,
+            "km": ref.km(lat, lon, zone, sone_int) if ref else None,
         })
         next_num += 1
         os.remove(src)
