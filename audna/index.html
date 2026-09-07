@@ -148,7 +148,23 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .dir-link:hover { background: #c6f6d5; }
 .photo-fs { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
 .photo-fs.open { display: flex; }
-.photo-fs img { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 6px; }
+.photo-fs img { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 6px;
+  transform-origin: 0 0; will-change: transform; touch-action: pan-x pan-y; }
+/* Zoom i fullskjerm: hjul zoomer, dra panorerer. Paa mobil gjoer nettleserens
+   egen knipe-gest jobben, saa dette er foerst og fremst for PC. */
+.photo-fs.zoomed img { cursor: grab; border-radius: 0; }
+.photo-fs.zoomed img.dragging { cursor: grabbing; }
+.photo-fs .fs-zoom { position: absolute; left: 12px; bottom: 12px; display: flex; align-items: center;
+  gap: 6px; background: rgba(0,0,0,0.45); border-radius: 999px; padding: 4px 6px; z-index: 2; }
+.photo-fs .fs-zoom button { color: #fff; background: rgba(255,255,255,0.15); border: none; border-radius: 50%;
+  width: 30px; height: 30px; font-size: 1rem; line-height: 1; cursor: pointer; display: flex;
+  align-items: center; justify-content: center; font-family: inherit; }
+.photo-fs .fs-zoom button:hover { background: rgba(255,255,255,0.3); }
+.photo-fs .fs-zoom button:disabled { opacity: 0.3; cursor: default; }
+.photo-fs .fs-zoom span { color: #e2e8f0; font-size: 0.68rem; font-weight: 700; min-width: 34px;
+  text-align: center; font-variant-numeric: tabular-nums; }
+.photo-fs .fs-hint { position: absolute; right: 12px; bottom: 16px; color: #94a3b8; font-size: 0.62rem; z-index: 2; }
+@media (max-width: 620px) { .photo-fs .fs-zoom, .photo-fs .fs-hint { display: none; } }
 .photo-fs .fs-cap { color: #f1f5f9; font-size: 0.95rem; font-weight: 600; text-align: center; padding: 0 16px; }
 .photo-fs .fs-close { color: white; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .photo-fs .fs-nav { position: absolute; top: 50%; transform: translateY(-50%); color: white; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 44px; height: 44px; font-size: 1.6rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -1524,6 +1540,113 @@ function _updateFsNav() {
   prevBtn.disabled = _fsNeighborIdx(-1) === -1;
   nextBtn.disabled = _fsNeighborIdx(1) === -1;
 }
+/* --- Zoom i fullskjermvisning (PC) ------------------------------------
+   Bildet skaleres med CSS-transform rundt musepekeren, og kan dras naar det
+   er stoerre enn vinduet. Paa mobil overlates zoom til nettleserens egen
+   knipe-gest, saa kontrollene skjules under 620 px. Bildene er komprimert
+   til maks 1600 px av foto-pipelinen, derfor er taket satt til 4x. */
+var _fsZoom = 1, _fsX = 0, _fsY = 0;
+var FS_MIN = 1, FS_MAX = 4;
+
+function _fsApply() {
+  var img = document.getElementById('fsImg');
+  var fs = document.getElementById('photoFs');
+  if (_fsZoom <= FS_MIN + 0.001) { _fsZoom = FS_MIN; _fsX = 0; _fsY = 0; }
+  img.style.transform = 'translate(' + _fsX.toFixed(1) + 'px,' + _fsY.toFixed(1) + 'px) scale(' + _fsZoom.toFixed(3) + ')';
+  fs.classList.toggle('zoomed', _fsZoom > FS_MIN);
+  var lbl = document.getElementById('fsZoomLbl');
+  if (lbl) { lbl.textContent = Math.round(_fsZoom * 100) + '%'; }
+  var bi = document.getElementById('fsZoomIn'), bo = document.getElementById('fsZoomOut');
+  if (bi) { bi.disabled = _fsZoom >= FS_MAX - 0.001; }
+  if (bo) { bo.disabled = _fsZoom <= FS_MIN + 0.001; }
+  // Pilene ville ellers ligge oppa et oppforstoerret bilde og bytte bilde
+  // naar man egentlig ville panorere.
+  ['fsPrev', 'fsNext'].forEach(function (id) {
+    var b = document.getElementById(id);
+    if (b) { b.style.visibility = _fsZoom > FS_MIN ? 'hidden' : ''; }
+  });
+}
+
+/* Zoomer rundt et punkt i klientkoordinater, slik at det punktet blir
+   staaende stille under musepekeren. */
+function _fsZoomAt(ny, cx, cy) {
+  ny = Math.max(FS_MIN, Math.min(FS_MAX, ny));
+  var img = document.getElementById('fsImg');
+  var r = img.getBoundingClientRect();
+  var k = ny / _fsZoom;
+  _fsX = cx - k * (cx - r.left) - (r.left - _fsX);
+  _fsY = cy - k * (cy - r.top) - (r.top - _fsY);
+  _fsZoom = ny;
+  _fsClamp();
+  _fsApply();
+}
+
+/* Holder bildet innenfor vinduet naar det er zoomet inn. */
+function _fsClamp() {
+  var img = document.getElementById('fsImg');
+  var w = img.offsetWidth * _fsZoom, h = img.offsetHeight * _fsZoom;
+  var vw = window.innerWidth, vh = window.innerHeight;
+  var baseL = (vw - img.offsetWidth) / 2, baseT = (vh - img.offsetHeight) / 2;
+  var minX = Math.min(0, vw - (baseL + w)), maxX = Math.max(0, -baseL);
+  var minY = Math.min(0, vh - (baseT + h)), maxY = Math.max(0, -baseT);
+  _fsX = Math.max(minX, Math.min(maxX, _fsX));
+  _fsY = Math.max(minY, Math.min(maxY, _fsY));
+}
+
+function fsZoomStep(dir) {
+  _fsZoomAt(_fsZoom * (dir > 0 ? 1.5 : 1 / 1.5), window.innerWidth / 2, window.innerHeight / 2);
+}
+function fsZoomReset() { _fsZoom = 1; _fsX = 0; _fsY = 0; _fsApply(); }
+
+(function () {
+  var fs = document.getElementById('photoFs');
+  var img = document.getElementById('fsImg');
+  if (!fs || !img) { return; }
+
+  fs.addEventListener('wheel', function (e) {
+    if (img.style.display === 'none') { return; }   // video, ikke bilde
+    e.preventDefault();
+    _fsZoomAt(_fsZoom * (e.deltaY < 0 ? 1.18 : 1 / 1.18), e.clientX, e.clientY);
+  }, { passive: false });
+
+  img.addEventListener('dblclick', function (e) {
+    e.stopPropagation();
+    if (_fsZoom > FS_MIN) { fsZoomReset(); }
+    else { _fsZoomAt(2.5, e.clientX, e.clientY); }
+  });
+
+  var drag = false, sx = 0, sy = 0, ox = 0, oy = 0, moved = false;
+  img.addEventListener('pointerdown', function (e) {
+    if (_fsZoom <= FS_MIN) { return; }
+    drag = true; moved = false;
+    sx = e.clientX; sy = e.clientY; ox = _fsX; oy = _fsY;
+    img.classList.add('dragging');
+    img.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+  img.addEventListener('pointermove', function (e) {
+    if (!drag) { return; }
+    _fsX = ox + (e.clientX - sx); _fsY = oy + (e.clientY - sy);
+    if (Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy) > 4) { moved = true; }
+    _fsClamp(); _fsApply();
+  });
+  ['pointerup', 'pointercancel'].forEach(function (ev) {
+    img.addEventListener(ev, function (e) {
+      if (!drag) { return; }
+      drag = false;
+      img.classList.remove('dragging');
+      try { img.releasePointerCapture(e.pointerId); } catch (err) { /* ignorer */ }
+    });
+  });
+  // Et klikk paa bakgrunnen lukker; et klikk som avsluttet en dra-bevegelse
+  // skal ikke gjoere det.
+  img.addEventListener('click', function (e) { if (moved) { e.stopPropagation(); } });
+
+  window.addEventListener('resize', function () {
+    if (_fsZoom > FS_MIN) { _fsClamp(); _fsApply(); }
+  });
+})();
+
 function openFullscreen() {
   if (!_activeZoneMedia.length) return;
   const p = _activeZoneMedia[_activeMediaIdx];
@@ -1545,10 +1668,14 @@ function openFullscreen() {
   const flowVal = (p.vannforing !== undefined && p.vannforing !== null) ? p.vannforing : FLOW_LOOKUP[p.dateISO];
   const flowStr = flowVal !== undefined ? flowVal + ' m³/s' : 'Vannstand ukjent';
   document.getElementById('fsCap').textContent = p.caption + ' · ' + flowStr;
+  fsZoomReset();
+  document.getElementById('fsZoomBox').style.display = isVideo ? 'none' : '';
+  document.getElementById('fsHint').style.display = isVideo ? 'none' : '';
   document.getElementById('photoFs').classList.add('open');
   _updateFsNav();
 }
 function closeFullscreen() {
+  fsZoomReset();
   document.getElementById('photoFs').classList.remove('open');
   document.getElementById('fsVideoWrap').innerHTML = ''; // stopper avspilling
 }
@@ -1561,9 +1688,12 @@ function fsNav(delta) {
 document.addEventListener('keydown', (e) => {
   const fs = document.getElementById('photoFs');
   if (!fs || !fs.classList.contains('open')) return;
-  if (e.key === 'ArrowLeft') fsNav(-1);
-  else if (e.key === 'ArrowRight') fsNav(1);
-  else if (e.key === 'Escape') closeFullscreen();
+  if (e.key === '+' || e.key === '=') { fsZoomStep(1); }
+  else if (e.key === '-') { fsZoomStep(-1); }
+  else if (e.key === '0') { fsZoomReset(); }
+  else if (e.key === 'ArrowLeft') { if (_fsZoom <= FS_MIN) fsNav(-1); }
+  else if (e.key === 'ArrowRight') { if (_fsZoom <= FS_MIN) fsNav(1); }
+  else if (e.key === 'Escape') { if (_fsZoom > FS_MIN) fsZoomReset(); else closeFullscreen(); }
 });
 
 /* ===== Fullskjerm-kart =====
@@ -1934,6 +2064,13 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
   <div id="fsVideoWrap" style="display:none; width:100%; max-width:900px;"></div>
   <button class="fs-nav fs-nav-next" id="fsNext" onclick="event.stopPropagation(); fsNav(1)" title="Neste (nord)">›</button>
   <div class="fs-cap" id="fsCap"></div>
+  <div class="fs-zoom" id="fsZoomBox" onclick="event.stopPropagation()">
+    <button id="fsZoomOut" onclick="fsZoomStep(-1)" title="Zoom ut (&minus;)">&minus;</button>
+    <span id="fsZoomLbl">100%</span>
+    <button id="fsZoomIn" onclick="fsZoomStep(1)" title="Zoom inn (+)">+</button>
+    <button id="fsZoomReset" onclick="fsZoomReset()" title="Tilbakestill (0)">&#8634;</button>
+  </div>
+  <div class="fs-hint" id="fsHint">Rull for å zoome · dra for å flytte · dobbeltklikk</div>
 </div>
 
 
@@ -1947,7 +2084,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.160</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.161</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
