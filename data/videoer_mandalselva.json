@@ -163,5 +163,16 @@
     "dateISO": "2026-07-13",
     "timeUTC": null,
     "vannforing": 65
+  },
+  {
+    "id": "V-015",
+    "zone": "Hauge A",
+    "lat": 58.13747,
+    "lon": 7.540185,
+    "youtubeId": "V3HINO8_otw",
+    "caption": "Hauge A · Video",
+    "dateISO": "2024-08-09",
+    "timeUTC": null,
+    "vannforing": 62
   }
 ]
