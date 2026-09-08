@@ -130,5 +130,16 @@
     "dateISO": "2024-08-03",
     "timeUTC": null,
     "vannforing": 40
+  },
+  {
+    "id": "V-012",
+    "zone": "Holmesland A",
+    "lat": 58.139784,
+    "lon": 7.54252,
+    "youtubeId": "Veol1C3wAd0",
+    "caption": "Holmesland A - Fangst",
+    "dateISO": "2024-08-20",
+    "timeUTC": null,
+    "vannforing": 106
   }
 ]
