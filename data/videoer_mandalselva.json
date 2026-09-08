@@ -141,5 +141,16 @@
     "dateISO": "2024-08-20",
     "timeUTC": null,
     "vannforing": 106
+  },
+  {
+    "id": "V-013",
+    "zone": "Hauge B1",
+    "lat": 58.140003,
+    "lon": 7.543126,
+    "youtubeId": "l5l6J3m5ElU",
+    "caption": "Hauge B1 - Fangst",
+    "dateISO": "2025-07-04",
+    "timeUTC": null,
+    "vannforing": 38
   }
 ]
