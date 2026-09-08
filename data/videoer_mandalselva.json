@@ -152,5 +152,16 @@
     "dateISO": "2025-07-04",
     "timeUTC": null,
     "vannforing": 38
+  },
+  {
+    "id": "V-014",
+    "zone": "Sone 3",
+    "lat": 58.210036,
+    "lon": 7.524313,
+    "youtubeId": "798S54Wz7ME",
+    "caption": "Sone 3 - Fangst",
+    "dateISO": "2026-07-13",
+    "timeUTC": null,
+    "vannforing": 65
   }
 ]
