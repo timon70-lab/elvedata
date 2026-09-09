@@ -11,7 +11,8 @@
   "locId": "Sone 9 Kvelland",
   "vannforing": 11,
   "autoSone": true,
-  "soneAvstandM": 200
+  "soneAvstandM": 200,
+  "km": 10.89
  },
  {
   "id": "L-002",
@@ -25,7 +26,8 @@
   "locId": "Sone 18 Kvås",
   "vannforing": 11,
   "autoSone": true,
-  "soneAvstandM": 577
+  "soneAvstandM": 577,
+  "km": 21.52
  },
  {
   "id": "L-003",
@@ -39,7 +41,8 @@
   "locId": "Sone 18 Kvås",
   "vannforing": 11,
   "autoSone": true,
-  "soneAvstandM": 168
+  "soneAvstandM": 168,
+  "km": 21.33
  },
  {
   "id": "L-004",
@@ -53,7 +56,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 126
+  "soneAvstandM": 126,
+  "km": 7.35
  },
  {
   "id": "L-005",
@@ -67,7 +71,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 126
+  "soneAvstandM": 126,
+  "km": 7.35
  },
  {
   "id": "L-006",
@@ -81,7 +86,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 54
+  "soneAvstandM": 54,
+  "km": 7.33
  },
  {
   "id": "L-007",
@@ -95,7 +101,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 44
+  "soneAvstandM": 44,
+  "km": 7.22
  },
  {
   "id": "L-008",
@@ -109,7 +116,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 171
+  "soneAvstandM": 171,
+  "km": 7.1
  },
  {
   "id": "L-009",
@@ -123,7 +131,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 171
+  "soneAvstandM": 171,
+  "km": 7.1
  },
  {
   "id": "L-010",
@@ -137,7 +146,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 248
+  "soneAvstandM": 248,
+  "km": 7.02
  },
  {
   "id": "L-011",
@@ -151,7 +161,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 323
+  "soneAvstandM": 323,
+  "km": 6.94
  },
  {
   "id": "L-012",
@@ -165,7 +176,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 462
+  "soneAvstandM": 462,
+  "km": 6.8
  },
  {
   "id": "L-013",
@@ -179,7 +191,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 566
+  "soneAvstandM": 566,
+  "km": 6.7
  },
  {
   "id": "L-014",
@@ -193,7 +206,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 446
+  "soneAvstandM": 446,
+  "km": 6.82
  },
  {
   "id": "L-015",
@@ -207,7 +221,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 761
+  "soneAvstandM": 761,
+  "km": 6.48
  },
  {
   "id": "L-016",
@@ -221,7 +236,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 547
+  "soneAvstandM": 547,
+  "km": 6.72
  },
  {
   "id": "L-017",
@@ -235,7 +251,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 856
+  "soneAvstandM": 856,
+  "km": 6.34
  },
  {
   "id": "L-018",
@@ -249,7 +266,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 639
+  "soneAvstandM": 639,
+  "km": 6.6
  },
  {
   "id": "L-019",
@@ -263,7 +281,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 688
+  "soneAvstandM": 688,
+  "km": 6.55
  },
  {
   "id": "L-020",
@@ -277,7 +296,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 729
+  "soneAvstandM": 729,
+  "km": 6.5
  },
  {
   "id": "L-021",
@@ -291,7 +311,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 772
+  "soneAvstandM": 772,
+  "km": 6.45
  },
  {
   "id": "L-022",
@@ -305,7 +326,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 760
+  "soneAvstandM": 760,
+  "km": 6.46
  },
  {
   "id": "L-023",
@@ -319,7 +341,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 764
+  "soneAvstandM": 764,
+  "km": 6.45
  },
  {
   "id": "L-024",
@@ -333,7 +356,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 756
+  "soneAvstandM": 756,
+  "km": 6.42
  },
  {
   "id": "L-025",
@@ -347,7 +371,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 747
+  "soneAvstandM": 747,
+  "km": 6.4
  },
  {
   "id": "L-026",
@@ -361,7 +386,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 747
+  "soneAvstandM": 747,
+  "km": 6.4
  },
  {
   "id": "L-027",
@@ -375,7 +401,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 743
+  "soneAvstandM": 743,
+  "km": 6.39
  },
  {
   "id": "L-028",
@@ -389,7 +416,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 723
+  "soneAvstandM": 723,
+  "km": 6.4
  },
  {
   "id": "L-029",
@@ -403,7 +431,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 646
+  "soneAvstandM": 646,
+  "km": 5.89
  },
  {
   "id": "L-030",
@@ -417,7 +446,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 614
+  "soneAvstandM": 614,
+  "km": 5.87
  },
  {
   "id": "L-031",
@@ -431,7 +461,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 249
+  "soneAvstandM": 249,
+  "km": 5.51
  },
  {
   "id": "L-032",
@@ -445,7 +476,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 174
+  "soneAvstandM": 174,
+  "km": 5.43
  },
  {
   "id": "L-033",
@@ -459,7 +491,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 80
+  "soneAvstandM": 80,
+  "km": 5.32
  },
  {
   "id": "L-034",
@@ -473,7 +506,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 21
+  "soneAvstandM": 21,
+  "km": 5.25
  },
  {
   "id": "L-035",
@@ -487,7 +521,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 21
+  "soneAvstandM": 21,
+  "km": 5.15
  },
  {
   "id": "L-036",
@@ -501,7 +536,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 21
+  "soneAvstandM": 21,
+  "km": 5.15
  },
  {
   "id": "L-037",
@@ -515,7 +551,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 48
+  "soneAvstandM": 48,
+  "km": 8.44
  },
  {
   "id": "L-038",
@@ -529,7 +566,8 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 48
+  "soneAvstandM": 48,
+  "km": 8.44
  },
  {
   "id": "L-039",
@@ -543,7 +581,8 @@
   "locId": "Sone 9 Kvelland",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 250
+  "soneAvstandM": 250,
+  "km": 10.86
  },
  {
   "id": "L-040",
@@ -557,7 +596,8 @@
   "locId": "Sone 9 Kvelland",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 250
+  "soneAvstandM": 250,
+  "km": 10.86
  },
  {
   "id": "L-041",
@@ -571,7 +611,8 @@
   "locId": "Sone 9 Kvelland",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 250
+  "soneAvstandM": 250,
+  "km": 10.86
  },
  {
   "id": "L-042",
@@ -585,7 +626,8 @@
   "locId": "Sone 9 Kvelland",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 292
+  "soneAvstandM": 292,
+  "km": 10.91
  },
  {
   "id": "L-043",
@@ -599,7 +641,8 @@
   "locId": "Sone 9 Kvelland",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 292
+  "soneAvstandM": 292,
+  "km": 10.91
  },
  {
   "id": "L-044",
@@ -613,7 +656,8 @@
   "locId": "Sone 18 Kvås",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 406
+  "soneAvstandM": 406,
+  "km": 21.52
  },
  {
   "id": "L-045",
@@ -627,7 +671,8 @@
   "locId": "Sone 18 Kvås",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 379
+  "soneAvstandM": 379,
+  "km": 21.52
  },
  {
   "id": "L-046",
@@ -641,7 +686,8 @@
   "locId": "Sone 18 Kvås",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 32
+  "soneAvstandM": 32,
+  "km": 21.11
  },
  {
   "id": "L-047",
@@ -655,7 +701,8 @@
   "locId": "Sone 18 Kvås",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 71
+  "soneAvstandM": 71,
+  "km": 21.16
  },
  {
   "id": "L-048",
@@ -669,7 +716,8 @@
   "locId": "Sone 18 Kvås",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 71
+  "soneAvstandM": 71,
+  "km": 21.16
  },
  {
   "id": "L-049",
@@ -683,7 +731,8 @@
   "locId": "Sone 18 Kvås",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 84
+  "soneAvstandM": 84,
+  "km": 21.18
  },
  {
   "id": "L-050",
@@ -697,7 +746,8 @@
   "locId": "Sone 16 Vemestad øvre",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 71
+  "soneAvstandM": 71,
+  "km": 18.56
  },
  {
   "id": "L-051",
@@ -711,7 +761,8 @@
   "locId": "Sone 16 Vemestad øvre",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 71
+  "soneAvstandM": 71,
+  "km": 18.56
  },
  {
   "id": "L-052",
@@ -725,7 +776,8 @@
   "locId": "Sone 15 Vemestad ytre",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 32
+  "soneAvstandM": 32,
+  "km": 16.99
  },
  {
   "id": "L-053",
@@ -739,7 +791,8 @@
   "locId": "Sone 15 Vemestad ytre",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 32
+  "soneAvstandM": 32,
+  "km": 16.99
  },
  {
   "id": "L-054",
@@ -753,7 +806,8 @@
   "locId": "Sone 15 Vemestad ytre",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 55
+  "soneAvstandM": 55,
+  "km": 16.97
  },
  {
   "id": "L-055",
@@ -767,7 +821,8 @@
   "locId": "Sone 15 Vemestad ytre",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 55
+  "soneAvstandM": 55,
+  "km": 16.97
  },
  {
   "id": "L-056",
@@ -781,7 +836,8 @@
   "locId": "Sone12 Vegge",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 209
+  "soneAvstandM": 209,
+  "km": 14.95
  },
  {
   "id": "L-057",
@@ -795,7 +851,8 @@
   "locId": "Sone12 Vegge",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 209
+  "soneAvstandM": 209,
+  "km": 14.95
  },
  {
   "id": "L-058",
@@ -809,6 +866,7 @@
   "locId": "Sone 8 Prestegården",
   "vannforing": 0.4,
   "autoSone": true,
-  "soneAvstandM": 56
+  "soneAvstandM": 56,
+  "km": 8.75
  }
 ]
