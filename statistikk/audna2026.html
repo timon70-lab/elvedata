@@ -213,9 +213,39 @@ details > summary:focus-visible { outline: 2px solid #276749; outline-offset: 2p
 </div>
 
 <div class="foot">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.000</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.001</span><br>
   <span style="font-size:0.6rem;">Data: Inatur.no (fangst) · NVE HydAPI (vannføring)</span>
 </div>
 
+<script>
+/* Hendelsesmaaling for de sammenleggbare avsnittene.
+   Alle avsnitt er kollapset som standard, saa uten dette vet vi bare at noen
+   kom til siden - ikke om de leste noe. Teller bare naar et avsnitt AAPNES.
+   GoatCounter er cookiefritt og lagrer bare hendelsesnavnet; kallet er pakket
+   i try/catch slik at en blokkert count.js aldri kan bryte siden. */
+(function () {
+  var ELV = 'audna';
+  function tell(navn, tittel) {
+    try {
+      if (window.goatcounter && typeof window.goatcounter.count === 'function') {
+        window.goatcounter.count({ path: navn, title: tittel, event: true });
+      }
+    } catch (e) { /* maaling skal aldri kunne bryte siden */ }
+  }
+  function slug(s) {
+    return (s || '').toLowerCase().trim()
+      .replace(/\u00e6/g, 'ae').replace(/\u00f8/g, 'o').replace(/\u00e5/g, 'a')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+  }
+  document.querySelectorAll('.panel-body details').forEach(function (det) {
+    det.addEventListener('toggle', function () {
+      if (!det.open) { return; }
+      var s = det.querySelector(':scope > summary');
+      var navn = s ? s.textContent.replace(/\s+/g, ' ').trim() : '';
+      tell('avsnitt-' + ELV + '-' + slug(navn), 'Avsnitt (Audna): ' + navn);
+    });
+  });
+})();
+</script>
 </body>
 </html>

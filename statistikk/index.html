@@ -741,7 +741,7 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
 </div>
 
 <div class="foot">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.013</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.014</span><br>
   <span style="font-size:0.6rem;">Data: Inatur.no (fangst) · NVE HydAPI (vannføring)</span>
 </div>
 
@@ -1649,5 +1649,58 @@ fetch(DATA_URL)
   });
 </script>
 
+<script>
+/* Hendelsesmaaling for de sammenleggbare seksjonene.
+   Uten dette ser vi bare at noen kom til siden - ikke om de aapnet noe.
+   Alt er kollapset som standard, saa en besoekende som ikke aapner noe har
+   i praksis ikke lest noe.
+
+   Vi teller tre nivaaer, og bare naar noe AAPNES (ikke ved lukking):
+     kategori-{navn}   - Sesongoppsummeringer / Annen statistikk
+     elv-{navn}        - hvilken elvs oppsummering
+     avsnitt-{elv}-{n} - hvilket avsnitt inne i en oppsummering
+
+   GoatCounter er cookiefritt og lagrer bare hendelsesnavnet. Kallet er pakket
+   i try/catch slik at en blokkert count.js aldri kan bryte siden. */
+function tellHendelse(navn, tittel) {
+  try {
+    if (window.goatcounter && typeof window.goatcounter.count === 'function') {
+      window.goatcounter.count({ path: navn, title: tittel, event: true });
+    }
+  } catch (e) { /* maaling skal aldri kunne bryte siden */ }
+}
+
+(function () {
+  function slug(s) {
+    return (s || '').toLowerCase().trim()
+      .replace(/\u00e6/g, 'ae').replace(/\u00f8/g, 'o').replace(/\u00e5/g, 'a')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+  }
+  // Bare selve overskriften, ikke merkelappen ved siden av.
+  function tittel(det) {
+    var s = det.querySelector(':scope > summary');
+    if (!s) { return ''; }
+    var k = s.cloneNode(true);
+    k.querySelectorAll('span').forEach(function (x) { x.remove(); });
+    return k.textContent.replace(/\s+/g, ' ').trim();
+  }
+
+  document.querySelectorAll('details.cat, details.sub, details.acc').forEach(function (det) {
+    det.addEventListener('toggle', function () {
+      if (!det.open) { return; }          // teller bare aapning
+      var navn = tittel(det);
+      if (det.classList.contains('cat')) {
+        tellHendelse('kategori-' + slug(navn), 'Kategori: ' + navn);
+      } else if (det.classList.contains('sub')) {
+        tellHendelse('elv-' + slug(navn), 'Oppsummering: ' + navn);
+      } else {
+        var elv = det.closest('details.sub');
+        var e = elv ? slug(tittel(elv)) : 'ukjent';
+        tellHendelse('avsnitt-' + e + '-' + slug(navn), 'Avsnitt: ' + navn);
+      }
+    });
+  });
+})();
+</script>
 </body>
 </html>
