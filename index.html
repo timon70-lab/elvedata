@@ -179,7 +179,15 @@ const RIVERS = [
   },
   { id: 'storelva', regulation: 'none',    name: 'Storelva (Vegårvassdraget)', lat: 58.63946, lon: 8.89749, hasData: false, seasonStart: '08-01', seasonEnd: '09-15' },
   { id: 'nidelva', regulation: 'heavy',     name: 'Nidelva (Arendal)',          lat: 58.4471, lon: 8.60796, hasData: false, seasonStart: '06-15', seasonEnd: '09-15' },
-  { id: 'tovdalselva', regulation: 'moderate', name: 'Tovdalselva',                lat: 58.31994, lon: 8.19338, hasData: false, seasonStart: '06-01', seasonEnd: '08-31' },
+  {
+    id: 'tovdalselva', regulation: 'moderate', name: 'Tovdalselva', lat: 58.31994, lon: 8.19338, hasData: true,
+    dashboardUrl: 'tovdalselva/',
+    flowUrl: 'data/vannforing_tovdalselva.json',
+    catchUrl: 'data/fangster_tovdalselva.json',
+    borsUrl: 'https://laksebors.inatur.no/bors/5',
+    scoreTable: {"0":28,"5":31,"10":35,"15":42,"20":47,"25":52,"30":56,"35":60,"40":62,"45":63,"50":66,"55":69,"60":69,"65":70,"70":72,"75":72,"80":61,"85":54},
+    maxBin: 85, seasonStart: '06-01', seasonEnd: '08-31'
+  },
   {
     id: 'otra', regulation: 'heavy', name: 'Otra', lat: 58.24628, lon: 7.952091, hasData: true,
     dashboardUrl: 'otra/',
@@ -639,7 +647,7 @@ loadNewsTicker();
 </script>
 
 <div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.047</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.048</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
