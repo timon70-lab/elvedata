@@ -33,6 +33,7 @@ RIVERS = {
     "mandalselva": {"river_id": 1542, "out": "data/fangster_mandalselva.json", "arter": {"Laks"}},
     "otra":        {"river_id": 6,    "out": "data/fangster_otra.json",        "arter": {"Laks"}},
     "sygna":       {"river_id": 717,  "out": "data/fangster_sygna.json",       "arter": {"Laks", "Sjøørret"}},
+    "tovdalselva": {"river_id": 5,    "out": "data/fangster_tovdalselva.json", "arter": {"Laks", "Sjøørret"}},
 }
 
 QUERY = """
