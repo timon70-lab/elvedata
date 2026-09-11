@@ -353,7 +353,7 @@ const map = L.map('map', { zoomControl: true });
   if (!m.length) { map.setView([58.24, 7.69], 9); return; }
   // Smal skjerm trenger all plassen den har, saa polstringen settes lavere der.
   const smal = (map.getSize().x < 620);
-  const pad = smal ? 15 : 42;
+  const pad = smal ? 20 : 42;
   map.fitBounds(L.latLngBounds(m.map(r => [r.lat, r.lon])), {
     padding: [pad, pad],
     maxZoom: 9           // samme zoomnivaa som foer paa PC, men riktig senter
@@ -665,7 +665,7 @@ loadNewsTicker();
 </script>
 
 <div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.052</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.053</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
