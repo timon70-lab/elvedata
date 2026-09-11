@@ -342,7 +342,20 @@ function riverState(river, now) {
   return { phase: 'nodata' };
 }
 
-const map = L.map('map', { zoomControl: true }).setView([58.35, 7.55], 9);
+const map = L.map('map', { zoomControl: true });
+
+// Utsnittet regnes ut fra elvene som faktisk har data, i stedet for aa vaere
+// fastsatt. Da faller ingen elv utenfor naar en ny kommer til, og kartet
+// tilpasser seg skjermstoerrelsen. Elver uten dashbord (Kvina, Sireaana,
+// Bjerkreimselva, Nidelva, Storelva) ligger utenfor og naas ved aa panorere.
+(function settUtsnitt() {
+  const m = RIVERS.filter(r => r.hasData);
+  if (!m.length) { map.setView([58.24, 7.69], 9); return; }
+  map.fitBounds(L.latLngBounds(m.map(r => [r.lat, r.lon])), {
+    padding: [42, 42],   // luft saa markoer og vannfoeringsmerke ikke klippes
+    maxZoom: 10          // hindrer at kartet zoomer for tett paa store skjermer
+  });
+})();
 
 // Lukk ev. åpen popup når fanen mister fokus (f.eks. fordi "Åpne elvesiden"-lenken
 // åpnet elva i en ny fane) - slik at popup-en ikke står igjen åpen når man bytter tilbake.
@@ -649,7 +662,7 @@ loadNewsTicker();
 </script>
 
 <div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.050</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.051</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
