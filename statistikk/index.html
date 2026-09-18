@@ -884,21 +884,21 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
   </div>
   <div class="panel-body">
     <button id="animReplay" class="pill active" style="width:100%;text-align:center;margin-bottom:12px">↻ Spill av</button>
-    <svg id="animChart" viewBox="0 0 340 205" role="img" aria-label="Antall registrert laks per sesong som prosent av hver elvs beste år, 2016 til 2025, med sumlinje for alle elver"></svg>
+    <svg id="animChart" viewBox="0 0 340 205" role="img" aria-label="Antall registrert laks per sesong som prosent av hver elvs beste år, 2016 til 2026, med sumlinje for alle elver"></svg>
     <div class="legend" id="animLegend"></div>
     <div class="readout" id="animReadout"><span class="hint">Trykk «Spill av» for å se fangsttallene tegnes opp fra 2016.</span></div>
   </div>
 </div>
 
-<!-- 2c. ANIMERT ÅRSFANGST 1993-2025 -->
+<!-- 2c. ANIMERT ÅRSFANGST 1993-2026 -->
 <div class="panel">
   <div class="panel-header">
-    <span class="panel-name">Antall laks – % av eget toppår (1993–2025)</span>
-    <span class="panel-sub">Samme figur, men strukket 23 sesonger lenger tilbake med SSB-tall. 1993–2015 er SSB, 2016–2025 er fangstloggene over. Hver elv skalert mot sin egen beste sesong i hele perioden.</span>
+    <span class="panel-name">Antall laks – % av eget toppår (1993–2026)</span>
+    <span class="panel-sub">Samme figur, men strukket 23 sesonger lenger tilbake med SSB-tall. 1993–2015 er SSB, 2016–2026 er fangstloggene over. Hver elv skalert mot sin egen beste sesong i hele perioden.</span>
   </div>
   <div class="panel-body">
     <button id="histReplay" class="pill active" style="width:100%;text-align:center;margin-bottom:12px">↻ Spill av</button>
-    <svg id="histChart" viewBox="0 0 340 205" role="img" aria-label="Antall registrert laks per sesong som prosent av hver elvs beste år, 1993 til 2025, med sumlinje for alle elver"></svg>
+    <svg id="histChart" viewBox="0 0 340 205" role="img" aria-label="Antall registrert laks per sesong som prosent av hver elvs beste år, 1993 til 2026, med sumlinje for alle elver"></svg>
     <div class="legend" id="histLegend"></div>
     <div class="readout" id="histReadout"><span class="hint">Trykk «Spill av» for å se fangsttallene tegnes opp fra 1993.</span></div>
   </div>
@@ -925,7 +925,7 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
   </div>
   <div class="panel-body">
     <button id="rateReplay" class="pill active" style="width:100%;text-align:center;margin-bottom:12px">↻ Spill av</button>
-    <svg id="rateChart" viewBox="0 0 340 205" role="img" aria-label="Laks per døgn per sesong som prosent av hver elvs beste år, 2016 til 2025, med sumlinje for alle elver"></svg>
+    <svg id="rateChart" viewBox="0 0 340 205" role="img" aria-label="Laks per døgn per sesong som prosent av hver elvs beste år, 2016 til 2026, med sumlinje for alle elver"></svg>
     <div class="legend" id="rateLegend"></div>
     <div class="readout" id="rateReadout"><span class="hint">Trykk «Spill av» for å se kurvene tegnes opp fra 2016.</span></div>
   </div>
@@ -965,7 +965,7 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
 </div>
 
 <div class="foot">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.019</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.020</span><br>
   <span style="font-size:0.6rem;">Data: Inatur.no (fangst) · NVE HydAPI (vannføring)</span>
 </div>
 
@@ -1209,7 +1209,7 @@ let histGeom = null;
 
 function animYears() {
   const s = new Set();
-  ORDER.forEach(k => DB.elver[k] && DB.elver[k].aarsserie.forEach(a => { if (a.aar <= 2025) s.add(a.aar); }));
+  ORDER.forEach(k => DB.elver[k] && DB.elver[k].aarsserie.forEach(a => s.add(a.aar)));
   return [...s].sort();
 }
 
@@ -1374,7 +1374,7 @@ function mergeHistSeries(ssbData) {
 
 function histYears() {
   const s = new Set();
-  ORDER.forEach(k => HISTDB.elver[k] && HISTDB.elver[k].aarsserie.forEach(a => { if (a.aar <= 2025) s.add(a.aar); }));
+  ORDER.forEach(k => HISTDB.elver[k] && HISTDB.elver[k].aarsserie.forEach(a => s.add(a.aar)));
   return [...s].sort((a, b) => a - b);
 }
 
@@ -1654,7 +1654,7 @@ let rateRunning = false;
 
 function rateYears() {
   const s = new Set();
-  ORDER.forEach(k => DB.elver[k] && DB.elver[k].aarsserie.forEach(a => { if (a.aar <= 2025 && a.rate !== null && a.rate !== undefined) s.add(a.aar); }));
+  ORDER.forEach(k => DB.elver[k] && DB.elver[k].aarsserie.forEach(a => { if (a.rate !== null && a.rate !== undefined) s.add(a.aar); }));
   return [...s].sort((a, b) => a - b);
 }
 
