@@ -965,7 +965,7 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
 </div>
 
 <div class="foot">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.022</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.023</span><br>
   <span style="font-size:0.6rem;">Data: Inatur.no (fangst) · NVE HydAPI (vannføring)</span>
 </div>
 
@@ -1270,7 +1270,8 @@ function drawAnim() {
       svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.8 : 2.6, fill: top ? '#fcfcfb' : COLORS[k], stroke: top ? COLORS[k] : null, 'stroke-width': top ? 2.2 : null, opacity: 1, class: 'dot', 'data-x': xOf(i) }));
       const lv = antallMap[k][years[i]] || 0;
       if (lv) {
-        const t = el('text', { x: xOf(i).toFixed(1), y: (yOf(v) + (yOf(v) > 15 ? -5 : 9)).toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-family': 'system-ui,sans-serif', fill: COLORS[k], opacity: 1, class: 'dot', 'data-x': xOf(i) });
+        const ly = labelY(yOf(v), i, pct[k], yOf, T, H - ph - 4, 5);
+        const t = el('text', { x: xOf(i).toFixed(1), y: ly.toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-family': 'system-ui,sans-serif', fill: COLORS[k], opacity: 1, class: 'dot', 'data-x': xOf(i) });
         t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
       }
     });
@@ -1284,7 +1285,8 @@ function drawAnim() {
       svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.8 : 2.6, fill: top ? '#fcfcfb' : '#1a202c', stroke: '#1a202c', 'stroke-width': top ? 2.2 : 0, opacity: 1, class: 'dot', 'data-x': xOf(i) }));
       const lv = sumVals[i] || 0;
       if (lv) {
-        const t = el('text', { x: xOf(i).toFixed(1), y: (yOf(sumPct[i]) + (yOf(sumPct[i]) > 15 ? -5 : 9)).toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-weight': 700, 'font-family': 'system-ui,sans-serif', fill: '#1a202c', opacity: 1, class: 'dot', 'data-x': xOf(i) });
+        const ly = labelY(yOf(sumPct[i]), i, sumPct, yOf, T, H - ph - 4, 5);
+        const t = el('text', { x: xOf(i).toFixed(1), y: ly.toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-weight': 700, 'font-family': 'system-ui,sans-serif', fill: '#1a202c', opacity: 1, class: 'dot', 'data-x': xOf(i) });
         t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
       }
     });
@@ -1387,7 +1389,8 @@ function drawHist() {
       svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.4 : 1.8, fill: top ? '#fcfcfb' : COLORS[k], stroke: top ? COLORS[k] : null, 'stroke-width': top ? 2 : null, opacity: 1, class: 'dot', 'data-x': xOf(i) }));
       const lv = antallMap[k][years[i]] || 0;
       if (lv) {
-        const t = el('text', { x: xOf(i).toFixed(1), y: (yOf(v) + (yOf(v) > 15 ? -5 : 9)).toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-family': 'system-ui,sans-serif', fill: COLORS[k], opacity: 1, class: 'dot', 'data-x': xOf(i) });
+        const ly = labelY(yOf(v), i, pct[k], yOf, T, H - ph - 4, 5);
+        const t = el('text', { x: xOf(i).toFixed(1), y: ly.toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-family': 'system-ui,sans-serif', fill: COLORS[k], opacity: 1, class: 'dot', 'data-x': xOf(i) });
         t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
       }
     });
@@ -1401,7 +1404,8 @@ function drawHist() {
       svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.4 : 1.8, fill: top ? '#fcfcfb' : '#1a202c', stroke: '#1a202c', 'stroke-width': top ? 2 : 0, opacity: 1, class: 'dot', 'data-x': xOf(i) }));
       const lv = sumVals[i] || 0;
       if (lv) {
-        const t = el('text', { x: xOf(i).toFixed(1), y: (yOf(sumPct[i]) + (yOf(sumPct[i]) > 15 ? -5 : 9)).toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-weight': 700, 'font-family': 'system-ui,sans-serif', fill: '#1a202c', opacity: 1, class: 'dot', 'data-x': xOf(i) });
+        const ly = labelY(yOf(sumPct[i]), i, sumPct, yOf, T, H - ph - 4, 5);
+        const t = el('text', { x: xOf(i).toFixed(1), y: ly.toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-weight': 700, 'font-family': 'system-ui,sans-serif', fill: '#1a202c', opacity: 1, class: 'dot', 'data-x': xOf(i) });
         t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
       }
     });
@@ -1778,6 +1782,25 @@ function drawWeight() {
   const lbl = el('text', {x: 2, y: H-6, class:'ax'});
   lbl.textContent = 'n';
   svg.appendChild(lbl);
+}
+
+// ── LABEL-POSISJONERING (kollisjonsfri) ───────────────────────────────────
+function labelY(cy, i, pctArr, yOfFn, T, B, OFF) {
+  const prev = i > 0 ? yOfFn(pctArr[i - 1]) : null;
+  const next = i < pctArr.length - 1 ? yOfFn(pctArr[i + 1]) : null;
+  // Høy y = lavt på grafen. "Naboene er høyere enn oss" = vi er på en topp = legg label over.
+  let placeAbove;
+  if (prev !== null && next !== null) {
+    placeAbove = (prev + next) / 2 > cy;
+  } else if (next !== null) {
+    placeAbove = next > cy;
+  } else if (prev !== null) {
+    placeAbove = prev > cy;
+  } else {
+    placeAbove = cy > (T + B) / 2;
+  }
+  const raw = placeAbove ? cy - (OFF || 5) : cy + (OFF || 5) + 3;
+  return Math.max(T + 7, Math.min(B - 2, raw));
 }
 
 // ── HOVER-LABELS PÅ KURVEGRAFER ───────────────────────────────────────────
