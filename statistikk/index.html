@@ -965,7 +965,7 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
 </div>
 
 <div class="foot">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.017</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.019</span><br>
   <span style="font-size:0.6rem;">Data: Inatur.no (fangst) · NVE HydAPI (vannføring)</span>
 </div>
 
@@ -1269,6 +1269,11 @@ function drawAnim() {
     pct[k].forEach((v, i) => {
       const top = Math.abs(v - 100) < 0.01;
       svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.8 : 2.6, fill: top ? '#fcfcfb' : COLORS[k], stroke: top ? COLORS[k] : null, 'stroke-width': top ? 2.2 : null, opacity: 0, class: 'dot', 'data-x': xOf(i) }));
+      const lv = antallMap[k][years[i]] || 0;
+      if (lv) {
+        const t = el('text', { x: xOf(i).toFixed(1), y: (yOf(v) + (yOf(v) > 15 ? -5 : 9)).toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-family': 'system-ui,sans-serif', fill: COLORS[k], opacity: 0, class: 'dot', 'data-x': xOf(i) });
+        t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
+      }
     });
   });
   if (!animOff.sum) {
@@ -1278,6 +1283,11 @@ function drawAnim() {
     sumPct.forEach((v, i) => {
       const top = Math.abs(v - 100) < 0.01;
       svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.8 : 2.6, fill: top ? '#fcfcfb' : '#1a202c', stroke: '#1a202c', 'stroke-width': top ? 2.2 : 0, opacity: 0, class: 'dot', 'data-x': xOf(i) }));
+      const lv = sumVals[i] || 0;
+      if (lv) {
+        const t = el('text', { x: xOf(i).toFixed(1), y: (yOf(sumPct[i]) + (yOf(sumPct[i]) > 15 ? -5 : 9)).toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-weight': 700, 'font-family': 'system-ui,sans-serif', fill: '#1a202c', opacity: 0, class: 'dot', 'data-x': xOf(i) });
+        t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
+      }
     });
   }
   const yl = el('text', { x: xOf(0).toFixed(1), y: T + ph + 9, 'text-anchor': 'middle', class: 'axb', id: 'animYrFollow', opacity: 0 });
@@ -1413,6 +1423,11 @@ function drawHist() {
     pct[k].forEach((v, i) => {
       const top = Math.abs(v - 100) < 0.01;
       svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.4 : 1.8, fill: top ? '#fcfcfb' : COLORS[k], stroke: top ? COLORS[k] : null, 'stroke-width': top ? 2 : null, opacity: 0, class: 'dot', 'data-x': xOf(i) }));
+      const lv = antallMap[k][years[i]] || 0;
+      if (lv) {
+        const t = el('text', { x: xOf(i).toFixed(1), y: (yOf(v) + (yOf(v) > 15 ? -5 : 9)).toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-family': 'system-ui,sans-serif', fill: COLORS[k], opacity: 0, class: 'dot', 'data-x': xOf(i) });
+        t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
+      }
     });
   });
   if (!histOff.sum) {
@@ -1422,6 +1437,11 @@ function drawHist() {
     sumPct.forEach((v, i) => {
       const top = Math.abs(v - 100) < 0.01;
       svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.4 : 1.8, fill: top ? '#fcfcfb' : '#1a202c', stroke: '#1a202c', 'stroke-width': top ? 2 : 0, opacity: 0, class: 'dot', 'data-x': xOf(i) }));
+      const lv = sumVals[i] || 0;
+      if (lv) {
+        const t = el('text', { x: xOf(i).toFixed(1), y: (yOf(sumPct[i]) + (yOf(sumPct[i]) > 15 ? -5 : 9)).toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-weight': 700, 'font-family': 'system-ui,sans-serif', fill: '#1a202c', opacity: 0, class: 'dot', 'data-x': xOf(i) });
+        t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
+      }
     });
   }
   const yl = el('text', { x: xOf(0).toFixed(1), y: T + ph + 9, 'text-anchor': 'middle', class: 'axb', id: 'histYrFollow', opacity: 0 });
@@ -1930,7 +1950,7 @@ function boot() {
   drawProfiles();
   drawAnimLegend(); animGeom = drawAnim();
   document.getElementById('animReplay').onclick = runAnim;
-  bindYearHover('animChart', () => animGeom, () => animOff, () => DB);
+
 
   fetch(HIST_URL)
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
@@ -1938,7 +1958,7 @@ function boot() {
       HISTDB = mergeHistSeries(j);
       drawHistLegend(); histGeom = drawHist();
       document.getElementById('histReplay').onclick = runHist;
-      bindYearHover('histChart', () => histGeom, () => histOff, () => HISTDB);
+
     })
     .catch(e => {
       document.getElementById('histReadout').innerHTML =
