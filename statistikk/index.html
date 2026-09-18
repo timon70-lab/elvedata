@@ -965,7 +965,7 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
 </div>
 
 <div class="foot">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.023</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.024</span><br>
   <span style="font-size:0.6rem;">Data: Inatur.no (fangst) · NVE HydAPI (vannføring)</span>
 </div>
 
@@ -1784,23 +1784,13 @@ function drawWeight() {
   svg.appendChild(lbl);
 }
 
-// ── LABEL-POSISJONERING (kollisjonsfri) ───────────────────────────────────
+// ── LABEL-POSISJONERING ───────────────────────────────────────────────────
 function labelY(cy, i, pctArr, yOfFn, T, B, OFF) {
-  const prev = i > 0 ? yOfFn(pctArr[i - 1]) : null;
-  const next = i < pctArr.length - 1 ? yOfFn(pctArr[i + 1]) : null;
-  // Høy y = lavt på grafen. "Naboene er høyere enn oss" = vi er på en topp = legg label over.
-  let placeAbove;
-  if (prev !== null && next !== null) {
-    placeAbove = (prev + next) / 2 > cy;
-  } else if (next !== null) {
-    placeAbove = next > cy;
-  } else if (prev !== null) {
-    placeAbove = prev > cy;
-  } else {
-    placeAbove = cy > (T + B) / 2;
-  }
-  const raw = placeAbove ? cy - (OFF || 5) : cy + (OFF || 5) + 3;
-  return Math.max(T + 7, Math.min(B - 2, raw));
+  // Alltid over punktet — unntatt hvis for nær toppen, da under
+  const o = OFF || 5;
+  const above = cy - o - 1;
+  if (above < T + 7) return Math.min(B - 2, cy + o + 4); // for nær toppen: legg under
+  return above;
 }
 
 // ── HOVER-LABELS PÅ KURVEGRAFER ───────────────────────────────────────────
