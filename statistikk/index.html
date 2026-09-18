@@ -965,7 +965,7 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
 </div>
 
 <div class="foot">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.021</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.022</span><br>
   <span style="font-size:0.6rem;">Data: Inatur.no (fangst) · NVE HydAPI (vannføring)</span>
 </div>
 
@@ -1905,7 +1905,7 @@ function boot() {
   bindScrub('flowChart', () => flowGeom, showFlowAt);
   drawIndex(); drawYearSmalls(); drawYearTable();
   drawRateLegend(); drawRate();
-  document.getElementById('rateReplay').onclick = runRate;
+  const rr = document.getElementById('rateReplay'); if (rr) rr.onclick = runRate;
   drawWeightPills(); drawWeightLegend(); drawWeight();
 }
 
