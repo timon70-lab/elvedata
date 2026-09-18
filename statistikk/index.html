@@ -880,13 +880,13 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
 <div class="panel">
   <div class="panel-header">
     <span class="panel-name">Antall laks – % av eget toppår</span>
-    <span class="panel-sub">Hver elv skalert mot sin egen beste sesong. Den sorte linjen er summen av alle seks. Trykk «Spill av» for å se kurvene tegnes opp.</span>
+    <span class="panel-sub">Hver elv skalert mot sin egen beste sesong. Den sorte linjen er summen av alle seks.</span>
   </div>
   <div class="panel-body">
-    <button id="animReplay" class="pill active" style="width:100%;text-align:center;margin-bottom:12px">↻ Spill av</button>
+
     <svg id="animChart" viewBox="0 0 340 205" role="img" aria-label="Antall registrert laks per sesong som prosent av hver elvs beste år, 2016 til 2026, med sumlinje for alle elver"></svg>
     <div class="legend" id="animLegend"></div>
-    <div class="readout" id="animReadout"><span class="hint">Trykk «Spill av» for å se fangsttallene tegnes opp fra 2016.</span></div>
+    <div class="readout" id="animReadout"></div>
   </div>
 </div>
 
@@ -897,10 +897,10 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
     <span class="panel-sub">Samme figur, men strukket 23 sesonger lenger tilbake med SSB-tall. 1993–2015 er SSB, 2016–2026 er fangstloggene over. Hver elv skalert mot sin egen beste sesong i hele perioden.</span>
   </div>
   <div class="panel-body">
-    <button id="histReplay" class="pill active" style="width:100%;text-align:center;margin-bottom:12px">↻ Spill av</button>
+
     <svg id="histChart" viewBox="0 0 340 205" role="img" aria-label="Antall registrert laks per sesong som prosent av hver elvs beste år, 1993 til 2026, med sumlinje for alle elver"></svg>
     <div class="legend" id="histLegend"></div>
-    <div class="readout" id="histReadout"><span class="hint">Trykk «Spill av» for å se fangsttallene tegnes opp fra 1993.</span></div>
+    <div class="readout" id="histReadout"></div>
   </div>
 </div>
 
@@ -921,13 +921,13 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
 <div class="panel">
   <div class="panel-header">
     <span class="panel-name">Laks per døgn – % av eget toppår</span>
-    <span class="panel-sub">Registrert laks per døgn per sesong, skalert mot elvas egen beste sesong. Hvert år deles på antall døgn den sesongen faktisk varte, så år med kortere sesong ikke ser dårligere ut enn de var. Den sorte linjen er summen av alle seks. Trykk «Spill av» for å se kurvene tegnes opp.</span>
+    <span class="panel-sub">Registrert laks per døgn per sesong, skalert mot elvas egen beste sesong. Hvert år deles på antall døgn den sesongen faktisk varte, så år med kortere sesong ikke ser dårligere ut enn de var. Den sorte linjen er summen av alle seks.</span>
   </div>
   <div class="panel-body">
-    <button id="rateReplay" class="pill active" style="width:100%;text-align:center;margin-bottom:12px">↻ Spill av</button>
+
     <svg id="rateChart" viewBox="0 0 340 205" role="img" aria-label="Laks per døgn per sesong som prosent av hver elvs beste år, 2016 til 2026, med sumlinje for alle elver"></svg>
     <div class="legend" id="rateLegend"></div>
-    <div class="readout" id="rateReadout"><span class="hint">Trykk «Spill av» for å se kurvene tegnes opp fra 2016.</span></div>
+    <div class="readout" id="rateReadout"></div>
   </div>
 </div>
 
@@ -965,7 +965,7 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
 </div>
 
 <div class="foot">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.020</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.021</span><br>
   <span style="font-size:0.6rem;">Data: Inatur.no (fangst) · NVE HydAPI (vannføring)</span>
 </div>
 
@@ -1203,7 +1203,6 @@ function bindScrub(svgId, getGeom, handler) {
 
 // ── 2b. ANIMERT ÅRSFANGST (% av eget toppår) ────────────────────────────
 let animOff = { sum: false };
-let animRunning = false;
 let animGeom = null;
 let histGeom = null;
 
@@ -1268,10 +1267,10 @@ function drawAnim() {
     svg.appendChild(p); paths.push(p);
     pct[k].forEach((v, i) => {
       const top = Math.abs(v - 100) < 0.01;
-      svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.8 : 2.6, fill: top ? '#fcfcfb' : COLORS[k], stroke: top ? COLORS[k] : null, 'stroke-width': top ? 2.2 : null, opacity: 0, class: 'dot', 'data-x': xOf(i) }));
+      svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.8 : 2.6, fill: top ? '#fcfcfb' : COLORS[k], stroke: top ? COLORS[k] : null, 'stroke-width': top ? 2.2 : null, opacity: 1, class: 'dot', 'data-x': xOf(i) }));
       const lv = antallMap[k][years[i]] || 0;
       if (lv) {
-        const t = el('text', { x: xOf(i).toFixed(1), y: (yOf(v) + (yOf(v) > 15 ? -5 : 9)).toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-family': 'system-ui,sans-serif', fill: COLORS[k], opacity: 0, class: 'dot', 'data-x': xOf(i) });
+        const t = el('text', { x: xOf(i).toFixed(1), y: (yOf(v) + (yOf(v) > 15 ? -5 : 9)).toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-family': 'system-ui,sans-serif', fill: COLORS[k], opacity: 1, class: 'dot', 'data-x': xOf(i) });
         t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
       }
     });
@@ -1282,10 +1281,10 @@ function drawAnim() {
     svg.appendChild(sp); paths.push(sp);
     sumPct.forEach((v, i) => {
       const top = Math.abs(v - 100) < 0.01;
-      svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.8 : 2.6, fill: top ? '#fcfcfb' : '#1a202c', stroke: '#1a202c', 'stroke-width': top ? 2.2 : 0, opacity: 0, class: 'dot', 'data-x': xOf(i) }));
+      svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.8 : 2.6, fill: top ? '#fcfcfb' : '#1a202c', stroke: '#1a202c', 'stroke-width': top ? 2.2 : 0, opacity: 1, class: 'dot', 'data-x': xOf(i) }));
       const lv = sumVals[i] || 0;
       if (lv) {
-        const t = el('text', { x: xOf(i).toFixed(1), y: (yOf(sumPct[i]) + (yOf(sumPct[i]) > 15 ? -5 : 9)).toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-weight': 700, 'font-family': 'system-ui,sans-serif', fill: '#1a202c', opacity: 0, class: 'dot', 'data-x': xOf(i) });
+        const t = el('text', { x: xOf(i).toFixed(1), y: (yOf(sumPct[i]) + (yOf(sumPct[i]) > 15 ? -5 : 9)).toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-weight': 700, 'font-family': 'system-ui,sans-serif', fill: '#1a202c', opacity: 1, class: 'dot', 'data-x': xOf(i) });
         t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
       }
     });
@@ -1296,42 +1295,6 @@ function drawAnim() {
   return { paths, years, xOf, yOf, L, R, W, sumVals, sumMax, antallMap, pct };
 }
 
-function runAnim() {
-  const svg = document.getElementById('animChart');
-  if (!svg || animRunning) return;
-  animGeom = drawAnim();
-  const g = animGeom;
-  if (!g) return;
-  animRunning = true;
-  const dots = [...svg.querySelectorAll('.dot')];
-  const yrFollow = document.getElementById('animYrFollow');
-  const ro = document.getElementById('animReadout');
-  const pw = g.W - g.L - g.R;
-  g.paths.forEach(p => { const len = p.getTotalLength(); p.style.strokeDasharray = len; p.style.strokeDashoffset = len; p.dataset.len = len; });
-  const t0 = performance.now(), DUR = 7600;
-  function step(now) {
-    const t = Math.min((now - t0) / DUR, 1);
-    const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-    g.paths.forEach(p => { p.style.strokeDashoffset = (+p.dataset.len) * (1 - e); });
-    const x = g.L + e * pw;
-    dots.forEach(d => { if (+d.dataset.x <= x + 0.5) d.setAttribute('opacity', 1); });
-    const i = Math.min(Math.round(e * (g.years.length - 1)), g.years.length - 1);
-    const clampedX = Math.min(Math.max(x, g.L + 14), g.W - g.R - 14);
-    yrFollow.setAttribute('x', clampedX.toFixed(1));
-    yrFollow.setAttribute('opacity', t < 1 ? 1 : 0);
-    yrFollow.textContent = g.years[i];
-    if (t < 1) { ro.innerHTML = ''; }
-    else {
-      const shown = ORDER.filter(k => !animOff[k] && DB.elver[k]).map(k => DB.elver[k].navn).join(' · ');
-      const last = g.years.length - 1;
-      ro.innerHTML = '<div class="ro-head">Vist</div>' +
-        (shown || 'ingen elver valgt') + (animOff.sum ? '' : ' · Alle elver') +
-        (animOff.sum ? '' : '<br><span class="hint">Sum ' + g.years[last] + ': ' + g.sumVals[last].toLocaleString('nb-NO') + ' laks (toppår ' + g.sumMax.toLocaleString('nb-NO') + ')</span>');
-    }
-    if (t < 1) requestAnimationFrame(step); else animRunning = false;
-  }
-  requestAnimationFrame(step);
-}
 
 function drawAnimLegend() {
   const host = document.getElementById('animLegend');
@@ -1345,7 +1308,7 @@ function drawAnimLegend() {
     b.tabIndex = 0;
     const sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = COLORS[key];
     b.appendChild(sw); b.appendChild(document.createTextNode(r.navn));
-    b.onclick = () => { animOff[key] = !animOff[key]; drawAnimLegend(); if (!animRunning) { animGeom = drawAnim(); } };
+    b.onclick = () => { animOff[key] = !animOff[key]; drawAnimLegend(); animGeom = drawAnim(); };
     host.appendChild(b);
   });
   const b = document.createElement('div');
@@ -1353,14 +1316,13 @@ function drawAnimLegend() {
   b.tabIndex = 0;
   const sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = '#1a202c';
   b.appendChild(sw); b.appendChild(document.createTextNode('Alle elver'));
-  b.onclick = () => { animOff.sum = !animOff.sum; drawAnimLegend(); if (!animRunning) { animGeom = drawAnim(); } };
+  b.onclick = () => { animOff.sum = !animOff.sum; drawAnimLegend(); animGeom = drawAnim(); };
   host.appendChild(b);
 }
 
 // ── 2c. ANIMERT ÅRSFANGST 1993-2025 ─────────────────────────────────────
 let HISTDB = null;
 let histOff = { sum: false };
-let histRunning = false;
 
 function mergeHistSeries(ssbData) {
   const elver = {};
@@ -1422,10 +1384,10 @@ function drawHist() {
     svg.appendChild(p); paths.push(p);
     pct[k].forEach((v, i) => {
       const top = Math.abs(v - 100) < 0.01;
-      svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.4 : 1.8, fill: top ? '#fcfcfb' : COLORS[k], stroke: top ? COLORS[k] : null, 'stroke-width': top ? 2 : null, opacity: 0, class: 'dot', 'data-x': xOf(i) }));
+      svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.4 : 1.8, fill: top ? '#fcfcfb' : COLORS[k], stroke: top ? COLORS[k] : null, 'stroke-width': top ? 2 : null, opacity: 1, class: 'dot', 'data-x': xOf(i) }));
       const lv = antallMap[k][years[i]] || 0;
       if (lv) {
-        const t = el('text', { x: xOf(i).toFixed(1), y: (yOf(v) + (yOf(v) > 15 ? -5 : 9)).toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-family': 'system-ui,sans-serif', fill: COLORS[k], opacity: 0, class: 'dot', 'data-x': xOf(i) });
+        const t = el('text', { x: xOf(i).toFixed(1), y: (yOf(v) + (yOf(v) > 15 ? -5 : 9)).toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-family': 'system-ui,sans-serif', fill: COLORS[k], opacity: 1, class: 'dot', 'data-x': xOf(i) });
         t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
       }
     });
@@ -1436,10 +1398,10 @@ function drawHist() {
     svg.appendChild(sp); paths.push(sp);
     sumPct.forEach((v, i) => {
       const top = Math.abs(v - 100) < 0.01;
-      svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.4 : 1.8, fill: top ? '#fcfcfb' : '#1a202c', stroke: '#1a202c', 'stroke-width': top ? 2 : 0, opacity: 0, class: 'dot', 'data-x': xOf(i) }));
+      svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.4 : 1.8, fill: top ? '#fcfcfb' : '#1a202c', stroke: '#1a202c', 'stroke-width': top ? 2 : 0, opacity: 1, class: 'dot', 'data-x': xOf(i) }));
       const lv = sumVals[i] || 0;
       if (lv) {
-        const t = el('text', { x: xOf(i).toFixed(1), y: (yOf(sumPct[i]) + (yOf(sumPct[i]) > 15 ? -5 : 9)).toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-weight': 700, 'font-family': 'system-ui,sans-serif', fill: '#1a202c', opacity: 0, class: 'dot', 'data-x': xOf(i) });
+        const t = el('text', { x: xOf(i).toFixed(1), y: (yOf(sumPct[i]) + (yOf(sumPct[i]) > 15 ? -5 : 9)).toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-weight': 700, 'font-family': 'system-ui,sans-serif', fill: '#1a202c', opacity: 1, class: 'dot', 'data-x': xOf(i) });
         t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
       }
     });
@@ -1450,42 +1412,6 @@ function drawHist() {
   return { paths, years, xOf, yOf, L, R, W, sumVals, sumMax, antallMap, pct };
 }
 
-function runHist() {
-  const svg = document.getElementById('histChart');
-  if (!svg || histRunning || !HISTDB) return;
-  histGeom = drawHist();
-  const g = histGeom;
-  if (!g) return;
-  histRunning = true;
-  const dots = [...svg.querySelectorAll('.dot')];
-  const yrFollow = document.getElementById('histYrFollow');
-  const ro = document.getElementById('histReadout');
-  const pw = g.W - g.L - g.R;
-  g.paths.forEach(p => { const len = p.getTotalLength(); p.style.strokeDasharray = len; p.style.strokeDashoffset = len; p.dataset.len = len; });
-  const t0 = performance.now(), DUR = 11000;
-  function step(now) {
-    const t = Math.min((now - t0) / DUR, 1);
-    const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-    g.paths.forEach(p => { p.style.strokeDashoffset = (+p.dataset.len) * (1 - e); });
-    const x = g.L + e * pw;
-    dots.forEach(d => { if (+d.dataset.x <= x + 0.5) d.setAttribute('opacity', 1); });
-    const i = Math.min(Math.round(e * (g.years.length - 1)), g.years.length - 1);
-    const clampedX = Math.min(Math.max(x, g.L + 14), g.W - g.R - 14);
-    yrFollow.setAttribute('x', clampedX.toFixed(1));
-    yrFollow.setAttribute('opacity', t < 1 ? 1 : 0);
-    yrFollow.textContent = g.years[i];
-    if (t < 1) { ro.innerHTML = ''; }
-    else {
-      const shown = ORDER.filter(k => !histOff[k] && HISTDB.elver[k]).map(k => HISTDB.elver[k].navn).join(' · ');
-      const last = g.years.length - 1;
-      ro.innerHTML = '<div class="ro-head">Vist</div>' +
-        (shown || 'ingen elver valgt') + (histOff.sum ? '' : ' · Alle elver') +
-        (histOff.sum ? '' : '<br><span class="hint">Sum ' + g.years[last] + ': ' + g.sumVals[last].toLocaleString('nb-NO') + ' laks (toppår ' + g.sumMax.toLocaleString('nb-NO') + ')</span>');
-    }
-    if (t < 1) requestAnimationFrame(step); else histRunning = false;
-  }
-  requestAnimationFrame(step);
-}
 
 function drawHistLegend() {
   const host = document.getElementById('histLegend');
@@ -1499,7 +1425,7 @@ function drawHistLegend() {
     b.tabIndex = 0;
     const sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = COLORS[key];
     b.appendChild(sw); b.appendChild(document.createTextNode(r.navn));
-    b.onclick = () => { histOff[key] = !histOff[key]; drawHistLegend(); if (!histRunning) { histGeom = drawHist(); } };
+    b.onclick = () => { histOff[key] = !histOff[key]; drawHistLegend(); histGeom = drawHist(); };
     host.appendChild(b);
   });
   const b = document.createElement('div');
@@ -1507,7 +1433,7 @@ function drawHistLegend() {
   b.tabIndex = 0;
   const sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = '#1a202c';
   b.appendChild(sw); b.appendChild(document.createTextNode('Alle elver'));
-  b.onclick = () => { histOff.sum = !histOff.sum; drawHistLegend(); if (!histRunning) { histGeom = drawHist(); } };
+  b.onclick = () => { histOff.sum = !histOff.sum; drawHistLegend(); histGeom = drawHist(); };
   host.appendChild(b);
 }
 
@@ -1704,7 +1630,7 @@ function drawRate() {
     svg.appendChild(p); paths.push(p);
     pct[k].forEach((v, i) => {
       const top = Math.abs(v - 100) < 0.01;
-      svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.8 : 2.6, fill: top ? '#fcfcfb' : COLORS[k], stroke: top ? COLORS[k] : null, 'stroke-width': top ? 2.2 : null, opacity: 0, class: 'dot', 'data-x': xOf(i) }));
+      svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.8 : 2.6, fill: top ? '#fcfcfb' : COLORS[k], stroke: top ? COLORS[k] : null, 'stroke-width': top ? 2.2 : null, opacity: 1, class: 'dot', 'data-x': xOf(i) }));
     });
   });
   if (!rateOff.sum) {
@@ -1713,7 +1639,7 @@ function drawRate() {
     svg.appendChild(sp); paths.push(sp);
     sumPct.forEach((v, i) => {
       const top = Math.abs(v - 100) < 0.01;
-      svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.8 : 2.6, fill: top ? '#fcfcfb' : '#1a202c', stroke: '#1a202c', 'stroke-width': top ? 2.2 : 0, opacity: 0, class: 'dot', 'data-x': xOf(i) }));
+      svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.8 : 2.6, fill: top ? '#fcfcfb' : '#1a202c', stroke: '#1a202c', 'stroke-width': top ? 2.2 : 0, opacity: 1, class: 'dot', 'data-x': xOf(i) }));
     });
   }
   const yl = el('text', { x: xOf(0).toFixed(1), y: T + ph + 9, 'text-anchor': 'middle', class: 'axb', id: 'rateYrFollow', opacity: 0 });
@@ -1949,7 +1875,12 @@ function boot() {
 
   drawProfiles();
   drawAnimLegend(); animGeom = drawAnim();
-  document.getElementById('animReplay').onclick = runAnim;
+  (function(){ const ro = document.getElementById('animReadout'); if(!ro||!animGeom) return;
+    const shown = ORDER.filter(k => !animOff[k] && DB.elver[k]).map(k => DB.elver[k].navn).join(' · ');
+    const last = animGeom.years.length - 1;
+    ro.innerHTML = '<div class="ro-head">Vist</div>' + (shown || 'ingen elver valgt') + (animOff.sum ? '' : ' · Alle elver') + (animOff.sum ? '' : '<br><span class="hint">Sum ' + animGeom.years[last] + ': ' + animGeom.sumVals[last].toLocaleString('nb-NO') + ' laks (toppår ' + animGeom.sumMax.toLocaleString('nb-NO') + ')</span>');
+  })();
+
 
 
   fetch(HIST_URL)
@@ -1957,7 +1888,12 @@ function boot() {
     .then(j => {
       HISTDB = mergeHistSeries(j);
       drawHistLegend(); histGeom = drawHist();
-      document.getElementById('histReplay').onclick = runHist;
+      (function(){ const ro = document.getElementById('histReadout'); if(!ro||!histGeom) return;
+        const shown = ORDER.filter(k => !histOff[k] && HISTDB.elver[k]).map(k => HISTDB.elver[k].navn).join(' · ');
+        const last = histGeom.years.length - 1;
+        ro.innerHTML = '<div class="ro-head">Vist</div>' + (shown || 'ingen elver valgt') + (histOff.sum ? '' : ' · Alle elver') + (histOff.sum ? '' : '<br><span class="hint">Sum ' + histGeom.years[last] + ': ' + histGeom.sumVals[last].toLocaleString('nb-NO') + ' laks (toppår ' + histGeom.sumMax.toLocaleString('nb-NO') + ')</span>');
+      })();
+
 
     })
     .catch(e => {
