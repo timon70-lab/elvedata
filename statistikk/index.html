@@ -1204,6 +1204,8 @@ function bindScrub(svgId, getGeom, handler) {
 // ── 2b. ANIMERT ÅRSFANGST (% av eget toppår) ────────────────────────────
 let animOff = { sum: false };
 let animRunning = false;
+let animGeom = null;
+let histGeom = null;
 
 function animYears() {
   const s = new Set();
@@ -1231,12 +1233,13 @@ function drawAnim() {
   const xOf = i => L + (i / (years.length - 1)) * pw;
   const yOf = v => T + ph - (v / 100) * ph;
 
-  const pct = {}, max = {};
+  const pct = {}, max = {}, antallMap = {};
   ORDER.forEach(k => {
     const r = DB.elver[k];
     if (!r) return;
     const map = {};
     r.aarsserie.forEach(a => map[a.aar] = a.antall || 0);
+    antallMap[k] = map;
     const vals = years.map(y => map[y] || 0);
     max[k] = Math.max(...vals, 1);
     pct[k] = vals.map(v => v / max[k] * 100);
@@ -1280,13 +1283,14 @@ function drawAnim() {
   const yl = el('text', { x: xOf(0).toFixed(1), y: T + ph + 9, 'text-anchor': 'middle', class: 'axb', id: 'animYrFollow', opacity: 0 });
   svg.appendChild(yl);
 
-  return { paths, years, xOf, L, R, W, sumVals, sumMax };
+  return { paths, years, xOf, yOf, L, R, W, sumVals, sumMax, antallMap, pct };
 }
 
 function runAnim() {
   const svg = document.getElementById('animChart');
   if (!svg || animRunning) return;
-  const g = drawAnim();
+  animGeom = drawAnim();
+  const g = animGeom;
   if (!g) return;
   animRunning = true;
   const dots = [...svg.querySelectorAll('.dot')];
@@ -1331,7 +1335,7 @@ function drawAnimLegend() {
     b.tabIndex = 0;
     const sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = COLORS[key];
     b.appendChild(sw); b.appendChild(document.createTextNode(r.navn));
-    b.onclick = () => { animOff[key] = !animOff[key]; drawAnimLegend(); if (!animRunning) drawAnim(); };
+    b.onclick = () => { animOff[key] = !animOff[key]; drawAnimLegend(); if (!animRunning) { animGeom = drawAnim(); } };
     host.appendChild(b);
   });
   const b = document.createElement('div');
@@ -1339,7 +1343,7 @@ function drawAnimLegend() {
   b.tabIndex = 0;
   const sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = '#1a202c';
   b.appendChild(sw); b.appendChild(document.createTextNode('Alle elver'));
-  b.onclick = () => { animOff.sum = !animOff.sum; drawAnimLegend(); if (!animRunning) drawAnim(); };
+  b.onclick = () => { animOff.sum = !animOff.sum; drawAnimLegend(); if (!animRunning) { animGeom = drawAnim(); } };
   host.appendChild(b);
 }
 
@@ -1372,12 +1376,13 @@ function drawHist() {
   const xOf = i => L + (i / (years.length - 1)) * pw;
   const yOf = v => T + ph - (v / 100) * ph;
 
-  const pct = {}, max = {};
+  const pct = {}, max = {}, antallMap = {};
   ORDER.forEach(k => {
     const r = HISTDB.elver[k];
     if (!r) return;
     const map = {};
     r.aarsserie.forEach(a => map[a.aar] = a.antall || 0);
+    antallMap[k] = map;
     const vals = years.map(y => map[y] || 0);
     max[k] = Math.max(...vals, 1);
     pct[k] = vals.map(v => v / max[k] * 100);
@@ -1422,13 +1427,14 @@ function drawHist() {
   const yl = el('text', { x: xOf(0).toFixed(1), y: T + ph + 9, 'text-anchor': 'middle', class: 'axb', id: 'histYrFollow', opacity: 0 });
   svg.appendChild(yl);
 
-  return { paths, years, xOf, L, R, W, sumVals, sumMax };
+  return { paths, years, xOf, yOf, L, R, W, sumVals, sumMax, antallMap, pct };
 }
 
 function runHist() {
   const svg = document.getElementById('histChart');
   if (!svg || histRunning || !HISTDB) return;
-  const g = drawHist();
+  histGeom = drawHist();
+  const g = histGeom;
   if (!g) return;
   histRunning = true;
   const dots = [...svg.querySelectorAll('.dot')];
@@ -1473,7 +1479,7 @@ function drawHistLegend() {
     b.tabIndex = 0;
     const sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = COLORS[key];
     b.appendChild(sw); b.appendChild(document.createTextNode(r.navn));
-    b.onclick = () => { histOff[key] = !histOff[key]; drawHistLegend(); if (!histRunning) drawHist(); };
+    b.onclick = () => { histOff[key] = !histOff[key]; drawHistLegend(); if (!histRunning) { histGeom = drawHist(); } };
     host.appendChild(b);
   });
   const b = document.createElement('div');
@@ -1481,7 +1487,7 @@ function drawHistLegend() {
   b.tabIndex = 0;
   const sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = '#1a202c';
   b.appendChild(sw); b.appendChild(document.createTextNode('Alle elver'));
-  b.onclick = () => { histOff.sum = !histOff.sum; drawHistLegend(); if (!histRunning) drawHist(); };
+  b.onclick = () => { histOff.sum = !histOff.sum; drawHistLegend(); if (!histRunning) { histGeom = drawHist(); } };
   host.appendChild(b);
 }
 
@@ -1828,6 +1834,90 @@ function drawWeight() {
   svg.appendChild(lbl);
 }
 
+// ── HOVER-LABELS PÅ KURVEGRAFER ───────────────────────────────────────────
+let _hoverBound = {};
+function bindYearHover(svgId, getGeom, getOff, getDb) {
+  if (_hoverBound[svgId]) return;
+  _hoverBound[svgId] = true;
+  const svgEl = document.getElementById(svgId);
+  if (!svgEl) return;
+  let lblGroup = null;
+
+  function buildLabels() {
+    const svg = document.getElementById(svgId);
+    if (!svg) return;
+    if (lblGroup) { try { svg.removeChild(lblGroup); } catch(e) {} }
+    lblGroup = document.createElementNS('http://www.w3.org/2000/svg','g');
+    lblGroup.style.pointerEvents = 'none';
+    lblGroup.style.opacity = '0';
+    ORDER.forEach(k => {
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('text-anchor','middle');
+      t.setAttribute('font-size','7');
+      t.setAttribute('font-family','system-ui,sans-serif');
+      t.setAttribute('fill', COLORS[k]);
+      t.dataset.lkey = k;
+      lblGroup.appendChild(t);
+    });
+    const ts = document.createElementNS('http://www.w3.org/2000/svg','text');
+    ts.setAttribute('text-anchor','middle');
+    ts.setAttribute('font-size','7');
+    ts.setAttribute('font-weight','700');
+    ts.setAttribute('font-family','system-ui,sans-serif');
+    ts.setAttribute('fill','#1a202c');
+    ts.dataset.lkey = 'sum';
+    lblGroup.appendChild(ts);
+    svg.appendChild(lblGroup);
+  }
+
+  function updateLabels(g, yi) {
+    if (!lblGroup || !g) return;
+    const off = getOff();
+    const y = g.years[yi];
+    [...lblGroup.children].forEach(t => {
+      const k = t.dataset.lkey;
+      if (k === 'sum') {
+        if (off.sum) { t.setAttribute('opacity',0); return; }
+        const v = g.sumVals[yi];
+        if (!v) { t.setAttribute('opacity',0); return; }
+        const cy = g.yOf(v / g.sumMax * 100);
+        t.setAttribute('x', g.xOf(yi).toFixed(1));
+        t.setAttribute('y', (cy > 15 ? cy - 5 : cy + 9).toFixed(1));
+        t.textContent = v.toLocaleString('nb-NO');
+        t.setAttribute('opacity',1);
+      } else {
+        if (off[k] || !g.antallMap || !g.antallMap[k] || !g.pct || !g.pct[k]) {
+          t.setAttribute('opacity',0); return;
+        }
+        const v = g.antallMap[k][y] || 0;
+        if (!v) { t.setAttribute('opacity',0); return; }
+        const cy = g.yOf(g.pct[k][yi]);
+        t.setAttribute('x', g.xOf(yi).toFixed(1));
+        t.setAttribute('y', (cy > 15 ? cy - 5 : cy + 9).toFixed(1));
+        t.textContent = v.toLocaleString('nb-NO');
+        t.setAttribute('opacity',1);
+      }
+    });
+    lblGroup.style.opacity = '1';
+  }
+
+  svgEl.addEventListener('mousemove', function(e) {
+    const g = getGeom();
+    if (!g || !g.years || g.years.length < 2) return;
+    const rect = svgEl.getBoundingClientRect();
+    const scaleX = 340 / (rect.width || 340);
+    const mx = (e.clientX - rect.left) * scaleX;
+    const frac = Math.max(0, Math.min(1, (mx - g.L) / (g.W - g.L - g.R)));
+    const yi = Math.round(frac * (g.years.length - 1));
+    if (!lblGroup) buildLabels();
+    updateLabels(g, yi);
+  });
+
+  svgEl.addEventListener('mouseleave', function() {
+    if (lblGroup) lblGroup.style.opacity = '0';
+  });
+}
+
 // ── OPPSTART ───────────────────────────────────────────────────────────
 function boot() {
   const yrs = allYears();
@@ -1838,15 +1928,17 @@ function boot() {
     ' · juni–september · oppdatert ' + DB.generert;
 
   drawProfiles();
-  drawAnimLegend(); drawAnim();
+  drawAnimLegend(); animGeom = drawAnim();
   document.getElementById('animReplay').onclick = runAnim;
+  bindYearHover('animChart', () => animGeom, () => animOff, () => DB);
 
   fetch(HIST_URL)
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(j => {
       HISTDB = mergeHistSeries(j);
-      drawHistLegend(); drawHist();
+      drawHistLegend(); histGeom = drawHist();
       document.getElementById('histReplay').onclick = runHist;
+      bindYearHover('histChart', () => histGeom, () => histOff, () => HISTDB);
     })
     .catch(e => {
       document.getElementById('histReadout').innerHTML =
