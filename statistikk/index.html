@@ -965,7 +965,7 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
 </div>
 
 <div class="foot">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.027</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.028</span><br>
   <span style="font-size:0.6rem;">Data: Inatur.no (fangst) · NVE HydAPI (vannføring)</span>
 </div>
 
@@ -1273,7 +1273,7 @@ function drawAnim() {
       svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.8 : 2.6, fill: top ? '#fcfcfb' : COLORS[k], stroke: top ? COLORS[k] : null, 'stroke-width': top ? 2.2 : null, opacity: 1, class: 'dot', 'data-x': xOf(i) }));
       const lv = antallMap[k][years[i]] || 0;
       if (lv && showLbls) {
-        const ly = labelY(yOf(v), i, pct[k], yOf, T, H - ph - 4, 4);
+        const ly = labelY(yOf(v), i, pct[k], yOf, T, T + ph, 4);
         const t = el('text', { x: xOf(i).toFixed(1), y: ly.toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-family': 'system-ui,sans-serif', fill: COLORS[k], stroke: '#fcfcfb', 'stroke-width': 2.6, 'stroke-linejoin': 'round', 'paint-order': 'stroke', opacity: 1, class: 'dot', 'data-x': xOf(i) });
         t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
       }
@@ -1288,7 +1288,7 @@ function drawAnim() {
       svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.8 : 2.6, fill: top ? '#fcfcfb' : '#1a202c', stroke: '#1a202c', 'stroke-width': top ? 2.2 : 0, opacity: 1, class: 'dot', 'data-x': xOf(i) }));
       const lv = sumVals[i] || 0;
       if (lv && showLbls) {
-        const ly = labelY(yOf(sumPct[i]), i, sumPct, yOf, T, H - ph - 4, 4);
+        const ly = labelY(yOf(sumPct[i]), i, sumPct, yOf, T, T + ph, 4);
         const t = el('text', { x: xOf(i).toFixed(1), y: ly.toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-weight': 700, 'font-family': 'system-ui,sans-serif', fill: '#1a202c', stroke: '#fcfcfb', 'stroke-width': 2.6, 'stroke-linejoin': 'round', 'paint-order': 'stroke', opacity: 1, class: 'dot', 'data-x': xOf(i) });
         t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
       }
@@ -1395,7 +1395,7 @@ function drawHist() {
       svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.4 : 1.8, fill: top ? '#fcfcfb' : COLORS[k], stroke: top ? COLORS[k] : null, 'stroke-width': top ? 2 : null, opacity: 1, class: 'dot', 'data-x': xOf(i) }));
       const lv = antallMap[k][years[i]] || 0;
       if (lv && showLbls) {
-        const ly = labelY(yOf(v), i, pct[k], yOf, T, H - ph - 4, 4);
+        const ly = labelY(yOf(v), i, pct[k], yOf, T, T + ph, 4);
         const t = el('text', { x: xOf(i).toFixed(1), y: ly.toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-family': 'system-ui,sans-serif', fill: COLORS[k], stroke: '#fcfcfb', 'stroke-width': 2.6, 'stroke-linejoin': 'round', 'paint-order': 'stroke', opacity: 1, class: 'dot', 'data-x': xOf(i) });
         t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
       }
@@ -1410,7 +1410,7 @@ function drawHist() {
       svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.4 : 1.8, fill: top ? '#fcfcfb' : '#1a202c', stroke: '#1a202c', 'stroke-width': top ? 2 : 0, opacity: 1, class: 'dot', 'data-x': xOf(i) }));
       const lv = sumVals[i] || 0;
       if (lv && showLbls) {
-        const ly = labelY(yOf(sumPct[i]), i, sumPct, yOf, T, H - ph - 4, 4);
+        const ly = labelY(yOf(sumPct[i]), i, sumPct, yOf, T, T + ph, 4);
         const t = el('text', { x: xOf(i).toFixed(1), y: ly.toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-weight': 700, 'font-family': 'system-ui,sans-serif', fill: '#1a202c', stroke: '#fcfcfb', 'stroke-width': 2.6, 'stroke-linejoin': 'round', 'paint-order': 'stroke', opacity: 1, class: 'dot', 'data-x': xOf(i) });
         t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
       }
