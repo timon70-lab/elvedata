@@ -97,5 +97,14 @@
     "link": "https://elvesona.no/statistikk/audna2026",
     "startDate": "2026-09-05",
     "stopDate": "2026-12-31"
+  },
+  {
+    "id": "N-012",
+    "elv": "Mandalselva",
+    "sourceType": "side",
+    "headline": "Sesongoppsummering 2026",
+    "link": "https://elvesona.no/statistikk/mandalselva2026",
+    "startDate": "2026-09-19",
+    "stopDate": "2026-12-31"
   }
 ]
