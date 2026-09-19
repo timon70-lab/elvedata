@@ -143,7 +143,7 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
 
 <!-- KOLONNE 1: SESONGOPPSUMMERINGER -->
 <div class="col">
-<details class="cat" id="kat-sesong">
+<details class="cat" id="kat-sesong" open>
   <summary>Sesongoppsummeringer <span class="cat-tag">6 elver</span></summary>
   <div class="cat-body">
   <details class="sub">
@@ -847,8 +847,8 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
 
 <!-- KOLONNE 2: ANNEN STATISTIKK -->
 <div class="col">
-<details class="cat" id="kat-annen">
-  <summary>Annen statistikk <span class="cat-tag">4 figurer</span></summary>
+<details class="cat" id="kat-annen" open>
+  <summary>Annen statistikk <span class="cat-tag">5 figurer</span></summary>
   <div class="cat-body">
 
 <!-- 2. VANNFØRINGSRESPONS -->
@@ -933,14 +933,14 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
   <h2>Om tallene</h2>
   <p><strong>Dette er registrert fangst, ikke bestand.</strong> Vi har ingen data på hvor mange som fisket. En sone eller en sesong kan ha få fisk fordi det var få fisk – eller fordi det var få fiskere. Tallene sier hva som ble meldt inn, ikke hvor mye laks som gikk opp.</p>
   <p><strong>Vannføringsresponsen henger delvis sammen med tidspunkt.</strong> Høy vannføring kommer ofte i høysesongen, så en stigende kurve kan skyldes begge deler. Derfor kan figuren deles i juni–juli og august–september: holder stigningen seg innenfor én periode, er det vannføringen som driver den.</p>
-  <p><strong>Sesonglengden er utledet, ikke oppgitt.</strong> Fangstloggene inneholder ikke åpnings- og stengedatoer, så vinduet settes fra første til siste registrerte fangst hver sesong. Der treffer det som regel presist – de fleste år lander på 1. juni og 31. august eller 15. september. Men i sesonger med svært få registreringer, eller der ingen meldte fangst før langt uti sesongen, er ytterpunktene ikke til å stole på. Slike år får elvas medianvindu og er merket med †. Kurven leses som utvikling innenfor én elv, ikke som rangering mellom elver.</p>
+  <p><strong>Sesonglengden er utledet, ikke oppgitt.</strong> Fangstloggene inneholder ikke åpnings- og stengedatoer, så vinduet settes fra første til siste registrerte fangst hver sesong. Der treffer det som regel presist – de fleste år lander på 1. juni og 31. august eller 15. september. Men i sesonger med svært få registreringer, eller der ingen meldte fangst før langt uti sesongen, er ytterpunktene ikke til å stole på. Slike år får elvas medianvindu og er merket med † i «Sesong for sesong»-tabellen, der laks per døgn regnes ut fra dette vinduet.</p>
   <p><strong>Vannføringsfiguren har egne begrensninger.</strong> Den regnes bare på døgn med måleverdi fra NVE. Otra mangler hele 2019, og Audna og Lygna har tynn dekning i september. Det påvirker ikke de øvrige figurene.</p>
   <p><strong>Registreringskulturen varierer.</strong> Enkelte elver har mange fangster ført på den 1. i måneden, samlet inn i etterkant. Det påvirker døgnanalyser, ikke sesongtotaler.</p>
-  <p><strong>1993–2015-figuren bruker en annen kilde.</strong> Der fangstloggene (Inatur) starter i 2016, er årene 1993–2015 hentet fra SSB tabell 08991 og summerer «avliva fisk» og «fisk sleppt ut att». De to kildene er kryssjekket for 2016–2025 og stemmer på under 1 % avvik for de fleste elv/år. Sygna tilsvarer SSB-kategorien «Songdalselva».</p>
+  <p><strong>1993–2026-figuren kombinerer to kilder.</strong> Fangstloggene (Inatur) starter i 2016, så årene 1993–2015 er hentet fra SSB tabell 08991 og summerer «avliva fisk» og «fisk sleppt ut att». De to kildene er kryssjekket på overlappende år og stemmer på under 1 % avvik for de fleste elv/år. Sygna tilsvarer SSB-kategorien «Songdalselva».</p>
 </div>
 
 <div class="foot">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.029</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.031</span><br>
   <span style="font-size:0.6rem;">Data: Inatur.no (fangst) · NVE HydAPI (vannføring)</span>
 </div>
 
@@ -1128,7 +1128,7 @@ function bindScrub(svgId, getGeom, handler) {
 }
 
 // ── 2b. ANIMERT ÅRSFANGST (% av eget toppår) ────────────────────────────
-let animOff = { sum: false };
+let animOff = { sum: false, audna: true, lygna: true, mandalselva: true, otra: true, sygna: true, tovdalselva: true };
 let animGeom = null;
 let histGeom = null;
 
@@ -1253,7 +1253,7 @@ function drawAnimLegend() {
 
 // ── 2c. ANIMERT ÅRSFANGST 1993-2025 ─────────────────────────────────────
 let HISTDB = null;
-let histOff = { sum: false };
+let histOff = { sum: false, audna: true, lygna: true, mandalselva: true, otra: true, sygna: true, tovdalselva: true };
 
 function mergeHistSeries(ssbData) {
   const elver = {};
