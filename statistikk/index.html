@@ -916,7 +916,7 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
     <div class="pill-row" id="weightPills"></div>
     <svg id="weightChart" viewBox="0 0 340 190" role="img" aria-label="Størrelsesfordeling per sesong"></svg>
     <div class="legend" id="weightLegend"></div>
-    <div class="hint" style="margin-top:7px">Tallet under hvert år er antall laks fordelingen bygger på. * = under 20 fisk, altfor tynt til å tolkes.</div>
+    <div class="hint" id="weightHint" style="margin-top:7px">Tallet under hvert år er antall laks fordelingen bygger på. * = under 20 fisk, altfor tynt til å tolkes. Trykk på en klasse for å se den alene.</div>
   </div>
 </div>
 
@@ -940,7 +940,7 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
 </div>
 
 <div class="foot">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.031</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.033</span><br>
   <span style="font-size:0.6rem;">Data: Inatur.no (fangst) · NVE HydAPI (vannføring)</span>
 </div>
 
@@ -969,6 +969,7 @@ let DB = null;
 let period = 'flowkurve';
 let hidden = {};
 let weightRiver = 'audna';
+let weightClass = null;   // null = stablet fordeling, ellers 'sma' | 'mellom' | 'stor'
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const el = document.createElementNS ? (t,a) => {
@@ -1477,8 +1478,10 @@ function drawYearSmalls() {
     });
     svg.appendChild(el('line', {x1:0, y1:H, x2:W, y2:H, class:'grid'}));
     [0, years.length-1].forEach(i => {
-      const tx = el('text', {x: (i*bw + bw/2).toFixed(2), y: H+7,
-        'text-anchor': i === 0 ? 'start' : 'end', class:'ax'});
+      const cx = i*bw + bw/2;
+      const half = 4.6;   // halv tekstbredde for to siffer
+      const tx = el('text', {x: Math.max(half, Math.min(W - half, cx)).toFixed(2), y: H+7,
+        'text-anchor': 'middle', class:'ax'});
       tx.textContent = String(years[i]).slice(2);
       svg.appendChild(tx);
     });
@@ -1530,7 +1533,7 @@ function drawWeightPills() {
     const b = document.createElement('button');
     b.className = 'pill' + (key === weightRiver ? ' active' : '');
     b.textContent = DB.elver[key].navn;
-    b.onclick = () => { weightRiver = key; drawWeightPills(); drawWeight(); };
+    b.onclick = () => { weightRiver = key; drawWeightPills(); drawWeightLegend(); drawWeight(); };
     host.appendChild(b);
   });
 }
@@ -1539,18 +1542,100 @@ function drawWeightLegend() {
   const host = document.getElementById('weightLegend');
   host.textContent = '';
   WCLASS.forEach(([k, lbl, col]) => {
-    const s = document.createElement('span');
-    s.className = 'lg'; s.style.cursor = 'default';
+    const s = document.createElement('button');
+    s.className = 'lg' + (weightClass && weightClass !== k ? ' off' : '');
+    s.style.cursor = 'pointer';
+    if (weightClass === k) { s.style.borderColor = col; s.style.fontWeight = '800'; }
     const sw = document.createElement('span');
     sw.className = 'sw'; sw.style.background = col;
     s.appendChild(sw);
     s.appendChild(document.createTextNode(lbl));
+    s.onclick = () => {
+      weightClass = (weightClass === k) ? null : k;
+      drawWeightLegend(); drawWeight();
+    };
     host.appendChild(s);
+  });
+  const hint = document.getElementById('weightHint');
+  if (hint) hint.textContent = weightClass
+    ? 'Trykk på samme klasse igjen for å gå tilbake til fordelingen.'
+    : 'Tallet under hvert år er antall laks fordelingen bygger på. * = under 20 fisk, altfor tynt til å tolkes. Trykk på en klasse for å se den alene.';
+}
+
+function drawWeightDetail() {
+  const svg = document.getElementById('weightChart');
+  svg.setAttribute('viewBox', '0 0 340 260');
+  svg.textContent = '';
+  const cls = WCLASS.find(c => c[0] === weightClass);
+  const col = cls ? cls[2] : '#276749';
+  const lbl = cls ? cls[1] : '';
+  const v = DB.elver[weightRiver].vekt;
+  const years = Object.keys(v).sort();
+  const W = 340, L = 30, R = 10;
+  const pw = W - L - R;
+  const xOf = i => years.length < 2 ? L + pw/2 : L + (i/(years.length-1))*pw;
+
+  // Datasett
+  const counts = years.map(y => (v[y] && v[y][weightClass] != null) ? v[y][weightClass] : 0);
+  const kgs    = years.map(y => (v[y] && v[y][weightClass + '_kg'] != null) ? v[y][weightClass + '_kg'] : null);
+
+  function panel(title, vals, yTop, ph, fmt, forceZero) {
+    const T = yTop, B = yTop + ph;
+    const real = vals.filter(x => x !== null && !isNaN(x));
+    if (!real.length) return;
+    let lo = forceZero ? 0 : Math.min(...real), hi = Math.max(...real);
+    if (hi === lo) { hi = lo + 1; }
+    const pad = (hi - lo) * 0.15;
+    hi += pad; if (!forceZero) lo = Math.max(0, lo - pad);
+    const yOf = x => B - ((x - lo)/(hi - lo)) * ph;
+
+    const ttl = el('text', {x: L, y: (T - 6).toFixed(1), class:'axb'});
+    ttl.textContent = title; svg.appendChild(ttl);
+
+    [0, 0.5, 1].forEach(f => {
+      const val = lo + f*(hi-lo), y = yOf(val);
+      svg.appendChild(el('line', {x1:L, y1:y.toFixed(1), x2:W-R, y2:y.toFixed(1), class:'grid'}));
+      const t = el('text', {x: L-4, y:(y+3).toFixed(1), 'text-anchor':'end', class:'ax'});
+      t.textContent = fmt(val); svg.appendChild(t);
+    });
+
+    // Linje (hopper over hull)
+    let d = '', open = false;
+    vals.forEach((x, i) => {
+      if (x === null || isNaN(x)) { open = false; return; }
+      d += (open ? ' L ' : ' M ') + xOf(i).toFixed(1) + ' ' + yOf(x).toFixed(1);
+      open = true;
+    });
+    if (d) svg.appendChild(el('path', {d: d.trim(), fill:'none', stroke: col,
+      'stroke-width': 2.4, 'stroke-linejoin':'round', 'stroke-linecap':'round'}));
+
+    vals.forEach((x, i) => {
+      if (x === null || isNaN(x)) return;
+      const cy = yOf(x);
+      svg.appendChild(el('circle', {cx: xOf(i).toFixed(1), cy: cy.toFixed(1), r: 2.6, fill: col}));
+      const ly = labelY(cy, i, vals.map(q => (q===null||isNaN(q)) ? lo : ((q-lo)/(hi-lo))*100), 
+                        p => B - (p/100)*ph, T, B, 4);
+      const t = el('text', {x: xOf(i).toFixed(1), y: ly.toFixed(1), 'text-anchor':'middle',
+        'font-size':7, 'font-family':'system-ui,sans-serif', fill: col,
+        stroke:'#fcfcfb', 'stroke-width':2.6, 'stroke-linejoin':'round', 'paint-order':'stroke'});
+      t.textContent = fmt(x); svg.appendChild(t);
+    });
+  }
+
+  panel('Antall ' + lbl.toLowerCase(), counts, 26, 78, x => String(Math.round(x)), true);
+  panel('Snittvekt ' + lbl.toLowerCase() + ' (kg)', kgs, 152, 78, x => nf(x, 2), false);
+
+  // Årstall langs bunnen
+  years.forEach((y, i) => {
+    const t = el('text', {x: xOf(i).toFixed(1), y: 246, 'text-anchor':'middle', class:'ax'});
+    t.textContent = String(y).slice(2); svg.appendChild(t);
   });
 }
 
 function drawWeight() {
+  if (weightClass) { drawWeightDetail(); return; }
   const svg = document.getElementById('weightChart');
+  svg.setAttribute('viewBox', '0 0 340 190');
   svg.textContent = '';
   const W = 340, H = 190, L = 26, R = 8, T = 12, B = 30;
   const pw = W - L - R, ph = H - T - B;
@@ -1585,7 +1670,7 @@ function drawWeight() {
     tx.textContent = String(y).slice(2);
     svg.appendChild(tx);
     const tn = el('text', {x: (L + i*bw + bw/2).toFixed(2), y: H-6, 'text-anchor':'middle', class:'ax'});
-    tn.textContent = (tot < 1000 ? tot : Math.round(tot/100)/10 + 'k') + (tot < 20 ? '*' : '');
+    tn.textContent = String(tot) + (tot < 20 ? '*' : '');
     svg.appendChild(tn);
   });
   const lbl = el('text', {x: 2, y: H-6, class:'ax'});
