@@ -965,7 +965,7 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
 </div>
 
 <div class="foot">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.024</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.025</span><br>
   <span style="font-size:0.6rem;">Data: Inatur.no (fangst) · NVE HydAPI (vannføring)</span>
 </div>
 
@@ -1246,6 +1246,9 @@ function drawAnim() {
   const sumVals = years.map((y, i) => ORDER.reduce((s, k) => s + (pct[k] ? (DB.elver[k].aarsserie.find(a => a.aar === y) || {}).antall || 0 : 0), 0));
   const sumMax = Math.max(...sumVals, 1);
   const sumPct = sumVals.map(v => v / sumMax * 100);
+  // Labels vises kun når nøyaktig én kurve er synlig (elv eller sum)
+  const nLines = ORDER.filter(k => !animOff[k] && DB.elver[k]).length + (animOff.sum ? 0 : 1);
+  const showLbls = nLines === 1;
 
   svg.textContent = '';
   [0, 25, 50, 75, 100].forEach(v => {
@@ -1269,7 +1272,7 @@ function drawAnim() {
       const top = Math.abs(v - 100) < 0.01;
       svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.8 : 2.6, fill: top ? '#fcfcfb' : COLORS[k], stroke: top ? COLORS[k] : null, 'stroke-width': top ? 2.2 : null, opacity: 1, class: 'dot', 'data-x': xOf(i) }));
       const lv = antallMap[k][years[i]] || 0;
-      if (lv) {
+      if (lv && showLbls) {
         const ly = labelY(yOf(v), i, pct[k], yOf, T, H - ph - 4, 5);
         const t = el('text', { x: xOf(i).toFixed(1), y: ly.toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-family': 'system-ui,sans-serif', fill: COLORS[k], opacity: 1, class: 'dot', 'data-x': xOf(i) });
         t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
@@ -1284,7 +1287,7 @@ function drawAnim() {
       const top = Math.abs(v - 100) < 0.01;
       svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.8 : 2.6, fill: top ? '#fcfcfb' : '#1a202c', stroke: '#1a202c', 'stroke-width': top ? 2.2 : 0, opacity: 1, class: 'dot', 'data-x': xOf(i) }));
       const lv = sumVals[i] || 0;
-      if (lv) {
+      if (lv && showLbls) {
         const ly = labelY(yOf(sumPct[i]), i, sumPct, yOf, T, H - ph - 4, 5);
         const t = el('text', { x: xOf(i).toFixed(1), y: ly.toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-weight': 700, 'font-family': 'system-ui,sans-serif', fill: '#1a202c', opacity: 1, class: 'dot', 'data-x': xOf(i) });
         t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
@@ -1364,6 +1367,9 @@ function drawHist() {
   const sumVals = years.map((y) => ORDER.reduce((s, k) => s + (pct[k] ? (HISTDB.elver[k].aarsserie.find(a => a.aar === y) || {}).antall || 0 : 0), 0));
   const sumMax = Math.max(...sumVals, 1);
   const sumPct = sumVals.map(v => v / sumMax * 100);
+  // Labels vises kun når nøyaktig én kurve er synlig (elv eller sum)
+  const nLines = ORDER.filter(k => !histOff[k] && HISTDB.elver[k]).length + (histOff.sum ? 0 : 1);
+  const showLbls = nLines === 1;
 
   svg.textContent = '';
   [0, 25, 50, 75, 100].forEach(v => {
@@ -1388,7 +1394,7 @@ function drawHist() {
       const top = Math.abs(v - 100) < 0.01;
       svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.4 : 1.8, fill: top ? '#fcfcfb' : COLORS[k], stroke: top ? COLORS[k] : null, 'stroke-width': top ? 2 : null, opacity: 1, class: 'dot', 'data-x': xOf(i) }));
       const lv = antallMap[k][years[i]] || 0;
-      if (lv) {
+      if (lv && showLbls) {
         const ly = labelY(yOf(v), i, pct[k], yOf, T, H - ph - 4, 5);
         const t = el('text', { x: xOf(i).toFixed(1), y: ly.toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-family': 'system-ui,sans-serif', fill: COLORS[k], opacity: 1, class: 'dot', 'data-x': xOf(i) });
         t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
@@ -1403,7 +1409,7 @@ function drawHist() {
       const top = Math.abs(v - 100) < 0.01;
       svg.appendChild(el('circle', { cx: xOf(i).toFixed(1), cy: yOf(v).toFixed(1), r: top ? 3.4 : 1.8, fill: top ? '#fcfcfb' : '#1a202c', stroke: '#1a202c', 'stroke-width': top ? 2 : 0, opacity: 1, class: 'dot', 'data-x': xOf(i) }));
       const lv = sumVals[i] || 0;
-      if (lv) {
+      if (lv && showLbls) {
         const ly = labelY(yOf(sumPct[i]), i, sumPct, yOf, T, H - ph - 4, 5);
         const t = el('text', { x: xOf(i).toFixed(1), y: ly.toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-weight': 700, 'font-family': 'system-ui,sans-serif', fill: '#1a202c', opacity: 1, class: 'dot', 'data-x': xOf(i) });
         t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
@@ -1786,11 +1792,28 @@ function drawWeight() {
 
 // ── LABEL-POSISJONERING ───────────────────────────────────────────────────
 function labelY(cy, i, pctArr, yOfFn, T, B, OFF) {
-  // Alltid over punktet — unntatt hvis for nær toppen, da under
+  // Plasser label på utsiden av kurven basert på lokal krumning.
+  // Husk: høy y-verdi = lavt på grafen (yOf inverterer).
   const o = OFF || 5;
-  const above = cy - o - 1;
-  if (above < T + 7) return Math.min(B - 2, cy + o + 4); // for nær toppen: legg under
-  return above;
+  const prev = i > 0 ? yOfFn(pctArr[i - 1]) : null;
+  const next = i < pctArr.length - 1 ? yOfFn(pctArr[i + 1]) : null;
+  let above;
+  if (prev !== null && next !== null) {
+    if (prev > cy && next > cy)      above = true;   // lokalt toppunkt → over
+    else if (prev < cy && next < cy) above = false;  // lokalt bunnpunkt → under
+    else if (next < cy)              above = false;  // kurven stiger → under
+    else                             above = true;   // kurven faller → over
+  } else if (next !== null) {
+    above = next > cy;      // første punkt: se framover
+  } else if (prev !== null) {
+    above = prev > cy;      // siste punkt: se bakover
+  } else {
+    above = true;
+  }
+  let y = above ? cy - o - 1 : cy + o + 4;
+  if (y < T + 7)  y = cy + o + 4;   // for nær toppen → snu til under
+  if (y > B - 2)  y = cy - o - 1;   // for nær bunnen → snu til over
+  return Math.max(T + 7, Math.min(B - 2, y));
 }
 
 // ── HOVER-LABELS PÅ KURVEGRAFER ───────────────────────────────────────────
