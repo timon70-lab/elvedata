@@ -965,7 +965,7 @@ table.tbl td:first-child { font-weight: 700; color: #1a202c; }
 </div>
 
 <div class="foot">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.025</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.026</span><br>
   <span style="font-size:0.6rem;">Data: Inatur.no (fangst) · NVE HydAPI (vannføring)</span>
 </div>
 
@@ -1274,7 +1274,7 @@ function drawAnim() {
       const lv = antallMap[k][years[i]] || 0;
       if (lv && showLbls) {
         const ly = labelY(yOf(v), i, pct[k], yOf, T, H - ph - 4, 5);
-        const t = el('text', { x: xOf(i).toFixed(1), y: ly.toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-family': 'system-ui,sans-serif', fill: COLORS[k], opacity: 1, class: 'dot', 'data-x': xOf(i) });
+        const t = el('text', { x: xOf(i).toFixed(1), y: ly.toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-family': 'system-ui,sans-serif', fill: COLORS[k], stroke: '#fcfcfb', 'stroke-width': 2.6, 'stroke-linejoin': 'round', 'paint-order': 'stroke', opacity: 1, class: 'dot', 'data-x': xOf(i) });
         t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
       }
     });
@@ -1289,7 +1289,7 @@ function drawAnim() {
       const lv = sumVals[i] || 0;
       if (lv && showLbls) {
         const ly = labelY(yOf(sumPct[i]), i, sumPct, yOf, T, H - ph - 4, 5);
-        const t = el('text', { x: xOf(i).toFixed(1), y: ly.toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-weight': 700, 'font-family': 'system-ui,sans-serif', fill: '#1a202c', opacity: 1, class: 'dot', 'data-x': xOf(i) });
+        const t = el('text', { x: xOf(i).toFixed(1), y: ly.toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-weight': 700, 'font-family': 'system-ui,sans-serif', fill: '#1a202c', stroke: '#fcfcfb', 'stroke-width': 2.6, 'stroke-linejoin': 'round', 'paint-order': 'stroke', opacity: 1, class: 'dot', 'data-x': xOf(i) });
         t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
       }
     });
@@ -1396,7 +1396,7 @@ function drawHist() {
       const lv = antallMap[k][years[i]] || 0;
       if (lv && showLbls) {
         const ly = labelY(yOf(v), i, pct[k], yOf, T, H - ph - 4, 5);
-        const t = el('text', { x: xOf(i).toFixed(1), y: ly.toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-family': 'system-ui,sans-serif', fill: COLORS[k], opacity: 1, class: 'dot', 'data-x': xOf(i) });
+        const t = el('text', { x: xOf(i).toFixed(1), y: ly.toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-family': 'system-ui,sans-serif', fill: COLORS[k], stroke: '#fcfcfb', 'stroke-width': 2.6, 'stroke-linejoin': 'round', 'paint-order': 'stroke', opacity: 1, class: 'dot', 'data-x': xOf(i) });
         t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
       }
     });
@@ -1411,7 +1411,7 @@ function drawHist() {
       const lv = sumVals[i] || 0;
       if (lv && showLbls) {
         const ly = labelY(yOf(sumPct[i]), i, sumPct, yOf, T, H - ph - 4, 5);
-        const t = el('text', { x: xOf(i).toFixed(1), y: ly.toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-weight': 700, 'font-family': 'system-ui,sans-serif', fill: '#1a202c', opacity: 1, class: 'dot', 'data-x': xOf(i) });
+        const t = el('text', { x: xOf(i).toFixed(1), y: ly.toFixed(1), 'text-anchor': 'middle', 'font-size': 7, 'font-weight': 700, 'font-family': 'system-ui,sans-serif', fill: '#1a202c', stroke: '#fcfcfb', 'stroke-width': 2.6, 'stroke-linejoin': 'round', 'paint-order': 'stroke', opacity: 1, class: 'dot', 'data-x': xOf(i) });
         t.textContent = lv.toLocaleString('nb-NO'); svg.appendChild(t);
       }
     });
