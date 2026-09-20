@@ -88,17 +88,19 @@ Detaljer ligger i egne filer — les dem når oppgaven berører temaet:
 Alle seks dashboard ligger som `index.html` i hver sin mappe i roten — filnavnet er alltid
 `index.html`, elva er mappenavnet (URL blir `elvesona.no/{elv}/`):
 
-| Elv | Fil | Versjon nå | Versjonslinje |
-|---|---|---|---|
-| Audna | `audna/index.html` | v1.164 | 2101 |
-| Lygna | `lygna/index.html` | v1.066 | 2195 |
-| Mandalselva | `mandalselva/index.html` | v1.060 | 1842 |
-| Otra | `otra/index.html` | v1.044 | 1830 |
-| Sygna | `sygna/index.html` | v1.043 | 1960 |
-| Tovdalselva | `tovdalselva/index.html` | v1.012 | 1898 |
+| Elv | Fil | Versjonslinje |
+|---|---|---|
+| Audna | `audna/index.html` | 2101 |
+| Lygna | `lygna/index.html` | 2195 |
+| Mandalselva | `mandalselva/index.html` | 1842 |
+| Otra | `otra/index.html` | 1830 |
+| Sygna | `sygna/index.html` | 1960 |
+| Tovdalselva | `tovdalselva/index.html` | 1898 |
 
 Linjenumrene er fra 2026-09-20 og forskyver seg ved redigering — søk alltid på mønsteret,
-ikke på linjenummer.
+ikke på linjenummer. Gjeldende versjon står ikke her med vilje: den endres hver runde, og
+et kart som må vedlikeholdes ved hver leveranse blir ikke vedlikeholdt. Bruk grep-kommandoen
+under.
 
 ### Hvor versjonsnummeret står
 
@@ -114,15 +116,16 @@ per fil, virker `rep()`-mønsteret direkte på `· v{gammel}<` → `· v{ny}<`. 
 med:
 
 ```
-grep -oE 'v[0-9]+\.[0-9]{3}' {elv}/index.html
+grep -oE 'v[0-9]+\.[0-9]{3}' <fil>
 ```
 
 ### Øvrige sider (samme versjonsmønster i footer)
 
-- `index.html` (roten) — oversiktskartet, v1.053. Endres KUN på eksplisitt forespørsel (regel 3).
-- `statistikk/index.html` — statistikksiden, v0.034.
-- `statistikk/{elv}2026.html` — sesongside per elv for alle seks elver, v1.001–v1.002.
-- `staging/index.html` — v1.034.
+- `index.html` (roten) — oversiktskartet. Endres KUN på eksplisitt forespørsel (regel 3).
+- `statistikk/index.html` — statistikksiden.
+- `statistikk/{elv}2026.html` — sesongside per elv for alle seks elver.
+- `staging/index.html` — staging for oversiktskartet: `noindex`, oransje STAGING-stripe og
+  deaktivert GoatCounter, men ekte data.
 - `admin/index.html` — adminpanelet. Har ingen versjonslinje.
 
 ### Kode og data
