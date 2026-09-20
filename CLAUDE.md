@@ -83,4 +83,61 @@ Detaljer ligger i egne filer — les dem når oppgaven berører temaet:
 
 ## Repo-kart
 
-<!-- Fylles ut i første Claude Code-økt: hvor ligger hvert dashboard, hvor er versjonsnummeret -->
+### Dashboard per elv
+
+Alle seks dashboard ligger som `index.html` i hver sin mappe i roten — filnavnet er alltid
+`index.html`, elva er mappenavnet (URL blir `elvesona.no/{elv}/`):
+
+| Elv | Fil | Versjon nå | Versjonslinje |
+|---|---|---|---|
+| Audna | `audna/index.html` | v1.164 | 2101 |
+| Lygna | `lygna/index.html` | v1.066 | 2195 |
+| Mandalselva | `mandalselva/index.html` | v1.060 | 1842 |
+| Otra | `otra/index.html` | v1.044 | 1830 |
+| Sygna | `sygna/index.html` | v1.043 | 1960 |
+| Tovdalselva | `tovdalselva/index.html` | v1.012 | 1898 |
+
+Linjenumrene er fra 2026-09-20 og forskyver seg ved redigering — søk alltid på mønsteret,
+ikke på linjenummer.
+
+### Hvor versjonsnummeret står
+
+Samme sted i alle filer: i bunnteksten (footer-diven rett før `.rd-overlay`), som eneste
+treff på `v{major}.{minor}` i hele fila:
+
+```html
+© 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.164</span><br>
+```
+
+Minor har alltid tre siffer med ledende nuller (`v1.012`, ikke `v1.12`). Siden treffet er unikt
+per fil, virker `rep()`-mønsteret direkte på `· v{gammel}<` → `· v{ny}<`. Finn gjeldende versjon
+med:
+
+```
+grep -oE 'v[0-9]+\.[0-9]{3}' {elv}/index.html
+```
+
+### Øvrige sider (samme versjonsmønster i footer)
+
+- `index.html` (roten) — oversiktskartet, v1.053. Endres KUN på eksplisitt forespørsel (regel 3).
+- `statistikk/index.html` — statistikksiden, v0.034.
+- `statistikk/{elv}2026.html` — sesongside per elv for alle seks elver, v1.001–v1.002.
+- `staging/index.html` — v1.034.
+- `admin/index.html` — adminpanelet. Har ingen versjonslinje.
+
+### Kode og data
+
+- `scripts/` — pipelines og verktøy: `valider.py` (kjøres før hver commit), `beregn_km.py`,
+  `km_ref.py`, `fangst_pipeline.py`, `foto_pipeline.py`, `nve_hent_dogn.py`, `frost_*.py`,
+  `jsdom_smoke.js`.
+- `data/` — genererte JSON-filer dashboardene henter i runtime: `vannforing_{elv}.json`,
+  `nedbor_{elv}.json`, `photos_{elv}.json`, `videoer_{elv}.json`,
+  `senterlinje_{elv}.geojson`, pluss felles `config.json`, `sesong.json`, `soner.json`,
+  `statistikk.json`, `nyheter.json`.
+  **Merk:** Audna bruker de usuffikserte `data/vannforing.json` og `data/nedbor.json`
+  (historisk navngiving), ikke `_audna`-varianter.
+  `fangster_{elv}.json` hentes ikke av dashboardene — fangstdata embeddes i HTML-en.
+- `data/raw/` — rådata, se egen seksjon over.
+- `data/logg/` — CSV-logger for nedbør og døgnvannføring.
+- `.github/workflows/` — ni workflows for datainnhenting (NVE, Frost, fangst, foto).
+- `.claude/commands/` — `ide.md`, `ny-elv.md`, `runde.md`.
