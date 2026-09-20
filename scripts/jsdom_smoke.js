@@ -11,7 +11,17 @@ const dom = new JSDOM(html, {
   runScripts: "dangerously", pretendToBeVisual: true, virtualConsole: vc,
   beforeParse(w) {
     w.fetch = () => Promise.resolve({ ok: true, json: async () => ({}), text: async () => "" });
-    const stub = new Proxy(function () { return stub; }, { get: () => stub });
+    // get-fellen må gi primitiver for koersjon — ellers:
+    // "TypeError: Cannot convert object to primitive value" så snart sidekoden
+    // string-koerserer en stub-verdi (f.eks. i en template-streng).
+    const stub = new Proxy(function () { return stub; }, {
+      get: (t, k) => {
+        if (k === Symbol.toPrimitive || k === "toString" || k === "valueOf") return () => "[stub]";
+        if (k === Symbol.toStringTag) return "stub";
+        if (k === "then") return undefined;   // ikke thenable — ellers henger await på stub
+        return stub;
+      },
+    });
     w.L = stub; w.Chart = stub;           // Leaflet / Chart.js
     w.scrollTo = () => {}; w.HTMLElement.prototype.scrollIntoView = () => {};
     w.matchMedia = () => ({ matches: false, addListener() {}, removeListener() {}, addEventListener() {} });

@@ -8,8 +8,9 @@ Sjekker i rekkefølge:
  2. node --check på hvert inline <script> (uten src)
  3. div-balanse (<div vs </div>)
  4. HTML-nesting (stakkbasert)
- 5. Toppnivå let/const/var/function-deklarasjoner mot git-referanse (standard HEAD)
- 6. jsdom-røyktest (scripts/jsdom_smoke.js) — hoppes over hvis jsdom ikke er installert
+ 5. Toppnivå let/const/var/function-deklarasjoner mot git-referanse (standard HEAD).
+    Info kun for genuint nye filer — ellers FEIL hvis sammenligningen ikke lar seg kjøre.
+ 6. jsdom-røyktest (scripts/jsdom_smoke.js) — FEIL hvis jsdom mangler, med mindre --uten-jsdom
 Avslutter med kode 1 hvis noe feiler.
 """
 import re, subprocess, sys, tempfile, os
@@ -105,21 +106,39 @@ def main():
             for t,l in rest[:10]: print(f"  FEIL nesting: <{t}> fra linje {l} lukkes aldri")
         else: print("  ok  HTML-nesting")
         # 5
-        r=subprocess.run(["git","show",f"{ref}:{os.path.relpath(path)}"],capture_output=True,text=True)
+        rel=os.path.relpath(path).replace(os.sep,"/")   # git vil ha /, også på Windows
+        r=subprocess.run(["git","show",f"{ref}:{rel}"],capture_output=True,text=True,
+                         encoding="utf-8",errors="replace")
         if r.returncode==0:
             before, after = decls(r.stdout), decls(html)
             gone=sorted(before-after); new=sorted(after-before)
             if gone: ok=False; print(f"  FEIL deklarasjoner borte vs {ref}: {gone}")
             else: print(f"  ok  ingen toppnivå-deklarasjoner forsvunnet vs {ref}")
             if new: print(f"  info nye deklarasjoner: {new}")
-        else: print(f"  info finnes ikke i {ref} (ny fil) — deklarasjonsdiff hoppet over")
+        else:
+            # Skill genuint ny fil fra en sammenligning som ikke lot seg kjøre
+            t=subprocess.run(["git","ls-tree","--name-only",ref,"--",rel],capture_output=True,
+                             text=True,encoding="utf-8",errors="replace")
+            if t.returncode==0 and not t.stdout.strip():
+                print(f"  info finnes ikke i {ref} (ny fil) — deklarasjonsdiff hoppet over")
+            else:
+                ok=False
+                grunn=r.stderr.strip().splitlines()[0] if r.stderr.strip() else "ukjent git-feil"
+                print(f"  FEIL fant {rel} i {ref}, men kunne ikke hente den — "
+                      f"deklarasjonsdiff IKKE kjørt: {grunn}")
         # 6
         if jsdom:
             here=os.path.dirname(os.path.abspath(__file__))
-            r=subprocess.run(["node",os.path.join(here,"jsdom_smoke.js"),path],capture_output=True,text=True)
-            if r.returncode==3: print("  info jsdom ikke installert (npm i -D jsdom) — røyktest hoppet over")
+            r=subprocess.run(["node",os.path.join(here,"jsdom_smoke.js"),path],capture_output=True,
+                             text=True,encoding="utf-8",errors="replace")
+            if r.returncode==3:
+                ok=False
+                print("  FEIL jsdom ikke tilgjengelig (npm i -D jsdom) — røyktest IKKE kjørt.")
+                print("       Bruk --uten-jsdom hvis den bevisst skal hoppes over.")
             elif r.returncode: ok=False; print("  FEIL jsdom:\n" + (r.stdout+r.stderr).strip())
             else: print("  ok  " + r.stdout.strip())
+        else:
+            print("  info jsdom-røyktest hoppet over (--uten-jsdom)")
     print("\nRESULTAT:", "OK" if ok else "FEIL — ikke commit")
     sys.exit(0 if ok else 1)
 
