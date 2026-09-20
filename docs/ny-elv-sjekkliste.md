@@ -1,7 +1,7 @@
 # Ny elv – sjekkliste for Elvedata
 
-> **Trigger:** Denne prosessen startes **kun i chat** med en melding på formen
-> `Ny elv – {navn} – {regulert/uregulert}`
+> **Trigger:** Denne prosessen startes i Claude Code med `/ny-elv {navn} {regulert/uregulert}`
+> eller en melding på formen `Ny elv – {navn} – {regulert/uregulert}`.
 >
 > Skal **ikke** trigges i Cowork — se begrunnelse under punkt 4.
 
@@ -17,6 +17,7 @@
 
 - [ ] **Fangstlogg 2016–2025**
   CSV med `Dato;Vekt;Fisk;Redskap;Sone` — eller Inatur-eksport med `Aar/Vald_Sone/Oppdrett`-format (som Mandalselva/Otra).
+  Legges uendret i `data/raw/` — ingen kolonner fjernes. `Fisker`/`Navn` vises aldri i dashboardet.
 - [ ] **Komplett daglig vannføringsserie 2016–2025**
   Ikke bare fangstdager — kreves for DAYS_DATA/fangstrate-beregning. Sjekk eksplisitt om filen faktisk er daglig (Otra kom ferdig som ~daglig serie; Audna/Lygna-filene er semikolon-separerte rådata som må sjekkes for hull).
 - [ ] **NVE-stasjon** (ID + navn)
@@ -66,7 +67,11 @@ Nedbørmetoden gjelder **ikke**. Fiskemelding = sesong-/oppgangsprofil fra fangs
 
 ---
 
-## 4. Arbeidsdeling: Cowork vs. Chat
+## 4. Arbeidsdeling: Cowork vs. Claude Code
+
+> Oppdatert 2026-09-20: utviklingen er flyttet fra claude.ai-chat til Claude Code. Claude Code leser
+> `CLAUDE.md` og `docs/` i repoet, så prosjektkonteksten som tidligere bare fantes i chat er nå
+> tilgjengelig der. «Chat» under betyr nå Claude Code.
 
 ### Det Cowork trygt kan gjøre
 Avgrensede, verifiserbare oppgaver uten prosjektbeslutninger:
@@ -78,7 +83,7 @@ Avgrensede, verifiserbare oppgaver uten prosjektbeslutninger:
 
 ### Det som bør holdes i chat
 Krever prosjektminne/kontekst og reelle beslutninger:
-- **Selve trigger-frasen** `Ny elv – {navn} – {regulert/uregulert}` — Cowork har ikke nødvendigvis tilgang til samme prosjektminne (tidligere elvers konvensjoner, kjente fallgruver, UX-standarder A/B/C under punkt 5)
+- **Selve trigger-frasen** `Ny elv – {navn} – {regulert/uregulert}` / `/ny-elv` — Cowork har ikke nødvendigvis tilgang til samme prosjektkontekst (tidligere elvers konvensjoner, kjente fallgruver, UX-standarder A/B/C under punkt 5)
 - Endelig sammenstilling av dashboard-HTML fra mal
 - Vurdering av hvilken fiskemelding-metode som passer (skjønnsvurdering)
 - Versjonsnummerering og oversiktskart-kobling
@@ -90,6 +95,8 @@ Krever prosjektminne/kontekst og reelle beslutninger:
 ---
 
 ## 5. Kart-UX-standarder (gjelder alle dashboard, uansett elv)
+
+Samme regler står i `docs/kart-ux-standarder.md`, som er hovedkilden.
 
 **A) Smooth slider — fast bredde på verdi-etiketten**
 `.ctrl-val`-klassen (verditeksten ved siden av hver slider — vannføring/år/måned) må ha `min-width: 88px`. Uten dette endrer etikett-teksten bredde når intervallet skifter (f.eks. «5–10 m³/s» → «145–150 m³/s»), som får slideren til å oscillere under drag.
@@ -104,6 +111,9 @@ I `selectZone()`s «lukk sone»-gren skal `map.fitBounds(allCoords, {...})` fjer
 
 ## 6. Validering før levering (uansett elv)
 
+Kjør `python scripts/valider.py <fil.html>`. Skriptet gjør alt under, pluss konfliktmarkør-sjekk,
+HTML-nesting og jsdom-røyktest:
+
 1. `node --check` for JS-syntaks
 2. Div open/close-balansesjekk
 3. Sammenlign alle topp-nivå `let`/`const`/`var`-deklarasjoner mot malen via regex — verifiser at alt som brukes er deklarert (`node --check` fanger kun syntaks, ikke manglende deklarasjoner — kritisk lærdom fra Mandalselva v3-krasjet)
@@ -114,4 +124,5 @@ I `selectZone()`s «lukk sone»-gren skal `map.fitBounds(allCoords, {...})` fjer
 
 | Dato | Endring |
 |---|---|
+| 2026-09-20 | Tilpasset Claude Code: `/ny-elv`-trigger, fangstlogg beholdes uendret, validering via `scripts/valider.py`, peker til `docs/kart-ux-standarder.md` |
 | 2026-07-13 | Første versjon — kombinerer opprinnelig huskeliste med lærdom fra Otra-implementeringen (kvoteformat-variasjon, Cowork/chat-arbeidsdeling, trigger-frase-presisering) |

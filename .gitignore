@@ -1,0 +1,7 @@
+# --- Legg til i .gitignore ---
+.env
+.env.*
+!.env.example
+.claude/settings.local.json
+__pycache__/
+node_modules/
