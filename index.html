@@ -342,7 +342,11 @@ function riverState(river, now) {
   return { phase: 'nodata' };
 }
 
-const map = L.map('map', { zoomControl: true });
+// zoomSnap under 1 lar utsnittet lande mellom hele zoomnivaaer. Med hele nivaaer
+// maa kartet falle et helt trinn ut naar polstringen oeker, og alt blir halvparten
+// saa stort; med 0.25 justeres det bare saa mye som trengs. zoomDelta holdes paa 1
+// slik at +/- knappene fortsatt hopper et helt nivaa.
+const map = L.map('map', { zoomControl: true, zoomSnap: 0.25, zoomDelta: 1 });
 
 // Utsnittet regnes ut fra elvene som faktisk har data, i stedet for aa vaere
 // fastsatt. Da faller ingen elv utenfor naar en ny kommer til, og kartet
@@ -351,11 +355,20 @@ const map = L.map('map', { zoomControl: true });
 (function settUtsnitt() {
   const m = RIVERS.filter(r => r.hasData);
   if (!m.length) { map.setView([58.24, 7.69], 9); return; }
-  // Smal skjerm trenger all plassen den har, saa polstringen settes lavere der.
+  // fitBounds polstrer rundt selve koordinatpunktet, ikke rundt markoeren. Markoeren
+  // er 40 px og senterforankret, og flere elementer stikker utenfor den igjen:
+  // vannfoeringsetiketten mot venstre, reguleringssymbolet mot hoeyre og opp,
+  // fangstetiketten ned. Polstringen maa derfor dekke halve markoeren pluss
+  // overhenget pluss oensket luft - ellers havner ytterelvene (Lygna i vest,
+  // Tovdalselva i oest) klemt inntil skjermkanten paa mobil.
+  const HALV = 20;
+  const OVER = { venstre: 12, hoeyre: 8, opp: 8, ned: 18 };
+  // Smal skjerm trenger all plassen den har, saa luften settes lavere der.
   const smal = (map.getSize().x < 620);
-  const pad = smal ? 20 : 42;
+  const luft = smal ? 14 : 30;
   map.fitBounds(L.latLngBounds(m.map(r => [r.lat, r.lon])), {
-    padding: [pad, pad],
+    paddingTopLeft: [HALV + OVER.venstre + luft, HALV + OVER.opp + luft],
+    paddingBottomRight: [HALV + OVER.hoeyre + luft, HALV + OVER.ned + luft],
     maxZoom: 9           // samme zoomnivaa som foer paa PC, men riktig senter
   });
 })();
@@ -665,7 +678,7 @@ loadNewsTicker();
 </script>
 
 <div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.053</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.054</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
