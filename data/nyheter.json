@@ -72,15 +72,6 @@
     "stopDate": "2026-09-15"
   },
   {
-    "id": "N-011",
-    "elv": "Audna",
-    "sourceType": "side",
-    "headline": "Sesongoppsummering 2026",
-    "link": "https://elvesona.no/statistikk/audna2026",
-    "startDate": "2026-09-05",
-    "stopDate": "2026-09-21"
-  },
-  {
     "id": "N-013",
     "elv": "Alle elver",
     "sourceType": "side",
