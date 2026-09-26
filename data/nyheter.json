@@ -45,15 +45,6 @@
     "stopDate": "2026-09-15"
   },
   {
-    "id": "N-006",
-    "elv": "Alle elver",
-    "sourceType": "side",
-    "headline": "Klikk oppe til høyre for å gi tilbakemelding",
-    "link": "https://forms.gle/erbDidxsjVDPz8BR9",
-    "startDate": "2026-07-31",
-    "stopDate": null
-  },
-  {
     "id": "N-007",
     "elv": "Otra",
     "sourceType": "apen",
