@@ -628,21 +628,36 @@ function stopNewsAutoScroll() {
   if (newsAutoTimer) { clearInterval(newsAutoTimer); newsAutoTimer = null; }
 }
 
-function renderNewsTicker(items) {
+let newsItemHtml = '';
+let newsResizeTimer = null;
+
+// Dupliser settet KUN når det er bredere enn banneret. Da trengs rulling, og kopien gjør at
+// auto-scroll kan loope sømløst. Er settet smalere (f.eks. én kort nyhet), ville begge kopiene
+// stått synlige side om side uten å rulle - da vises settet én gang, stillestående.
+function layoutNewsTicker() {
   const wrap = document.getElementById('newsTickerWrap');
   const track = document.getElementById('newsTickerTrack');
+  stopNewsAutoScroll();
+  track.innerHTML = newsItemHtml;
+  wrap.scrollLeft = 0;
+  if (track.scrollWidth <= wrap.clientWidth) return;
+  track.innerHTML = newsItemHtml + newsItemHtml;
+  startNewsAutoScroll(wrap);
+}
+
+function renderNewsTicker(items) {
+  const wrap = document.getElementById('newsTickerWrap');
   if (!items || items.length === 0) { wrap.style.display = 'none'; return; }
 
-  const itemHtml = items.map(function (n) {
+  newsItemHtml = items.map(function (n) {
     return '<a class="news-item" href="' + n.link + '" target="_blank" rel="noopener">' +
       '<span class="news-badge ' + n.sourceType + '">' + (NEWS_BADGE_LABEL[n.sourceType] || '') + '</span>' +
       '<b>' + n.elv + ':</b> ' + n.headline +
     '</a>';
   }).join('');
 
-  // Dupliser settet slik at auto-scroll kan loope sømløst
-  track.innerHTML = itemHtml + itemHtml;
-  wrap.style.display = 'block';
+  wrap.style.display = 'block';   // må være synlig før bredden kan måles
+  layoutNewsTicker();
 
   // Manuell dra-for-å-bla: pause auto-scroll mens brukeren interagerer,
   // gjenoppta en liten stund etter at fingeren/musen slippes.
@@ -656,7 +671,11 @@ function renderNewsTicker(items) {
   wrap.addEventListener('focusin', pause);
   wrap.addEventListener('focusout', resumeSoon);
 
-  startNewsAutoScroll(wrap);
+  // Ny skjermbredde (rotasjon, vindu) kan endre om rulling trengs.
+  window.addEventListener('resize', function () {
+    clearTimeout(newsResizeTimer);
+    newsResizeTimer = setTimeout(layoutNewsTicker, 200);
+  });
 }
 
 async function loadNewsTicker() {
@@ -678,7 +697,7 @@ loadNewsTicker();
 </script>
 
 <div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.054</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.055</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
