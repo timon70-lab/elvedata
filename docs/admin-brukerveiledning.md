@@ -3,8 +3,8 @@
 Praktisk veiledning for `admin/index.html`. Fungerer både på PC og mobil; tokenet må
 legges inn separat i hver nettleser.
 
-Seksjoner (i rekkefølge på siden): 📰 Nyheter · 🎬 Media · 📅 Sesong · ⚖️ Scoringsparametre ·
-🔑 Nøkler og tilgang.
+Seksjoner (i rekkefølge på siden): 📰 Nyheter · 🎬 Media · 📅 Sesong · 💬 Tilbakemeldinger ·
+⚖️ Scoringsparametre · 🔑 Nøkler og tilgang.
 
 ---
 
@@ -21,8 +21,9 @@ din** — PC og mobil trenger hvert sitt.
 3. Fyll ut:
    - **Token name:** f.eks. `elvedata-admin-mobil`
    - **Resource owner:** `timon70-lab`
-   - **Expiration:** velg selv, f.eks. 90 dager
-   - **Repository access:** «Only select repositories» → **elvedata**
+   - **Expiration:** velg selv, f.eks. 90 dager — sett en påminnelse i kalenderen
+   - **Repository access:** «Only select repositories» → **elvedata** og
+     **elvesona-tilbakemeldinger** (begge)
    - **Permissions** → **Repository permissions** → **Contents** → **Read and write**
 4. **Generate token** nederst
 5. **Kopier verdien med en gang** — den vises kun denne ene gangen
@@ -34,6 +35,13 @@ din** — PC og mobil trenger hvert sitt.
 3. Lim inn i GitHub-token-feltet → **Lagre**
 
 Feltet viser deretter «Token er lagret ✓». Skal du bytte, lim bare inn et nytt.
+
+**Legge til et repo på et eksisterende token:** `github.com/settings/personal-access-tokens`
+→ klikk tokenet → **Edit** → *Select repositories* → huk av repoet → **Update** nederst.
+Tokenverdien endres ikke, så den trenger ikke limes inn i admin på nytt.
+
+**Hvilket token bruker admin?** Listen på GitHub viser bare grovt «Last used». Har du flere
+admin-tokens (f.eks. ett per enhet), gi alle de samme repoene — da spiller det ingen rolle.
 
 Samme seksjon har et felt for **NVE HydAPI-nøkkel**. Den brukes til å slå opp vannføring
 automatisk når du registrerer en video, og lagres også kun i `localStorage`.
@@ -133,6 +141,23 @@ dashbordene.
 
 ---
 
+## 💬 Tilbakemeldinger
+
+Viser innsendinger fra `elvesona.no/tilbakemelding/`. De lagres i det **private** repoet
+`elvesona-tilbakemeldinger` (fila `tilbakemeldinger.json`), så tokenet må ha tilgang dit.
+
+- **↻ Hent** laster lista, nyeste først. Nye er markert gult, og antallet vises i overskriften.
+- Filtrer på type, elv og status.
+- **Merk lest** / **Ferdig** / **Merk som ny** lagrer statusen tilbake til repoet.
+- Har innsenderen oppgitt e-post, er den en `mailto:`-lenke — svar fra din egen e-post.
+
+| Melding | Årsak |
+|---|---|
+| «Fant ikke tilbakemeldinger.json … (GitHub svarer 404 i begge tilfeller)» | Nesten alltid at tokenet mangler tilgang til `elvesona-tilbakemeldinger` — se token-oppsettet øverst |
+| «Lagre GitHub-token først.» | Ingen token i denne nettleseren |
+
+---
+
 ## ⚖️ Scoringsparametre
 
 Sjelden brukt. Justerer `rateWeight`, `volWeight`, `shrinkC`, `shrinkCElv` og `knee` per elv,
@@ -164,4 +189,5 @@ skjemaene og lese data — men ikke endre noe, siden skriving krever ditt person
 
 - Lim aldri inn tokenet på en delt eller fremmed enhet
 - Del aldri skjermbilde der token-feltet er utfylt
-- Bruk alltid fine-grained token begrenset til `elvedata` med kun `Contents: read/write`
+- Bruk alltid fine-grained token begrenset til `elvedata` og `elvesona-tilbakemeldinger`,
+  med kun `Contents: read/write`
