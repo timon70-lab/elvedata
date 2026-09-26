@@ -52,5 +52,36 @@ dashboard), `statistikk.json`, `nyheter.json`, `nyhetskilder.json`, `soner.json`
 - GoatCounter: `elvedata.goatcounter.com` (bevisst uendret navn; Per Lasses egen trafikk filtrert bort).
   Event-tracking på oversiktskartet: markør-åpning, dashboard-klikk, laksebørs-klikk.
 - Facebook-gruppe og -side «Elvesona»; YouTube-kanal.
-- Tilbakemelding: 💬-lenke til Google Forms i headeren på oversiktskartet (kun der). Nyhet N-006 peker
-  til et annet skjema. Erstatning er planlagt, se `docs/ideer/tilbakemeldingsside.md`.
+- Tilbakemelding: 💬-lenke til Google Forms i headeren på oversiktskartet (kun der). Erstattes av
+  tilbakemeldingssiden under når den er satt i drift.
+
+## Tilbakemeldingsside (runde 1, ikke lenket ennå)
+Statisk side kan ikke ha skrivetoken, så innsendinger går via en Cloudflare Worker som holder tokenet
+og skriver til et **privat** repo (e-post og fritekst blir aldri offentlig).
+
+```
+tilbakemelding/index.html ──POST──► Cloudflare Worker ──Contents API──► elvesona-tilbakemeldinger/tilbakemeldinger.json
+                                     (worker/tilbakemelding.js)                    ▲
+                                                                  admin/index.html «💬 Tilbakemeldinger»
+```
+
+- **Side:** `tilbakemelding/index.html` (`noindex` til den lenkes). Forhåndsutfylling med
+  `?elv=&sone=&type=&v=`. `WORKER_URL` øverst i skriptet fylles inn etter deploy; tom verdi viser
+  reservelenken (Google-skjemaet). GoatCounter-event `tilbakemelding-sendt-{type}`.
+- **Worker:** `worker/tilbakemelding.js` + `worker/wrangler.toml`. CORS kun `elvesona.no` og localhost.
+  Honeypot-feltet `website`, lengdegrenser, maks 5 innsendinger per IP per time (KV `RATE`, IP lagres
+  kun som SHA-256-hash), retry ved sha-konflikt (409/422). Secret: `GH_TOKEN`.
+- **Privat repo:** `timon70-lab/elvesona-tilbakemeldinger`, fil `tilbakemeldinger.json` (liste).
+  Post: `{id, mottatt, status: ny|lest|ferdig, type: ide|feil|fangst|annet, elv, sone, melding, epost, side, versjon}`.
+- **Admin:** seksjonen «💬 Tilbakemeldinger» leser lista og setter status. Admin-PAT-en må ha tilgang
+  til både `elvedata` og `elvesona-tilbakemeldinger`.
+
+**Oppsett (engangs, gjøres av Per Lasse):**
+1. Opprett privat repo `elvesona-tilbakemeldinger` med `tilbakemeldinger.json` = `[]`.
+2. Fine-grained PAT **kun** for det repoet, Contents: read/write (Workerens token).
+3. Legg det nye repoet til på admin-PAT-en (Contents: read/write).
+4. I `worker/`: `npx wrangler login` → `npx wrangler kv namespace create RATE` (lim id inn i
+   `wrangler.toml`) → `npx wrangler secret put GH_TOKEN` → `npx wrangler deploy`.
+5. Sett `WORKER_URL` i `tilbakemelding/index.html` til Worker-URL-en.
+
+Lokal test: `npx wrangler dev` i `worker/`, med `GH_TOKEN=...` i `worker/.dev.vars` (gitignored).

@@ -28,7 +28,6 @@ Admin har seksjonene Nyheter, Media, Sesong, Scoringsparametre og Nøkler og til
 - Mandalselva `ZONE_INFO` sier fortsatt «Alt fiske stoppes ved vanntemperatur over 21 °C», selv om
   21 °C-stoppen ikke lenger er del av kvotesettet (jf. `docs/kvoter-2026.md`).
 - `videoer_audna.json`: `vannforing: 0` betyr «ikke registrert» — admin bør skrive `null`.
-- To ulike Google Forms-lenker for tilbakemelding (💬 på oversiktskartet vs. nyhet N-006).
 
 ## Horisont
 - AI-synlighet: robots.txt, sitemap.xml, statisk HTML-innhold, schema.org, llms.txt,
@@ -52,4 +51,6 @@ Admin har seksjonene Nyheter, Media, Sesong, Scoringsparametre og Nøkler og til
 - Sesongoppsummering som lavsesonginnhold (nesten fullt automatiserbar).
 - Oversiktskart: sesongtotal eller nedtelling på stengte markører; «planleggingsmodus» i dashboard.
 - Turlogg / fangstregistrering — se `docs/ideer/turlogg.md`.
-- Egen tilbakemeldingsside (erstatter Google Forms) — se `docs/ideer/tilbakemeldingsside.md`.
+- Egen tilbakemeldingsside — runde 1 (Worker, side, admin) er bygd, men ikke satt i drift eller lenket.
+  Neste runder: lenke fra alle seks dashboard, statistikk og 💬 på oversiktskartet; deretter
+  «Stemte dette? 👍/👎» under topp 3. Se `docs/ideer/tilbakemeldingsside.md`.

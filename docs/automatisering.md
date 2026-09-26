@@ -16,6 +16,7 @@ slutter bare å oppdatere seg.
 |---|---|---|---|
 | `elvedata-cron` (PAT for cron-job.org) | **11. juli 2027** | Vannføring og fangster fryser | Varsling fra cron-job.org |
 | Admin-PAT (fine-grained) | Selvvalgt | Lagring i admin feiler | Feilmelding i admin |
+| Worker-PAT `GH_TOKEN` (tilbakemeldinger) | Selvvalgt | Innsendinger feiler (502) | Siden viser reservelenken; ingen varsling |
 | NVE API-nøkkel | Ingen kjent utløpsdato | Tomme vannføringsfiler | Ingen |
 
 Fornyelse av cron-tokenet: nytt fine-grained PAT med **Actions: read/write** på kun
@@ -115,7 +116,8 @@ litt kvote.
 | `NVE_API_KEY` | GitHub Secrets + lokal `.env` | Actions (`nve_cache`, `issue_foto_pipeline`) og lokale skript |
 | NVE-nøkkel i admin | `localStorage` i din nettleser | Vannføringsoppslag ved videoregistrering |
 | `elvedata-cron` | cron-job.org | Actions read/write, kun `elvedata` |
-| Admin-PAT | `localStorage` i din nettleser | Contents read/write, kun `elvedata` |
+| Admin-PAT | `localStorage` i din nettleser | Contents read/write, `elvedata` + `elvesona-tilbakemeldinger` |
+| `GH_TOKEN` | Cloudflare Worker-secret (`wrangler secret put`) | Contents read/write, kun `elvesona-tilbakemeldinger` |
 
 **NVE-nøkkelen skal aldri hardkodes i en HTML-fil.** Den hører hjemme i GitHub Secrets og
 brukes serverside i Actions. Dashbordene leser ferdig mellomlagrede JSON-filer, aldri

@@ -1,6 +1,8 @@
 # Idé: egen tilbakemeldingsside
 
-Status: kun idé, ingen implementering påbegynt (loggført 2026-09-26).
+Status: runde 1 (kjerne: Worker, side, admin) implementert 2026-09-26, ikke satt i drift eller lenket.
+Punkt 4 (inngangspunkter) og 👍/👎 gjenstår. Driftsdokumentasjon: `docs/datakilder-og-infrastruktur.md`.
+Loggført som idé 2026-09-26.
 Beslutninger tatt: lagring i privat repo, Cloudflare Worker som mellomledd.
 
 ## Kontekst

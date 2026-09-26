@@ -25,7 +25,8 @@ Denne begrensningen forklarer nesten alle designvalgene lenger ned i dokumentet.
 | Oversiktskart | `index.html` | Landingsside, kart over alle elvene, nyhetsbanner |
 | Elve-dashboard × 6 | `audna/`, `lygna/`, `mandalselva/`, `otra/`, `sygna/`, `tovdalselva/` | Sonekart, score, historikk, media |
 | Statistikk | `statistikk/index.html`, `statistikk/{elv}2026.html` | Statistikkside og sesongside per elv |
-| Admin-panel | `admin/index.html` | Redigering av nyheter, kilder, media, sesong, scoreparametre |
+| Admin-panel | `admin/index.html` | Redigering av nyheter, kilder, media, sesong, scoreparametre; lesing av tilbakemeldinger |
+| Tilbakemelding | `tilbakemelding/index.html`, `worker/` | Skjema + Cloudflare Worker som skriver til privat repo |
 | Staging | `staging/index.html` | Testversjon av oversiktskartet før publisering |
 | Data | `data/*.json` | Mellomlagrede data fra eksterne kilder |
 | Rådata | `data/raw/` | Komplette fangstlogger og vannføringsserier 2016–2026 |
@@ -119,8 +120,9 @@ lagre. Siden har `noindex` og er ikke lenket fra dashbordene.
 Å la besøkende stemme eller registrere fangster ville krevd at et skrivetoken var
 tilgjengelig i nettleseren til alle — altså full skrivetilgang til repoet for hvem som
 helst. Slike funksjoner må derfor gå via eksterne tjenester (Google Forms, Strawpoll
-eller tilsvarende) eller via et mellomledd som holder tokenet — se forslaget i
-[`ideer/tilbakemeldingsside.md`](ideer/tilbakemeldingsside.md).
+eller tilsvarende) eller via et mellomledd som holder tokenet. Tilbakemeldingssiden bruker det
+siste: en Cloudflare Worker med eget token skriver til et privat repo — se
+[datakilder-og-infrastruktur.md](datakilder-og-infrastruktur.md#tilbakemeldingsside-runde-1-ikke-lenket-ennå).
 
 ---
 
