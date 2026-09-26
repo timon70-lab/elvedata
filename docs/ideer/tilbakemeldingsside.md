@@ -55,7 +55,7 @@ repoet er privat, så e-post og fritekst fra brukerne blir ikke offentlig.
 ### 3. Siden `tilbakemelding/index.html`
 - Samme stil og footer-versjonsmønster som øvrige sider (starter på `v0.001`), med GoatCounter-event ved innsending.
 - Felt:
-  - Type som piller: 💡 Idé · 🐞 Feil · 🎣 Fangst/sone stemte ikke · 💬 Annet
+  - Type som piller: 💡 Idé · 🐞 Feil · 🎣 Sone stemte ikke · 💬 Annet
   - Elv (valgfri, forhåndsutfylt fra `?elv=`)
   - Sone (valgfri, fra `?sone=`)
   - Melding
@@ -66,7 +66,7 @@ repoet er privat, så e-post og fritekst fra brukerne blir ikke offentlig.
 - **Alle seks dashboard:** en synlig «Gi tilbakemelding»-knapp som lenker til `/tilbakemelding/?elv={elv}`.
   Det gir én runde per elv med versjonsbump, `valider.py` og commit (jf. `/runde`).
 - **Kontekstuell hurtigrespons i dashboard:** under topp 3-sonene, «Stemte dette? 👍 / 👎». Et 👎-klikk
-  åpner siden med `elv` og `sone` ferdig utfylt og typen «Fangst/sone stemte ikke». Det er lavest mulig terskel
+  åpner siden med `elv` og `sone` ferdig utfylt og typen «Sone stemte ikke». Det er lavest mulig terskel
   og gir samtidig kalibreringsdata.
 - **Statistikksiden og sesongsidene:** samme lenke i footer.
 - **Oversiktskartet:** 💬-lenken peker nå til `/tilbakemelding/` i stedet for Google Forms. *Endringen

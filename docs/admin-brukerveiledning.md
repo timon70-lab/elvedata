@@ -149,6 +149,8 @@ Viser innsendinger fra `elvesona.no/tilbakemelding/`. De lagres i det **private*
 - **↻ Hent** laster lista, nyeste først. Nye er markert gult, og antallet vises i overskriften.
 - Filtrer på type, elv og status.
 - **Merk lest** / **Ferdig** / **Merk som ny** lagrer statusen tilbake til repoet.
+- **🗑 Slett** fjerner posten fra `tilbakemeldinger.json` etter bekreftelse. Den ligger fortsatt
+  i git-historikken til det private repoet.
 - Har innsenderen oppgitt e-post, er den en `mailto:`-lenke — svar fra din egen e-post.
 
 | Melding | Årsak |

@@ -232,6 +232,8 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
 .fb-meta a { color: #2b6cb0; }
 .fb-actions { display: flex; gap: 6px; margin-top: 6px; }
 .fb-actions button { padding: 4px 10px; font-size: 0.74rem; }
+.fb-actions button.slett { background: #fee2e2; color: #b91c1c; margin-left: auto; }
+.fb-actions button.slett:hover { background: #fecaca; }
 #fbStatus { font-size: 0.8rem; margin-top: 10px; min-height: 1.2em; }
 #fbStatus.ok { color: #276749; }
 #fbStatus.err { color: #c53030; }
@@ -600,7 +602,7 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
       <option value="">Alle typer</option>
       <option value="ide">💡 Idé</option>
       <option value="feil">🐞 Feil</option>
-      <option value="fangst">🎣 Fangst/sone</option>
+      <option value="fangst">🎣 Sone stemte ikke</option>
       <option value="annet">💬 Annet</option>
     </select>
     <select id="fbFElv" onchange="fbRender()"><option value="">Alle elver</option></select>
@@ -1502,7 +1504,7 @@ async function putJsonFile(path, list, message, sha, repo = REPO) {
    Innholdet kommer fra offentlige brukere: alt vises med textContent, aldri innerHTML. */
 const FB_REPO = 'elvesona-tilbakemeldinger';
 const FB_PATH = 'tilbakemeldinger.json';
-const FB_TYPER = { ide: '💡 Idé', feil: '🐞 Feil', fangst: '🎣 Fangst/sone', annet: '💬 Annet' };
+const FB_TYPER = { ide: '💡 Idé', feil: '🐞 Feil', fangst: '🎣 Sone stemte ikke', annet: '💬 Annet' };
 let fbListe = [];
 
 function fbStatus(msg, isErr) {
@@ -1595,6 +1597,9 @@ function fbRender() {
       b.onclick = () => fbSettStatus(f.id, s);
       act.appendChild(b);
     });
+    const slett = fbEl('button', 'slett', '🗑 Slett');
+    slett.onclick = () => fbSlett(f.id);
+    act.appendChild(slett);
     row.appendChild(act);
     wrap.appendChild(row);
   });
@@ -1615,6 +1620,26 @@ async function fbSettStatus(id, status) {
     fbStatus('Lagret ' + id + ' som «' + status + '». ✓', false);
   } catch (e) {
     fbStatus('Kunne ikke lagre: ' + fbFeiltekst(e), true);
+  }
+}
+
+async function fbSlett(id) {
+  if (!getToken()) { fbStatus('Lagre GitHub-token først.', true); return; }
+  const post = fbListe.find(f => f.id === id);
+  const utdrag = post && post.melding ? '\n\n«' + post.melding.slice(0, 80) + (post.melding.length > 80 ? '…' : '') + '»' : '';
+  if (!confirm('Slette tilbakemelding ' + id + '?' + utdrag)) return;
+  fbStatus('Sletter …', false);
+  try {
+    // Hent fersk kopi rett før skriving: Workeren kan ha lagt til nye poster i mellomtiden.
+    const { list, sha } = await fetchJsonFile(FB_PATH, FB_REPO);
+    const ny = list.filter(f => f.id !== id);
+    if (ny.length === list.length) throw new Error('Fant ikke ' + id);
+    await putJsonFile(FB_PATH, ny, 'Slett tilbakemelding ' + id + ' via admin', sha, FB_REPO);
+    fbListe = ny;
+    fbRender();
+    fbStatus('Slettet ' + id + '. ✓', false);
+  } catch (e) {
+    fbStatus('Kunne ikke slette: ' + fbFeiltekst(e), true);
   }
 }
 
