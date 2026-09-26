@@ -48,3 +48,4 @@ Admin har Sesong-, Media- og scoringparameter-seksjoner.
 - Sesongoppsummering som lavsesonginnhold (nesten fullt automatiserbar).
 - Oversiktskart: sesongtotal eller nedtelling på stengte markører; «planleggingsmodus» i dashboard.
 - Turlogg / fangstregistrering — se `docs/ideer/turlogg.md`.
+- Egen tilbakemeldingsside (erstatter Google Forms) — se `docs/ideer/tilbakemeldingsside.md`.
