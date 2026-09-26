@@ -5,3 +5,7 @@
 .claude/settings.local.json
 __pycache__/
 node_modules/
+
+# Cloudflare Worker (tilbakemelding): lokale hemmeligheter og byggmappe
+.dev.vars
+worker/.wrangler/

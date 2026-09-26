@@ -1,0 +1,12 @@
+# Cloudflare Worker for tilbakemeldinger – se docs/datakilder-og-infrastruktur.md.
+# Ingen hemmeligheter her. GH_TOKEN settes med:  npx wrangler secret put GH_TOKEN
+# Lokalt (wrangler dev): legg GH_TOKEN=... i worker/.dev.vars (gitignored).
+name = "elvesona-tilbakemelding"
+main = "tilbakemelding.js"
+compatibility_date = "2026-09-01"
+
+# Rate-limit-teller. Opprett med:  npx wrangler kv namespace create RATE
+# og lim inn id-en under.
+[[kv_namespaces]]
+binding = "RATE"
+id = "FYLL_INN_ID_FRA_KV_NAMESPACE_CREATE"

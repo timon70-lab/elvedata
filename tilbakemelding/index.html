@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Gi tilbakemelding – Elvesona</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f4f8; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px 12px 40px; }
+h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #94a3b8; margin-bottom: 16px; text-align: center; }
+
+.banner { width: 100%; max-width: 480px; background: #0f2d4a; border-radius: 14px; padding: 14px 18px; margin-bottom: 14px; }
+.back-link { display: inline-flex; align-items: center; gap: 4px; font-size: 0.62rem; color: #7fd4f0; text-decoration: none; margin-bottom: 5px; }
+.back-link:hover { color: #a8e4f5; text-decoration: underline; }
+.rname { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #9ae6b4; margin-bottom: 6px; }
+.lede { font-size: 0.78rem; color: #cbd5e1; line-height: 1.55; }
+.lede strong { color: #fff; }
+
+.panel { width: 100%; max-width: 480px; background: white; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 14px; padding: 16px 18px; }
+
+fieldset { border: none; margin-bottom: 16px; }
+legend, .lbl { display: block; font-size: 0.66rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #0f2d4a; margin-bottom: 7px; }
+.opt { font-weight: 600; text-transform: none; letter-spacing: 0; color: #94a3b8; }
+
+.pills { display: flex; flex-wrap: wrap; gap: 7px; }
+.pill { position: relative; }
+.pill input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.pill span { display: inline-block; padding: 8px 12px; min-height: 36px; border-radius: 18px; border: 2px solid #cbd5e1; background: #f8fafc; font-size: 0.78rem; color: #334155; cursor: pointer; user-select: none; }
+.pill input:checked + span { border-color: #38a169; background: #f0fff4; color: #22543d; font-weight: 700; }
+.pill input:focus-visible + span { outline: 2px solid #3182ce; outline-offset: 2px; }
+
+.field { margin-bottom: 16px; }
+select, input[type=text], input[type=email], textarea { width: 100%; font: inherit; font-size: 0.85rem; padding: 9px 11px; border: 2px solid #cbd5e1; border-radius: 8px; background: #fff; color: #1a202c; }
+select:focus, input:focus, textarea:focus { outline: none; border-color: #3182ce; }
+textarea { min-height: 130px; resize: vertical; line-height: 1.45; }
+.row { display: flex; gap: 10px; }
+.row > .field { flex: 1; min-width: 0; }
+.hint { font-size: 0.64rem; color: #94a3b8; margin-top: 4px; }
+.teller { float: right; }
+.teller.over { color: #e53e3e; font-weight: 700; }
+
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+.send { width: 100%; min-height: 46px; border: none; border-radius: 10px; background: #0f2d4a; color: #fff; font: inherit; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
+.send:hover { background: #17406a; }
+.send:disabled { background: #94a3b8; cursor: default; }
+
+.msg { display: none; margin-top: 12px; padding: 11px 13px; border-radius: 8px; font-size: 0.78rem; line-height: 1.5; }
+.msg.feil { display: block; background: #fff5f5; color: #9b2c2c; border: 1px solid #feb2b2; }
+.msg a { color: inherit; font-weight: 700; }
+
+.takk { display: none; text-align: center; padding: 10px 4px 4px; }
+.takk .ikon { font-size: 2rem; margin-bottom: 6px; }
+.takk h2 { font-size: 1rem; color: #22543d; margin-bottom: 6px; }
+.takk p { font-size: 0.8rem; color: #475569; line-height: 1.5; margin-bottom: 12px; }
+.takk button { border: 2px solid #9ae6b4; background: #f0fff4; color: #22543d; border-radius: 8px; padding: 8px 16px; font: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+
+.personvern { font-size: 0.66rem; color: #64748b; line-height: 1.5; }
+
+.foot { width: 100%; max-width: 480px; text-align: center; padding: 16px 0 24px; font-size: 0.65rem; color: #94a3b8; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<script data-goatcounter="https://elvedata.goatcounter.com/count"
+        data-goatcounter-settings='{"allow_local": false}'
+        async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<h1>Elvesona · Tilbakemelding</h1>
+
+<div class="banner">
+  <a class="back-link" id="backLink" href="../">← Tilbake til oversiktskartet</a>
+  <div class="rname">Hjelp oss å bli bedre</div>
+  <p class="lede">Har du sett en feil, en sone som ikke stemmer, eller har du en idé? <strong>Alle meldinger leses</strong> – også de korte.</p>
+</div>
+
+<div class="panel">
+  <form id="skjema" novalidate>
+    <fieldset>
+      <legend>Hva gjelder det?</legend>
+      <div class="pills">
+        <label class="pill"><input type="radio" name="type" value="ide" checked><span>💡 Idé</span></label>
+        <label class="pill"><input type="radio" name="type" value="feil"><span>🐞 Feil</span></label>
+        <label class="pill"><input type="radio" name="type" value="fangst"><span>🎣 Fangst/sone stemte ikke</span></label>
+        <label class="pill"><input type="radio" name="type" value="annet"><span>💬 Annet</span></label>
+      </div>
+    </fieldset>
+
+    <div class="row">
+      <div class="field">
+        <label class="lbl" for="elv">Elv <span class="opt">(valgfritt)</span></label>
+        <select id="elv">
+          <option value="">Generelt</option>
+          <option value="audna">Audna</option>
+          <option value="lygna">Lygna</option>
+          <option value="mandalselva">Mandalselva</option>
+          <option value="otra">Otra</option>
+          <option value="sygna">Sygna</option>
+          <option value="tovdalselva">Tovdalselva</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="lbl" for="sone">Sone <span class="opt">(valgfritt)</span></label>
+        <input type="text" id="sone" maxlength="60" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lbl" for="melding">Melding <span class="teller" id="teller">0 / 2000</span></label>
+      <textarea id="melding" maxlength="2000" required placeholder="Skriv så kort eller langt du vil."></textarea>
+    </div>
+
+    <div class="field">
+      <label class="lbl" for="epost">E-post <span class="opt">(valgfritt – bare hvis du vil ha svar)</span></label>
+      <input type="email" id="epost" maxlength="200" autocomplete="email">
+    </div>
+
+    <div class="hp" aria-hidden="true">
+      <label for="website">La dette feltet stå tomt</label>
+      <input type="text" id="website" tabindex="-1" autocomplete="off">
+    </div>
+
+    <button type="submit" class="send" id="sendBtn">Send tilbakemelding</button>
+    <div class="msg" id="msg" role="alert"></div>
+  </form>
+
+  <div class="takk" id="takk" role="status">
+    <div class="ikon">🙏</div>
+    <h2>Takk!</h2>
+    <p>Tilbakemeldingen er mottatt. Hvis du la igjen e-post og ba om svar, hører du fra oss.</p>
+    <button type="button" id="nyBtn">Send en til</button>
+  </div>
+</div>
+
+<div class="panel">
+  <p class="personvern">Meldingen lagres privat og vises aldri offentlig på Elvesona. E-post brukes bare til å svare deg. Vi lagrer ikke IP-adressen din.</p>
+</div>
+
+<div class="foot">
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.001</span><br>
+</div>
+
+<script>
+// Mottaket (Cloudflare Worker, worker/tilbakemelding.js). Fylles inn etter deploy.
+// Tom streng = mottaket er ikke satt opp, og siden viser reservelenken i stedet.
+const WORKER_URL = '';
+// Reserve hvis mottaket er nede: dagens Google-skjema.
+const RESERVE_URL = 'https://forms.gle/JbZt3QCmrVAGJnAT9';
+
+const ELVER = ['audna', 'lygna', 'mandalselva', 'otra', 'sygna', 'tovdalselva'];
+const TYPER = ['ide', 'feil', 'fangst', 'annet'];
+
+/* GoatCounter er cookiefritt og lagrer bare hendelsesnavnet. Kallet er pakket
+   i try/catch slik at en blokkert count.js aldri kan bryte siden. */
+function tellHendelse(navn, tittel) {
+  try {
+    if (window.goatcounter && typeof window.goatcounter.count === 'function') {
+      window.goatcounter.count({ path: navn, title: tittel, event: true });
+    }
+  } catch (e) { /* maaling skal aldri kunne bryte siden */ }
+}
+
+// Hvor kom brukeren fra? Kun stien, og kun fra eget nettsted.
+function fraSide() {
+  try {
+    if (!document.referrer) return '';
+    const u = new URL(document.referrer);
+    return u.host === location.host ? u.pathname.slice(0, 200) : '';
+  } catch (e) { return ''; }
+}
+
+const skjema = document.getElementById('skjema');
+const melding = document.getElementById('melding');
+const teller = document.getElementById('teller');
+const msg = document.getElementById('msg');
+const sendBtn = document.getElementById('sendBtn');
+
+// Forhåndsutfylling: ?elv=lygna&sone=Sone%203&type=fangst&v=v1.066
+const params = new URLSearchParams(location.search);
+const pElv = (params.get('elv') || '').toLowerCase();
+if (ELVER.includes(pElv)) {
+  document.getElementById('elv').value = pElv;
+  document.getElementById('backLink').href = '../' + pElv + '/';
+  document.getElementById('backLink').textContent = '← Tilbake til ' + pElv.charAt(0).toUpperCase() + pElv.slice(1);
+}
+if (params.get('sone')) document.getElementById('sone').value = params.get('sone').slice(0, 60);
+const pType = params.get('type');
+if (TYPER.includes(pType)) skjema.querySelector('input[name=type][value=' + pType + ']').checked = true;
+const pVersjon = (params.get('v') || '').slice(0, 20);
+
+function oppdaterTeller() {
+  const n = melding.value.length;
+  teller.textContent = n + ' / 2000';
+  teller.classList.toggle('over', n > 2000);
+}
+melding.addEventListener('input', oppdaterTeller);
+
+function visFeil(tekst, medReserve) {
+  msg.className = 'msg feil';
+  msg.textContent = tekst;
+  if (medReserve) {
+    msg.appendChild(document.createTextNode(' Du kan også bruke '));
+    const a = document.createElement('a');
+    a.href = RESERVE_URL; a.target = '_blank'; a.rel = 'noopener';
+    a.textContent = 'reserveskjemaet';
+    msg.appendChild(a);
+    msg.appendChild(document.createTextNode('.'));
+  }
+}
+
+skjema.addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  msg.className = 'msg';
+  const tekst = melding.value.trim();
+  if (tekst.length < 5) { visFeil('Skriv litt mer – minst 5 tegn.', false); melding.focus(); return; }
+  const epostEl = document.getElementById('epost');
+  if (epostEl.value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(epostEl.value.trim())) {
+    visFeil('E-postadressen ser ikke riktig ut.', false); epostEl.focus(); return;
+  }
+  if (!WORKER_URL) { visFeil('Mottaket er ikke satt opp ennå.', true); return; }
+
+  const body = {
+    type: skjema.querySelector('input[name=type]:checked').value,
+    elv: document.getElementById('elv').value,
+    sone: document.getElementById('sone').value.trim(),
+    melding: tekst,
+    epost: epostEl.value.trim(),
+    side: fraSide(),
+    versjon: pVersjon,
+    website: document.getElementById('website').value,
+  };
+
+  sendBtn.disabled = true;
+  sendBtn.textContent = 'Sender …';
+  try {
+    const res = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const svar = await res.json().catch(() => ({}));
+    if (res.ok && svar.ok) {
+      tellHendelse('tilbakemelding-sendt-' + body.type, 'Tilbakemelding sendt (' + body.type + ')');
+      skjema.style.display = 'none';
+      document.getElementById('takk').style.display = 'block';
+    } else if (res.status === 400 || res.status === 429) {
+      visFeil(svar.feil || 'Noe var galt med innsendingen.', res.status === 429);
+    } else {
+      visFeil('Tilbakemeldingen kunne ikke lagres akkurat nå.', true);
+    }
+  } catch (e) {
+    visFeil('Fikk ikke kontakt med mottaket.', true);
+  } finally {
+    sendBtn.disabled = false;
+    sendBtn.textContent = 'Send tilbakemelding';
+  }
+});
+
+document.getElementById('nyBtn').addEventListener('click', () => {
+  melding.value = ''; oppdaterTeller();
+  document.getElementById('takk').style.display = 'none';
+  skjema.style.display = 'block';
+  melding.focus();
+});
+</script>
+</body>
+</html>
