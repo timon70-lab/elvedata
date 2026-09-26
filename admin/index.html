@@ -215,6 +215,26 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
 .news-status-tag.aktiv { background:#dbeafe; color:#1d4ed8; }
 .news-status-tag.kommende { background:#f1f5f9; color:#64748b; }
 .news-status-tag.utlopt { background:#f1f5f9; color:#94a3b8; }
+.fb-filter { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 4px; }
+.fb-filter select { padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.8rem; background: #fff; }
+.fb-ny-chip { font-size: 0.68rem; font-weight: 700; border-radius: 999px; padding: 2px 8px; background: #fee2e2; color: #b91c1c; margin-left: 6px; }
+.fb-row { padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+.fb-row:last-child { border-bottom: none; }
+.fb-row.ny { background: #fffbeb; margin: 0 -8px; padding: 10px 8px; border-radius: 8px; }
+.fb-hdr { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.72rem; color: #64748b; margin-bottom: 4px; }
+.fb-type { font-weight: 700; color: #1e293b; }
+.fb-st { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; }
+.fb-st.ny { background: #fee2e2; color: #b91c1c; }
+.fb-st.lest { background: #dbeafe; color: #1d4ed8; }
+.fb-st.ferdig { background: #dcfce7; color: #166534; }
+.fb-txt { font-size: 0.82rem; color: #1a202c; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.45; }
+.fb-meta { font-size: 0.68rem; color: #94a3b8; margin-top: 4px; overflow-wrap: anywhere; }
+.fb-meta a { color: #2b6cb0; }
+.fb-actions { display: flex; gap: 6px; margin-top: 6px; }
+.fb-actions button { padding: 4px 10px; font-size: 0.74rem; }
+#fbStatus { font-size: 0.8rem; margin-top: 10px; min-height: 1.2em; }
+#fbStatus.ok { color: #276749; }
+#fbStatus.err { color: #c53030; }
 .news-list-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0;
         border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; }
 .news-list-row:last-child { border-bottom: none; }
@@ -563,6 +583,36 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
     </div>
 
   </div>
+</div>
+</details>
+
+<details class="card-details" id="fbDetails">
+  <summary>💬 Tilbakemeldinger <span class="sum-hint">(fra elvesona.no/tilbakemelding · privat repo)</span><span class="fb-ny-chip" id="fbNyChip" style="display:none"></span></summary>
+<div class="card">
+  <h2>💬 Tilbakemeldinger</h2>
+  <div class="hint" style="margin-top:0">Leses fra <code>tilbakemeldinger.json</code> i det private repoet
+    <code>elvesona-tilbakemeldinger</code>. Tokenet under «Nøkler og tilgang» må også ha tilgang dit.</div>
+  <div class="save-row">
+    <button onclick="fbHent()">↻ Hent</button>
+  </div>
+  <div class="fb-filter" id="fbFilter" style="display:none">
+    <select id="fbFType" onchange="fbRender()">
+      <option value="">Alle typer</option>
+      <option value="ide">💡 Idé</option>
+      <option value="feil">🐞 Feil</option>
+      <option value="fangst">🎣 Fangst/sone</option>
+      <option value="annet">💬 Annet</option>
+    </select>
+    <select id="fbFElv" onchange="fbRender()"><option value="">Alle elver</option></select>
+    <select id="fbFStatus" onchange="fbRender()">
+      <option value="">Alle statuser</option>
+      <option value="ny">Ny</option>
+      <option value="lest">Lest</option>
+      <option value="ferdig">Ferdig</option>
+    </select>
+  </div>
+  <div id="fbList"></div>
+  <div id="fbStatus"></div>
 </div>
 </details>
 
@@ -1419,8 +1469,8 @@ async function leggTilVideo() {
   }
 }
 
-async function fetchJsonFile(path) {
-  const api = 'https://api.github.com/repos/' + OWNER + '/' + REPO + '/contents/' + path;
+async function fetchJsonFile(path, repo = REPO) {
+  const api = 'https://api.github.com/repos/' + OWNER + '/' + repo + '/contents/' + path;
   const res = await fetch(api, { headers: headers(), cache: 'no-cache' });
   if (res.status === 404) return { list: [], sha: null };
   if (!res.ok) throw new Error('HTTP ' + res.status + ' ved henting av ' + path);
@@ -1429,8 +1479,8 @@ async function fetchJsonFile(path) {
   return { list, sha: gd.sha };
 }
 
-async function putJsonFile(path, list, message, sha) {
-  const api = 'https://api.github.com/repos/' + OWNER + '/' + REPO + '/contents/' + path;
+async function putJsonFile(path, list, message, sha, repo = REPO) {
+  const api = 'https://api.github.com/repos/' + OWNER + '/' + repo + '/contents/' + path;
   const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(list, null, 2) + '\n')));
   const body = { message: message, content: b64 };
   if (sha) body.sha = sha;
@@ -1445,6 +1495,127 @@ async function putJsonFile(path, list, message, sha) {
   }
   const data = await res.json();
   return data.content.sha;
+}
+
+/* ---- TILBAKEMELDINGER ----
+   Skrives av Cloudflare-Workeren (worker/tilbakemelding.js) til et PRIVAT repo.
+   Innholdet kommer fra offentlige brukere: alt vises med textContent, aldri innerHTML. */
+const FB_REPO = 'elvesona-tilbakemeldinger';
+const FB_PATH = 'tilbakemeldinger.json';
+const FB_TYPER = { ide: '💡 Idé', feil: '🐞 Feil', fangst: '🎣 Fangst/sone', annet: '💬 Annet' };
+let fbListe = [];
+
+function fbStatus(msg, isErr) {
+  const el = document.getElementById('fbStatus');
+  el.textContent = msg;
+  el.className = isErr ? 'err' : 'ok';
+}
+
+function fbFeiltekst(e) {
+  return /HTTP (401|403|404)/.test(e.message)
+    ? 'Tokenet mangler tilgang til ' + FB_REPO + ' (' + e.message + ').'
+    : e.message;
+}
+
+async function fbHent() {
+  if (!getToken()) { fbStatus('Lagre GitHub-token først.', true); return; }
+  fbStatus('Henter …', false);
+  try {
+    const { list, sha } = await fetchJsonFile(FB_PATH, FB_REPO);
+    // fetchJsonFile gjør 404 om til tom liste. For et privat repo svarer GitHub også 404
+    // når tokenet mangler tilgang – det må ikke se ut som «ingen tilbakemeldinger».
+    if (!sha) {
+      fbStatus('Fant ikke ' + FB_PATH + ' i ' + FB_REPO + '. Enten finnes ikke fila, eller tokenet mangler tilgang til repoet (GitHub svarer 404 i begge tilfeller).', true);
+      return;
+    }
+    fbListe = Array.isArray(list) ? list : [];
+    const elver = [...new Set(fbListe.map(f => f.elv).filter(Boolean))].sort();
+    const sel = document.getElementById('fbFElv');
+    const valgt = sel.value;
+    sel.length = 1;
+    elver.forEach(e => sel.add(new Option(e.charAt(0).toUpperCase() + e.slice(1), e)));
+    sel.value = elver.includes(valgt) ? valgt : '';
+    document.getElementById('fbFilter').style.display = fbListe.length ? 'flex' : 'none';
+    fbRender();
+    fbStatus(fbListe.length + ' tilbakemelding' + (fbListe.length === 1 ? '' : 'er') + ' hentet. ✓', false);
+  } catch (e) {
+    fbStatus('Kunne ikke hente: ' + fbFeiltekst(e), true);
+  }
+}
+
+function fbEl(tag, cls, tekst) {
+  const el = document.createElement(tag);
+  if (cls) el.className = cls;
+  if (tekst != null) el.textContent = tekst;
+  return el;
+}
+
+function fbRender() {
+  const antNy = fbListe.filter(f => f.status === 'ny').length;
+  const chip = document.getElementById('fbNyChip');
+  chip.textContent = antNy + ' ny' + (antNy === 1 ? '' : 'e');
+  chip.style.display = antNy ? 'inline' : 'none';
+
+  const fType = document.getElementById('fbFType').value;
+  const fElv = document.getElementById('fbFElv').value;
+  const fSt = document.getElementById('fbFStatus').value;
+  const vis = fbListe
+    .filter(f => (!fType || f.type === fType) && (!fElv || f.elv === fElv) && (!fSt || f.status === fSt))
+    .sort((a, b) => String(b.mottatt).localeCompare(String(a.mottatt)));
+
+  const wrap = document.getElementById('fbList');
+  wrap.replaceChildren();
+  if (!fbListe.length) { wrap.appendChild(fbEl('div', 'hint', 'Ingen tilbakemeldinger ennå.')); return; }
+  if (!vis.length) { wrap.appendChild(fbEl('div', 'hint', 'Ingen treff med dette filteret.')); return; }
+
+  vis.forEach(f => {
+    const row = fbEl('div', 'fb-row' + (f.status === 'ny' ? ' ny' : ''));
+    const hdr = fbEl('div', 'fb-hdr');
+    hdr.appendChild(fbEl('span', 'fb-type', FB_TYPER[f.type] || f.type));
+    const sted = [f.elv ? f.elv.charAt(0).toUpperCase() + f.elv.slice(1) : 'Generelt', f.sone].filter(Boolean).join(' · ');
+    hdr.appendChild(fbEl('span', null, sted));
+    const d = new Date(f.mottatt);
+    hdr.appendChild(fbEl('span', null, isNaN(d) ? '' : d.toLocaleString('no-NO', { dateStyle: 'short', timeStyle: 'short' })));
+    hdr.appendChild(fbEl('span', 'fb-st ' + (f.status || 'ny'), f.status || 'ny'));
+    row.appendChild(hdr);
+    row.appendChild(fbEl('div', 'fb-txt', f.melding || ''));
+
+    const meta = fbEl('div', 'fb-meta');
+    if (f.epost) {
+      const a = fbEl('a', null, f.epost);
+      a.href = 'mailto:' + encodeURIComponent(f.epost).replace(/%40/g, '@');
+      meta.append('Svar til: ', a, ' · ');
+    }
+    meta.append([f.side && ('fra ' + f.side), f.versjon, f.id].filter(Boolean).join(' · '));
+    row.appendChild(meta);
+
+    const act = fbEl('div', 'fb-actions');
+    ['ny', 'lest', 'ferdig'].filter(s => s !== (f.status || 'ny')).forEach(s => {
+      const b = fbEl('button', 'secondary', s === 'ny' ? 'Merk som ny' : s === 'lest' ? 'Merk lest' : 'Ferdig');
+      b.onclick = () => fbSettStatus(f.id, s);
+      act.appendChild(b);
+    });
+    row.appendChild(act);
+    wrap.appendChild(row);
+  });
+}
+
+async function fbSettStatus(id, status) {
+  if (!getToken()) { fbStatus('Lagre GitHub-token først.', true); return; }
+  fbStatus('Lagrer …', false);
+  try {
+    // Hent fersk kopi rett før skriving: Workeren kan ha lagt til nye poster i mellomtiden.
+    const { list, sha } = await fetchJsonFile(FB_PATH, FB_REPO);
+    const post = list.find(f => f.id === id);
+    if (!post) throw new Error('Fant ikke ' + id);
+    post.status = status;
+    await putJsonFile(FB_PATH, list, 'Tilbakemelding ' + id + ': ' + status + ' via admin', sha, FB_REPO);
+    fbListe = list;
+    fbRender();
+    fbStatus('Lagret ' + id + ' som «' + status + '». ✓', false);
+  } catch (e) {
+    fbStatus('Kunne ikke lagre: ' + fbFeiltekst(e), true);
+  }
 }
 
 /* ---- NYHETER / KILDER ---- */
