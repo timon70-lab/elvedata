@@ -60,8 +60,8 @@ Poengskalaen er komprimert i toppen. Rundt **80 poeng** ligger nivået til de al
 
 Dette er det viktigste å vite når du tolker sonescorene.
 
-Beregningen bruker hele perioden 2016–2025. **Fangstratene har falt i alle fem elver
-siden omtrent 2020** — i Mandalselva er de grovt regnet halvert. Det betyr at
+Beregningen bruker hele perioden 2016–2025. **Fangstratene har falt i de fem elvene vi har
+analysert siden omtrent 2020** — i Mandalselva er de grovt regnet halvert. Det betyr at
 poengsummene kan gi et mer optimistisk bilde enn dagens situasjon tilsier.
 
 Tallene er fortsatt nyttige til det de er ment for: å sammenligne soner *mot hverandre*
@@ -87,10 +87,12 @@ gode — men det kan vi ikke skille på uten data om solgte fiskekort.
 **Rekordlaks** viser tyngste registrerte laks i sonen. Begge er historiske kuriositeter,
 ikke noe som inngår i poengsummen.
 
-**Fiskemeldingen** er basert på nedbørsvarsel fra Meteorologisk institutt og en vurdering
-av hvor raskt elva pleier å reagere. Audna svarer omtrent samme døgn; Lygna bruker ett til
-to døgn fordi vannet må gjennom Lygne først. Otra er regulert, og har derfor ingen
-fiskemelding — vannføringen styres av kraftverksdrift, ikke av regn.
+**Fiskemeldingen** er basert på nedbørsvarsel fra Meteorologisk institutt for de neste tre
+døgnene, og på hvor mye elva historisk har steget av samme mengde regn ved omtrent samme
+vannføring. Lav elv og tørr mark tar unna mye; våt mark gir raskere og større stigning.
+Audna svarer omtrent samme døgn; Lygna bruker ett til to døgn fordi vannet må gjennom Lygne
+først. Mandalselva og Otra er regulert, og har derfor ingen fiskemelding — vannføringen
+styres av kraftverksdrift, ikke av regn.
 
 **Vannføringen** hentes direkte fra NVE og oppdateres hver time.
 
@@ -100,7 +102,7 @@ fiskemelding — vannføringen styres av kraftverksdrift, ikke av regn.
 
 - **Fangststatistikk:** Inatur laksebørs og elveeierlagenes fangstlogger
 - **Vannføring:** NVE HydAPI
-- **Nedbørsvarsel:** Meteorologisk institutt
+- **Nedbørsvarsel og observert nedbør:** Meteorologisk institutt (Locationforecast og Frost)
 - **Kart:** OpenStreetMap
 
 Elvesona er et privat, ikke-kommersielt prosjekt uten tilknytning til elveeierlagene.

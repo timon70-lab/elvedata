@@ -6,9 +6,8 @@ Referanseimplementasjon: `computeScores()` og `scaleScore()` i hver elvs `index.
 Denne beskrivelsen skal til enhver tid stemme med koden — endres den ene, må den andre
 følge etter.
 
-> ⚠️ **Sist konsolidert: ingen konsolidering utført ennå.**
-> Endringer etter 2026-07-13 er dokumentert i [`docs/endringer/`](endringer/README.md)
-> og er **ikke** innarbeidet her ennå. Sjekk der før du stoler på detaljer i denne fila.
+> Sist konsolidert mot koden: **2026-09-26**. Senere endringer står i
+> [`docs/endringer/`](endringer/).
 
 ---
 
@@ -128,6 +127,22 @@ volumleddet der endte med å belønne store soner framfor gode soner.
 
 ---
 
+## Elvenivå-score
+
+Den samlede scoren for elva (ringen i headeren) beregnes på to måter:
+
+- **Audna, Lygna og Tovdalselva** — `computeRiverScore()`: samme tre steg som over, men med
+  hele elva som én enhet (fangster og dager summert over alle soner). Egne konstanter
+  `P90_RATE_ELV`, `P90_VOL_ELV`, `MAX_RATE_ELV`, `MAX_VOL_ELV`, og egen krymping `shrinkCElv`
+  (8 i `config.json`).
+- **Mandalselva og Otra** — fangstvektet snitt av sonescorene. **Sygna** har bare én sone.
+
+**Hvorfor frikoblet:** et fangstvektet snitt måler hvor *konsentrert* fisket er i beste sone,
+ikke hvor godt det fisker i elva. Ved høy vannføring sprer fangstene seg på flere soner, og
+snittet falt selv når det ble tatt dobbelt så mye fisk.
+
+---
+
 ## Fargeskala
 
 Terskler i `scoreColor()` skaleres mot `knee`, slik at fargene følger med hvis knee
@@ -148,8 +163,11 @@ endres:
 nye HTML-filer:
 
 ```json
-{ "rateWeight": 0.8, "volWeight": 0.2, "shrinkC": 15, "knee": 80 }
+{ "rateWeight": 0.8, "volWeight": 0.2, "shrinkC": 15, "shrinkCElv": 15, "knee": 80 }
 ```
+
+Verdiene settes per elv under `score.<elv>` med `score.default` som fallback. Per 2026-09-26
+avviker Mandalselva (1,0 / 0,0) og `shrinkCElv` = 8 for Audna, Lygna og Tovdalselva.
 
 Faller hentingen, brukes innebygget fallback med de samme standardverdiene.
 
@@ -166,18 +184,20 @@ HTML-filen. De må beregnes på nytt dersom fangsthistorikken utvides.
 
 | Elv | Bin | Samlebin | P90 rate | P90 volum | Vekting |
 |---|---|---|---|---|---|
-| Audna | 5 m³/s | 55+ | 5,30 | 173,5 | 0,8 / 0,2 |
-| Lygna | 5 m³/s | 55+ | 1,58 | 63,4 | 0,8 / 0,2 |
-| Mandalselva | 15 m³/s | 150+ | 0,82 | 38,0 | 1,0 / 0,0 |
-| Otra | 25 m³/s | 300+ | 1,95 | — | 0,8 / 0,2 |
-| Sygna | 2 m³/s | 18+ | — | — | 0,8 / 0,2 |
+| Audna | 5 m³/s | 55+ | 5,1 | 175,5 | 0,8 / 0,2 |
+| Lygna | 5 m³/s | 55+ | 1,58 | 63,8 | 0,8 / 0,2 |
+| Mandalselva | 5 m³/s | 150+ | 0,82 | 38,0 | 1,0 / 0,0 |
+| Otra | 25 m³/s | 300+ | 1,89 | 204 | 0,8 / 0,2 |
+| Sygna | 2 m³/s | 18+ | 7,0 | 301,0 | 0,8 / 0,2 |
+| Tovdalselva | 5 m³/s | 85+ | 2,77 | 96,5 | 0,8 / 0,2 |
 
-Audna og Lygna har i tillegg egne konstanter for «kun flue»-visningen
-(`P90_RATE_FLY`, `P90_VOL_FLY` og tilsvarende maks).
+Alle elver har i tillegg egne konstanter for «kun flue»-visningen (`P90_RATE_FLY`,
+`P90_VOL_FLY` og tilsvarende maks). Fullstendige tabeller, inkludert maks-verdier,
+«kun laks»- og elvenivå-konstanter: [elver.md](elver.md#scoringskonstanter).
 
-Sygna scorer **laks og sjøørret samlet**, i motsetning til de øvrige elvene som kun
-teller laks. Sygna er primært en sjøørretelv, og en ren lakseskår ville hatt for tynt
-datagrunnlag.
+Sygna og Tovdalselva scorer **laks og sjøørret samlet**, med en «kun laks»-bryter som bytter
+til egne `*_LAKS`-konstanter. De øvrige elvene teller kun laks. Sygna er primært en
+sjøørretelv, og en ren lakseskår ville hatt for tynt datagrunnlag.
 
 ---
 
@@ -193,8 +213,8 @@ robust, men datagrunnlaget finnes ikke.
 uavhengig av hvor mye fisk som står i elva. Det gjør sammenligning på tvers av år skjev,
 i disfavør av nyere sesonger.
 
-**Nåtidsrelevans.** Scoren bygger på hele 2016–2025. Fangstratene har falt i alle fem
-elver siden omtrent 2020 — mest markant i Mandalselva, der de grovt regnet er halvert.
+**Nåtidsrelevans.** Scoren bygger på hele 2016–2025. Fangstratene har falt i de fem
+opprinnelige elvene (Tovdalselva er ikke vurdert) siden omtrent 2020 — mest markant i Mandalselva, der de grovt regnet er halvert.
 Scoren beskriver derfor *historisk sonekvalitet*, og kan overvurdere dagens fisketetthet.
 Mulige tiltak under vurdering: nyhetsvekting, rullerende femårsvindu, eller tydeligere
 kommunikasjon av hva tallet faktisk er. Avventer 2026-data.

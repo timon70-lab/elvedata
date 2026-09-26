@@ -1,7 +1,10 @@
 # Admin-brukerveiledning
 
-Praktisk veiledning for `admin/index.html`. Skrevet med mobilbruk i tankene, siden det er
-der mesteparten av redigeringen skjer.
+Praktisk veiledning for `admin/index.html`. Fungerer både på PC og mobil; tokenet må
+legges inn separat i hver nettleser.
+
+Seksjoner (i rekkefølge på siden): 📰 Nyheter · 🎬 Media · 📅 Sesong · ⚖️ Scoringsparametre ·
+🔑 Nøkler og tilgang.
 
 ---
 
@@ -12,8 +15,8 @@ din** — PC og mobil trenger hvert sitt.
 
 **Opprette token:**
 
-1. Gå til **`github.com/settings/tokens?type=beta`** i mobilnettleseren
-   (ikke GitHub-appen — den støtter ikke opprettelse av fine-grained tokens)
+1. Gå til **`github.com/settings/tokens?type=beta`** i nettleseren
+   (på mobil: ikke GitHub-appen — den støtter ikke opprettelse av fine-grained tokens)
 2. **Generate new token**
 3. Fyll ut:
    - **Token name:** f.eks. `elvedata-admin-mobil`
@@ -31,6 +34,9 @@ din** — PC og mobil trenger hvert sitt.
 3. Lim inn i GitHub-token-feltet → **Lagre**
 
 Feltet viser deretter «Token er lagret ✓». Skal du bytte, lim bare inn et nytt.
+
+Samme seksjon har et felt for **NVE HydAPI-nøkkel**. Den brukes til å slå opp vannføring
+automatisk når du registrerer en video, og lagres også kun i `localStorage`.
 
 ---
 
@@ -109,10 +115,28 @@ video/bilde.
 
 ---
 
+## 📅 Sesong
+
+Skriver `data/sesong.json`, som styrer sesongmarkørene på oversiktskartet og Sesong-raden i
+dashbordene.
+
+- Velg elv, og sett **sesongstart** og **sesongslutt**. Datoene styrer markørfasen på kartet.
+- **Tillegg** er fritekst som vises etter datointervallet i dashbordet, f.eks. «(2026)».
+  Påvirker ikke kartet.
+- **Soneavvik**: legg inn kun soner som avviker på datoer, tillegg eller begge.
+  «Arv datoer fra elva» beholder elvas datoer for sonen. (`stengt: true` i fila, som for
+  Otra Sone 5B Øst, settes ikke fra skjemaet.)
+- ⚠️ Lagring slår inn på oversiktskartet umiddelbart — en feil dato kan sette en elv til
+  «stengt» midt i sesongen.
+- Kartelver uten dashboard (Storelva, Nidelva, Kvina m.fl.) har bare start og slutt —
+  tillegg og soneavvik er deaktivert for dem.
+
+---
+
 ## ⚖️ Scoringsparametre
 
-Sjelden brukt. Justerer `rateWeight`, `volWeight`, `shrinkC` og `knee` per elv, og skriver
-til `data/config.json`.
+Sjelden brukt. Justerer `rateWeight`, `volWeight`, `shrinkC`, `shrinkCElv` og `knee` per elv,
+og skriver til `data/config.json`.
 
 > ⚠️ **Endringene slår ikke gjennom på oversiktskartet.** Score-tabellene der er
 > forhåndsberegnede. Endrer du parametre, vil elve-dashbordene og oversiktskartet vise
@@ -122,16 +146,12 @@ Se [scoring.md](scoring.md) for hva parametrene faktisk gjør før du endrer dem
 
 ---
 
-## Laste opp nye dashboard-filer fra mobil
+## Nye dashboard-versjoner
 
-1. Last ned filen fra chatten → havner i Filer / Nedlastinger
-2. Gå til repoet på **github.com** i mobilnettleseren (ikke appen)
-3. Naviger til riktig mappe, f.eks. `mandalselva/`
-4. **Add file** → **Upload files**
-5. Velg filen fra Filer / Nedlastinger
-6. **Endre filnavnet til `index.html`** før du committer — dette kan gjøres direkte i
-   GitHubs opplastingsdialog
-7. Skriv commit-melding → **Commit changes**
+Dashbordene publiseres ikke via admin. Siden 2026-09-20 redigeres `{elv}/index.html` direkte
+i repoet med Claude Code, valideres med `scripts/valider.py` og committes per runde — se
+[utviklerkonvensjoner.md](utviklerkonvensjoner.md). Den gamle flyten med nedlasting fra chat
+og manuell opplasting via github.com brukes ikke lenger.
 
 ---
 

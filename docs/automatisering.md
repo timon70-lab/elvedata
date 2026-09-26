@@ -2,9 +2,8 @@
 
 Workflows, planlagte jobber og hemmeligheter.
 
-> ⚠️ **Sist konsolidert: ingen konsolidering utført ennå.**
-> Endringer etter 2026-07-13 er dokumentert i [`docs/endringer/`](endringer/README.md)
-> og er **ikke** innarbeidet her ennå. Sjekk der før du stoler på detaljer i denne fila.
+> Sist konsolidert mot koden: **2026-09-26**. Senere endringer står i
+> [`docs/endringer/`](endringer/).
 
 ---
 
@@ -32,8 +31,12 @@ Alle ligger i `.github/workflows/`.
 
 Kjerneworkflowen. Kjører hver time og henter:
 
-- Vannføring fra NVE HydAPI for alle fem stasjoner, `ResolutionTime=60`, `ReferenceTime=P7D`
-- Nedbørsprognose fra MET for tre punkter (Konsmo/Audna, Eiken/Lygna, Nodeland/Sygna)
+- Vannføring fra NVE HydAPI for alle seks stasjoner, `ResolutionTime=60`, `ReferenceTime=P7D`
+- Nedbørsprognose fra MET for fire punkter (Konsmo/Audna, Eiken/Lygna, Nodeland/Sygna,
+  Hynnekleiv/Tovdalselva)
+
+Deretter kjører `scripts/logg_nedbor.py`, som logger varslet nedbør mot vannføring i
+`data/logg/nedbor_vf_2026.csv`.
 
 Verifiserer at hver fil faktisk lot seg parse før commit, og pusher med inntil fem
 forsøk med `git pull --rebase` mellom hvert — nødvendig fordi flere workflows kan skrive
@@ -43,14 +46,17 @@ Krever hemmeligheten `NVE_API_KEY`.
 
 ### `fangst_pipeline.yml` — ferske fangster
 
-Kjører `scripts/fangst_pipeline.py`, som henter fra Inaturs GraphQL-endepunkt. Planlagt
-på **:30 over hver time** for ikke å kollidere med NVE-cachen på hel time.
+Kjører `scripts/fangst_pipeline.py`, som henter siste 72 timer fra Inaturs GraphQL-endepunkt.
+Planlagt på **:30 over hver time** for ikke å kollidere med NVE-cachen på hel time.
 
-Filtrerer på `Art == "Laks"`. Fiskernavn hentes aldri inn.
+Kun laks, bortsett fra Sygna og Tovdalselva som også tar med sjøørret. Fiskernavn hentes aldri inn.
+
+> ⚠️ Skriptet henter seks elver, men `git add`-steget i workflowen lister bare fem —
+> `data/fangster_tovdalselva.json` blir derfor aldri committet.
 
 ### `foto_pipeline.yml` — bildeprosessering
 
-Utløses av push til `bilder/innboks/<elv>/`. Leser EXIF, henter GPS, finner nærmeste sone,
+Utløses av push til `bilder/innboks/<elv>/` (alle seks elver). Leser EXIF, henter GPS, finner nærmeste sone,
 komprimerer til maks 1600 px bredde, stripper EXIF og skriver til `photos_<elv>.json`.
 
 Bruker `concurrency: foto-pipeline` for å hindre at to bildejobber skriver samtidig.
@@ -63,10 +69,25 @@ laster ned bildene derfra.
 Finnes fordi bilder lastet opp til et issue lagres på GitHubs eget CDN og **ikke** teller
 mot repoets 1 GB-grense. Det er den anbefalte veien for større mengder bilder.
 
+Elva leses fra issue-tittelen. Støtter Audna, Lygna, Mandalselva og Tovdalselva — **ikke**
+Otra og Sygna. Bruker også `NVE_API_KEY` for å slå opp vannføring på bildetidspunktet.
+
 ### `bulk_foto_pipeline.yml` — masseopplasting
 
 Manuell utløsning med en release-tag som parameter. Forventer en zip med undermapper per
-elv. Brukes ved engangsimport av store bildesamlinger.
+elv (pakkes ut av `scripts/bulk_unpack.py`, deretter kjøres `foto_pipeline.py`). Brukes ved
+engangsimport av store bildesamlinger. Deler `concurrency: foto-pipeline` med foto-pipelinen.
+
+### Manuelle kalibreringsjobber
+
+Kun `workflow_dispatch`, normalt kjørt én gang. Grunnlaget for fiskemeldingens responsfaktorer:
+
+| Workflow | Gjør |
+|---|---|
+| `frost_stasjoner.yml` | Finner kandidatstasjoner for nedbør nær hver elv (`data/logg/frost_stasjoner.md`) |
+| `frost_dekning.yml` | Måler datadekning 2016–2025 for kandidatene (`data/logg/frost_dekning.md`) |
+| `frost_hent_nedbor.yml` | Henter observert døgnnedbør 2016–2025 (`data/logg/nedbor_obs_<elv>.csv`) |
+| `nve_hent_dogn.yml` | Henter døgnvannføring 2016–2025, 06–06-døgn (`data/logg/vannforing_dogn_<elv>.csv`) |
 
 ---
 
@@ -91,13 +112,15 @@ litt kvote.
 
 | Navn | Hvor lagret | Rekkevidde |
 |---|---|---|
-| `NVE_API_KEY` | GitHub Secrets | Kun tilgjengelig i Actions |
+| `NVE_API_KEY` | GitHub Secrets + lokal `.env` | Actions (`nve_cache`, `issue_foto_pipeline`) og lokale skript |
+| NVE-nøkkel i admin | `localStorage` i din nettleser | Vannføringsoppslag ved videoregistrering |
 | `elvedata-cron` | cron-job.org | Actions read/write, kun `elvedata` |
 | Admin-PAT | `localStorage` i din nettleser | Contents read/write, kun `elvedata` |
 
 **NVE-nøkkelen skal aldri hardkodes i en HTML-fil.** Den hører hjemme i GitHub Secrets og
-brukes kun serverside i Actions. Dashbordene leser ferdig mellomlagrede JSON-filer, aldri
-NVE direkte.
+brukes serverside i Actions. Dashbordene leser ferdig mellomlagrede JSON-filer, aldri
+NVE direkte. Eneste unntak er adminpanelet, der du selv limer inn nøkkelen og den bare
+lagres i din egen nettleser.
 
 Admin-PAT ligger kun lokalt i nettleseren din. Bytter du enhet, må du opprette et nytt —
 GitHub viser aldri en eksisterende tokenverdi på nytt.

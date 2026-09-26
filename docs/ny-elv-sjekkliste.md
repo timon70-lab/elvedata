@@ -5,9 +5,8 @@
 >
 > Skal **ikke** trigges i Cowork — se begrunnelse under punkt 4.
 
-> ⚠️ **Sist konsolidert: ingen konsolidering utført ennå.**
-> Endringer etter 2026-07-13 er dokumentert i [`docs/endringer/`](endringer/README.md)
-> og er **ikke** innarbeidet her ennå. Sjekk der før du stoler på detaljer i denne fila.
+> Sist konsolidert mot repoet: **2026-09-26**. Senere endringer står i
+> [`docs/endringer/`](endringer/).
 
 ---
 
@@ -116,7 +115,7 @@ HTML-nesting og jsdom-røyktest:
 
 1. `node --check` for JS-syntaks
 2. Div open/close-balansesjekk
-3. Sammenlign alle topp-nivå `let`/`const`/`var`-deklarasjoner mot malen via regex — verifiser at alt som brukes er deklarert (`node --check` fanger kun syntaks, ikke manglende deklarasjoner — kritisk lærdom fra Mandalselva v3-krasjet)
+3. Sammenlign alle topp-nivå `let`/`const`/`var`/`function`-deklarasjoner mot `HEAD` (`node --check` fanger kun syntaks, ikke manglende deklarasjoner — kritisk lærdom fra Mandalselva v3-krasjet). For en helt ny fil finnes ingen `HEAD`-versjon og sjekken hoppes over — sammenlign da mot malelva med `--mot` eller manuelt.
 
 ---
 
@@ -124,5 +123,6 @@ HTML-nesting og jsdom-røyktest:
 
 | Dato | Endring |
 |---|---|
+| 2026-09-26 | Revisjon av docs: konsolideringsbanner og deklarasjonssjekk (mot `HEAD`, ikke mal) rettet |
 | 2026-09-20 | Tilpasset Claude Code: `/ny-elv`-trigger, fangstlogg beholdes uendret, validering via `scripts/valider.py`, peker til `docs/kart-ux-standarder.md` |
 | 2026-07-13 | Første versjon — kombinerer opprinnelig huskeliste med lærdom fra Otra-implementeringen (kvoteformat-variasjon, Cowork/chat-arbeidsdeling, trigger-frase-presisering) |

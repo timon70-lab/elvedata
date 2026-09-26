@@ -32,14 +32,14 @@ stash/pull-operasjoner som er committet uten at konflikten ble løst.
 
 **Fiks:**
 
-1. Hent fersk fil fra `raw.githubusercontent.com`
+1. `git pull`, og finn commiten som introduserte markørene (`git log -p -S'<<<<<<<' -- {elv}/index.html`)
 2. Identifiser hvilken side som er riktig — normalt den sist leverte versjonen
 3. Fjern markørene og den forkastede siden
-4. Kjør full valideringssekvens
-5. Publiser ren fil med økt versjonsnummer
+4. Kjør `python scripts/valider.py {elv}/index.html`
+5. Commit ren fil med økt versjonsnummer (vanlig runde, se `/runde`)
 
-**Forebygging:** valideringssekvensens steg 2 fanger dette før publisering. Hopp aldri over
-det steget.
+**Forebygging:** `valider.py` sjekker konfliktmarkører som første steg og stopper commit. Hopp
+aldri over valideringen.
 
 ---
 
@@ -65,7 +65,9 @@ eller ikke lar seg parse.
 fikk eget nedbørspunkt — dashbordet må publiseres *etter* at workflowen har opprettet
 `nedbor_lygna.json`.
 
-**Sjekk:** åpne `data/nedbor_<elv>.json` i nettleseren. Får du 404, er det årsaken.
+**Sjekk:** åpne `data/nedbor_<elv>.json` i nettleseren (Audna: `data/nedbor.json`). Får du
+404, er det årsaken. Gjelder kun Audna, Lygna, Sygna og Tovdalselva — Mandalselva og Otra har
+ingen fiskemelding.
 
 ---
 
@@ -142,4 +144,13 @@ ekstra kjøring gjør ingen skade.
 
 Bilder er den store posten. Bruk **issue-basert opplasting**
 (`issue_foto_pipeline.yml`) — bilder lastet opp til et issue lagres på GitHubs CDN og
-teller ikke mot repogrensen.
+teller ikke mot repogrensen. Merk at issue-pipelinen ikke støtter Otra og Sygna ennå.
+
+Måling 2026-09-26 (lokal klone): `bilder/` ≈ 460 MB, `.git` ≈ 850 MB. Sjekk med
+`du -sh bilder .git`.
+
+## Siste fangster mangler for Tovdalselva
+
+Forventet per 2026-09-26: `fangst_pipeline.py` henter Tovdalselva, men workflowen committer
+ikke `data/fangster_tovdalselva.json`. Rettes ved å legge fila til `git add`-linjen i
+`.github/workflows/fangst_pipeline.yml`.

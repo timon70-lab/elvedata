@@ -20,16 +20,18 @@ Oppdateres hver sesong — bekreft mot Inatur/elveeierlag.
 - All laks over 65 cm må settes ut igjen
 - Bekreftet av Per Lasse 2026-09-20: 5 laks per sesong. C/r-kvoter (2/døgn, 20/sesong),
   21 °C-stopp og krokregler er ikke lenger del av kvotesettet.
+  NB: `ZONE_INFO` i `mandalselva/index.html` nevner fortsatt 21 °C-stoppen (teknisk gjeld).
 
 ## Otra
-- Døgnkvote: 1 laks
+- Døgnkvote: 1 laks + 1 sjøørret (slik dashboardet viser det per 2026-09-26; tidligere notert her som kun «1 laks»)
 - Sesongkvote: 25 kg
 - Regulert (Otra Kraft / Vigelandsfossen). Sesong 15. juni – 17. august 2026; Sone 5B Rød starter 1. juli.
 - Meitemark tillatt.
 
 ## Sygna
 - Døgnkvote: 2 fisk (laks/sjøørret)
-- Sesongkvote: ukjent
+- Sesongkvote: ikke fastsatt (dashboardet viser «ikke fastsatt»)
+- Sesong 15. juli – 15. september.
 
 ## Tovdalselva
 - Døgnkvote: 1 laks / 2 sjøørret

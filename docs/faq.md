@@ -62,9 +62,15 @@ tilsiget. Audna er uregulert uten tilsvarende buffer og svarer omtrent samme dø
 
 ### Fiskemeldingen sier «tørt», men det er meldt regn?
 
-Meldingen ser bare 48 timer frem, og har ulike terskler for i dag og i morgen: 3 mm holder
-for dagens døgn, mens det kreves 10 mm for døgnet etter. Regn som kommer om tre dager
-fanges ikke opp i det hele tatt. Dette er en kjent begrensning vi vurderer å endre.
+Meldingen ser 72 timer frem. Kommer det mindre enn 3 mm til sammen i den perioden, regnes det
+som tørt. Regn som kommer senere enn tre døgn frem, fanges ikke opp.
+
+### Hvorfor sier meldingen «neppe nok» selv om det kommer en del regn?
+
+Meldingen ser på hvor mye elva ventes å *stige*, ikke bare på hvor mye regn som kommer.
+Samme regnmengde gir mange ganger større stigning når bakken allerede er våt enn når elva er
+lav og marka tørr — da tar grunnen unna det meste. Beregningen bygger på målt nedbør og
+vannføring 2016–2025 for hver elv som har fiskemelding.
 
 ### Er sonegrensene på kartet nøyaktige?
 

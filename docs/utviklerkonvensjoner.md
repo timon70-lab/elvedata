@@ -25,7 +25,7 @@ se «Repo-kart» i [CLAUDE.md](../CLAUDE.md) for plassering og gjeldende versjon
 
 **Én leveranse per fil per runde.** Alle endringer samles i én ny versjon i stedet for å
 levere flere mellomversjoner. Iterasjonsnummeret økes med nøyaktig én per levert fil, og
-nullstilles aldri: ved go-live går Tovdalselva fra v0.006 til v1.007, ikke v1.000.
+nullstilles aldri: ved go-live gikk Tovdalselva fra v0.009 til v1.010, ikke v1.000.
 
 ---
 
@@ -66,8 +66,9 @@ fanger den vanligste alvorlige feilen: at en tekstutskifting ved et uhell slette
 funksjonsdefinisjon. Nye navn rapporteres som `info`. For en fil som ikke finnes i
 referansen — en ny elv — hoppes sjekken over.
 
-**6. jsdom-røyktest** (`scripts/jsdom_smoke.js`). Hoppes over med `info` hvis jsdom ikke er
-installert (`npm i -D jsdom`). Da er den sjekken reelt ikke kjørt.
+**6. jsdom-røyktest** (`scripts/jsdom_smoke.js`). Gir **FEIL** hvis jsdom ikke er installert
+(`npm i -D jsdom`), med mindre `--uten-jsdom` er gitt — da hoppes den over med `info`, og
+sjekken er reelt ikke kjørt.
 
 For Python-filer finnes ingen tilsvarende automatikk — bruk `ast.parse()`.
 
