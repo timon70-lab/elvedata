@@ -8,6 +8,8 @@ const errors = [];
 const vc = new VirtualConsole();
 vc.on("jsdomError", e => { if (!/Could not load|Not implemented/.test(e.message)) errors.push(e.message); });
 const dom = new JSDOM(html, {
+  // url gir siden en ekte origin – uten den kaster localStorage (brukt av admin) SecurityError.
+  url: "https://elvesona.no/",
   runScripts: "dangerously", pretendToBeVisual: true, virtualConsole: vc,
   beforeParse(w) {
     w.fetch = () => Promise.resolve({ ok: true, json: async () => ({}), text: async () => "" });
