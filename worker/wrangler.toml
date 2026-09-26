@@ -9,4 +9,4 @@ compatibility_date = "2026-09-01"
 # og lim inn id-en under.
 [[kv_namespaces]]
 binding = "RATE"
-id = "FYLL_INN_ID_FRA_KV_NAMESPACE_CREATE"
+id = "e837e96869bf4d89b6cdd1f5da053f6b"

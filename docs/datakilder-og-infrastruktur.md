@@ -68,7 +68,9 @@ tilbakemelding/index.html ──POST──► Cloudflare Worker ──Contents A
 - **Side:** `tilbakemelding/index.html` (`noindex` til den lenkes). Forhåndsutfylling med
   `?elv=&sone=&type=&v=`. `WORKER_URL` øverst i skriptet fylles inn etter deploy; tom verdi viser
   reservelenken (Google-skjemaet). GoatCounter-event `tilbakemelding-sendt-{type}`.
-- **Worker:** `worker/tilbakemelding.js` + `worker/wrangler.toml`. CORS kun `elvesona.no` og localhost.
+- **Worker:** `https://elvesona-tilbakemelding.elvesona.workers.dev` (Cloudflare-konto til Per Lasse, satt i drift
+  2026-09-26). Kode: `worker/tilbakemelding.js` + `worker/wrangler.toml`. Endringer publiseres med
+  `npx wrangler deploy` i `worker/` — push til GitHub publiserer **ikke** Workeren. CORS kun `elvesona.no` og localhost.
   Honeypot-feltet `website`, lengdegrenser, maks 5 innsendinger per IP per time (KV `RATE`, IP lagres
   kun som SHA-256-hash), retry ved sha-konflikt (409/422). Secret: `GH_TOKEN`.
 - **Privat repo:** `timon70-lab/elvesona-tilbakemeldinger`, fil `tilbakemeldinger.json` (liste).
