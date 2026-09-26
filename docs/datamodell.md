@@ -28,8 +28,6 @@ kjenne til.
 | `senterlinje_<elv>.geojson` | Manuelt (leses av `beregn_km.py`) | Sjelden | Nye medier får ikke `km` og sorteres på breddegrad |
 | `logg/*.csv` | `nve_cache.yml` / manuelle kalibreringsjobber | Hver time / engang | Ingen synlig effekt |
 
-`fangster_tovdalselva.json` finnes ikke i repoet: workflowens `git add` mangler den (se
-[automatisering.md](automatisering.md)).
 
 Merk navneinkonsekvensen: Audna bruker `vannforing.json` og `nedbor.json` uten
 elvesuffiks, fordi de var først. De øvrige har suffiks. Ikke rør dette uten å oppdatere

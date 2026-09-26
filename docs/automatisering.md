@@ -51,8 +51,8 @@ Planlagt på **:30 over hver time** for ikke å kollidere med NVE-cachen på hel
 
 Kun laks, bortsett fra Sygna og Tovdalselva som også tar med sjøørret. Fiskernavn hentes aldri inn.
 
-> ⚠️ Skriptet henter seks elver, men `git add`-steget i workflowen lister bare fem —
-> `data/fangster_tovdalselva.json` blir derfor aldri committet.
+Commit-steget bruker `git add data/fangster_*.json`, så en ny elv i `RIVERS` blir med
+automatisk, og en elv som aldri har fått skrevet fil stopper ikke committen.
 
 ### `foto_pipeline.yml` — bildeprosessering
 

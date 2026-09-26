@@ -148,9 +148,3 @@ teller ikke mot repogrensen. Merk at issue-pipelinen ikke støtter Otra og Sygna
 
 Måling 2026-09-26 (lokal klone): `bilder/` ≈ 460 MB, `.git` ≈ 850 MB. Sjekk med
 `du -sh bilder .git`.
-
-## Siste fangster mangler for Tovdalselva
-
-Forventet per 2026-09-26: `fangst_pipeline.py` henter Tovdalselva, men workflowen committer
-ikke `data/fangster_tovdalselva.json`. Rettes ved å legge fila til `git add`-linjen i
-`.github/workflows/fangst_pipeline.yml`.

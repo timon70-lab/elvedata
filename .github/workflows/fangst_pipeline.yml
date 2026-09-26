@@ -30,7 +30,9 @@ jobs:
         run: |
           git config user.name "fangst-pipeline"
           git config user.email "actions@users.noreply.github.com"
-          git add data/fangster_audna.json data/fangster_lygna.json data/fangster_mandalselva.json data/fangster_otra.json data/fangster_sygna.json
+          # Glob i stedet for eksplisitt liste: tar med alle elver i RIVERS (også nye),
+          # og feiler ikke hvis en elv aldri har fått skrevet fil.
+          git add data/fangster_*.json
           if git diff --cached --quiet; then
             echo "Ingen endringer aa committe."
             exit 0

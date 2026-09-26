@@ -24,9 +24,6 @@ Admin har seksjonene Nyheter, Media, Sesong, Scoringsparametre og Nøkler og til
   notert for Otra, men Otra har ikke lenger egne ELV-konstanter.)
 - Otra og Sygna mangler i `issue_foto_pipeline.py` (som også har en utdatert feilmelding som bare
   nevner audna/mandalselva/lygna).
-- `fangst_pipeline.yml` committer ikke `data/fangster_tovdalselva.json`: skriptet henter Tovdalselva
-  (riverId 5), men `git add`-linjen i workflowen lister bare de fem andre. Fila finnes derfor ikke
-  i repoet, selv om oversiktskartet peker på den (`catchUrl`).
 - Sone 5A/5B-grense i Audna: ~670 m avvik mellom pipeline og dashboard.
 - Mandalselva `ZONE_INFO` sier fortsatt «Alt fiske stoppes ved vanntemperatur over 21 °C», selv om
   21 °C-stoppen ikke lenger er del av kvotesettet (jf. `docs/kvoter-2026.md`).
