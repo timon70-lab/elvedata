@@ -70,5 +70,14 @@
     "link": "https://elvesona.no/statistikk",
     "startDate": "2026-09-21",
     "stopDate": "2026-12-31"
+  },
+  {
+    "id": "N-014",
+    "elv": "Alle elver",
+    "sourceType": "side",
+    "headline": "Si din mening",
+    "link": "https://elvesona.no/tilbakemelding",
+    "startDate": "2026-10-03",
+    "stopDate": "2026-12-31"
   }
 ]
