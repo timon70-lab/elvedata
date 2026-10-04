@@ -52,10 +52,11 @@ dashboard), `statistikk.json`, `nyheter.json`, `nyhetskilder.json`, `soner.json`
 - GoatCounter: `elvedata.goatcounter.com` (bevisst uendret navn; Per Lasses egen trafikk filtrert bort).
   Event-tracking på oversiktskartet: markør-åpning, dashboard-klikk, laksebørs-klikk.
 - Facebook-gruppe og -side «Elvesona»; YouTube-kanal.
-- Tilbakemelding: 💬-lenke til Google Forms i headeren på oversiktskartet (kun der). Erstattes av
-  tilbakemeldingssiden under når den er satt i drift.
+- Tilbakemelding: 💬-lenke i headeren på oversiktskartet peker til `/tilbakemelding/` (fra 2026-10-05).
+  Google-skjemaet brukes fortsatt som reservelenke på siden hvis Workeren er nede.
+  Dashboardene og statistikksidene har ennå ingen lenke.
 
-## Tilbakemeldingsside (runde 1, ikke lenket ennå)
+## Tilbakemeldingsside (i drift, lenket fra oversiktskartet)
 Statisk side kan ikke ha skrivetoken, så innsendinger går via en Cloudflare Worker som holder tokenet
 og skriver til et **privat** repo (e-post og fritekst blir aldri offentlig).
 
@@ -65,7 +66,7 @@ tilbakemelding/index.html ──POST──► Cloudflare Worker ──Contents A
                                                                   admin/index.html «💬 Tilbakemeldinger»
 ```
 
-- **Side:** `tilbakemelding/index.html` (`noindex` til den lenkes). Forhåndsutfylling med
+- **Side:** `tilbakemelding/index.html` (`noindex` fjernet 2026-10-05 da siden ble lenket). Forhåndsutfylling med
   `?elv=&sone=&type=&v=`. `WORKER_URL` øverst i skriptet fylles inn etter deploy; tom verdi viser
   reservelenken (Google-skjemaet). GoatCounter-event `tilbakemelding-sendt-{type}`.
 - **Worker:** `https://elvesona-tilbakemelding.elvesona.workers.dev` (Cloudflare-konto til Per Lasse, satt i drift
