@@ -4,7 +4,7 @@ Overført fra claude.ai-prosjektet 2026-09-20. Revidert mot repoet 2026-09-26.
 
 ## Versjoner (per 2026-09-26)
 Øyeblikksbilde — gjeldende versjon finnes alltid med `grep -oE 'v[0-9]+\.[0-9]{3}' <fil>`.
-- Audna v1.164 · Lygna v1.066 · Mandalselva v1.060 · Otra v1.046 · Sygna v1.043 · Tovdalselva v1.012
+- Audna v1.164 · Lygna v1.066 · Mandalselva v1.060 · Otra v1.047 · Sygna v1.043 · Tovdalselva v1.012
 - Alle seks elver ligger på oversiktskartet (Tovdalselva gikk live v0.009 → v1.010).
 - Oversiktskart (`index.html`) v1.054 · Staging v1.034 · Statistikk (`statistikk/index.html`) v0.036
 - Sesongsider `statistikk/{elv}2026.html` for alle seks elver (v1.001–v1.002).
@@ -20,7 +20,7 @@ statistikkside med animerte grafer, SSB-data, sammenleggbare seksjoner.
 Admin har seksjonene Nyheter, Media, Sesong, Scoringsparametre og Nøkler og tilgang.
 
 ## Kjent teknisk gjeld
-- Desinfeksjonsposter finnes kun i Otra (v1.045–v1.046). Koden (`fetchDesinf`, `nearestPost`, «Nærmeste
+- Desinfeksjonsposter finnes kun i Otra (v1.045–v1.047). Koden (`fetchDesinf`, `nearestPost`, «Nærmeste
   desinfeksjonspost»-knappen, `desinfZoneHtml` i soneinfo) må porteres til de øvrige fem elvene når
   postene deres legges i `data/desinfisering.json`.
 - `P90_RATE_ELV`/`P90_VOL_ELV` kan ikke reproduseres fra embeddede data i Lygna. (Tidligere også
