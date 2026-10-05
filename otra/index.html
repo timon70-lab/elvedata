@@ -396,7 +396,7 @@ table.rd-tbl tr.big td.w { color:#9b2c2c; }
   <div class="map-header">
     <span class="map-title" id="mapTitle">🗺 Kart</span>
     <span class="map-hdr-right">
-      <span class="map-hint">Klikk en sone for å zoome inn · <span style="color:#63b3ed">■</span> desinfeksjonspost</span>
+      <span class="map-hint">Klikk en sone for å zoome inn · 🧴 desinfisering</span>
       <button id="mapFsBtn" class="map-fs-btn" onclick="toggleMapFullscreen()" title="Åpne kartet i fullskjerm">⛶ Fullskjerm</button>
     </span>
   </div>
@@ -900,7 +900,7 @@ function initMap() {
     options: { position: 'topright' },
     onAdd: function() {
       _nearestBtn = L.DomUtil.create('button', '');
-      _nearestBtn.innerHTML = '🧴 Nærmeste desinfeksjonspost';
+      _nearestBtn.innerHTML = '🧴 Desinfisering';
       _nearestBtn.style.cssText = 'background:#ebf4ff;color:#2a4365;border:2px solid rgba(0,0,0,0.2);border-radius:4px;padding:5px 10px;font-size:0.75rem;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:none;';
       _nearestBtn.title = 'Finn desinfeksjonsposten som er nærmest deg';
       L.DomEvent.on(_nearestBtn, 'click', L.DomEvent.stopPropagation);
@@ -918,7 +918,7 @@ function initMap() {
   new NearestPostControl().addTo(map);
   function resetNearestBtn() {
     _nearestPostPending = false;
-    if (_nearestBtn) { _nearestBtn.innerHTML = '🧴 Nærmeste desinfeksjonspost'; _nearestBtn.disabled = false; }
+    if (_nearestBtn) { _nearestBtn.innerHTML = '🧴 Desinfisering'; _nearestBtn.disabled = false; }
   }
 
   let _myLocMarker = null;
@@ -978,6 +978,7 @@ function initMap() {
   }
   updateLabelVisibility();
   map.on('zoomend', updateLabelVisibility);
+  map.on('zoomend', updateDesinfVisibility);
 }
 
 function addVideoMarkers() {
@@ -1084,11 +1085,8 @@ function makeEndIcon(color) {
 
 // ── DESINFEKSJONSPOSTER ───────────────────────────────────────────────────
 function makeDesinfIcon() {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26">
-    <rect x="1.5" y="1.5" width="23" height="23" rx="6" fill="#2b6cb0" stroke="#fff" stroke-width="2"/>
-    <path d="M13 6.5 C13 6.5 7.8 12.2 7.8 15.4 a5.2 5.2 0 0 0 10.4 0 C18.2 12.2 13 6.5 13 6.5 Z" fill="#fff"/>
-  </svg>`;
-  return L.divIcon({html: svg, className: '', iconSize: [26,26], iconAnchor: [13,13], tooltipAnchor: [0,-13]});
+  const html = '<div style="font-size:12px;line-height:13px;width:13px;height:13px;text-align:center;filter:drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1px #fff)">🧴</div>';
+  return L.divIcon({html, className: '', iconSize: [13,13], iconAnchor: [6.5,6.5], tooltipAnchor: [0,-7]});
 }
 
 function haversineKm(a, b) {
@@ -1126,7 +1124,22 @@ function addDesinfMarkers() {
     const mk = L.marker([post.lat, post.lon], { icon: makeDesinfIcon(), zIndexOffset: 20 }).addTo(map);
     mk.bindTooltip('Desinfeksjonspost: ' + post.navn, { permanent: false, direction: 'top', className: 'mtip' });
     mk.bindPopup(postPopupHtml(post));
+    mk.on('popupopen', updateDesinfVisibility);
+    mk.on('popupclose', () => setTimeout(updateDesinfVisibility, 0)); // isPopupOpen() er fortsatt true under selve eventet
     desinfMarkers.push({ mk, post });
+  });
+  updateDesinfVisibility();
+}
+
+// Poster vises først fra samme zoomnivå som sonenavn-etikettene (LABEL_ZOOM_THRESHOLD).
+// Et åpent popup holder sin post synlig, så «Nærmeste»/«Vis på kart» virker også utzoomet.
+function updateDesinfVisibility() {
+  if (!map) return;
+  const zoomed = map.getZoom() >= LABEL_ZOOM_THRESHOLD;
+  desinfMarkers.forEach(({ mk }) => {
+    const show = zoomed || mk.isPopupOpen();
+    mk.setOpacity(show ? 1 : 0);
+    if (mk._icon) mk._icon.style.pointerEvents = show ? 'auto' : 'none';
   });
 }
 
@@ -1970,7 +1983,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.045</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.046</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
