@@ -136,6 +136,7 @@ grep -oE 'v[0-9]+\.[0-9]{3}' <fil>
 - `data/` — genererte JSON-filer dashboardene henter i runtime: `vannforing_{elv}.json`,
   `nedbor_{elv}.json`, `photos_{elv}.json`, `videoer_{elv}.json`,
   `senterlinje_{elv}.geojson`, pluss felles `config.json`, `sesong.json`, `soner.json`,
+  `desinfisering.json` (poster for alle elver, nøkkel per elv under `elver`),
   `statistikk.json`, `nyheter.json`.
   **Merk:** Audna bruker de usuffikserte `data/vannforing.json` og `data/nedbor.json`
   (historisk navngiving), ikke `_audna`-varianter.

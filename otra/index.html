@@ -155,6 +155,10 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .zi-row { display:flex; justify-content:space-between; align-items:baseline; font-size:.72rem; padding:2px 0; border-bottom:1px solid #f8fafc; }
 .zi-row:last-child { border-bottom:none; }
 .zi-label { color:#64748b; }
+.zi-desinf-item { font-weight:400; font-size:.7rem; line-height:1.45; margin-bottom:4px; }
+.zi-desinf-item:last-child { margin-bottom:0; }
+.zi-desinf-km { color:#4a5568; }
+.zi-desinf-item a { color:#2b6cb0; text-decoration:none; white-space:nowrap; }
 .zi-val { color:#1a202c; font-weight:600; text-align:right; max-width:60%; }
 .zi-score-row { display:flex; align-items:center; gap:8px; padding:6px 0 4px; border-bottom:1px solid #f1f5f9; margin-bottom:4px; flex-wrap:wrap; }
 .zi-score-num { font-size:1.6rem; font-weight:800; line-height:1; }
@@ -392,7 +396,7 @@ table.rd-tbl tr.big td.w { color:#9b2c2c; }
   <div class="map-header">
     <span class="map-title" id="mapTitle">🗺 Kart</span>
     <span class="map-hdr-right">
-      <span class="map-hint">Klikk en sone for å zoome inn</span>
+      <span class="map-hint">Klikk en sone for å zoome inn · <span style="color:#63b3ed">■</span> desinfeksjonspost</span>
       <button id="mapFsBtn" class="map-fs-btn" onclick="toggleMapFullscreen()" title="Åpne kartet i fullskjerm">⛶ Fullskjerm</button>
     </span>
   </div>
@@ -536,6 +540,10 @@ let activeZone = null;
 let map = null;
 let mapLayers = {};
 const LABEL_ZOOM_THRESHOLD = 13; // Sonenavn-etiketter vises først fra dette zoomnivået
+const DESINF_URL = '../data/desinfisering.json'; // delt fil, nøkkel per elv (SESONG_ELV)
+let DESINF = [];        // [{id, navn, beskrivelse, lat, lon}] - desinfeksjonsposter
+let desinfMarkers = []; // [{mk, post}]
+let _nearestLine = null;
 
 // ── CONTROLS ──────────────────────────────────────────────────────────────
 function onFlowChange(val) {
@@ -885,20 +893,52 @@ function initMap() {
   });
   new LocControl().addTo(map);
 
+  // "Nærmeste desinfeksjonspost"-kontroll rett under "Hvor er jeg?"
+  let _nearestPostPending = false;
+  let _nearestBtn = null;
+  const NearestPostControl = L.Control.extend({
+    options: { position: 'topright' },
+    onAdd: function() {
+      _nearestBtn = L.DomUtil.create('button', '');
+      _nearestBtn.innerHTML = '🧴 Nærmeste desinfeksjonspost';
+      _nearestBtn.style.cssText = 'background:#ebf4ff;color:#2a4365;border:2px solid rgba(0,0,0,0.2);border-radius:4px;padding:5px 10px;font-size:0.75rem;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:none;';
+      _nearestBtn.title = 'Finn desinfeksjonsposten som er nærmest deg';
+      L.DomEvent.on(_nearestBtn, 'click', L.DomEvent.stopPropagation);
+      L.DomEvent.on(_nearestBtn, 'click', () => {
+        if (!DESINF.length) { alert('Desinfeksjonspostene er ikke lastet ennå. Prøv igjen om et øyeblikk.'); return; }
+        _nearestBtn.innerHTML = '⏳ Søker...';
+        _nearestBtn.disabled = true;
+        _nearestPostPending = true;
+        _locatingInProgress = true;
+        map.locate({ setView: false });
+      });
+      return _nearestBtn;
+    }
+  });
+  new NearestPostControl().addTo(map);
+  function resetNearestBtn() {
+    _nearestPostPending = false;
+    if (_nearestBtn) { _nearestBtn.innerHTML = '🧴 Nærmeste desinfeksjonspost'; _nearestBtn.disabled = false; }
+  }
+
   let _myLocMarker = null;
   let _locatingInProgress = false;
   map.on('locationfound', (e) => {
+    if (_nearestPostPending) {
+      resetNearestBtn();
+      showNearestPostFrom(e.latlng);
+    }
     if (_myLocMarker) _myLocMarker.remove();
     _myLocMarker = L.circleMarker(e.latlng, {
       radius: 8, color: '#e53e3e', fillColor: '#e53e3e',
       fillOpacity: 0.9, weight: 2
     }).addTo(map).bindTooltip('📍 Du er her', { permanent: false, direction: 'top', className: 'mtip' });
-    document.querySelector('.leaflet-control button') && (document.querySelectorAll('.leaflet-control button')[document.querySelectorAll('.leaflet-control button').length - 1].innerHTML = '📍 Hvor er jeg?');
     const locBtn = document.querySelector('[title="Vis min posisjon på kartet"]');
     if (locBtn) { locBtn.innerHTML = '📍 Hvor er jeg?'; locBtn.disabled = false; }
     _locatingInProgress = false;
   });
   map.on('locationerror', () => {
+    resetNearestBtn();
     const locBtn = document.querySelector('[title="Vis min posisjon på kartet"]');
     if (locBtn) { locBtn.innerHTML = '📍 Hvor er jeg?'; locBtn.disabled = false; }
     _locatingInProgress = false;
@@ -1040,6 +1080,107 @@ function makeEndIcon(color) {
     <line x1="6.5" y1="10.5" x2="14.5" y2="10.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
   </svg>`;
   return L.divIcon({html: svg, className: '', iconSize: [21,21], iconAnchor: [10.5,10.5]});
+}
+
+// ── DESINFEKSJONSPOSTER ───────────────────────────────────────────────────
+function makeDesinfIcon() {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26">
+    <rect x="1.5" y="1.5" width="23" height="23" rx="6" fill="#2b6cb0" stroke="#fff" stroke-width="2"/>
+    <path d="M13 6.5 C13 6.5 7.8 12.2 7.8 15.4 a5.2 5.2 0 0 0 10.4 0 C18.2 12.2 13 6.5 13 6.5 Z" fill="#fff"/>
+  </svg>`;
+  return L.divIcon({html: svg, className: '', iconSize: [26,26], iconAnchor: [13,13], tooltipAnchor: [0,-13]});
+}
+
+function haversineKm(a, b) {
+  const R = 6371, rad = Math.PI / 180;
+  const dLat = (b[0] - a[0]) * rad, dLon = (b[1] - a[1]) * rad;
+  const h = Math.sin(dLat/2)**2 + Math.cos(a[0]*rad) * Math.cos(b[0]*rad) * Math.sin(dLon/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+// pt: [lat, lon]. Returnerer {post, km} (luftlinje) eller null hvis ingen poster er lastet.
+function nearestPost(pt) {
+  let best = null;
+  DESINF.forEach(post => {
+    const km = haversineKm(pt, [post.lat, post.lon]);
+    if (!best || km < best.km) best = {post, km};
+  });
+  return best;
+}
+
+function fmtKm(km) { return km.toFixed(1).replace('.', ','); }
+
+function postPopupHtml(post, km) {
+  return '<div style="font-size:.78rem;line-height:1.4"><strong>🧴 ' + post.navn + '</strong>'
+    + (post.beskrivelse ? '<br>' + post.beskrivelse : '')
+    + (km != null ? '<br><span style="color:#4a5568">' + fmtKm(km) + ' km fra deg (luftlinje)</span>' : '')
+    + '<br><a class="zi-link" href="https://www.google.com/maps/dir/?api=1&destination=' + post.lat + ',' + post.lon
+    + '&travelmode=driving" target="_blank">🧭 Kjør til posten ↗</a></div>';
+}
+
+function addDesinfMarkers() {
+  if (!map) return;
+  desinfMarkers.forEach(({ mk }) => mk.remove());
+  desinfMarkers = [];
+  DESINF.forEach(post => {
+    const mk = L.marker([post.lat, post.lon], { icon: makeDesinfIcon(), zIndexOffset: 20 }).addTo(map);
+    mk.bindTooltip('Desinfeksjonspost: ' + post.navn, { permanent: false, direction: 'top', className: 'mtip' });
+    mk.bindPopup(postPopupHtml(post));
+    desinfMarkers.push({ mk, post });
+  });
+}
+
+async function fetchDesinf() {
+  try {
+    const res = await fetch(DESINF_URL);
+    if (!res.ok) return;
+    const all = await res.json();
+    const data = all && all.elver && all.elver[SESONG_ELV];
+    DESINF = Array.isArray(data) ? data.filter(p => p && isFinite(p.lat) && isFinite(p.lon)) : [];
+    addDesinfMarkers();
+    if (activeZone) showZoneInfo(activeZone, false);
+  } catch(e) { /* desinfeksjonsposter er valgfrie - feiler stille */ }
+}
+
+// Fra «Nærmeste post»-knappen: zoom til brukeren + nærmeste post, tegn linje og åpne popup.
+function showNearestPostFrom(latlng) {
+  const n = nearestPost([latlng.lat, latlng.lng]);
+  if (!n) return;
+  if (_nearestLine) { _nearestLine.remove(); _nearestLine = null; }
+  _nearestLine = L.polyline([[latlng.lat, latlng.lng], [n.post.lat, n.post.lon]],
+    {color: '#2b6cb0', weight: 3, dashArray: '6,6'}).addTo(map);
+  map.fitBounds([[latlng.lat, latlng.lng], [n.post.lat, n.post.lon]], {padding: [60, 60], maxZoom: 14});
+  const m = desinfMarkers.find(x => x.post.id === n.post.id);
+  if (m) { m.mk.setPopupContent(postPopupHtml(n.post, n.km)); m.mk.openPopup(); }
+}
+
+// Fra soneinfo: vis post sammen med sonens startpunkt.
+function focusPost(id, fromLat, fromLon) {
+  const m = desinfMarkers.find(x => x.post.id === id);
+  if (!m || !map) return;
+  map.fitBounds([[fromLat, fromLon], [m.post.lat, m.post.lon]], {padding: [60, 60], maxZoom: 14});
+  m.mk.setPopupContent(postPopupHtml(m.post));
+  m.mk.openPopup();
+  document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function desinfZoneHtml(zone) {
+  const zc = ZONE_COORDS[zone];
+  if (!zc || !DESINF.length) return '';
+  const ns = nearestPost(zc.s), ne = nearestPost(zc.e);
+  const line = (lbl, pt, n) => {
+    const href = 'https://www.google.com/maps/dir/?api=1&origin=' + pt[0] + ',' + pt[1]
+      + '&destination=' + n.post.lat + ',' + n.post.lon + '&travelmode=driving';
+    return '<div class="zi-desinf-item"><strong>' + n.post.navn + '</strong>'
+      + (n.post.beskrivelse ? ' – ' + n.post.beskrivelse : '')
+      + '<br><span class="zi-desinf-km">' + fmtKm(n.km) + ' km fra ' + lbl + ' (luftlinje)</span> '
+      + '<a href="' + href + '" target="_blank">🧭 Kjør dit ↗</a> · '
+      + '<a href="#" onclick="focusPost(\'' + n.post.id + '\',' + pt[0] + ',' + pt[1] + ');return false">📍 Vis på kart</a></div>';
+  };
+  const same = ns.post.id === ne.post.id;
+  const body = same ? line('sonen', ns.km <= ne.km ? zc.s : zc.e, ns.km <= ne.km ? ns : ne)
+                    : line('sonestart', zc.s, ns) + line('sonens slutt', zc.e, ne);
+  return '<div class="zi-row"><span class="zi-label">Desinfisering</span><span class="zi-val">' + body + '</span></div>';
 }
 
 function updateMap(scores) {
@@ -1185,6 +1326,7 @@ function showZoneInfo(zone, scrollTo = true) {
     <div class="zi-row"><span class="zi-label">Redskap</span><span class="zi-val">${info.redskap}</span></div>
     ${sesongRad(zone)}
     <div class="zi-row"><span class="zi-label">Merknader</span><span class="zi-val">${info.merknader}</span></div>
+    ${desinfZoneHtml(zone)}
     <a class="zi-link" href="https://www.google.com/maps/dir/?api=1&destination=${ZONE_COORDS[zone]?.s[0]},${ZONE_COORDS[zone]?.s[1]}&travelmode=driving" target="_blank">🗺 Veibeskrivelse hit ↗</a>
     ${priceHtml}
     <a class="zi-link" href="${info.kortUrl}" target="_blank">🎫 Kjøp fiskekort ↗</a>
@@ -1769,6 +1911,7 @@ fetchNVE().then(() => update());
 fetchSesong();
 fetchPhotos();
 fetchVideos();
+fetchDesinf();
 window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </script>
 
@@ -1827,7 +1970,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.044</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.045</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 

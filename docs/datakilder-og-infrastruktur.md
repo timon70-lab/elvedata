@@ -41,7 +41,8 @@ Revidert mot repoet 2026-09-26.
 
 ## Datafiler (data/)
 `config.json` (scoringvekter + sparkline), `sesong.json` (sesongdatoer for alle kartelver, også de uten
-dashboard), `statistikk.json`, `nyheter.json`, `nyhetskilder.json`, `soner.json`,
+dashboard), `desinfisering.json` (desinfeksjonsposter, nøkkel per elv under `elver`; håndvedlikeholdt,
+format `{id, navn, lat, lon}` + valgfri `beskrivelse`), `statistikk.json`, `nyheter.json`, `nyhetskilder.json`, `soner.json`,
 `vannforing*.json`, `nedbor*.json`, `fangster_<elv>.json`, `photos_<elv>.json`, `videoer_<elv>.json`,
 `senterlinje_<elv>.geojson`, `ssb_historikk_1993_2015.json`,
 `logg/nedbor_vf_2026.csv`, `logg/nedbor_obs_<elv>.csv`, `logg/vannforing_dogn_<elv>.csv`

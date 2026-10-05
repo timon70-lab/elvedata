@@ -1,0 +1,11 @@
+{
+  "elver": {
+    "otra": [
+      {"id":"d1","navn":"Parkeringsplass på Haus","lat":58.218911,"lon":7.931910},
+      {"id":"d2","navn":"Glattetre bak fender","lat":58.213632,"lon":7.931946},
+      {"id":"d3","navn":"Otra house","lat":58.248624,"lon":7.953972},
+      {"id":"d4","navn":"Skibbua","lat":58.243637,"lon":7.943350},
+      {"id":"d5","navn":"Parkering Monen","lat":58.253068,"lon":7.951855}
+    ]
+  }
+}
