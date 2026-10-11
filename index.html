@@ -11,7 +11,7 @@
   html, body { height: 100%; }
   body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f2d4a; color: #e2e8f0;
          display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
-  header { padding: 18px 20px 10px; text-align: center; position: relative; }
+  header { padding: 18px 56px 10px; text-align: center; position: relative; } /* 56px: plass til QR-knapp (venstre) og tilbakemelding (høyre) */
   header h1 { margin: 0; font-size: 1.3rem; font-weight: 700; }
   .brand-ikon { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.22em; }
   header p { margin: 4px 0 0; font-size: 0.8rem; color: #94a3b8; }
@@ -23,6 +23,19 @@
     border-radius: 999px; text-decoration: none; font-size: 0.95rem;
   }
   .feedback-link:hover { background: rgba(255,255,255,.16); }
+  /* QR-kode for deling: liten flis oppe til venstre, trykk for stor visning */
+  .qr-btn { position: absolute; top: 8px; left: 14px; width: 44px; height: 44px; padding: 3px;
+    background: #fff; border: 1px solid rgba(255,255,255,.16); border-radius: 8px; cursor: pointer; line-height: 0; }
+  .qr-btn:hover { box-shadow: 0 0 0 2px #5eb6d9; }
+  .qr-btn svg, .qr-big svg { display: block; width: 100%; height: 100%; shape-rendering: crispEdges; }
+  .qr-overlay { position: fixed; inset: 0; z-index: 10000; background: rgba(5,18,32,.86); display: none;
+    flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 16px; cursor: pointer; }
+  .qr-overlay.open { display: flex; }
+  .qr-big { width: min(88vw, 72vh, 440px); height: min(88vw, 72vh, 440px); background: #fff; border-radius: 14px; padding: 10px; }
+  .qr-cap { color: #e2e8f0; font-size: 1rem; font-weight: 600; text-align: center; }
+  .qr-cap small { display: block; margin-top: 4px; font-size: .75rem; font-weight: 400; color: #94a3b8; }
+  .qr-close { position: absolute; top: 12px; right: 14px; width: 40px; height: 40px; border-radius: 999px;
+    background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25); color: #fff; font-size: 1.2rem; cursor: pointer; }
   #map { width: 100%; flex: 1 1 auto; min-height: 380px; }  /* fyller resten av skjermen - ingen scroll */
   .legend { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; padding: 8px 16px 10px; font-size: 0.7rem; color: #94a3b8; }
   .legend span { display: inline-flex; align-items: center; gap: 5px; }
@@ -90,7 +103,12 @@
 </head>
 <body>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="qr-elvesona" viewBox="0 0 29 29"><rect width="29" height="29" fill="#fff"/><path fill="#0a2238" d="M2 2h7v1h-7zM12 2h3v1h-3zM16 2h1v1h-1zM20 2h7v1h-7zM2 3h1v1h-1zM8 3h1v1h-1zM10 3h1v1h-1zM12 3h1v1h-1zM20 3h1v1h-1zM26 3h1v1h-1zM2 4h1v1h-1zM4 4h3v1h-3zM8 4h1v1h-1zM13 4h1v1h-1zM15 4h1v1h-1zM20 4h1v1h-1zM22 4h3v1h-3zM26 4h1v1h-1zM2 5h1v1h-1zM4 5h3v1h-3zM8 5h1v1h-1zM10 5h2v1h-2zM13 5h3v1h-3zM17 5h2v1h-2zM20 5h1v1h-1zM22 5h3v1h-3zM26 5h1v1h-1zM2 6h1v1h-1zM4 6h3v1h-3zM8 6h1v1h-1zM10 6h1v1h-1zM15 6h2v1h-2zM20 6h1v1h-1zM22 6h3v1h-3zM26 6h1v1h-1zM2 7h1v1h-1zM8 7h1v1h-1zM14 7h3v1h-3zM20 7h1v1h-1zM26 7h1v1h-1zM2 8h7v1h-7zM10 8h1v1h-1zM12 8h1v1h-1zM14 8h1v1h-1zM16 8h1v1h-1zM18 8h1v1h-1zM20 8h7v1h-7zM10 9h6v1h-6zM3 10h1v1h-1zM5 10h4v1h-4zM10 10h2v1h-2zM15 10h1v1h-1zM17 10h4v1h-4zM22 10h2v1h-2zM25 10h1v1h-1zM2 11h1v1h-1zM5 11h1v1h-1zM7 11h1v1h-1zM10 11h3v1h-3zM16 11h2v1h-2zM21 11h5v1h-5zM2 12h2v1h-2zM8 12h2v1h-2zM12 12h1v1h-1zM16 12h2v1h-2zM21 12h3v1h-3zM26 12h1v1h-1zM3 13h2v1h-2zM7 13h1v1h-1zM9 13h2v1h-2zM12 13h1v1h-1zM14 13h1v1h-1zM17 13h1v1h-1zM19 13h3v1h-3zM23 13h4v1h-4zM2 14h1v1h-1zM5 14h4v1h-4zM11 14h6v1h-6zM18 14h1v1h-1zM20 14h2v1h-2zM26 14h1v1h-1zM2 15h2v1h-2zM5 15h1v1h-1zM7 15h1v1h-1zM10 15h1v1h-1zM12 15h1v1h-1zM14 15h6v1h-6zM22 15h1v1h-1zM25 15h1v1h-1zM2 16h2v1h-2zM5 16h2v1h-2zM8 16h2v1h-2zM11 16h2v1h-2zM14 16h1v1h-1zM16 16h2v1h-2zM19 16h2v1h-2zM22 16h5v1h-5zM2 17h1v1h-1zM4 17h1v1h-1zM6 17h2v1h-2zM11 17h1v1h-1zM15 17h1v1h-1zM17 17h1v1h-1zM21 17h1v1h-1zM23 17h2v1h-2zM26 17h1v1h-1zM2 18h1v1h-1zM4 18h1v1h-1zM8 18h1v1h-1zM12 18h4v1h-4zM18 18h5v1h-5zM24 18h2v1h-2zM10 19h3v1h-3zM16 19h1v1h-1zM18 19h1v1h-1zM22 19h1v1h-1zM24 19h2v1h-2zM2 20h7v1h-7zM11 20h3v1h-3zM15 20h2v1h-2zM18 20h1v1h-1zM20 20h1v1h-1zM22 20h1v1h-1zM26 20h1v1h-1zM2 21h1v1h-1zM8 21h1v1h-1zM10 21h2v1h-2zM13 21h2v1h-2zM17 21h2v1h-2zM22 21h1v1h-1zM25 21h1v1h-1zM2 22h1v1h-1zM4 22h3v1h-3zM8 22h1v1h-1zM10 22h3v1h-3zM14 22h1v1h-1zM16 22h7v1h-7zM26 22h1v1h-1zM2 23h1v1h-1zM4 23h3v1h-3zM8 23h1v1h-1zM10 23h1v1h-1zM12 23h2v1h-2zM15 23h3v1h-3zM19 23h2v1h-2zM25 23h2v1h-2zM2 24h1v1h-1zM4 24h3v1h-3zM8 24h1v1h-1zM12 24h1v1h-1zM17 24h1v1h-1zM19 24h1v1h-1zM22 24h5v1h-5zM2 25h1v1h-1zM8 25h1v1h-1zM10 25h1v1h-1zM12 25h1v1h-1zM14 25h4v1h-4zM20 25h3v1h-3zM24 25h3v1h-3zM2 26h7v1h-7zM11 26h2v1h-2zM14 26h1v1h-1zM16 26h1v1h-1zM18 26h1v1h-1zM20 26h1v1h-1zM23 26h1v1h-1zM26 26h1v1h-1z"/></symbol>
+</svg>
+
 <header>
+  <button type="button" class="qr-btn" id="qrBtn" onclick="openQr()" aria-label="Vis QR-kode for å dele elvesona.no" title="QR-kode – trykk for å forstørre"><svg viewBox="0 0 29 29" aria-hidden="true"><use href="#qr-elvesona"/></svg></button>
   <h1 style="display:inline-flex;align-items:center;gap:8px;"><svg class="brand-ikon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 25 C6 24, 8 22, 11 21 C13 20.5, 14 8, 16 8 C18 8, 19 20, 21.5 21.5 C24 23, 27 17, 30 15" fill="none" stroke="#5eb6d9" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="8" r="3.6" fill="none" stroke="#5eb6d9" stroke-width="1.3"/><circle cx="16" cy="8" r="2" fill="#9ae6b4"/></svg>Elvesona</h1>
   <p>Live fiskeforhold for sørlandselver — trykk på en elv for detaljer</p>
   <a class="feedback-link" href="tilbakemelding/" target="_blank" rel="noopener" title="Gi tilbakemelding">💬</a>
@@ -697,9 +715,22 @@ loadNewsTicker();
 </script>
 
 <div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.057</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.058</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
+<div class="qr-overlay" id="qrOverlay" role="dialog" aria-modal="true" aria-label="QR-kode for elvesona.no" onclick="closeQr()">
+  <button type="button" class="qr-close" aria-label="Lukk" onclick="closeQr()">✕</button>
+  <div class="qr-big"><svg viewBox="0 0 29 29" role="img" aria-label="QR-kode som åpner elvesona.no"><use href="#qr-elvesona"/></svg></div>
+  <div class="qr-cap">Skann for å åpne elvesona.no<small>Trykk hvor som helst for å lukke</small></div>
+</div>
+<script>
+function openQr() {
+  document.getElementById('qrOverlay').classList.add('open');
+  tellHendelse('qr-aapnet', 'QR-kode åpnet');
+}
+function closeQr() { document.getElementById('qrOverlay').classList.remove('open'); }
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeQr(); });
+</script>
 </body>
 </html>
