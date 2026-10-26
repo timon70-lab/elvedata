@@ -15,9 +15,14 @@ slutter bare å oppdatere seg.
 | Hva | Utløper | Symptom ved utløp | Deteksjon |
 |---|---|---|---|
 | `elvedata-cron` (PAT for cron-job.org) | **11. juli 2027** | Vannføring og fangster fryser | Varsling fra cron-job.org |
-| Admin-PAT (fine-grained) | Selvvalgt | Lagring i admin feiler | Feilmelding i admin |
+| `elvedata-mobil` (admin-PAT på mobil) | **26. oktober 2027** | Lagring i admin fra mobilen feiler | E-post fra GitHub 1 dag før; feilmelding i admin |
+| Andre admin-PAT-er (fine-grained, f.eks. PC) | Selvvalgt | Lagring i admin feiler | Feilmelding i admin |
 | Worker-PAT `GH_TOKEN` (tilbakemeldinger) | Selvvalgt | Innsendinger feiler (502) | Siden viser reservelenken; ingen varsling |
 | NVE API-nøkkel | Ingen kjent utløpsdato | Tomme vannføringsfiler | Ingen |
+
+Fornyelse av admin-PAT (`elvedata-mobil`): `github.com/settings/personal-access-tokens` → tokenet →
+**Regenerate token**, velg ny utløpsdato, kopier verdien (vises bare én gang) og lim den inn i admin på
+hver enhet som bruker den. Rettigheter og repoer beholdes. Sist fornyet 2026-10-26.
 
 Fornyelse av cron-tokenet: nytt fine-grained PAT med **Actions: read/write** på kun
 `elvedata`-repoet, deretter oppdatere det i cron-job.org-jobbene.
