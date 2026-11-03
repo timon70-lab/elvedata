@@ -90,6 +90,7 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .leaflet-tooltip.mtip::before { display: none; }
 .leaflet-tooltip.zone-label { background: #ffffff; color: #1a202c; border: 1px solid rgba(0,0,0,0.15); font-size: 0.58rem; font-weight: 700; padding: 1px 4px; border-radius: 4px; box-shadow: none; pointer-events: none; text-align: center; line-height: 1.2; }
 .leaflet-tooltip.zone-label::before { display: none; }
+.leaflet-soneflater-pane path:focus { outline: none; } /* nettleserens fokusramme rundt klikket sonepolygon */
 
 .photo-panel { width: 100%; max-width: 480px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-top: 14px; display: none; }
 .photo-panel.visible { display: block; }
@@ -2029,7 +2030,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.050</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.051</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
