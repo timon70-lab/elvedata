@@ -6,7 +6,7 @@
     "soner": {
       "Sone 3B Hageodden": { "forelder": "Sone 3A", "side": "øst" },
       "Sone 3C Mosby": { "forelder": "Sone 3A", "side": "vest" },
-      "Sone 4B Ravnås": { "forelder": "Sone 4A" },
+      "Sone 4B Ravnås": { "forelder": "Sone 4A", "side": "vest" },
       "Sone 4C Holmane": { "forelder": "Sone 4A" },
       "Sone 5B Rød": { "side": "vest" },
       "Sone 5B Øst": { "som": "Sone 5B Rød", "side": "øst" }
