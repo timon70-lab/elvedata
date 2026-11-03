@@ -4,7 +4,7 @@ Overført fra claude.ai-prosjektet 2026-09-20. Revidert mot repoet 2026-09-26.
 
 ## Versjoner (per 2026-09-26)
 Øyeblikksbilde — gjeldende versjon finnes alltid med `grep -oE 'v[0-9]+\.[0-9]{3}' <fil>`.
-- Audna v1.164 · Lygna v1.066 · Mandalselva v1.060 · Otra v1.049 · Sygna v1.043 · Tovdalselva v1.012
+- Audna v1.164 · Lygna v1.066 · Mandalselva v1.060 · Otra v1.050 · Sygna v1.043 · Tovdalselva v1.012
 - Alle seks elver ligger på oversiktskartet (Tovdalselva gikk live v0.009 → v1.010).
 - Oversiktskart (`index.html`) v1.058 · Staging v1.034 · Statistikk (`statistikk/index.html`) v0.036
 - Sesongsider `statistikk/{elv}2026.html` for alle seks elver (v1.001–v1.002).
@@ -44,8 +44,11 @@ Admin har seksjonene Nyheter, Media, Sesong, Scoringsparametre og Nøkler og til
   Case: Strædethylen (Mandalselva) 16 laks 2016–2025, null etter 2021, men nesten ingen kjøpere.
   Støttecase: Otra 2026 (+~16 % fiskere), Audna Sone 4 Berge øvre (én fluefisker dominerer),
   Lygna Øyvind Kleiven-analysen. Inatur-webshopkalender som proxy for fisketrykk.
-- (g) Fiskeområde-polygoner tegnet i geojson.io med Inatur-kart som referanse → `data/soner_<elv>.geojson`,
-  med disclaimer om at Inatur-kartet kun er veiledende.
+- (g) Sonepolygoner → `data/soner_<elv>.geojson`. **Otra er gjort (v1.050)**: polygonene regnes ut av
+  `scripts/sonepolygoner.py` fra OSM-elveflaten + kutt vinkelrett på midtlinja ved sonepunktene
+  (oppsett i `scripts/sonepolygoner_oppsett.json`). Gjenstår: øvrige fem elver, grensesjekk med
+  lokalkjente (Otra 3B Hageodden og 4B Ravnås har begge punktene på én bredd — kanskje bare én side?),
+  og eventuelt en merknad om at grensene er veiledende.
 - (k) Brukerbidrag med sonetips via Google Forms → admin-moderering → `data/tips_<elv>.json`.
   Åpne spørsmål: kreditering, konflikt med grunneiere, tidløshet.
 - Video etter vannføring i sonepanel (mockup for Audna; blokkert av `vannforing: 0`-problemet).

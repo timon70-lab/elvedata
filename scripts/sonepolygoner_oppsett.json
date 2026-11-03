@@ -1,0 +1,14 @@
+{
+  "otra": {
+    "osm": { "midtlinje": [251890088], "vann": [1140977] },
+    "bredde_land": 40,
+    "soner": {
+      "Sone 3B Hageodden": { "forelder": "Sone 3A" },
+      "Sone 3C Mosby": { "forelder": "Sone 3A", "side": "vest" },
+      "Sone 4B Ravnås": { "forelder": "Sone 4A" },
+      "Sone 4C Holmane": { "forelder": "Sone 4A" },
+      "Sone 5B Rød": { "side": "vest" },
+      "Sone 5B Øst": { "som": "Sone 5B Rød", "side": "øst" }
+    }
+  }
+}

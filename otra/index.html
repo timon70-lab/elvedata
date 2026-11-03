@@ -433,6 +433,7 @@ const ZONES = ["Sone 1","Sone 2","Sone 3A","Sone 3B Hageodden","Sone 3C Mosby","
 const BILDE_BASE = '../bilder/otra/';
 const PHOTOS_URL = '../data/photos_otra.json';
 const VIDEOS_URL = '../data/videoer_otra.json';
+const SONER_URL = '../data/soner_otra.geojson'; // sonepolygoner, laget av scripts/sonepolygoner.py
 const SESONG_URL = '../data/sesong.json';
 const SESONG_ELV = 'otra';
 
@@ -529,6 +530,7 @@ let photoMarkers = [];
 
 let VIDEOS = [];
 let videoMarkers = [];
+let zonePolys = {}; // sone → Leaflet-lag med polygonet (tomt til SONER_URL er lastet)
 
 let activePhoto = null;
 const FLOW_STEP = 25; // Otra: bins i 25 m³/s intervaller (matcher flowSlider step-attributt)
@@ -873,6 +875,10 @@ function initMap() {
   setTimeout(() => map.invalidateSize(), 50);
   setTimeout(() => map.invalidateSize(), 300);
 
+  // Sonepolygonene ligger i en egen pane under alle markører (markørene er i
+  // markerPane, z 600), så bilder, video og poster kan fortsatt klikkes.
+  map.createPane('soneflater').style.zIndex = 350;
+
   // "Hvor er jeg?"-kontroll oppe til høyre
   const LocControl = L.Control.extend({
     options: { position: 'topright' },
@@ -1015,6 +1021,25 @@ function addPhotoMarkers() {
     mk.on('click', (e) => { L.DomEvent.stopPropagation(e); openZoneMedia(photo.zone, photo); });
     photoMarkers.push({ mk, zone: photo.zone, photosIdx: idx });
   });
+}
+
+async function fetchSoner() {
+  try {
+    const res = await fetch(SONER_URL);
+    if (!res.ok) return;
+    const gj = await res.json();
+    // Hovedsonene ligger først i fila, delsonene etter - de tegnes oppå.
+    gj.features.forEach(f => {
+      const zone = f.properties.sone;
+      if (!ZONES.includes(zone)) return;
+      const lag = L.geoJSON(f, {pane: 'soneflater'}).addTo(map);
+      lag.isDel = f.properties.slag === 'del';
+      lag.bindTooltip(zone, {sticky: true, direction: 'top', className: 'mtip'});
+      lag.on('click', () => { selectZone(zone); if (activeZone === zone) showZoneInfo(zone); });
+      zonePolys[zone] = lag;
+    });
+    updateMap(computeScores());
+  } catch(e) { /* sonepolygoner er valgfrie – uten dem vises bare start/slutt-markørene */ }
 }
 
 async function fetchPhotos() {
@@ -1210,11 +1235,19 @@ function desinfZoneHtml(zone) {
 function updateMap(scores) {
   if (!map) return;
   ZONES.forEach(zone => {
-    const l = mapLayers[zone]; if (!l) return;
     const isSelected = zone === activeZone;
     const isDimmed = activeZone !== null && !isSelected;
     const sc = scores ? (scores[zone]?.score || 0) : 0;
     const col = isDimmed ? '#94a3b8' : (scores ? scoreColor(sc) : '#94a3b8');
+    const poly = zonePolys[zone];
+    if (poly) poly.setStyle({
+      color: col, fillColor: col,
+      weight: isSelected ? 3 : 1.5,
+      opacity: isDimmed ? 0.5 : 0.9,
+      fillOpacity: isSelected ? 0.35 : (isDimmed ? 0.08 : 0.22),
+      dashArray: poly.isDel ? '5,4' : null
+    });
+    const l = mapLayers[zone]; if (!l) return;
     const scoreText = scores ? String(sc) : '–';
     l.startMk.setIcon(makeStartIcon(scoreText, col, isSelected, isDimmed));
     l.startMk.setZIndexOffset(isSelected ? 100 : 10);
@@ -1251,7 +1284,8 @@ function selectZone(zone) {
     document.getElementById('mapTitle').textContent = '🗺 ' + zone;
     closeMedia(); // lukk ev. åpent bilde/video fra forrige sone
     const zc = ZONE_COORDS[zone];
-    if (zc) map.fitBounds([zc.s, zc.e], {padding: [50,50], animate: true, maxZoom: 14});
+    if (zonePolys[zone]) map.fitBounds(zonePolys[zone].getBounds(), {padding: [30,30], animate: true, maxZoom: 15});
+    else if (zc) map.fitBounds([zc.s, zc.e], {padding: [50,50], animate: true, maxZoom: 14});
   }
   update();
 }
@@ -1933,6 +1967,7 @@ document.getElementById('totalScoreBox').innerHTML =
   + '<div class="total-score-lbl">Score</div>';
 fetchNVE().then(() => update());
 fetchSesong();
+fetchSoner();
 fetchPhotos();
 fetchVideos();
 fetchDesinf();
@@ -1994,7 +2029,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.049</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.050</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
