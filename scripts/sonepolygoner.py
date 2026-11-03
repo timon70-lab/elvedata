@@ -16,6 +16,9 @@ Slik regnes sonene ut:
   * En delsone (forelder satt) går fra sin egen start til sin egen slutt og
     tegnes oppå hovedsonen.
   * side = vest/øst deler strekningen langs midtlinja.
+  * utelat_øy_med_kanal = OSM-id til en vei i øyas ring. Øya, sidekanalen
+    bak den (sett fra midtlinja) og landstripa langs kanalen tas ut av sonene.
+    Kanalåpningene lukkes med korteste linje fra øyspissene til bredden.
 
 Bruk:
     python scripts/sonepolygoner.py otra           # lag polygonene
@@ -26,7 +29,7 @@ Data fra OpenStreetMap er under ODbL (© OpenStreetMap contributors).
 
 import json, math, os, sys, time, urllib.parse, urllib.request
 
-from shapely.geometry import LineString, MultiPolygon, Point, Polygon, mapping
+from shapely.geometry import LineString, MultiLineString, MultiPolygon, Point, Polygon, mapping
 from shapely.ops import linemerge, polygonize, split, unary_union
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -85,17 +88,28 @@ def les_osm(elv, oppsett, xy):
     midt = LineString(list(midt.coords)[::-1])
 
     # Vannflaten: ytre ringer minus indre (øyer).
-    ytre, indre = [], []
+    ytre, indre, indre_id = [], [], []
     for e in elementer:
         if e['type'] != 'relation' or e['id'] not in oppsett['osm']['vann']:
             continue
         for m in e['members']:
             if m['type'] == 'way' and 'geometry' in m:
-                (indre if m['role'] == 'inner' else ytre).append(linje(m['geometry']))
+                if m['role'] == 'inner':
+                    indre.append(linje(m['geometry']))
+                    indre_id.append(m['ref'])
+                else:
+                    ytre.append(linje(m['geometry']))
     vann = unary_union(list(polygonize(ytre)))
-    if indre:
-        vann = vann.difference(unary_union(list(polygonize(indre))))
-    return midt, vann
+    øyer = list(polygonize(indre))
+    if øyer:
+        vann = vann.difference(unary_union(øyer))
+    # Øy per OSM-vei, så oppsettet kan peke på en øy med id-en til en av veiene i ringen.
+    øy_for_vei = {}
+    for vid, v in zip(indre_id, indre):
+        for ø in øyer:
+            if v.distance(ø.exterior) < 0.5 and v.within(ø.exterior.buffer(0.5)):
+                øy_for_vei[vid] = ø
+    return midt, vann, øy_for_vei
 
 
 # ---------------------------------------------------------------- geometri
@@ -125,6 +139,44 @@ def kutt(midt, korridor, m):
     d = math.hypot(x1 - x0, y1 - y0) or 1.0
     ux, uy = (x1 - x0) / d, (y1 - y0) / d
     return LineString([(x0 - ux * 5, y0 - uy * 5), (x1 + ux * 5, y1 + uy * 5)])
+
+
+def kanal_bak_øy(midt, vann, øy):
+    """Vannet på baksiden av en øy sett fra midtlinja, dvs. sidekanalen rundt
+    øya. Hver kanalåpning lukkes med den korteste linja fra øyas øvre og nedre
+    spiss over til bredden på baksiden (bort fra midtlinja)."""
+    spisser = sorted(øy.exterior.coords, key=lambda c: midt.project(Point(c)))
+    c = øy.centroid
+    munninger = []
+    for t in (Point(spisser[0]), Point(spisser[-1])):
+        q = midt.interpolate(midt.project(t))
+        vx, vy = t.x - q.x, t.y - q.y
+        bak = [Point(p) for p in vann.exterior.coords
+               if (p[0] - q.x) * vx + (p[1] - q.y) * vy > 0]
+        b = min(bak, key=lambda p: p.distance(t))
+        # Linja må starte inne på øya og slutte inne på land (begge utenfor
+        # vannflaten) for at split() skal dele.
+        d = t.distance(c) or 1.0
+        inne = (t.x + (c.x - t.x) / d * 3, t.y + (c.y - t.y) / d * 3)
+        L = b.distance(t) or 1.0
+        land = (b.x + (b.x - t.x) / L * 3, b.y + (b.y - t.y) / L * 3)
+        munninger.append(LineString([inne, (t.x, t.y), (b.x, b.y), land]))
+        print('    kanalåpning lukket med %.0f m linje' % L)
+    # Begge linjene på én gang: én linje alene fra øya til land deler ikke flata.
+    biter = list(split(vann, MultiLineString(munninger)).geoms)
+    hoved = max(biter, key=lambda b: b.area)
+    return unary_union([b for b in biter if b is not hoved and b.distance(øy) < 1])
+
+
+def lag_korridor(midt, vann, bredde, unntak):
+    """Vannflaten + bredde meter land. unntak = flater (øy med kanal) som
+    verken skal være vann eller land i sonen."""
+    if not unntak:
+        return vann.buffer(bredde, join_style='round')
+    ut = unary_union(unntak)
+    hovedvann = vann.difference(ut)
+    land = hovedvann.buffer(bredde, join_style='round').difference(ut.buffer(bredde))
+    return unary_union([hovedvann, land])
 
 
 def strekning(midt, korridor, m0, m1):
@@ -192,9 +244,17 @@ def behandle(elv, hent=False):
     k = 111320.0 * math.cos(math.radians(lat0))
     inv = lambda x, y: (lon0 + x / k, lat0 + y / 110540.0)
 
-    midt, vann = les_osm(elv, oppsett, xy)
-    korridor = vann.buffer(oppsett.get('bredde_land', 40), join_style='round')
+    midt, vann, øy_for_vei = les_osm(elv, oppsett, xy)
     print('Midtlinje %.2f km, vannflate %.2f km²' % (midt.length / 1000, vann.area / 1e6))
+    unntak = []
+    for vid in oppsett.get('utelat_øy_med_kanal', []):
+        øy = øy_for_vei.get(vid)
+        if øy is None:
+            sys.exit('Fant ingen øy med OSM-vei %s i vannflaten.' % vid)
+        kanal = kanal_bak_øy(midt, vann, øy)
+        print('  utelater øy (vei %s, %.0f m²) og kanal bak den (%.0f m²)' % (vid, øy.area, kanal.area))
+        unntak += [øy, kanal]
+    korridor = lag_korridor(midt, vann, oppsett.get('bredde_land', 40), unntak)
 
     spesial = oppsett.get('soner', {})
 

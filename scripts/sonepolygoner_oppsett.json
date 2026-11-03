@@ -2,6 +2,7 @@
   "otra": {
     "osm": { "midtlinje": [251890088], "vann": [1140977] },
     "bredde_land": 40,
+    "utelat_øy_med_kanal": [172530737],
     "soner": {
       "Sone 3B Hageodden": { "forelder": "Sone 3A" },
       "Sone 3C Mosby": { "forelder": "Sone 3A", "side": "vest" },
