@@ -4,7 +4,7 @@ Overført fra claude.ai-prosjektet 2026-09-20. Revidert mot repoet 2026-09-26.
 
 ## Versjoner (per 2026-09-26)
 Øyeblikksbilde — gjeldende versjon finnes alltid med `grep -oE 'v[0-9]+\.[0-9]{3}' <fil>`.
-- Audna v1.165 · Lygna v1.068 · Mandalselva v1.061 · Otra v1.053 · Sygna v1.044 · Tovdalselva v1.012
+- Audna v1.165 · Lygna v1.068 · Mandalselva v1.061 · Otra v1.053 · Sygna v1.044 · Tovdalselva v1.013
 - Alle seks elver ligger på oversiktskartet (Tovdalselva gikk live v0.009 → v1.010).
 - Oversiktskart (`index.html`) v1.058 · Staging v1.034 · Statistikk (`statistikk/index.html`) v0.036
 - Sesongsider `statistikk/{elv}2026.html` for alle seks elver (v1.001–v1.002).
