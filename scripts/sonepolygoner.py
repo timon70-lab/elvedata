@@ -291,6 +291,8 @@ def behandle(elv, hent=False):
         flate = strekning(midt, korridor, m0, m1)
         if z['side']:
             flate = side(midt, flate, z['side'])
+        # Hull er midten av øyer som landstripa ikke rakk inn til - øya hører til sonen.
+        flate = unary_union([Polygon(p.exterior) for p in getattr(flate, 'geoms', [flate])])
         if flate.is_empty:
             print('ADVARSEL: %s ble tom' % z['navn'])
             continue
