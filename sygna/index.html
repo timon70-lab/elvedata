@@ -1066,10 +1066,12 @@ function updateMap(scores) {
     mk.setOpacity(show ? 1 : 0);
     if (mk._icon) mk._icon.style.pointerEvents = show ? 'auto' : 'none';
   });
-  videoMarkers.forEach(({ mk, zone }) => {
-    mk.setOpacity(activeZone === zone ? 1 : 0);
-    if (mk._icon) mk._icon.style.pointerEvents = activeZone === zone ? 'auto' : 'none';
+  videoMarkers.forEach(({ mk, zone, video }) => {
+    const show = activeZone === zone && mediaPassesFilter(video);
+    mk.setOpacity(show ? 1 : 0);
+    if (mk._icon) mk._icon.style.pointerEvents = show ? 'auto' : 'none';
   });
+  _syncFlowChip(); // pillens antall følger valgt sone og vannføring
 }
 
 function selectZone(zone) {
@@ -1217,7 +1219,8 @@ function mediaPassesFilter(m) {
 /* Antall bilder/videoer i aktiv sone som ligger i en gitt vannføringsbin */
 function mediaCountInBin(bin) {
   return [...PHOTOS, ...VIDEOS].filter(m => {
-    if (m.zone !== _activeMediaZone) return false;
+    // Sonen som er valgt i kartet; i fullskjerm vises pillen før noe bilde er åpnet.
+    if (m.zone !== (activeZone || _activeMediaZone)) return false;
     const f = mediaFlow(m);
     return (f !== undefined && f !== null) && flowBinOf(f) === bin;
   }).length;
@@ -1957,7 +1960,7 @@ window.addEventListener('resize', function () {
   <div class="zi-body" id="ziBody"></div>
 </div>
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.043</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.044</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
