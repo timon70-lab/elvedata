@@ -82,6 +82,7 @@ kartløsningen for laksefiske som finnes på internett.
 - Nyttig for deling i Facebook-grupper og for synlighet i søk.
 
 ### 8. Offline-kart (stor, senere)
+- **Lagt på is inntil videre** (Per Lasse, 2026-11-14).
 - Lavt prioritert for bynære Otra, mer aktuelt for Sygna og Tovdalselva.
 
 ## Rekkefølge
