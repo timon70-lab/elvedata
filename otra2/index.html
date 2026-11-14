@@ -883,21 +883,39 @@ function update() {
 // nettleseren. maxNativeZoom lar kartet zoome videre ved å forstørre flisene.
 const BASE_LAYER_DEFS = [
   { id: 'kart', navn: 'Kart', url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    opt: { attribution: '© OpenStreetMap', maxNativeZoom: 19, maxZoom: 19 } },
+    opt: { attribution: '© OpenStreetMap', maxNativeZoom: 19, maxZoom: 19 },
+    buf: null },   // OSM: ingen forhåndslasting (flisvilkårene frarår det)
   { id: 'topo', navn: 'Topo', url: 'https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png',
-    opt: { attribution: '© Kartverket', maxNativeZoom: 18, maxZoom: 19 } },
+    opt: { attribution: '© Kartverket', maxNativeZoom: 18, maxZoom: 19 },
+    buf: { bbox: [10, 11, 12, 13], korridor: [14, 15, 16], sone: [17] } },   // store fliser (50–130 kB)
   { id: 'foto', navn: 'Flyfoto', url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    opt: { attribution: 'Flyfoto © Esri, Maxar, Earthstar Geographics', maxNativeZoom: 18, maxZoom: 19 } }
+    opt: { attribution: 'Flyfoto © Esri, Maxar, Earthstar Geographics', maxNativeZoom: 18, maxZoom: 19 },
+    buf: { bbox: [10, 11, 12, 13, 14, 15], korridor: [16, 17], sone: [18] } }   // små fliser (10–20 kB)
 ];
+// Felles flisopsjoner: større kant av ferdige fliser rundt utsnittet, og last
+// også mens kartet dras (standard på mobil er å vente til det står stille).
+const TILE_OPT = { keepBuffer: 4, updateWhenIdle: false };
 const BASE_LAYER_KEY = 'elvesona_kartlag';
 let _baseLayers = {};      // id → L.tileLayer
 let _baseLayerId = null;
 
 function setBaseLayer(id) {
   if (!_baseLayers[id]) id = 'kart';
-  if (_baseLayerId && _baseLayers[_baseLayerId]) map.removeLayer(_baseLayers[_baseLayerId]);
-  _baseLayers[id].addTo(map);
+  // Mykt bytte: det gamle laget blir liggende under til det nye er ferdig lastet,
+  // så kartet aldri står tomt mellom to lag.
+  const gammelId = _baseLayerId, gammel = gammelId && _baseLayers[gammelId], ny = _baseLayers[id];
   _baseLayerId = id;
+  if (gammel && gammel !== ny) {
+    gammel.setZIndex(1); ny.setZIndex(2);
+    ny.addTo(map);
+    const fjern = () => { if (_baseLayerId !== gammelId && map.hasLayer(gammel)) map.removeLayer(gammel); };
+    ny.once('load', fjern);
+    setTimeout(fjern, 4000);
+  } else {
+    ny.setZIndex(2);
+    ny.addTo(map);
+  }
+  startPreload();
   document.getElementById('map').classList.toggle('bl-foto', id === 'foto');
   document.querySelectorAll('.bl-btn').forEach(b => {
     const on = b.dataset.bl === id;
@@ -908,7 +926,7 @@ function setBaseLayer(id) {
 }
 
 function initBaseLayers() {
-  BASE_LAYER_DEFS.forEach(d => { _baseLayers[d.id] = L.tileLayer(d.url, d.opt); });
+  BASE_LAYER_DEFS.forEach(d => { _baseLayers[d.id] = L.tileLayer(d.url, Object.assign({}, TILE_OPT, d.opt)); });
   const BlControl = L.Control.extend({
     options: { position: 'bottomleft' },
     onAdd: function() {
@@ -930,6 +948,147 @@ function initBaseLayers() {
   let valgt = 'kart';
   try { valgt = localStorage.getItem(BASE_LAYER_KEY) || 'kart'; } catch (e) { /* ignorer */ }
   setBaseLayer(valgt);
+}
+
+// ── FLISBUFFER ────────────────────────────────────────────────────────────
+// Kart-UX D: ingen tomme felter ved flytting og zoom. Fliser for valgt kartlag
+// hentes på forhånd inn i nettleserens hurtiglager, i tre trinn:
+//   bbox      – hele utsnittet som viser elva (lave zoomnivå, få fliser)
+//   korridor  – bare flisene som berører sonepolygonene (midlere zoom)
+//   sone      – korridoren for valgt sone på dypeste nivå, når sonen velges
+// Hvilke zoomnivå som går i hvert trinn står i BASE_LAYER_DEFS[].buf, fordi
+// flisstørrelsen varierer mye mellom kildene. Ingenting lastes utenfor elva.
+const PRELOAD_PARALLEL = 6;
+const PRELOAD_START_MS = 1500;   // la de synlige flisene komme først
+let _soneRinger = {};            // sone → [ytre ringer som [[lat,lon],...]]
+let _plKo = [];                  // url-er som venter
+let _plAktive = 0;
+let _plSett = {};                // lagId → Set med url-er som er hentet/bestilt
+let _plStats = { bestilt: 0, ferdig: 0, feil: 0 };
+
+function preloadModus() {
+  // 'av' = ingen forhåndslasting, 'lett' = mobilnett/mobil, 'full' = ellers.
+  const k = navigator.connection;
+  if (k && k.saveData) return 'av';
+  if (k && (k.type === 'cellular' || /2g|3g/.test(k.effectiveType || ''))) return 'lett';
+  if (!k && window.matchMedia && window.matchMedia('(pointer: coarse)').matches) return 'lett';
+  return 'full';
+}
+
+function tileXY(lat, lon, z) {
+  const n = Math.pow(2, z), r = lat * Math.PI / 180;
+  return [Math.floor((lon + 180) / 360 * n),
+          Math.floor((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * n)];
+}
+function tileCenter(x, y, z) {
+  const n = Math.pow(2, z);
+  return [Math.atan(Math.sinh(Math.PI * (1 - 2 * (y + 0.5) / n))) * 180 / Math.PI, (x + 0.5) / n * 360 - 180];
+}
+function pointInRing(lat, lon, ring) {
+  let inne = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const a = ring[i], b = ring[j];
+    if ((a[0] > lat) !== (b[0] > lat) && lon < (b[1] - a[1]) * (lat - a[0]) / (b[0] - a[0]) + a[1]) inne = !inne;
+  }
+  return inne;
+}
+function ringerBbox(ringer) {
+  let s = 90, w = 180, n = -90, e = -180;
+  ringer.forEach(r => r.forEach(p => { s = Math.min(s, p[0]); n = Math.max(n, p[0]); w = Math.min(w, p[1]); e = Math.max(e, p[1]); }));
+  return { s, w, n, e };
+}
+function alleRinger() { return Object.values(_soneRinger).reduce((a, r) => a.concat(r), []); }
+
+// Alle fliser i et rektangel, utvidet med 'pad' (andel av bredde/høyde) på hver side.
+function bboxTiles(z, b, pad) {
+  const dLat = (b.n - b.s) * pad, dLon = (b.e - b.w) * pad;
+  const a = tileXY(b.n + dLat, b.w - dLon, z), c = tileXY(b.s - dLat, b.e + dLon, z);
+  const ut = [];
+  for (let x = a[0]; x <= c[0]; x++) for (let y = a[1]; y <= c[1]; y++) ut.push([x, y, z]);
+  return ut;
+}
+// Fliser som berører ringene: enten ligger flisas midtpunkt inne i en ring,
+// eller så går kanten av en ring gjennom flisa.
+function korridorTiles(z, ringer) {
+  if (!ringer.length) return [];
+  const sett = new Set(), ut = [];
+  const ta = (x, y) => { const k = x + '/' + y; if (!sett.has(k)) { sett.add(k); ut.push([x, y, z]); } };
+  ringer.forEach(ring => {
+    for (let i = 0; i < ring.length; i++) {
+      const a = ring[i], b = ring[(i + 1) % ring.length];
+      const ta0 = tileXY(a[0], a[1], z), tb0 = tileXY(b[0], b[1], z);
+      const steg = Math.max(1, 2 * Math.max(Math.abs(ta0[0] - tb0[0]), Math.abs(ta0[1] - tb0[1])));
+      for (let s = 0; s <= steg; s++) {
+        const t = tileXY(a[0] + (b[0] - a[0]) * s / steg, a[1] + (b[1] - a[1]) * s / steg, z);
+        ta(t[0], t[1]);
+      }
+    }
+  });
+  bboxTiles(z, ringerBbox(ringer), 0).forEach(t => {
+    if (sett.has(t[0] + '/' + t[1])) return;
+    const m = tileCenter(t[0], t[1], z);
+    if (ringer.some(r => pointInRing(m[0], m[1], r))) ta(t[0], t[1]);
+  });
+  return ut;
+}
+
+function tileUrl(lagId, t) {
+  const lag = _baseLayers[lagId];
+  const pt = { x: t[0], y: t[1], z: t[2] };
+  return L.Util.template(lag._url, { s: lag._getSubdomain(pt), x: t[0], y: t[1], z: t[2], r: '' });
+}
+function plLeggTil(lagId, tiles, forst) {
+  const sett = _plSett[lagId] || (_plSett[lagId] = new Set());
+  const nye = [];
+  tiles.forEach(t => { const u = tileUrl(lagId, t); if (!sett.has(u)) { sett.add(u); nye.push(u); } });
+  _plStats.bestilt += nye.length;
+  _plKo = forst ? nye.concat(_plKo) : _plKo.concat(nye);
+  plPump();
+}
+function plPump() {
+  while (_plAktive < PRELOAD_PARALLEL && _plKo.length) {
+    const img = new Image();
+    _plAktive++;
+    img.onload = () => { _plAktive--; _plStats.ferdig++; plPump(); };
+    img.onerror = () => { _plAktive--; _plStats.feil++; plPump(); };
+    img.src = _plKo.shift();
+  }
+}
+
+// Bygger køen for valgt kartlag. Kalles når sonepolygonene er lastet og ved lagbytte.
+function startPreload() {
+  const lagId = _baseLayerId;
+  const def = BASE_LAYER_DEFS.find(d => d.id === lagId);
+  const modus = preloadModus();
+  // Ved lagbytte er det gamle lagets kø ikke lenger interessant. Det som ikke
+  // rakk å bli hentet, glemmes også i _plSett så det kan bestilles på nytt senere.
+  Object.keys(_plSett).forEach(id => _plKo.forEach(u => _plSett[id].delete(u)));
+  _plStats.bestilt -= _plKo.length;
+  _plKo = [];
+  if (!def || !def.buf || modus === 'av') return;
+  const ringer = alleRinger();
+  if (!ringer.length) return;   // venter på fetchSoner()
+  setTimeout(() => {
+    if (_baseLayerId !== lagId) return;
+    const b = ringerBbox(ringer);
+    def.buf.bbox.forEach(z => {
+      if (modus === 'lett' && z > 12) return;
+      // Lave nivå: samme utsnitt som startvisningen (elva med god luft rundt).
+      plLeggTil(lagId, bboxTiles(z, b, z <= 12 ? 0.75 : 0.2), false);
+    });
+    if (modus === 'full') def.buf.korridor.forEach(z => plLeggTil(lagId, korridorTiles(z, ringer), false));
+    if (activeZone) preloadZone(activeZone);
+  }, PRELOAD_START_MS);
+}
+
+// Når en sone velges: hent sonens korridor på de dypeste nivåene først i køen.
+function preloadZone(zone) {
+  const def = BASE_LAYER_DEFS.find(d => d.id === _baseLayerId);
+  const modus = preloadModus();
+  const ringer = _soneRinger[zone];
+  if (!def || !def.buf || modus === 'av' || !ringer) return;
+  const nivaa = modus === 'lett' ? def.buf.korridor.filter(z => z <= 16) : def.buf.sone;
+  nivaa.slice().reverse().forEach(z => plLeggTil(_baseLayerId, korridorTiles(z, ringer), true));
 }
 
 // ── MAP ───────────────────────────────────────────────────────────────────
@@ -1105,8 +1264,12 @@ async function fetchSoner() {
       lag.bindTooltip(zone, {sticky: true, direction: 'top', className: 'mtip'});
       lag.on('click', () => { selectZone(zone); if (activeZone === zone) showZoneInfo(zone); });
       zonePolys[zone] = lag;
+      const g = f.geometry;
+      const polys = g.type === 'MultiPolygon' ? g.coordinates : [g.coordinates];
+      _soneRinger[zone] = polys.map(p => p[0].map(k => [k[1], k[0]]));   // GeoJSON er [lon, lat]
     });
     updateMap(computeScores());
+    startPreload();
   } catch(e) { /* sonepolygoner er valgfrie – uten dem vises bare start/slutt-markørene */ }
 }
 
@@ -1354,6 +1517,7 @@ function selectZone(zone) {
     activeZone = zone;
     document.getElementById('mapTitle').textContent = '🗺 ' + zone;
     closeMedia(); // lukk ev. åpent bilde/video fra forrige sone
+    preloadZone(zone);
     const zc = ZONE_COORDS[zone];
     if (zonePolys[zone]) map.fitBounds(zonePolys[zone].getBounds(), {padding: [30,30], animate: true, maxZoom: 15});
     else if (zc) map.fitBounds([zc.s, zc.e], {padding: [50,50], animate: true, maxZoom: 14});
@@ -2101,7 +2265,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.056</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.057</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span>
 </div>
 
