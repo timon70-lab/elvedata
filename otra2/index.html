@@ -91,6 +91,14 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .leaflet-tooltip.mtip::before { display: none; }
 .leaflet-tooltip.zone-label { background: #ffffff; color: #1a202c; border: 1px solid rgba(0,0,0,0.15); font-size: 0.58rem; font-weight: 700; padding: 1px 4px; border-radius: 4px; box-shadow: none; pointer-events: none; text-align: center; line-height: 1.2; }
 .leaflet-tooltip.zone-label::before { display: none; }
+.bl-box { display:flex; background:#fff; border:2px solid rgba(0,0,0,0.2); border-radius:6px; overflow:hidden; }
+.bl-btn { background:#fff; color:#374151; border:none; border-right:1px solid #e2e8f0; padding:6px 10px; font-size:0.72rem; font-weight:700; font-family:inherit; cursor:pointer; min-height:30px; }
+.bl-btn:last-child { border-right:none; }
+.bl-btn:hover { background:#f0fff4; }
+.bl-btn.on { background:#276749; color:#fff; }
+.bl-btn:focus-visible { outline:2px solid #9ae6b4; outline-offset:-2px; }
+/* Flyfoto er mørkt: gi sonekantene litt mer trøkk så de synes */
+#map.bl-foto .leaflet-soneflater-pane path { stroke-width:2.5px; }
 .leaflet-soneflater-pane path:focus { outline: none; } /* nettleserens fokusramme rundt klikket sonepolygon */
 
 .photo-panel { width: 100%; max-width: 480px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-top: 14px; display: none; }
@@ -311,6 +319,8 @@ table.rd-tbl tr.big td.w { color:#9b2c2c; }
 #mapFs.fs-on #photoFs { z-index:9900; }
 /* Gi plass til «Avslutt fullskjerm» over Leaflets topright-kontroller */
 #mapFs.fs-on .leaflet-top.leaflet-right { margin-top:46px; }
+/* Kartlagvelgeren skal ikke ligge oppå «Esc lukker fullskjerm» */
+#mapFs.fs-on .leaflet-bottom.leaflet-left { margin-bottom:34px; }
 @media (max-width: 520px) {
   #mapFs.fs-on #fsCtrlBox { width:172px; max-width:calc(100vw - 60px); padding:8px 10px; gap:7px; border-radius:10px; top:10px; left:50px; }
   #mapFs.fs-on #fsCtrlBox .ctrl-row { gap:6px; }
@@ -867,15 +877,68 @@ function update() {
     + '<div class="total-score-lbl">Score</div>';
 }
 
+// ── KARTLAG ───────────────────────────────────────────────────────────────
+// Tre bakgrunnskart: OSM (som før), Kartverkets topografiske kart (stedsnavn,
+// stier, høydekurver) og flyfoto (grusører, stryk, bruer). Valget huskes i
+// nettleseren. maxNativeZoom lar kartet zoome videre ved å forstørre flisene.
+const BASE_LAYER_DEFS = [
+  { id: 'kart', navn: 'Kart', url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    opt: { attribution: '© OpenStreetMap', maxNativeZoom: 19, maxZoom: 19 } },
+  { id: 'topo', navn: 'Topo', url: 'https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png',
+    opt: { attribution: '© Kartverket', maxNativeZoom: 18, maxZoom: 19 } },
+  { id: 'foto', navn: 'Flyfoto', url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    opt: { attribution: 'Flyfoto © Esri, Maxar, Earthstar Geographics', maxNativeZoom: 18, maxZoom: 19 } }
+];
+const BASE_LAYER_KEY = 'elvesona_kartlag';
+let _baseLayers = {};      // id → L.tileLayer
+let _baseLayerId = null;
+
+function setBaseLayer(id) {
+  if (!_baseLayers[id]) id = 'kart';
+  if (_baseLayerId && _baseLayers[_baseLayerId]) map.removeLayer(_baseLayers[_baseLayerId]);
+  _baseLayers[id].addTo(map);
+  _baseLayerId = id;
+  document.getElementById('map').classList.toggle('bl-foto', id === 'foto');
+  document.querySelectorAll('.bl-btn').forEach(b => {
+    const on = b.dataset.bl === id;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+  try { localStorage.setItem(BASE_LAYER_KEY, id); } catch (e) { /* privat modus e.l. */ }
+}
+
+function initBaseLayers() {
+  BASE_LAYER_DEFS.forEach(d => { _baseLayers[d.id] = L.tileLayer(d.url, d.opt); });
+  const BlControl = L.Control.extend({
+    options: { position: 'bottomleft' },
+    onAdd: function() {
+      const box = L.DomUtil.create('div', 'bl-box');
+      box.setAttribute('role', 'group');
+      box.setAttribute('aria-label', 'Velg bakgrunnskart');
+      BASE_LAYER_DEFS.forEach(d => {
+        const b = L.DomUtil.create('button', 'bl-btn', box);
+        b.type = 'button';
+        b.dataset.bl = d.id;
+        b.textContent = d.navn;
+        L.DomEvent.on(b, 'click', (e) => { L.DomEvent.stop(e); setBaseLayer(d.id); });
+      });
+      L.DomEvent.disableClickPropagation(box);
+      return box;
+    }
+  });
+  new BlControl().addTo(map);
+  let valgt = 'kart';
+  try { valgt = localStorage.getItem(BASE_LAYER_KEY) || 'kart'; } catch (e) { /* ignorer */ }
+  setBaseLayer(valgt);
+}
+
 // ── MAP ───────────────────────────────────────────────────────────────────
 function initMap() {
   if (map) return;
   const container = document.getElementById('map');
   container.style.height = '320px';
-  map = L.map('map', {zoomControl: true}).setView([58.198, 7.970], 12);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap', maxZoom: 17
-  }).addTo(map);
+  map = L.map('map', {zoomControl: true, maxZoom: 19}).setView([58.198, 7.970], 12);
+  initBaseLayers();
 
   setTimeout(() => map.invalidateSize(), 50);
   setTimeout(() => map.invalidateSize(), 300);
@@ -2038,8 +2101,8 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.055</span><br>
-  <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.056</span><br>
+  <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span>
 </div>
 
 <div class="rd-overlay" id="rdOverlay"
