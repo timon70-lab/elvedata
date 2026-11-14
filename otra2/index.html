@@ -318,6 +318,9 @@ table.rd-tbl tr.big td.w { color:#9b2c2c; }
 #mapFs.fs-on #photoPanel { position:absolute; right:12px; bottom:12px; z-index:9600; width:465px; max-width:calc(100vw - 24px); max-height:calc(100vh - 24px); overflow:auto; margin-top:0; }
 #mapFs.fs-on #photoPanel .photo-img { max-height:420px; }
 #mapFs.fs-on #photoFs { z-index:9900; }
+/* Fullskjerm: alle sliderne i kontrollboksen, soneinfo som sidepanel til venstre */
+#mapFs.fs-on #fsCtrlBox .dual-slider { width:auto; flex:1 1 auto; min-width:0; }
+#mapFs.fs-on #zoneInfoPanel { position:absolute; left:12px; top:236px; width:360px; max-width:calc(100vw - 24px); max-height:calc(100% - 236px - 84px); overflow:auto; margin:0; z-index:9590; box-shadow:0 4px 18px rgba(0,0,0,0.28); }
 /* Gi plass til «Avslutt fullskjerm» over Leaflets topright-kontroller */
 #mapFs.fs-on .leaflet-top.leaflet-right { margin-top:46px; }
 /* Kartlagvelgeren skal ikke ligge oppå «Esc lukker fullskjerm» */
@@ -332,7 +335,25 @@ table.rd-tbl tr.big td.w { color:#9b2c2c; }
   #mapFs.fs-on #fsCtrlBox .flow-chip .fc-arw { width:30px; height:30px; font-size:1.05rem; }
   #mapFs.fs-on #fsCtrlBox .flow-chip.on .fc-lbl { min-width:64px; padding:6px 2px; }
   #mapFs.fs-on #fsCtrlBox .fc-cnt { display:none; }
+  /* Mobil: bare vannføring i boksen, soneinfo som ark nederst */
+  #mapFs.fs-on #fsCtrlBox .ctrl-row.fs-extra { display:none; }
+  #mapFs.fs-on #zoneInfoPanel { left:8px; right:8px; width:auto; max-width:none; top:auto; bottom:84px; max-height:42vh; }
 }
+
+/* ===== PC-layout: kartet som hovedflate =====
+   Fra 1000 px bredde ligger kartet fast til venstre i full høyde, mens banner,
+   topp 3, slidere, soneinfo og bilder ruller i en 480 px kolonne til høyre.
+   Under 1000 px er siden som før (én kolonne, kart 320 px høyt). */
+@media (min-width: 1000px) {
+  body { align-items:flex-end; padding:34px 24px 40px 16px; }
+  body > h1 { width:480px; }
+  #mapFs:not(.fs-on) { display:block; position:fixed; left:16px; top:34px; bottom:16px; right:520px; z-index:5; }
+  #mapFs:not(.fs-on) .map-panel { max-width:none; height:100%; display:flex; flex-direction:column; }
+  #mapFs:not(.fs-on) #map { flex:1 1 auto; height:auto !important; min-height:0; }
+  .photo-panel, .zone-info-panel { margin-top:0; margin-bottom:14px; }
+}
+.wheel-hint { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:1100; background:rgba(15,45,74,0.85); color:#fff; font-size:0.72rem; font-weight:700; padding:8px 14px; border-radius:8px; pointer-events:none; opacity:0; transition:opacity 0.2s; white-space:nowrap; }
+.wheel-hint.vis { opacity:1; }
 </style>
 <!-- GoatCounter er fjernet med vilje: otra2 er en testklone og skal ikke telles. -->
 </head>
@@ -1099,6 +1120,21 @@ function initMap() {
   container.style.height = '320px';
   map = L.map('map', {zoomControl: true, maxZoom: 19}).setView([58.198, 7.970], 12);
   initBaseLayers();
+
+  // Hjulzoom: i PC-layout og fullskjerm er kartet en egen flate, og hjulet zoomer.
+  // Ligger kartet inne i siden (smal skjerm), kreves Ctrl + hjul, så siden kan
+  // rulles forbi kartet uten at det zoomer.
+  const hjulHint = L.DomUtil.create('div', 'wheel-hint', container);
+  hjulHint.textContent = 'Hold Ctrl og rull for å zoome kartet';
+  let hjulTimer = null;
+  container.addEventListener('wheel', (e) => {
+    const egenFlate = _mapFsOn || window.matchMedia('(min-width: 1000px)').matches;
+    if (egenFlate || e.ctrlKey) { map.scrollWheelZoom.enable(); return; }
+    map.scrollWheelZoom.disable();
+    hjulHint.classList.add('vis');
+    clearTimeout(hjulTimer);
+    hjulTimer = setTimeout(() => hjulHint.classList.remove('vis'), 1200);
+  }, { capture: true, passive: true });
 
   // Diskret zoomnivå-visning under +/−, så det er lett å vise til «zoom 13».
   const ZoomLbl = L.Control.extend({
@@ -2072,15 +2108,21 @@ function _enterMapFs() {
   var chip = document.getElementById('flowChip');
   var pp   = document.getElementById('photoPanel');
   var pfs  = document.getElementById('photoFs');
+  var zi   = document.getElementById('zoneInfoPanel');
+  // År, måned og «Kun flue» følger med inn i boksen (skjules på mobil via .fs-extra).
+  var ekstra = Array.prototype.filter.call(document.querySelectorAll('.ctrl-col > .ctrl-row'),
+    function (r) { return r !== row; });
+  ekstra.forEach(function (r) { r.classList.add('fs-extra'); });
   _fsHomes = [];
-  [row, chip, pp, pfs].forEach(_fsStash);
+  [row].concat(ekstra, [chip, pp, pfs, zi]).forEach(_fsStash);
   if (row)  box.appendChild(row);
+  ekstra.forEach(function (r) { box.appendChild(r); });
   if (chip) box.appendChild(chip);
   if (pp)   wrap.appendChild(pp);
   if (pfs)  wrap.appendChild(pfs);
+  if (zi)   wrap.appendChild(zi);   // soneinfo vises som sidepanel i fullskjerm
   wrap.classList.add('fs-on');
   _mapFsOn = true;
-  closeZoneInfo();
   _fsObserveMap();
   try {
     if (wrap.requestFullscreen) wrap.requestFullscreen().catch(function () {});
@@ -2280,7 +2322,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.058</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.059</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span>
 </div>
 
