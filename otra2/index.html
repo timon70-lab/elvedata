@@ -95,6 +95,18 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .leaflet-tooltip.zone-label { background: #ffffff; color: #1a202c; border: 1px solid rgba(0,0,0,0.15); font-size: 0.58rem; font-weight: 700; padding: 1px 4px; border-radius: 4px; box-shadow: none; pointer-events: none; text-align: center; line-height: 1.2; }
 .leaflet-tooltip.zone-label::before { display: none; }
 .zoom-lbl { background:rgba(255,255,255,0.8); color:#4a5568; font-size:0.62rem; font-weight:700; padding:1px 0; width:34px; text-align:center; border-radius:4px; pointer-events:none; font-variant-numeric:tabular-nums; margin-top:4px !important; }
+.pos-kort { display:none; width:214px; max-width:60vw; background:#fff; border:2px solid rgba(0,0,0,0.2); border-radius:8px; padding:8px 10px; font-size:0.72rem; line-height:1.45; color:#1a202c; text-align:left; box-shadow:0 2px 10px rgba(0,0,0,0.18); }
+.pos-kort .pk-hdr { display:flex; justify-content:space-between; align-items:flex-start; gap:6px; font-weight:600; }
+.pos-kort .pk-hdr b { font-weight:800; color:#276749; }
+.pos-kort .pk-x { background:none; border:none; color:#94a3b8; font-size:0.95rem; line-height:1; cursor:pointer; padding:0 2px; font-family:inherit; }
+.pos-kort .pk-rad { margin-top:3px; color:#4a5568; }
+.pos-kort .pk-score { display:inline-block; min-width:24px; text-align:center; color:#fff; font-weight:800; border-radius:999px; padding:0 6px; margin-right:4px; }
+.pos-kort .pk-stengt { color:#c53030; font-weight:700; }
+.pos-kort .pk-delvis { color:#b7791f; font-weight:700; }
+.pos-kort .pk-apen { color:#276749; font-weight:700; }
+.pos-kort .pk-lenker { margin-top:5px; }
+.pos-kort .pk-lenker a { color:#2b6cb0; text-decoration:none; font-weight:700; cursor:pointer; }
+.pos-kort .pk-svak { color:#94a3b8; font-size:0.64rem; margin-top:3px; }
 .bl-box { display:flex; background:#fff; border:2px solid rgba(0,0,0,0.2); border-radius:6px; overflow:hidden; }
 .bl-btn { background:#fff; color:#374151; border:none; border-right:1px solid #e2e8f0; padding:6px 10px; font-size:0.72rem; font-weight:700; font-family:inherit; cursor:pointer; min-height:30px; }
 .bl-btn:last-child { border-right:none; }
@@ -1231,11 +1243,14 @@ function initMap() {
       btn.title = 'Vis min posisjon på kartet';
       L.DomEvent.on(btn, 'click', L.DomEvent.stopPropagation);
       L.DomEvent.on(btn, 'click', () => {
+        if (_folger) { stoppPosisjon(); return; }   // andre trykk slår av
+        _folger = true;
+        _forsteFix = true;
         btn.innerHTML = '⏳ Søker...';
         btn.disabled = true;
-        _locatingInProgress = true;
-        map.locate({ setView: true, maxZoom: 14 });
+        finnPosisjon(true);
       });
+      _locBtn = btn;
       return btn;
     }
   });
@@ -1254,11 +1269,11 @@ function initMap() {
       L.DomEvent.on(_nearestBtn, 'click', L.DomEvent.stopPropagation);
       L.DomEvent.on(_nearestBtn, 'click', () => {
         if (!DESINF.length) { alert('Desinfeksjonspostene er ikke lastet ennå. Prøv igjen om et øyeblikk.'); return; }
+        if (_minPos) { showNearestPostFrom(_minPos.latlng); return; }   // posisjonen er allerede kjent
         _nearestBtn.innerHTML = '⏳ Søker...';
         _nearestBtn.disabled = true;
         _nearestPostPending = true;
-        _locatingInProgress = true;
-        map.locate({ setView: false });
+        finnPosisjon(false);
       });
       return _nearestBtn;
     }
@@ -1269,28 +1284,39 @@ function initMap() {
     if (_nearestBtn) { _nearestBtn.innerHTML = desinfIconHtml(18) + ' Desinfisering'; _nearestBtn.disabled = false; }
   }
 
-  let _myLocMarker = null;
-  let _locatingInProgress = false;
+  // Posisjonskortet: «Du står i Sone …», under knappene oppe til høyre.
+  const PosKort = L.Control.extend({
+    options: { position: 'topright' },
+    onAdd: function() {
+      _posKortEl = L.DomUtil.create('div', 'pos-kort');
+      L.DomEvent.disableClickPropagation(_posKortEl);
+      L.DomEvent.disableScrollPropagation(_posKortEl);
+      return _posKortEl;
+    }
+  });
+  new PosKort().addTo(map);
+
   map.on('locationfound', (e) => {
+    _locatingInProgress = false;
+    _minPos = { latlng: e.latlng, accuracy: e.accuracy || 0 };
     if (_nearestPostPending) {
       resetNearestBtn();
       showNearestPostFrom(e.latlng);
     }
-    if (_myLocMarker) _myLocMarker.remove();
-    _myLocMarker = L.circleMarker(e.latlng, {
-      radius: 8, color: '#e53e3e', fillColor: '#e53e3e',
-      fillOpacity: 0.9, weight: 2
-    }).addTo(map).bindTooltip('📍 Du er her', { permanent: false, direction: 'top', className: 'mtip' });
-    const locBtn = document.querySelector('[title="Vis min posisjon på kartet"]');
-    if (locBtn) { locBtn.innerHTML = '📍 Hvor er jeg?'; locBtn.disabled = false; }
-    _locatingInProgress = false;
+    tegnPosisjon();
+    // Første treff flytter kartet til deg; etterpå står kartet i ro så du kan se deg rundt.
+    if (_folger && _forsteFix) {
+      _forsteFix = false;
+      map.setView(e.latlng, Math.max(map.getZoom(), 15));
+    }
+    if (_locBtn) { _locBtn.disabled = false; _locBtn.innerHTML = _folger ? '📍 Følger deg · stopp' : '📍 Hvor er jeg?'; }
+    oppdaterPosKort();
   });
   map.on('locationerror', () => {
     resetNearestBtn();
-    const locBtn = document.querySelector('[title="Vis min posisjon på kartet"]');
-    if (locBtn) { locBtn.innerHTML = '📍 Hvor er jeg?'; locBtn.disabled = false; }
-    _locatingInProgress = false;
-    alert('Posisjon ikke tilgjengelig. Sjekk at du har gitt tilgang til posisjon i nettleseren.');
+    const fulgte = _folger;
+    stoppPosisjon();
+    visPosFeil(fulgte ? 'Fant ikke posisjonen din.' : 'Fant ikke posisjonen din, så nærmeste post kan ikke vises.');
   });
 
   ZONES.forEach(zone => {
@@ -1683,6 +1709,128 @@ async function fetchSenterlinje() {
   } catch (e) { /* uten midtlinja vises polygonene som vanlig også i oversikten */ }
 }
 
+// ── POSISJON: «hvilken sone står jeg i?» ──────────────────────────────────
+// «Hvor er jeg?» følger posisjonen løpende (blå prikk + nøyaktighetssirkel) og
+// viser et kort med sonen du står i, score, dagsstatus og pris.
+// Testposisjon uten GPS: ?pos=58.2335,7.9385 i adressen.
+let _folger = false;              // «Hvor er jeg?» er slått på
+let _forsteFix = false;           // neste treff skal flytte kartet til posisjonen
+let _minPos = null;               // { latlng, accuracy } – siste kjente posisjon
+let _posMk = null, _posSirkel = null;
+let _posKortEl = null, _locBtn = null;
+let _posFeilTimer = null;
+let _locatingInProgress = false;  // leses av _onMapFsChange (tillatelsesdialogen kan avbryte fullskjerm)
+const _testPos = (() => {
+  const m = /[?&]pos=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/.exec(location.search);
+  return m ? [parseFloat(m[1]), parseFloat(m[2])] : null;
+})();
+
+function finnPosisjon(folg) {
+  _locatingInProgress = true;
+  if (_testPos) {
+    setTimeout(() => map.fire('locationfound', { latlng: L.latLng(_testPos[0], _testPos[1]), accuracy: 12 }), 300);
+    return;
+  }
+  map.locate(folg ? { watch: true, setView: false, enableHighAccuracy: true, maximumAge: 5000 }
+                  : { setView: false });
+}
+
+function tegnPosisjon() {
+  if (!_minPos) return;
+  const ll = _minPos.latlng, r = Math.max(_minPos.accuracy, 5);
+  if (!_posSirkel) {
+    _posSirkel = L.circle(ll, { radius: r, color: '#2b6cb0', weight: 1, fillColor: '#2b6cb0', fillOpacity: 0.12, interactive: false }).addTo(map);
+    _posMk = L.circleMarker(ll, { radius: 7, color: '#fff', weight: 2.5, fillColor: '#2b6cb0', fillOpacity: 1 }).addTo(map)
+      .bindTooltip('Du er her', { direction: 'top', className: 'mtip' });
+  } else {
+    _posSirkel.setLatLng(ll).setRadius(r);
+    _posMk.setLatLng(ll);
+  }
+}
+
+function stoppPosisjon() {
+  _folger = false;
+  _forsteFix = false;
+  _locatingInProgress = false;
+  if (map) map.stopLocate();
+  if (_posMk) { _posMk.remove(); _posMk = null; }
+  if (_posSirkel) { _posSirkel.remove(); _posSirkel = null; }
+  _minPos = null;
+  if (_locBtn) { _locBtn.disabled = false; _locBtn.innerHTML = '📍 Hvor er jeg?'; }
+  oppdaterPosKort();
+}
+
+function visPosFeil(tekst) {
+  if (!_posKortEl) return;
+  _posKortEl.innerHTML = '<div class="pk-hdr"><span>⚠️ ' + tekst + '</span></div>'
+    + '<div class="pk-svak">Sjekk at nettleseren har tilgang til posisjon.</div>';
+  _posKortEl.style.display = 'block';
+  clearTimeout(_posFeilTimer);
+  _posFeilTimer = setTimeout(() => { if (!_folger) _posKortEl.style.display = 'none'; }, 6000);
+}
+
+// Sonen punktet ligger i. En delsone vinner over hovedsonen den ligger inni.
+function soneVedPunkt(lat, lon) {
+  let treff = null;
+  ZONES.forEach(z => {
+    const ringer = _soneRinger[z];
+    if (!ringer || !ringer.some(r => pointInRing(lat, lon, r))) return;
+    if (!treff || (zonePolys[z] && zonePolys[z].isDel)) treff = z;
+  });
+  return treff;
+}
+// Nærmeste sone målt mot polygonenes hjørner (godt nok til «ca. 300 m»).
+function naermesteSone(lat, lon) {
+  let best = null;
+  ZONES.forEach(z => (_soneRinger[z] || []).forEach(r => r.forEach(v => {
+    const m = haversineKm([lat, lon], v) * 1000;
+    if (!best || m < best.m) best = { zone: z, m };
+  })));
+  return best;
+}
+
+function visSoneFraPos(zone) {
+  if (activeZone !== zone) selectZone(zone);
+  showZoneInfo(zone);
+}
+
+function oppdaterPosKort() {
+  if (!_posKortEl) return;
+  if (!_folger || !_minPos) { clearTimeout(_posFeilTimer); _posKortEl.style.display = 'none'; return; }
+  const lat = _minPos.latlng.lat, lon = _minPos.latlng.lng;
+  const x = '<button class="pk-x" onclick="stoppPosisjon()" title="Slå av posisjon" aria-label="Slå av posisjon">✕</button>';
+  const usikker = _minPos.accuracy > 75
+    ? '<div class="pk-svak">Usikker posisjon (± ' + Math.round(_minPos.accuracy) + ' m)</div>' : '';
+  const zone = soneVedPunkt(lat, lon);
+  let html;
+  if (zone) {
+    const scores = computeScores();
+    const sc = scores && scores[zone] ? scores[zone].score : null;
+    const st = soneStatus(zone);
+    const pris = PRICES[zone] && PRICES[zone].dogn ? PRICES[zone].dogn + ' kr døgnkort' : '';
+    const kort = ZONE_INFO[zone] && ZONE_INFO[zone].kortUrl;
+    const stKl = st.lukket ? 'pk-stengt' : (st.delvis ? 'pk-delvis' : 'pk-apen');
+    html = '<div class="pk-hdr"><span>📍 Du står i <b>' + zone + '</b></span>' + x + '</div>'
+      + (sc !== null ? '<div class="pk-rad"><span class="pk-score" style="background:' + scoreColor(sc) + '">' + sc
+          + '</span>score ved ' + flowBinLabel(currentFlow) + ' m³/s</div>' : '')
+      + (st.kort ? '<div class="pk-rad ' + stKl + '">' + st.kort + (st.tekst ? ' — ' + st.tekst : '') + '</div>' : '')
+      + (pris ? '<div class="pk-rad">' + pris + '</div>' : '')
+      + '<div class="pk-lenker"><a data-z="' + zone + '" onclick="visSoneFraPos(this.dataset.z)">Vis sone</a>'
+      + (kort && st.kode !== 'stengt' ? ' · <a href="' + kort + '" target="_blank" rel="noopener">Kjøp kort ↗</a>' : '')
+      + '</div>' + usikker;
+  } else {
+    const n = naermesteSone(lat, lon);
+    const avst = !n ? '' : (n.m < 1000 ? 'ca. ' + Math.round(n.m / 10) * 10 + ' m' : 'ca. ' + fmtKm(n.m / 1000) + ' km');
+    html = '<div class="pk-hdr"><span>📍 Du står utenfor sonene</span>' + x + '</div>'
+      + (n ? '<div class="pk-rad">Nærmeste: <b>' + n.zone + '</b>, ' + avst + '</div>'
+           + '<div class="pk-lenker"><a data-z="' + n.zone + '" onclick="visSoneFraPos(this.dataset.z)">Vis sone</a></div>' : '')
+      + usikker;
+  }
+  clearTimeout(_posFeilTimer);
+  _posKortEl.innerHTML = html;
+  _posKortEl.style.display = 'block';
+}
+
 const STENGT_FARGE = '#64748b';   // stengt sone (hele sesongen eller i dag)
 let _harPolygoner = false;   // true når sonepolygonene er lastet
 let _legendEl = null;
@@ -1827,6 +1975,7 @@ function updateMap(scores) {
     if (mk._icon) mk._icon.style.pointerEvents = show ? 'auto' : 'none';
   });
   _syncFlowChip(); // pillens antall følger valgt sone og vannføring
+  oppdaterPosKort(); // score og status i posisjonskortet følger sliderne
 }
 
 function selectZone(zone) {
@@ -2658,7 +2807,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.065</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.066</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span>
 </div>
 
