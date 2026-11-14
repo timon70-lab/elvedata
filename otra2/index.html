@@ -355,6 +355,13 @@ table.rd-tbl tr.big td.w { color:#9b2c2c; }
   #mapFs:not(.fs-on) #map { flex:1 1 auto; height:auto !important; min-height:0; }
   .photo-panel, .zone-info-panel { margin-top:0; margin-bottom:14px; }
 }
+/* Smal skjerm med valgt sone: kartet står fast øverst på skjermen (lavere enn
+   ellers), og soneinfo/bilder ruller under det. */
+@media (max-width: 999px) {
+  .map-panel { scroll-margin-top:24px; }
+  body.sone-valgt .map-panel { position:sticky; top:24px; z-index:60; box-shadow:0 6px 18px rgba(0,0,0,0.22); }
+  body.sone-valgt #map { height:max(230px, 36vh); }
+}
 .wheel-hint { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:1100; background:rgba(15,45,74,0.85); color:#fff; font-size:0.72rem; font-weight:700; padding:8px 14px; border-radius:8px; pointer-events:none; opacity:0; transition:opacity 0.2s; white-space:nowrap; }
 .wheel-hint.vis { opacity:1; }
 </style>
@@ -470,6 +477,7 @@ const BILDE_BASE = '../bilder/otra/';
 const PHOTOS_URL = '../data/photos_otra.json';
 const VIDEOS_URL = '../data/videoer_otra.json';
 const SONER_URL = '../data/soner_otra.geojson'; // sonepolygoner, laget av scripts/sonepolygoner.py
+const SENTERLINJE_URL = '../data/senterlinje_otra.geojson'; // midtlinja, brukes til sonelinjene i oversikten
 const SESONG_URL = '../data/sesong.json';
 const SESONG_ELV = 'otra';
 
@@ -858,7 +866,10 @@ function update() {
       row.addEventListener('click', () => {
         selectZone(zone);
         // Topp 3 øverst i vinduet, kartet med valgt sone rett under.
-        if (activeZone === zone) document.getElementById('zoneList').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (activeZone === zone) {
+          if (erSmalLayout()) visKartOverst();
+          else document.getElementById('zoneList').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       });
     }
     container.appendChild(row);
@@ -1329,6 +1340,7 @@ async function fetchSoner() {
     plasserSoneMarkorer();
     updateMap(computeScores());
     startPreload();
+    fetchSenterlinje();
   } catch(e) { /* sonepolygoner er valgfrie – uten dem vises bare start/slutt-markørene */ }
 }
 
@@ -1523,6 +1535,98 @@ function desinfZoneHtml(zone) {
   return '<div class="zi-row"><span class="zi-label">Desinfisering</span><span class="zi-val">' + body + '</span></div>';
 }
 
+// ── SONELINJER (oversikt under zoom 13) ───────────────────────────────────
+// I oversikten er polygonene for smale til å leses. Der tegnes hver hovedsone
+// i stedet som én glatt linje langs elvas midtlinje, med hvit kant under.
+let soneLinjer = {};     // sone → L.polyline
+let _elvKant = null;     // hvit kant under alle sonelinjene
+
+function erSmalLayout() { return !window.matchMedia('(min-width: 1000px)').matches; }
+// Smal skjerm: rull så kartet står øverst, med detaljene rett under.
+function visKartOverst() {
+  document.querySelector('.map-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Chaikin-glatting: kutter hjørnene på en grovt tegnet linje.
+function chaikin(pts, runder) {
+  for (let r = 0; r < runder; r++) {
+    const ut = [pts[0]];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const a = pts[i], b = pts[i + 1];
+      ut.push([0.75 * a[0] + 0.25 * b[0], 0.75 * a[1] + 0.25 * b[1]]);
+      ut.push([0.25 * a[0] + 0.75 * b[0], 0.25 * a[1] + 0.75 * b[1]]);
+    }
+    ut.push(pts[pts.length - 1]);
+    pts = ut;
+  }
+  return pts;
+}
+
+function lagSoneLinjer(senter) {
+  const pts = chaikin(senter, 2);
+  const kum = [0];   // avstand langs linja til hvert punkt, i meter
+  for (let i = 1; i < pts.length; i++) kum.push(kum[i - 1] + haversineKm(pts[i - 1], pts[i]) * 1000);
+  // Avstand langs linja til punktet på linja som er nærmest v.
+  const kjeding = (v) => {
+    let best = 0, bd = Infinity;
+    const kx = Math.cos(v[0] * Math.PI / 180) * 111320, ky = 110540;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const ax = (pts[i][1] - v[1]) * kx, ay = (pts[i][0] - v[0]) * ky;
+      const bx = (pts[i + 1][1] - v[1]) * kx, by = (pts[i + 1][0] - v[0]) * ky;
+      const dx = bx - ax, dy = by - ay, l2 = dx * dx + dy * dy;
+      const t = l2 > 0 ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / l2)) : 0;
+      const px = ax + t * dx, py = ay + t * dy, d = px * px + py * py;
+      if (d < bd) { bd = d; best = kum[i] + t * (kum[i + 1] - kum[i]); }
+    }
+    return best;
+  };
+  const punktVed = (m) => {
+    for (let i = 0; i < pts.length - 1; i++) {
+      if (m <= kum[i + 1]) {
+        const t = (m - kum[i]) / ((kum[i + 1] - kum[i]) || 1);
+        return [pts[i][0] + t * (pts[i + 1][0] - pts[i][0]), pts[i][1] + t * (pts[i + 1][1] - pts[i][1])];
+      }
+    }
+    return pts[pts.length - 1];
+  };
+  const snitt = (fra, til) => [punktVed(fra)].concat(pts.filter((q, i) => kum[i] > fra && kum[i] < til), [punktVed(til)]);
+
+  map.createPane('sonelinjer').style.zIndex = 360;   // over polygonene (350), under markørene
+  let lavest = Infinity, hoyest = -Infinity;
+  const deler = [];
+  ZONES.forEach(zone => {
+    const poly = zonePolys[zone], ring = (_soneRinger[zone] || [])[0];
+    if (!poly || poly.isDel || !ring) return;
+    let fra = Infinity, til = -Infinity;
+    ring.forEach(v => { const k = kjeding(v); fra = Math.min(fra, k); til = Math.max(til, k); });
+    if (til - fra < 20) return;
+    lavest = Math.min(lavest, fra); hoyest = Math.max(hoyest, til);
+    deler.push({ zone, fra, til });
+  });
+  if (!deler.length) return;
+  _elvKant = L.polyline(snitt(lavest, hoyest), { pane: 'sonelinjer', color: '#fff', weight: 10, opacity: 0,
+    lineCap: 'round', lineJoin: 'round', interactive: false }).addTo(map);
+  deler.forEach(d => {
+    const linje = L.polyline(snitt(d.fra, d.til), { pane: 'sonelinjer', weight: 6, opacity: 0,
+      lineCap: 'butt', lineJoin: 'round' }).addTo(map);
+    linje.bindTooltip(d.zone, { sticky: true, direction: 'top', className: 'mtip' });
+    linje.on('click', () => { selectZone(d.zone); if (activeZone === d.zone) showZoneInfo(d.zone); });
+    soneLinjer[d.zone] = linje;
+  });
+}
+
+async function fetchSenterlinje() {
+  try {
+    const res = await fetch(SENTERLINJE_URL);
+    if (!res.ok) return;
+    const gj = await res.json();
+    const f = gj.features.find(x => x.geometry && x.geometry.type === 'LineString');
+    if (!f) return;
+    lagSoneLinjer(f.geometry.coordinates.map(k => [k[1], k[0]]));   // GeoJSON er [lon, lat]
+    updateMap(computeScores());
+  } catch (e) { /* uten midtlinja vises polygonene som vanlig også i oversikten */ }
+}
+
 let _harPolygoner = false;   // true når sonepolygonene er lastet
 let _legendEl = null;
 let _legendTxt = '';
@@ -1585,10 +1689,12 @@ function oppdaterTegnforklaring() {
 function updateMap(scores) {
   if (!map) return;
   oppdaterTegnforklaring();
-  // Oversiktsmodus under zoom 13: hovedsonene tegnes med tykk kant så de leses
-  // som en scorefarget linje langs elva, og delsonene skjules.
+  // Oversiktsmodus under zoom 13: hovedsonene vises som glatte linjer langs
+  // midtlinja (soneLinjer), og polygonene og delsonene skjules.
   const lav = map.getZoom() < LABEL_ZOOM_THRESHOLD;
+  const linjeModus = lav && Object.keys(soneLinjer).length > 0;
   document.getElementById('map').classList.toggle('lav-zoom', lav);
+  if (_elvKant) _elvKant.setStyle({ opacity: linjeModus ? 0.95 : 0 });
   ZONES.forEach(zone => {
     const isSelected = zone === activeZone;
     const isDimmed = activeZone !== null && !isSelected;
@@ -1597,15 +1703,23 @@ function updateMap(scores) {
     const poly = zonePolys[zone];
     const erDel = !!(poly && poly.isDel);
     const skjult = lav && erDel && !isSelected;   // delsoner vises ikke i oversikten
+    // I linjemodus erstatter sonelinja polygonet for hovedsonene.
+    const polySkjult = skjult || (linjeModus && !erDel);
     if (poly) {
-      poly.setStyle(skjult ? { opacity: 0, fillOpacity: 0 } : {
+      poly.setStyle(polySkjult ? { opacity: 0, fillOpacity: 0 } : {
         color: col, fillColor: col,
-        weight: lav ? (isSelected ? 9 : 7) : (isSelected ? 3 : 1.5),
-        opacity: lav ? (isDimmed ? 0.6 : 1) : (isDimmed ? 0.5 : 0.9),
+        weight: isSelected ? 3 : 1.5,
+        opacity: isDimmed ? 0.5 : 0.9,
         fillOpacity: isSelected ? 0.35 : (isDimmed ? 0.08 : 0.22),
-        dashArray: (erDel && !lav) ? '5,4' : null
+        dashArray: erDel ? '5,4' : null
       });
-      poly.eachLayer(pl => { if (pl._path) pl._path.style.pointerEvents = skjult ? 'none' : ''; });
+      poly.eachLayer(pl => { if (pl._path) pl._path.style.pointerEvents = polySkjult ? 'none' : ''; });
+    }
+    const linje = soneLinjer[zone];
+    if (linje) {
+      linje.setStyle({ color: col, weight: isSelected ? 9 : 6, opacity: linjeModus ? (isDimmed ? 0.6 : 1) : 0 });
+      if (linje._path) linje._path.style.pointerEvents = linjeModus ? '' : 'none';
+      if (linjeModus && isSelected) linje.bringToFront();
     }
     const l = mapLayers[zone]; if (!l) return;
     const scoreText = scores ? String(sc) : '–';
@@ -1662,10 +1776,17 @@ function selectZone(zone) {
     closeMedia(); // lukk ev. åpent bilde/video fra forrige sone
     preloadZone(zone);
   }
+  // Smal skjerm: valgt sone gjør kartet lavere og fast øverst (CSS body.sone-valgt).
+  // Kartet skifter da høyde, så Leaflet må måle på nytt, og zoomen til sonen
+  // gjøres uten animasjon (en animasjon som starter midt i høydeskiftet kan bomme).
+  const hoydeskift = erSmalLayout() && !_mapFsOn
+    && document.body.classList.contains('sone-valgt') !== (activeZone !== null);
+  document.body.classList.toggle('sone-valgt', activeZone !== null);
+  if (hoydeskift) map.invalidateSize({ animate: false });
   update();
   // Zoom til sonen ETTER update(): da er soneinfo tegnet, og i fullskjerm vet vi
   // hvor mye av kartet panelet dekker (se kartInnrykk).
-  if (activeZone === zone) zoomTilSone(zone);
+  if (activeZone === zone) zoomTilSone(zone, !hoydeskift);
 }
 
 // Hvor mye av kartflaten som er dekket av paneler i fullskjerm, i piksler fra
@@ -1689,13 +1810,13 @@ function kartInnrykk() {
   return inn;
 }
 
-function zoomTilSone(zone) {
+function zoomTilSone(zone, animer = true) {
   const inn = kartInnrykk();
   const zc = ZONE_COORDS[zone];
   if (zonePolys[zone]) map.fitBounds(zonePolys[zone].getBounds(),
-    {paddingTopLeft: [30 + inn.venstre, 30], paddingBottomRight: [30, 30 + inn.bunn], animate: true, maxZoom: 15});
+    {paddingTopLeft: [30 + inn.venstre, 30], paddingBottomRight: [30, 30 + inn.bunn], animate: animer, maxZoom: 15});
   else if (zc) map.fitBounds([zc.s, zc.e],
-    {paddingTopLeft: [50 + inn.venstre, 50], paddingBottomRight: [50, 50 + inn.bunn], animate: true, maxZoom: 14});
+    {paddingTopLeft: [50 + inn.venstre, 50], paddingBottomRight: [50, 50 + inn.bunn], animate: animer, maxZoom: 14});
 }
 
 // Flytter kartet så punktet havner midt i den SYNLIGE delen av kartet.
@@ -1812,7 +1933,11 @@ function showZoneInfo(zone, scrollTo = true) {
   `;
   const panel = document.getElementById('zoneInfoPanel');
   panel.classList.add('visible');
-  if (scrollTo) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (scrollTo) {
+    // Smal skjerm: kartet øverst og soneinfo under, i stedet for at panelet tar hele skjermen.
+    if (erSmalLayout() && !_mapFsOn) visKartOverst();
+    else panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
 }
 
 function closeZoneInfo() {
@@ -1918,7 +2043,8 @@ function openZoneMedia(zone, target) {
   _panTilAktivtMedium();
   const _pImg = document.getElementById('photoImg');
   if (!_pImg._panBundet) { _pImg._panBundet = true; _pImg.addEventListener('load', _panTilAktivtMedium); }
-  document.getElementById('photoPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (erSmalLayout() && !_mapFsOn) visKartOverst();
+  else document.getElementById('photoPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function showMedia(idx) {
@@ -2461,7 +2587,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.061</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.062</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span>
 </div>
 
