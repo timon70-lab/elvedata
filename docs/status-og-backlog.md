@@ -57,6 +57,8 @@ Admin har seksjonene Nyheter, Media, Sesong, Scoringsparametre og Nøkler og til
 - Sesongoppsummering som lavsesonginnhold (nesten fullt automatiserbar).
 - Oversiktskart: sesongtotal eller nedtelling på stengte markører; «planleggingsmodus» i dashboard.
 - Turlogg / fangstregistrering — se `docs/ideer/turlogg.md`.
+- Kartløsning Otra: åtte forbedringsforslag fra evaluering av v1.054 (loggført 2026-11-14) — se
+  `docs/ideer/otra-kart-forbedringer.md`.
 - Egen tilbakemeldingsside — runde 1 (Worker, side, admin) er bygd, men ikke satt i drift eller lenket.
   Neste runder: lenke fra alle seks dashboard, statistikk og 💬 på oversiktskartet; deretter
   «Stemte dette? 👍/👎» under topp 3. Se `docs/ideer/tilbakemeldingsside.md`.
