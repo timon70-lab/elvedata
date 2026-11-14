@@ -1683,6 +1683,7 @@ async function fetchSenterlinje() {
   } catch (e) { /* uten midtlinja vises polygonene som vanlig også i oversikten */ }
 }
 
+const STENGT_FARGE = '#64748b';   // stengt sone (hele sesongen eller i dag)
 let _harPolygoner = false;   // true når sonepolygonene er lastet
 let _legendEl = null;
 let _legendTxt = '';
@@ -1735,11 +1736,12 @@ function oppdaterTegnforklaring() {
   if (!_legendEl) return;
   const k = SCORE_CFG.knee / 100;
   const a = Math.ceil(70 * k), b = Math.ceil(45 * k), d = Math.ceil(25 * k);
-  const txt = 'Score <span><i style="background:#38a169"></i>' + a + '+</span>'
-    + '<span><i style="background:#3182ce"></i>' + b + '–' + (a - 1) + '</span>'
+  // Lavest score til venstre, høyest til høyre.
+  const txt = 'Score <span><i style="background:#e53e3e"></i>-' + d + '</span>'
     + '<span><i style="background:#ed8936"></i>' + d + '–' + (b - 1) + '</span>'
-    + '<span><i style="background:#e53e3e"></i>under ' + d + '</span>'
-    + (ZONES.some(z => soneStatus(z).lukket) ? '<span><i style="background:#94a3b8"></i>stengt</span>' : '');
+    + '<span><i style="background:#3182ce"></i>' + b + '–' + (a - 1) + '</span>'
+    + '<span><i style="background:#38a169"></i>' + a + '+</span>'
+    + (ZONES.some(z => soneStatus(z).lukket) ? '<span><i style="background:' + STENGT_FARGE + '"></i>stengt</span>' : '');
   if (txt !== _legendTxt) { _legendTxt = txt; _legendEl.innerHTML = txt; }
 }
 
@@ -1758,7 +1760,9 @@ function updateMap(scores) {
     const sc = scores ? (scores[zone]?.score || 0) : 0;
     const st = soneStatus(zone);
     const lukket = st.lukket;   // stengt hele sesongen eller stengt i dag: grå og stiplet
-    const col = (isDimmed || lukket) ? '#94a3b8' : (scores ? scoreColor(sc) : '#94a3b8');
+    // Stengt har egen, mørkere gråtone: den må skille seg både fra den hvite kanten
+    // under sonelinja og fra dimmede soner (#94a3b8).
+    const col = lukket ? STENGT_FARGE : (isDimmed ? '#94a3b8' : (scores ? scoreColor(sc) : '#94a3b8'));
     const poly = zonePolys[zone];
     const erDel = !!(poly && poly.isDel);
     const skjult = lav && erDel && !isSelected;   // delsoner vises ikke i oversikten
@@ -1776,8 +1780,8 @@ function updateMap(scores) {
     }
     const linje = soneLinjer[zone];
     if (linje) {
-      linje.setStyle({ color: col, weight: isSelected ? 9 : 6, opacity: linjeModus ? (isDimmed ? 0.6 : 1) : 0,
-        dashArray: lukket ? '3,9' : null });
+      // Heltrukket også for stengte soner: stiplet grå oppå hvit kant leses som en hvit strek.
+      linje.setStyle({ color: col, weight: isSelected ? 9 : 6, opacity: linjeModus ? (isDimmed && !lukket ? 0.6 : 1) : 0 });
       if (linje._path) linje._path.style.pointerEvents = linjeModus ? '' : 'none';
       if (linjeModus && isSelected) linje.bringToFront();
     }
@@ -2654,7 +2658,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.063</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.064</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span>
 </div>
 
