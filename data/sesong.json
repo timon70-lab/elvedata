@@ -7,7 +7,8 @@
       "start": "MM-DD, sesongstart",
       "slutt": "MM-DD, sesongslutt",
       "tillegg": "Fritekst som limes pa etter datointervallet ved visning. Tom streng = ingen tillegg.",
-      "soner": "Kun soner som avviker. start/slutt = null betyr arv fra elvas datoer."
+      "soner": "Kun soner som avviker. start/slutt = null betyr arv fra elvas datoer.",
+      "ukedager": "Per elv (ikke under soner, saa admin ikke overskriver): sone -> liste av {dager: [man,tir,ons,tor,fre,lor,son], grad: stengt|delvis, tekst}. Gjelder bare i sesong."
     }
   },
   "elver": {
@@ -46,6 +47,18 @@
       "soner": {
         "Sone 5B Rød": { "start": "07-01", "slutt": "08-17", "tillegg": "(2026) — forsinket start i denne sonen" },
         "Sone 5B Øst": { "start": null, "slutt": null, "tillegg": "—", "stengt": true }
+      },
+      "ukedager": {
+        "Sone 2": [{ "dager": ["man"], "grad": "stengt", "tekst": "Grunneierdag – landfiske stengt. Båtfiske tillatt." }],
+        "Sone 3A": [{ "dager": ["man", "tir"], "grad": "stengt", "tekst": "Grunneierdager – landfiske stengt." }],
+        "Sone 3B Hageodden": [{ "dager": ["man", "tir"], "grad": "stengt", "tekst": "Grunneierdager – stengt." }],
+        "Sone 3C Mosby": [{ "dager": ["man", "tir"], "grad": "stengt", "tekst": "Grunneierdager – stengt." }],
+        "Sone 4A": [
+          { "dager": ["man"], "grad": "stengt", "tekst": "Grunneierdag – stengt." },
+          { "dager": ["ons"], "grad": "delvis", "tekst": "Nedre del: landfiske stengt fra vestsiden." }
+        ],
+        "Sone 4B Ravnås": [{ "dager": ["man"], "grad": "stengt", "tekst": "Grunneierdag – landfiske stengt." }],
+        "Sone 4C Holmane": [{ "dager": ["man"], "grad": "stengt", "tekst": "Grunneierdag – landfiske stengt." }]
       }
     },
     "sygna": {
