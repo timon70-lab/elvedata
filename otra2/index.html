@@ -227,6 +227,12 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .flow-chip .fc-arw:focus-visible, .flow-chip .fc-lbl:focus-visible { outline:2px solid #9ae6b4; outline-offset:2px; }
 .flow-chip .fc-cnt { color:inherit; font-size:inherit; opacity:.72; font-weight:600; }
 
+.zi-status { font-size:.72rem; line-height:1.45; padding:7px 10px; border-radius:8px; margin-bottom:4px; }
+.zi-status b { font-weight:800; }
+.zi-status.stengt { background:#fff5f5; border:1px solid #feb2b2; color:#9b2c2c; }
+.zi-status.delvis { background:#fffaf0; border:1px solid #fbd38d; color:#975a16; }
+.zi-status.apen { background:#f0fff4; border:1px solid #c6f6d5; color:#276749; }
+.zone-stengt { font-size:0.6rem; font-weight:700; color:#c53030; margin-top:1px; }
 .zi-boom { display:flex; gap:8px; align-items:center; margin-top:8px; padding:8px 10px; background:#fffbea; border:1px solid #fbd38d; border-radius:8px; }
 .zi-boom-icon { font-size:1.1rem; line-height:1; flex-shrink:0; }
 .zi-boom-hdr { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#975a16; }
@@ -368,7 +374,7 @@ table.rd-tbl tr.big td.w { color:#9b2c2c; }
 <!-- GoatCounter er fjernet med vilje: otra2 er en testklone og skal ikke telles. -->
 </head>
 <body>
-<div style="position:fixed;top:0;left:0;right:0;z-index:9400;background:#ed8936;color:#1a202c;font-size:0.68rem;font-weight:800;letter-spacing:0.08em;text-align:center;padding:3px 8px;">TESTVERSJON · OTRA 2 · <a href="../otra/" style="color:#1a202c;">gå til vanlig Otra</a></div>
+<div id="testStripe" style="position:fixed;top:0;left:0;right:0;z-index:9400;background:#ed8936;color:#1a202c;font-size:0.68rem;font-weight:800;letter-spacing:0.08em;text-align:center;padding:3px 8px;">TESTVERSJON · OTRA 2 · <a href="../otra/" style="color:#1a202c;">gå til vanlig Otra</a></div>
 
 <h1 style="margin-top:14px;">Otra 2 (test) · Dynamisk oversikt</h1>
 
@@ -497,6 +503,7 @@ async function fetchSesong() {
   } catch (e) {
     SESONG = null;
   }
+  try { update(); } catch (e) { /* kartet er ikke klart ennå - update() kjøres uansett ved init */ }
   if (activeZone) showZoneInfo(activeZone, false);
 }
 
@@ -525,6 +532,49 @@ function sesongRad(zone) {
   if (!t) return '';
   return '<div class="zi-row"><span class="zi-label">Sesong</span>'
        + '<span class="zi-val">' + t + '</span></div>';
+}
+
+/* ---------- Dagsstatus: «Kan jeg fiske her i dag?» ----------
+   Leser data/sesong.json: soner[zone].stengt (sonen er stengt hele sesongen) og
+   ukedager[zone] (grunneierdager o.l.). Ukedagsreglene gjelder bare i sesong;
+   utenfor sesong vises alt som før. Testdato: ?dato=ÅÅÅÅ-MM-DD i adressen. */
+const UKEDAG_KODE = ['son', 'man', 'tir', 'ons', 'tor', 'fre', 'lor'];
+const UKEDAG_NAVN = ['søndag', 'mandag', 'tirsdag', 'onsdag', 'torsdag', 'fredag', 'lørdag'];
+const _testDato = (/[?&]dato=(\d{4}-\d{2}-\d{2})/.exec(location.search) || [])[1] || null;
+function iDag() { return _testDato ? new Date(_testDato + 'T12:00:00') : new Date(); }
+
+// Returnerer { kode, lukket, delvis, kort, tekst }.
+// kode: 'stengt' (hele sesongen) | 'stengt-idag' | 'delvis' | 'apen' | 'utenfor' | 'ukjent'
+function soneStatus(zone) {
+  const ingen = (kode) => ({ kode, lukket: false, delvis: false, kort: '', tekst: '' });
+  if (!SESONG) return ingen('ukjent');
+  const o = (SESONG.soner && SESONG.soner[zone]) || null;
+  if (o && o.stengt) {
+    const t = (o.tillegg || '').replace(/[\u2013\u2014-]/g, '').trim();
+    return { kode: 'stengt', lukket: true, delvis: false, kort: 'Stengt', tekst: t || 'Ikke åpen for ordinært fiske.' };
+  }
+  const d = iDag();
+  const md = String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const start = (o && o.start) || SESONG.start, slutt = (o && o.slutt) || SESONG.slutt;
+  if (!start || !slutt || md < start || md > slutt) return ingen('utenfor');
+  const regler = (SESONG.ukedager && SESONG.ukedager[zone]) || [];
+  const kode = UKEDAG_KODE[d.getDay()], dag = UKEDAG_NAVN[d.getDay()];
+  const treff = regler.filter(r => (r.dager || []).includes(kode));
+  const stengt = treff.find(r => r.grad === 'stengt');
+  if (stengt) return { kode: 'stengt-idag', lukket: true, delvis: false, kort: 'Stengt i dag', tekst: stengt.tekst || '', dag };
+  const delvis = treff.find(r => r.grad === 'delvis');
+  if (delvis) return { kode: 'delvis', lukket: false, delvis: true, kort: 'Delvis stengt i dag', tekst: delvis.tekst || '', dag };
+  return { kode: 'apen', lukket: false, delvis: false, kort: 'Åpen i dag', tekst: '', dag };
+}
+
+function soneStatusHtml(zone) {
+  const st = soneStatus(zone);
+  const dag = st.dag ? ' (' + st.dag + ')' : '';
+  if (st.kode === 'stengt')      return '<div class="zi-status stengt">🚫 <b>Stengt</b> — ' + st.tekst + '</div>';
+  if (st.kode === 'stengt-idag') return '<div class="zi-status stengt">🚫 <b>Stengt i dag</b>' + dag + (st.tekst ? ' — ' + st.tekst : '') + '</div>';
+  if (st.kode === 'delvis')      return '<div class="zi-status delvis">⚠️ <b>Delvis stengt i dag</b>' + dag + (st.tekst ? ' — ' + st.tekst : '') + '</div>';
+  if (st.kode === 'apen')        return '<div class="zi-status apen">✅ <b>Åpen i dag</b>' + dag + '</div>';
+  return '';   // utenfor sesong / ukjent: ingen endring
 }
 
 /* ---------- Sentral konfig (data/config.json) — scoringsparametre ---------- */
@@ -860,6 +910,7 @@ function update() {
       +'<div class="zone-info">'
       +'<div class="zone-name">'+zone+'</div>'
       +'<div class="zone-catches">'+perDay+' fangster/dag</div>'
+      +(soneStatus(zone).lukket ? '<div class="zone-stengt">🚫 ' + soneStatus(zone).kort + '</div>' : '')
       +(ZONE_COORDS[zone] ? '<div class="zone-map-hint">📍 Klikk for å vise på kart</div>' : '')
       +'</div>';
     if (ZONE_COORDS[zone]) {
@@ -1388,16 +1439,21 @@ function makePhotoIcon(active) {
     tooltipAnchor: [0, -10],
   });
 }
-function makeStartIcon(scoreText, color, isSelected, isDimmed, liten) {
+function makeStartIcon(scoreText, color, isSelected, isDimmed, liten, merke) {
   const size = isSelected ? 36 : (liten ? 24 : 30);
   const fs = isSelected ? 12 : (liten ? 9 : 10);
   const opacity = isDimmed ? 0.50 : 1;
   // Små markører ligger oppå en linje i samme farge: hvit kant skiller dem ut.
   const stroke = (isSelected || liten) ? '#fff' : 'rgba(0,0,0,0.15)';
   const sw = isSelected ? 2.5 : (liten ? 2 : 1.5);
+  // merke: 'stengt' = hvit skråstrek over tallet, 'delvis' = oransje prikk oppe til høyre.
+  const k = size * 0.24;
+  const ekstra = merke === 'stengt'
+    ? `<line x1="${k}" y1="${size-k}" x2="${size-k}" y2="${k}" stroke="#fff" stroke-width="2" stroke-linecap="round"/>`
+    : (merke === 'delvis' ? `<circle cx="${size-5}" cy="5" r="4" fill="#ed8936" stroke="#fff" stroke-width="1.5"/>` : '');
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" opacity="${opacity}">
     <circle cx="${size/2}" cy="${size/2}" r="${size/2-2}" fill="${color}" stroke="${stroke}" stroke-width="${sw}"/>
-    <text x="${size/2}" y="${size/2+fs*0.38}" text-anchor="middle" fill="#fff" font-size="${fs}" font-weight="700" font-family="Segoe UI,sans-serif">${scoreText}</text>
+    <text x="${size/2}" y="${size/2+fs*0.38}" text-anchor="middle" fill="#fff" font-size="${fs}" font-weight="700" font-family="Segoe UI,sans-serif">${scoreText}</text>${ekstra}
   </svg>`;
   return L.divIcon({html: svg, className: '', iconSize: [size,size], iconAnchor: [size/2,size/2], tooltipAnchor: [0,-size/2]});
 }
@@ -1682,7 +1738,8 @@ function oppdaterTegnforklaring() {
   const txt = 'Score <span><i style="background:#38a169"></i>' + a + '+</span>'
     + '<span><i style="background:#3182ce"></i>' + b + '–' + (a - 1) + '</span>'
     + '<span><i style="background:#ed8936"></i>' + d + '–' + (b - 1) + '</span>'
-    + '<span><i style="background:#e53e3e"></i>under ' + d + '</span>';
+    + '<span><i style="background:#e53e3e"></i>under ' + d + '</span>'
+    + (ZONES.some(z => soneStatus(z).lukket) ? '<span><i style="background:#94a3b8"></i>stengt</span>' : '');
   if (txt !== _legendTxt) { _legendTxt = txt; _legendEl.innerHTML = txt; }
 }
 
@@ -1699,7 +1756,9 @@ function updateMap(scores) {
     const isSelected = zone === activeZone;
     const isDimmed = activeZone !== null && !isSelected;
     const sc = scores ? (scores[zone]?.score || 0) : 0;
-    const col = isDimmed ? '#94a3b8' : (scores ? scoreColor(sc) : '#94a3b8');
+    const st = soneStatus(zone);
+    const lukket = st.lukket;   // stengt hele sesongen eller stengt i dag: grå og stiplet
+    const col = (isDimmed || lukket) ? '#94a3b8' : (scores ? scoreColor(sc) : '#94a3b8');
     const poly = zonePolys[zone];
     const erDel = !!(poly && poly.isDel);
     const skjult = lav && erDel && !isSelected;   // delsoner vises ikke i oversikten
@@ -1710,20 +1769,22 @@ function updateMap(scores) {
         color: col, fillColor: col,
         weight: isSelected ? 3 : 1.5,
         opacity: isDimmed ? 0.5 : 0.9,
-        fillOpacity: isSelected ? 0.35 : (isDimmed ? 0.08 : 0.22),
-        dashArray: erDel ? '5,4' : null
+        fillOpacity: isSelected ? 0.35 : ((isDimmed || lukket) ? 0.08 : 0.22),
+        dashArray: lukket ? '3,7' : (erDel ? '5,4' : null)
       });
       poly.eachLayer(pl => { if (pl._path) pl._path.style.pointerEvents = polySkjult ? 'none' : ''; });
     }
     const linje = soneLinjer[zone];
     if (linje) {
-      linje.setStyle({ color: col, weight: isSelected ? 9 : 6, opacity: linjeModus ? (isDimmed ? 0.6 : 1) : 0 });
+      linje.setStyle({ color: col, weight: isSelected ? 9 : 6, opacity: linjeModus ? (isDimmed ? 0.6 : 1) : 0,
+        dashArray: lukket ? '3,9' : null });
       if (linje._path) linje._path.style.pointerEvents = linjeModus ? '' : 'none';
       if (linjeModus && isSelected) linje.bringToFront();
     }
     const l = mapLayers[zone]; if (!l) return;
-    const scoreText = scores ? String(sc) : '–';
-    l.startMk.setIcon(makeStartIcon(scoreText, col, isSelected, isDimmed, lav || erDel));
+    const scoreText = st.kode === 'stengt' ? '✕' : (scores ? String(sc) : '–');
+    l.startMk.setIcon(makeStartIcon(scoreText, col, isSelected, isDimmed, lav || erDel,
+      st.kode === 'stengt-idag' ? 'stengt' : (st.delvis ? 'delvis' : null)));
     // Valgt sone øverst, ellers høyest score øverst der markører overlapper.
     l.startMk.setZIndexOffset(isSelected ? 1000 : 10 + sc);
     l.startMk.setOpacity(skjult ? 0 : 1);
@@ -1737,9 +1798,10 @@ function updateMap(scores) {
     }
     const priceInfo = PRICES[zone];
     const priceLbl = priceInfo && priceInfo.dogn ? priceInfo.dogn + ' kr' : null;
-    const tipHtml = priceLbl
+    const tipHtml = (priceLbl
       ? zone + '<br><span style="color:' + priceColor(priceInfo.dogn) + '">' + priceLbl + '</span>'
-      : zone;
+      : zone)
+      + ((lukket || st.delvis) ? '<br><span style="color:' + (lukket ? '#c53030' : '#b7791f') + '">' + st.kort + '</span>' : '');
     // Etikett (navn + pris): fast for valgt sone, ellers bare ved hover.
     if (l.perm !== isSelected) {
       l.startMk.unbindTooltip();
@@ -1915,6 +1977,7 @@ function showZoneInfo(zone, scrollTo = true) {
 
   document.getElementById('ziTitle').textContent = '📍 ' + info.name;
   document.getElementById('ziBody').innerHTML = `
+    ${soneStatusHtml(zone)}
     <div class="zi-score-row">
       <div class="zi-score-num" style="color:${col}">${score}</div>
       <div class="zi-score-label">Score (${yrLbl} · ${moLbl} · ${currentFlow >= 300 ? '300+' : currentFlow + '–' + (currentFlow+25)} m³/s)<br>${catches === 1 ? '1 fangst' : catches + ' fangster'} i utvalget</div>
@@ -2523,6 +2586,10 @@ document.getElementById('totalScoreBox').innerHTML =
   + '<div class="mnum" style="position:absolute;color:#e2e8f0;font-size:0.85rem;font-weight:800">–</div>'
   + '</div>'
   + '<div class="total-score-lbl">Score</div>';
+if (_testDato) {
+  const stripe = document.getElementById('testStripe');
+  if (stripe) stripe.insertAdjacentText('beforeend', ' · testdato ' + _testDato);
+}
 fetchNVE().then(() => update());
 fetchSesong();
 fetchSoner();
@@ -2587,7 +2654,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.062</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.063</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span>
 </div>
 
