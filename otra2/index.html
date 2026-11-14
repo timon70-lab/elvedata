@@ -86,7 +86,10 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .map-header { padding: 10px 14px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; display: flex; justify-content: space-between; align-items: center; }
 .map-header .map-title { font-size: 0.78rem; font-weight: 700; color: #276749; }
 .map-header .map-hint { font-size: 0.62rem; color: #94a3b8; }
-#map { height: 320px; width: 100%; }
+#map { height: clamp(320px, 52vh, 480px); width: 100%; }
+.kart-legend { display:flex; align-items:center; gap:7px; background:rgba(255,255,255,0.9); color:#374151; font-size:0.6rem; font-weight:700; padding:3px 8px; border-radius:6px; border:1px solid rgba(0,0,0,0.12); white-space:nowrap; pointer-events:none; }
+.kart-legend i { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:3px; vertical-align:-1px; }
+.kart-legend span { font-weight:600; font-variant-numeric:tabular-nums; }
 .leaflet-tooltip.mtip { background: #1a202c; color: #e2e8f0; border: 1px solid #4a5568; font-size: .72rem; font-weight: 700; padding: 2px 7px; border-radius: 5px; box-shadow: none; }
 .leaflet-tooltip.mtip::before { display: none; }
 .leaflet-tooltip.zone-label { background: #ffffff; color: #1a202c; border: 1px solid rgba(0,0,0,0.15); font-size: 0.58rem; font-weight: 700; padding: 1px 4px; border-radius: 4px; box-shadow: none; pointer-events: none; text-align: center; line-height: 1.2; }
@@ -99,7 +102,7 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .bl-btn.on { background:#276749; color:#fff; }
 .bl-btn:focus-visible { outline:2px solid #9ae6b4; outline-offset:-2px; }
 /* Flyfoto er mørkt: gi sonekantene litt mer trøkk så de synes */
-#map.bl-foto .leaflet-soneflater-pane path { stroke-width:2.5px; }
+#map.bl-foto:not(.lav-zoom) .leaflet-soneflater-pane path { stroke-width:2.5px; }
 .leaflet-soneflater-pane path:focus { outline: none; } /* nettleserens fokusramme rundt klikket sonepolygon */
 
 .photo-panel { width: 100%; max-width: 480px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-top: 14px; display: none; }
@@ -1117,7 +1120,6 @@ function preloadZone(zone) {
 function initMap() {
   if (map) return;
   const container = document.getElementById('map');
-  container.style.height = '320px';
   map = L.map('map', {zoomControl: true, maxZoom: 19}).setView([58.198, 7.970], 12);
   initBaseLayers();
 
@@ -1232,10 +1234,8 @@ function initMap() {
   ZONES.forEach(zone => {
     const zc = ZONE_COORDS[zone]; if (!zc) return;
 
-    const startMk = L.marker(zc.s, {icon: makeStartIcon('–', '#94a3b8', false, false), zIndexOffset: 10}).addTo(map);
-    startMk.bindTooltip(zone, {permanent: true, direction: 'top', className: 'zone-label', offset: [0, 0]});
-    startMk.closeTooltip();
-    startMk.on('click', () => { selectZone(zone); if (activeZone === zone) showZoneInfo(zone); });
+    // Foreløpig på startgrensa; flyttes til midten av sonen når polygonene er lastet.
+    const startMk = lagSoneMarkor(zone, zc.s);
 
     const endMk = L.marker(zc.e, {icon: makeEndIcon(), opacity: 0, zIndexOffset: 5, interactive: false}).addTo(map);
     endMk.bindTooltip(zone + ' · slutt', {permanent: false, direction: 'top', className: 'mtip'});
@@ -1251,17 +1251,24 @@ function initMap() {
     if (zc) { allZoneCoords.push(zc.s); allZoneCoords.push(zc.e); }
   });
   if (allZoneCoords.length) {
-    map.fitBounds(allZoneCoords, {padding: [30, 30], maxZoom: 14});
+    map.fitBounds(allZoneCoords, {padding: [30, 30], maxZoom: 14, animate: false});
   }
 
-  function updateLabelVisibility() {
-    const show = map.getZoom() >= LABEL_ZOOM_THRESHOLD;
-    Object.values(mapLayers).forEach(({ startMk }) => {
-      if (show) startMk.openTooltip(); else startMk.closeTooltip();
-    });
-  }
-  updateLabelVisibility();
-  map.on('zoomend', updateLabelVisibility);
+  // Under LABEL_ZOOM_THRESHOLD tegnes kartet i oversiktsmodus (se updateMap):
+  // tegn på nytt bare når zoomen krysser terskelen.
+  let _varLav = map.getZoom() < LABEL_ZOOM_THRESHOLD;
+  map.on('zoomend', () => {
+    const lav = map.getZoom() < LABEL_ZOOM_THRESHOLD;
+    if (lav !== _varLav) { _varLav = lav; updateMap(computeScores()); }
+  });
+
+  // Tegnforklaring for scorefargene, nede til venstre over kartlagvelgeren
+  // (nede til høyre kolliderer den med velgeren på smale skjermer).
+  const Legend = L.Control.extend({
+    options: { position: 'bottomleft' },
+    onAdd: function() { _legendEl = L.DomUtil.create('div', 'kart-legend'); return _legendEl; }
+  });
+  new Legend().addTo(map);
   map.on('zoomend', updateDesinfVisibility);
 }
 
@@ -1319,6 +1326,7 @@ async function fetchSoner() {
       const polys = g.type === 'MultiPolygon' ? g.coordinates : [g.coordinates];
       _soneRinger[zone] = polys.map(p => p[0].map(k => [k[1], k[0]]));   // GeoJSON er [lon, lat]
     });
+    plasserSoneMarkorer();
     updateMap(computeScores());
     startPreload();
   } catch(e) { /* sonepolygoner er valgfrie – uten dem vises bare start/slutt-markørene */ }
@@ -1368,12 +1376,13 @@ function makePhotoIcon(active) {
     tooltipAnchor: [0, -10],
   });
 }
-function makeStartIcon(scoreText, color, isSelected, isDimmed) {
-  const size = isSelected ? 36 : 30;
-  const fs = isSelected ? 12 : 10;
+function makeStartIcon(scoreText, color, isSelected, isDimmed, liten) {
+  const size = isSelected ? 36 : (liten ? 24 : 30);
+  const fs = isSelected ? 12 : (liten ? 9 : 10);
   const opacity = isDimmed ? 0.50 : 1;
-  const stroke = isSelected ? '#fff' : 'rgba(0,0,0,0.15)';
-  const sw = isSelected ? 2.5 : 1.5;
+  // Små markører ligger oppå en linje i samme farge: hvit kant skiller dem ut.
+  const stroke = (isSelected || liten) ? '#fff' : 'rgba(0,0,0,0.15)';
+  const sw = isSelected ? 2.5 : (liten ? 2 : 1.5);
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" opacity="${opacity}">
     <circle cx="${size/2}" cy="${size/2}" r="${size/2-2}" fill="${color}" stroke="${stroke}" stroke-width="${sw}"/>
     <text x="${size/2}" y="${size/2+fs*0.38}" text-anchor="middle" fill="#fff" font-size="${fs}" font-weight="700" font-family="Segoe UI,sans-serif">${scoreText}</text>
@@ -1514,34 +1523,117 @@ function desinfZoneHtml(zone) {
   return '<div class="zi-row"><span class="zi-label">Desinfisering</span><span class="zi-val">' + body + '</span></div>';
 }
 
+let _harPolygoner = false;   // true når sonepolygonene er lastet
+let _legendEl = null;
+let _legendTxt = '';
+
+function lagSoneMarkor(zone, latlng) {
+  const mk = L.marker(latlng, {icon: makeStartIcon('–', '#94a3b8', false, false), zIndexOffset: 10}).addTo(map);
+  mk.bindTooltip(zone, {permanent: false, direction: 'top', className: 'zone-label'});
+  mk.on('click', () => { selectZone(zone); if (activeZone === zone) showZoneInfo(zone); });
+  return mk;
+}
+
+// Et punkt godt inne i sonen: rutenett over sonens utstrekning, behold punktene
+// som ligger inne i polygonet, og velg det som er nærmest tyngdepunktet.
+// 'unngaa' er andre markører ([lat, lon] + minsteavstand i meter) som denne
+// ikke skal havne oppå.
+function soneMidtpunkt(ring, unngaa) {
+  const b = ringerBbox([ring]), N = 40, inne = [];
+  for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
+    const lat = b.s + (i + 0.5) / N * (b.n - b.s), lon = b.w + (j + 0.5) / N * (b.e - b.w);
+    if (pointInRing(lat, lon, ring)) inne.push([lat, lon]);
+  }
+  if (!inne.length) return [(b.s + b.n) / 2, (b.w + b.e) / 2];
+  const c = [inne.reduce((s, q) => s + q[0], 0) / inne.length, inne.reduce((s, q) => s + q[1], 0) / inne.length];
+  const frie = inne.filter(q => unngaa.every(u => haversineKm(q, u.p) * 1000 >= u.m));
+  const kand = frie.length ? frie : inne;
+  let best = kand[0], bd = Infinity;
+  kand.forEach(q => { const d = haversineKm(q, c); if (d < bd) { bd = d; best = q; } });
+  return best;
+}
+
+// Flytter scoremarkørene fra sonegrensa til midten av sonen. Delsonene plasseres
+// først; hovedsonene holder avstand til dem og til hverandre.
+function plasserSoneMarkorer() {
+  const plassert = [];
+  const rekke = ZONES.filter(z => zonePolys[z] && zonePolys[z].isDel)
+    .concat(ZONES.filter(z => zonePolys[z] && !zonePolys[z].isDel));
+  rekke.forEach(zone => {
+    const ring = (_soneRinger[zone] || [])[0];
+    if (!ring) return;
+    const erDel = zonePolys[zone].isDel;
+    const pos = soneMidtpunkt(ring, erDel ? [] : plassert);
+    plassert.push({ p: pos, m: erDel ? 500 : 150 });
+    if (mapLayers[zone]) mapLayers[zone].startMk.setLatLng(pos);
+    else mapLayers[zone] = { startMk: lagSoneMarkor(zone, pos), endMk: null };
+  });
+  _harPolygoner = true;
+}
+
+function oppdaterTegnforklaring() {
+  if (!_legendEl) return;
+  const k = SCORE_CFG.knee / 100;
+  const a = Math.ceil(70 * k), b = Math.ceil(45 * k), d = Math.ceil(25 * k);
+  const txt = 'Score <span><i style="background:#38a169"></i>' + a + '+</span>'
+    + '<span><i style="background:#3182ce"></i>' + b + '–' + (a - 1) + '</span>'
+    + '<span><i style="background:#ed8936"></i>' + d + '–' + (b - 1) + '</span>'
+    + '<span><i style="background:#e53e3e"></i>under ' + d + '</span>';
+  if (txt !== _legendTxt) { _legendTxt = txt; _legendEl.innerHTML = txt; }
+}
+
 function updateMap(scores) {
   if (!map) return;
+  oppdaterTegnforklaring();
+  // Oversiktsmodus under zoom 13: hovedsonene tegnes med tykk kant så de leses
+  // som en scorefarget linje langs elva, og delsonene skjules.
+  const lav = map.getZoom() < LABEL_ZOOM_THRESHOLD;
+  document.getElementById('map').classList.toggle('lav-zoom', lav);
   ZONES.forEach(zone => {
     const isSelected = zone === activeZone;
     const isDimmed = activeZone !== null && !isSelected;
     const sc = scores ? (scores[zone]?.score || 0) : 0;
     const col = isDimmed ? '#94a3b8' : (scores ? scoreColor(sc) : '#94a3b8');
     const poly = zonePolys[zone];
-    if (poly) poly.setStyle({
-      color: col, fillColor: col,
-      weight: isSelected ? 3 : 1.5,
-      opacity: isDimmed ? 0.5 : 0.9,
-      fillOpacity: isSelected ? 0.35 : (isDimmed ? 0.08 : 0.22),
-      dashArray: poly.isDel ? '5,4' : null
-    });
+    const erDel = !!(poly && poly.isDel);
+    const skjult = lav && erDel && !isSelected;   // delsoner vises ikke i oversikten
+    if (poly) {
+      poly.setStyle(skjult ? { opacity: 0, fillOpacity: 0 } : {
+        color: col, fillColor: col,
+        weight: lav ? (isSelected ? 9 : 7) : (isSelected ? 3 : 1.5),
+        opacity: lav ? (isDimmed ? 0.6 : 1) : (isDimmed ? 0.5 : 0.9),
+        fillOpacity: isSelected ? 0.35 : (isDimmed ? 0.08 : 0.22),
+        dashArray: (erDel && !lav) ? '5,4' : null
+      });
+      poly.eachLayer(pl => { if (pl._path) pl._path.style.pointerEvents = skjult ? 'none' : ''; });
+    }
     const l = mapLayers[zone]; if (!l) return;
     const scoreText = scores ? String(sc) : '–';
-    l.startMk.setIcon(makeStartIcon(scoreText, col, isSelected, isDimmed));
-    l.startMk.setZIndexOffset(isSelected ? 100 : 10);
-    l.endMk.setIcon(makeEndIcon(col));
-    l.endMk.setOpacity(isSelected ? 1 : 0);
-    if (l.endMk._icon) l.endMk._icon.style.pointerEvents = isSelected ? 'auto' : 'none';
+    l.startMk.setIcon(makeStartIcon(scoreText, col, isSelected, isDimmed, lav || erDel));
+    // Valgt sone øverst, ellers høyest score øverst der markører overlapper.
+    l.startMk.setZIndexOffset(isSelected ? 1000 : 10 + sc);
+    l.startMk.setOpacity(skjult ? 0 : 1);
+    if (l.startMk._icon) l.startMk._icon.style.pointerEvents = skjult ? 'none' : 'auto';
+    if (l.endMk) {
+      // Sluttmarkøren trengs bare som reserve når polygonene ikke er lastet.
+      const visSlutt = isSelected && !_harPolygoner;
+      l.endMk.setIcon(makeEndIcon(col));
+      l.endMk.setOpacity(visSlutt ? 1 : 0);
+      if (l.endMk._icon) l.endMk._icon.style.pointerEvents = visSlutt ? 'auto' : 'none';
+    }
     const priceInfo = PRICES[zone];
     const priceLbl = priceInfo && priceInfo.dogn ? priceInfo.dogn + ' kr' : null;
     const tipHtml = priceLbl
       ? zone + '<br><span style="color:' + priceColor(priceInfo.dogn) + '">' + priceLbl + '</span>'
       : zone;
-    l.startMk.setTooltipContent(tipHtml);
+    // Etikett (navn + pris): fast for valgt sone, ellers bare ved hover.
+    if (l.perm !== isSelected) {
+      l.startMk.unbindTooltip();
+      l.startMk.bindTooltip(tipHtml, {permanent: isSelected, direction: 'top', className: 'zone-label'});
+      l.perm = isSelected;
+    } else {
+      l.startMk.setTooltipContent(tipHtml);
+    }
   });
   // Show photo markers only when their zone is active
   photoMarkers.forEach(({ mk, zone, photosIdx }) => {
@@ -2369,7 +2461,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.060</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.061</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span>
 </div>
 
