@@ -127,6 +127,10 @@ grep -oE 'v[0-9]+\.[0-9]{3}' <fil>
 - `staging/index.html` — staging for oversiktskartet: `noindex`, oransje STAGING-stripe og
   deaktivert GoatCounter, men ekte data.
 - `admin/index.html` — adminpanelet. Har ingen versjonslinje.
+- `otra2/index.html` — testklone av Otra (fra 2026-11-14): `noindex`, oransje TESTVERSJON-stripe,
+  uten GoatCounter, major 0, leser Otras datafiler. Nås kun med direkte lenke og skal ikke lenkes
+  fra noen side. **Kartendringer for Otra gjøres her**, ikke i `otra/index.html`, til Per Lasse ber
+  om go-live. Endres `otra/index.html` i mellomtiden, må samme endring inn i `otra2`.
 
 ### Kode og data
 

@@ -4,6 +4,7 @@ Allow: /
 # Administrasjon og arbeidsområder skal ikke indekseres
 Disallow: /admin/
 Disallow: /staging/
+Disallow: /otra2/
 Disallow: /scripts/
 Disallow: /docs/
 Disallow: /data/
