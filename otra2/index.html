@@ -95,9 +95,11 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .leaflet-tooltip.zone-label { background: #ffffff; color: #1a202c; border: 1px solid rgba(0,0,0,0.15); font-size: 0.58rem; font-weight: 700; padding: 1px 4px; border-radius: 4px; box-shadow: none; pointer-events: none; text-align: center; line-height: 1.2; }
 .leaflet-tooltip.zone-label::before { display: none; }
 .zoom-lbl { background:rgba(255,255,255,0.8); color:#4a5568; font-size:0.62rem; font-weight:700; padding:1px 0; width:34px; text-align:center; border-radius:4px; pointer-events:none; font-variant-numeric:tabular-nums; margin-top:4px !important; }
-.pos-kort { display:none; width:214px; max-width:60vw; background:#fff; border:2px solid rgba(0,0,0,0.2); border-radius:8px; padding:8px 10px; font-size:0.72rem; line-height:1.45; color:#1a202c; text-align:left; box-shadow:0 2px 10px rgba(0,0,0,0.18); }
+.pos-kort { display:none; max-width:60vw; background:#fff; border:2px solid rgba(0,0,0,0.2); border-radius:8px; padding:8px 10px; font-size:0.72rem; line-height:1.45; color:#1a202c; text-align:left; box-shadow:0 2px 10px rgba(0,0,0,0.18); }
 .pos-kort .pk-hdr { display:flex; justify-content:space-between; align-items:flex-start; gap:6px; font-weight:600; }
+.pos-kort .pk-hdr { align-items:center; white-space:nowrap; }
 .pos-kort .pk-hdr b { font-weight:800; color:#276749; }
+.pos-kort .pk-sone { cursor:pointer; }
 .pos-kort .pk-x { background:none; border:none; color:#94a3b8; font-size:0.95rem; line-height:1; cursor:pointer; padding:0 2px; font-family:inherit; }
 .pos-kort .pk-rad { margin-top:3px; color:#4a5568; }
 .pos-kort .pk-score { display:inline-block; min-width:24px; text-align:center; color:#fff; font-weight:800; border-radius:999px; padding:0 6px; margin-right:4px; }
@@ -1762,8 +1764,8 @@ function stoppPosisjon() {
 
 function visPosFeil(tekst) {
   if (!_posKortEl) return;
-  _posKortEl.innerHTML = '<div class="pk-hdr"><span>⚠️ ' + tekst + '</span></div>'
-    + '<div class="pk-svak">Sjekk at nettleseren har tilgang til posisjon.</div>';
+  _posKortEl.innerHTML = '<div class="pk-hdr" style="white-space:normal;max-width:200px"><span>⚠️ ' + tekst + '</span></div>'
+    + '<div class="pk-svak" style="white-space:normal;max-width:200px">Sjekk at nettleseren har tilgang til posisjon.</div>';
   _posKortEl.style.display = 'block';
   clearTimeout(_posFeilTimer);
   _posFeilTimer = setTimeout(() => { if (!_folger) _posKortEl.style.display = 'none'; }, 6000);
@@ -1798,34 +1800,14 @@ function oppdaterPosKort() {
   if (!_posKortEl) return;
   if (!_folger || !_minPos) { clearTimeout(_posFeilTimer); _posKortEl.style.display = 'none'; return; }
   const lat = _minPos.latlng.lat, lon = _minPos.latlng.lng;
+  // Brukes mest på mobil, så kortet viser bare sonen. Resten står i soneinfo:
+  // trykk på sonenavnet her eller på sonen i kartet.
   const x = '<button class="pk-x" onclick="stoppPosisjon()" title="Slå av posisjon" aria-label="Slå av posisjon">✕</button>';
-  const usikker = _minPos.accuracy > 75
-    ? '<div class="pk-svak">Usikker posisjon (± ' + Math.round(_minPos.accuracy) + ' m)</div>' : '';
   const zone = soneVedPunkt(lat, lon);
-  let html;
-  if (zone) {
-    const scores = computeScores();
-    const sc = scores && scores[zone] ? scores[zone].score : null;
-    const st = soneStatus(zone);
-    const pris = PRICES[zone] && PRICES[zone].dogn ? PRICES[zone].dogn + ' kr døgnkort' : '';
-    const kort = ZONE_INFO[zone] && ZONE_INFO[zone].kortUrl;
-    const stKl = st.lukket ? 'pk-stengt' : (st.delvis ? 'pk-delvis' : 'pk-apen');
-    html = '<div class="pk-hdr"><span>📍 Du står i <b>' + zone + '</b></span>' + x + '</div>'
-      + (sc !== null ? '<div class="pk-rad"><span class="pk-score" style="background:' + scoreColor(sc) + '">' + sc
-          + '</span>score ved ' + flowBinLabel(currentFlow) + ' m³/s</div>' : '')
-      + (st.kort ? '<div class="pk-rad ' + stKl + '">' + st.kort + (st.tekst ? ' — ' + st.tekst : '') + '</div>' : '')
-      + (pris ? '<div class="pk-rad">' + pris + '</div>' : '')
-      + '<div class="pk-lenker"><a data-z="' + zone + '" onclick="visSoneFraPos(this.dataset.z)">Vis sone</a>'
-      + (kort && st.kode !== 'stengt' ? ' · <a href="' + kort + '" target="_blank" rel="noopener">Kjøp kort ↗</a>' : '')
-      + '</div>' + usikker;
-  } else {
-    const n = naermesteSone(lat, lon);
-    const avst = !n ? '' : (n.m < 1000 ? 'ca. ' + Math.round(n.m / 10) * 10 + ' m' : 'ca. ' + fmtKm(n.m / 1000) + ' km');
-    html = '<div class="pk-hdr"><span>📍 Du står utenfor sonene</span>' + x + '</div>'
-      + (n ? '<div class="pk-rad">Nærmeste: <b>' + n.zone + '</b>, ' + avst + '</div>'
-           + '<div class="pk-lenker"><a data-z="' + n.zone + '" onclick="visSoneFraPos(this.dataset.z)">Vis sone</a></div>' : '')
-      + usikker;
-  }
+  const html = '<div class="pk-hdr">'
+    + (zone ? '<span>📍 <b class="pk-sone" data-z="' + zone + '" onclick="visSoneFraPos(this.dataset.z)">' + zone + '</b></span>'
+            : '<span>📍 Utenfor sonene</span>')
+    + x + '</div>';
   clearTimeout(_posFeilTimer);
   _posKortEl.innerHTML = html;
   _posKortEl.style.display = 'block';
@@ -1975,7 +1957,7 @@ function updateMap(scores) {
     if (mk._icon) mk._icon.style.pointerEvents = show ? 'auto' : 'none';
   });
   _syncFlowChip(); // pillens antall følger valgt sone og vannføring
-  oppdaterPosKort(); // score og status i posisjonskortet følger sliderne
+  oppdaterPosKort();
 }
 
 function selectZone(zone) {
@@ -2807,7 +2789,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.066</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.067</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span>
 </div>
 
