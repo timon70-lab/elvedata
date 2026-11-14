@@ -1569,11 +1569,53 @@ function selectZone(zone) {
     document.getElementById('mapTitle').textContent = '🗺 ' + zone;
     closeMedia(); // lukk ev. åpent bilde/video fra forrige sone
     preloadZone(zone);
-    const zc = ZONE_COORDS[zone];
-    if (zonePolys[zone]) map.fitBounds(zonePolys[zone].getBounds(), {padding: [30,30], animate: true, maxZoom: 15});
-    else if (zc) map.fitBounds([zc.s, zc.e], {padding: [50,50], animate: true, maxZoom: 14});
   }
   update();
+  // Zoom til sonen ETTER update(): da er soneinfo tegnet, og i fullskjerm vet vi
+  // hvor mye av kartet panelet dekker (se kartInnrykk).
+  if (activeZone === zone) zoomTilSone(zone);
+}
+
+// Hvor mye av kartflaten som er dekket av paneler i fullskjerm, i piksler fra
+// hver kant. Utenfor fullskjerm ligger panelene ved siden av/under kartet → 0.
+// Et panel som spenner over det meste av bredden (mobil) regnes som dekke
+// nederst; et smalt panel til venstre (soneinfo på PC) som dekke til venstre.
+function kartInnrykk() {
+  const inn = { venstre: 0, bunn: 0 };
+  if (!_mapFsOn) return inn;
+  const m = document.getElementById('map').getBoundingClientRect();
+  ['zoneInfoPanel', 'photoPanel'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || !el.classList.contains('visible')) return;
+    const r = el.getBoundingClientRect();
+    if (r.width >= m.width * 0.6) inn.bunn = Math.max(inn.bunn, m.bottom - r.top);
+    else if (id === 'zoneInfoPanel') inn.venstre = Math.max(inn.venstre, r.right - m.left);
+  });
+  // Er nesten hele kartet dekket, gir det ingen mening å skyve fokus.
+  if (m.height - inn.bunn < 80) inn.bunn = 0;
+  if (m.width - inn.venstre < 160) inn.venstre = 0;
+  return inn;
+}
+
+function zoomTilSone(zone) {
+  const inn = kartInnrykk();
+  const zc = ZONE_COORDS[zone];
+  if (zonePolys[zone]) map.fitBounds(zonePolys[zone].getBounds(),
+    {paddingTopLeft: [30 + inn.venstre, 30], paddingBottomRight: [30, 30 + inn.bunn], animate: true, maxZoom: 15});
+  else if (zc) map.fitBounds([zc.s, zc.e],
+    {paddingTopLeft: [50 + inn.venstre, 50], paddingBottomRight: [50, 50 + inn.bunn], animate: true, maxZoom: 14});
+}
+
+// Flytter kartet så punktet havner midt i den SYNLIGE delen av kartet.
+function panTilSynlig(lat, lon) {
+  const inn = kartInnrykk();
+  const pt = map.latLngToContainerPoint([lat, lon]);
+  const senter = pt.add([-inn.venstre / 2, inn.bunn / 2]);
+  map.panTo(map.containerPointToLatLng(senter), { animate: true, duration: 0.4 });
+}
+function _panTilAktivtMedium() {
+  const m = _activeZoneMedia[_activeMediaIdx];
+  if (m && document.getElementById('photoPanel').classList.contains('visible')) panTilSynlig(m.lat, m.lon);
 }
 
 function showZoneInfo(zone, scrollTo = true) {
@@ -1779,6 +1821,11 @@ function openZoneMedia(zone, target) {
   _activeMediaIdx = posInGroup >= 0 ? posInGroup : 0;
   _renderMedia();
   document.getElementById('photoPanel').classList.add('visible');
+  // Panelet er først nå synlig, og bildet endrer høyden når det er lastet:
+  // sentrer på nytt begge ganger så markøren ikke havner bak panelet.
+  _panTilAktivtMedium();
+  const _pImg = document.getElementById('photoImg');
+  if (!_pImg._panBundet) { _pImg._panBundet = true; _pImg.addEventListener('load', _panTilAktivtMedium); }
   document.getElementById('photoPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
@@ -1855,7 +1902,7 @@ function _renderMedia() {
 
   // Sentrer kartet på aktiv markør
   if (activePhoto) {
-    map.panTo([activePhoto.lat, activePhoto.lon], { animate: true, duration: 0.4 });
+    panTilSynlig(activePhoto.lat, activePhoto.lon);
   }
 }
 function closeMedia() {
@@ -2322,7 +2369,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.059</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.060</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span>
 </div>
 
