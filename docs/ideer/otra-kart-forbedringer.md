@@ -60,6 +60,11 @@ kartløsningen for laksefiske som finnes på internett.
 - Retter også 5B Øst (funn 5).
 
 ### 4. Fiskeplasser, parkering og kortsalg som punkter (middels, mest dataarbeid)
+- **Avklart med Per Lasse 2026-11-15:**
+  - Fiskeplasser tas ut av forslaget — de blir ikke lagt inn.
+  - Fysisk kortsalg skjer fra Otra House mellom kl. 18:00 og 20:00.
+  - Parkering: Per Lasse kommer tilbake med koordinater.
+- Opprinnelig forslag:
 - Ny `data/steder_otra.json` med type, navn, posisjon og kort tekst, vedlikeholdt i admin.
 - «Veibeskrivelse» går til nærmeste parkering i stedet for sonegrensa.
 - Laxefiskelagets fiskekart (PDF på lakseelver.no) skal ifølge søketreff ha parkering, landfiske
