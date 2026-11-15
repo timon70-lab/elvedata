@@ -4,6 +4,13 @@
     "bredde_land": 40,
     "utelat_øy_med_kanal": [172530737],
     "soner": {
+      "Sone 2": { "kun_side": [
+        { "side": "øst", "fra": [58.197703, 7.934725], "til": "slutt" }
+      ] },
+      "Sone 4A": { "kun_side": [
+        { "side": "øst", "fra": "start", "til": [58.232462, 7.931631] },
+        { "side": "vest", "fra": [58.242507, 7.946954], "til": "slutt" }
+      ] },
       "Sone 3B Hageodden": { "forelder": "Sone 3A", "side": "øst" },
       "Sone 3C Mosby": { "forelder": "Sone 3A", "side": "vest" },
       "Sone 4B Ravnås": { "forelder": "Sone 4A", "side": "vest" },

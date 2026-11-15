@@ -380,6 +380,8 @@ table.rd-tbl tr.big td.w { color:#9b2c2c; }
 /* Smal skjerm med valgt sone: kartet står fast øverst på skjermen (lavere enn
    ellers), og soneinfo/bilder ruller under det. */
 @media (max-width: 999px) {
+  /* Tegnforklaringen tar for mye av et lite kart: vises bare i fullskjerm. */
+  #mapFs:not(.fs-on) .kart-legend { display:none; }
   .map-panel { scroll-margin-top:24px; }
   body.sone-valgt .map-panel { position:sticky; top:24px; z-index:60; box-shadow:0 6px 18px rgba(0,0,0,0.22); }
   body.sone-valgt #map { height:max(230px, 36vh); }
@@ -499,7 +501,9 @@ const ZONES = ["Sone 1","Sone 2","Sone 3A","Sone 3B Hageodden","Sone 3C Mosby","
 const BILDE_BASE = '../bilder/otra/';
 const PHOTOS_URL = '../data/photos_otra.json';
 const VIDEOS_URL = '../data/videoer_otra.json';
-const SONER_URL = '../data/soner_otra.geojson'; // sonepolygoner, laget av scripts/sonepolygoner.py
+// Testklonen har egen polygonfil, så endringer i sonegrenser kan prøves før de når vanlig Otra.
+// Lages med: python scripts/sonepolygoner.py otra --ut soner_otra2.geojson
+const SONER_URL = '../data/soner_otra2.geojson';
 const SENTERLINJE_URL = '../data/senterlinje_otra.geojson'; // midtlinja, brukes til sonelinjene i oversikten
 const STEDER_URL = '../data/steder_otra.json'; // kortsalg og parkering som egne punkter
 const SESONG_URL = '../data/sesong.json';
@@ -3035,7 +3039,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.069</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.070</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span>
 </div>
 

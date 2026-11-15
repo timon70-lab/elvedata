@@ -131,6 +131,9 @@ grep -oE 'v[0-9]+\.[0-9]{3}' <fil>
   uten GoatCounter, major 0, leser Otras datafiler. Nås kun med direkte lenke og skal ikke lenkes
   fra noen side. **Kartendringer for Otra gjøres her**, ikke i `otra/index.html`, til Per Lasse ber
   om go-live. Endres `otra/index.html` i mellomtiden, må samme endring inn i `otra2`.
+  Klonen har egen polygonfil `data/soner_otra2.geojson`
+  (`python scripts/sonepolygoner.py otra --ut soner_otra2.geojson`), så endrede sonegrenser ikke
+  når vanlig Otra før go-live. Vanlig Otra leser fortsatt `data/soner_otra.geojson`.
 
 ### Kode og data
 

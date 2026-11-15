@@ -16,6 +16,9 @@ Slik regnes sonene ut:
   * En delsone (forelder satt) går fra sin egen start til sin egen slutt og
     tegnes oppå hovedsonen.
   * side = vest/øst deler strekningen langs midtlinja.
+  * kun_side = liste av {side, fra, til}: på delstrekningen fra–til hører bare
+    den ene bredden til sonen (fiske fra én side). fra/til er [lat, lon] eller
+    "start"/"slutt" for sonens egne grenser.
   * utelat_øy_med_kanal = OSM-id til en vei i øyas ring. Øya, sidekanalen
     bak den (sett fra midtlinja) og landstripa langs kanalen tas ut av sonene.
     Kanalåpningene lukkes med korteste linje fra øyspissene til bredden.
@@ -23,6 +26,7 @@ Slik regnes sonene ut:
 Bruk:
     python scripts/sonepolygoner.py otra           # lag polygonene
     python scripts/sonepolygoner.py otra --hent    # hent OSM på nytt først
+    python scripts/sonepolygoner.py otra --ut soner_otra2.geojson   # annet filnavn i data/
 
 Data fra OpenStreetMap er under ODbL (© OpenStreetMap contributors).
 """
@@ -228,7 +232,7 @@ def som_lonlat(geom, inv):
 
 # ---------------------------------------------------------------- kjøring
 
-def behandle(elv, hent=False):
+def behandle(elv, hent=False, ut_fil=None):
     with open(OPPSETT, encoding='utf-8') as fh:
         oppsett = json.load(fh)[elv]
     if hent:
@@ -268,13 +272,14 @@ def behandle(elv, hent=False):
         s = spesial.get(navn, {})
         ms, ds = mål(z['s'])
         me, de = mål(z['e'])
-        soner.append(dict(navn=navn, ms=ms, me=me, forelder=s.get('forelder'), side=s.get('side')))
+        soner.append(dict(navn=navn, ms=ms, me=me, forelder=s.get('forelder'), side=s.get('side'),
+                          kun_side=s.get('kun_side', [])))
         print('  %-20s %6.0f–%6.0f m  (punktene %3.0f / %3.0f m fra midtlinja)' % (navn, ms, me, ds, de))
     # Soner uten egne koordinater, som deler strekning med en annen.
     for navn, s in spesial.items():
         if 'som' in s and navn not in zc:
             mal = next(z for z in soner if z['navn'] == s['som'])
-            soner.append(dict(mal, navn=navn, side=s.get('side')))
+            soner.append(dict(mal, navn=navn, side=s.get('side'), kun_side=s.get('kun_side', [])))
 
     hoved = sorted([z for z in soner if not z['forelder']], key=lambda z: z['ms'])
     starter = sorted({round(z['ms'], 1) for z in hoved})
@@ -293,6 +298,23 @@ def behandle(elv, hent=False):
             flate = side(midt, flate, z['side'])
         # Hull er midten av øyer som landstripa ikke rakk inn til - øya hører til sonen.
         flate = unary_union([Polygon(p.exterior) for p in getattr(flate, 'geoms', [flate])])
+        # Delstrekninger der det bare fiskes fra én side: ta bort den andre bredden.
+        for regel in z.get('kun_side', []):
+            def grense(v, standard):
+                if v in (None, 'start', 'slutt'):
+                    return standard
+                m, d = mål(v)
+                print('    %s: kun %s, grensepunkt %.0f m fra midtlinja' % (z['navn'], regel['side'], d))
+                return m
+            ma = grense(regel.get('fra', 'start'), m0)
+            mb = grense(regel.get('til', 'slutt'), m1)
+            # Klipp fra hele korridoren (et kutt akkurat i sonegrensa treffer ikke sonens egen flate).
+            bit = strekning(midt, korridor, ma, mb).intersection(flate)
+            feil_side = side(midt, bit, 'vest' if regel['side'] == 'øst' else 'øst')
+            før = flate.area
+            flate = flate.difference(feil_side.buffer(0.5))
+            print('    %s: kun %s-siden på %.0f–%.0f m (%.0f m lang), fjernet %.0f m²'
+                  % (z['navn'], regel['side'], min(ma, mb), max(ma, mb), abs(mb - ma), før - flate.area))
         if flate.is_empty:
             print('ADVARSEL: %s ble tom' % z['navn'])
             continue
@@ -310,7 +332,7 @@ def behandle(elv, hent=False):
                  'Generert av scripts/sonepolygoner.py',
         'features': features,
     }
-    sti = os.path.join(ROOT, 'data', 'soner_%s.geojson' % elv)
+    sti = os.path.join(ROOT, 'data', ut_fil or 'soner_%s.geojson' % elv)
     with open(sti, 'w', encoding='utf-8') as fh:
         json.dump(ut, fh, ensure_ascii=False, separators=(',', ':'))
     print('Skrev %s (%d soner, %.1f kB)' % (os.path.relpath(sti, ROOT), len(features),
@@ -318,11 +340,17 @@ def behandle(elv, hent=False):
 
 
 def main():
-    args = [a for a in sys.argv[1:] if not a.startswith('--')]
+    argv = sys.argv[1:]
+    ut_fil = None
+    if '--ut' in argv:
+        i = argv.index('--ut')
+        ut_fil = argv[i + 1]
+        del argv[i:i + 2]
+    args = [a for a in argv if not a.startswith('--')]
     if not args:
         sys.exit(__doc__)
     for elv in args:
-        behandle(elv, hent='--hent' in sys.argv)
+        behandle(elv, hent='--hent' in argv, ut_fil=ut_fil)
 
 
 if __name__ == '__main__':
