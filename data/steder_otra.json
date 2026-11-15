@@ -1,0 +1,18 @@
+{
+  "_meta": {
+    "endret": "2026-11-15",
+    "notat": "Steder som vises som egne punkter i Otra-kartet. type: kortsalg | parkering. lat/lon i WGS84. tekst er fritekst som vises i popup og soneinfo.",
+    "kilde": "Otra House: Kartverkets adresse-API (Venneslavegen 229, 4708 Vennesla). Åpningstid oppgitt av Per Lasse 2026-11-15."
+  },
+  "steder": [
+    {
+      "id": "k1",
+      "type": "kortsalg",
+      "navn": "Otra House",
+      "adresse": "Venneslavegen 229, 4708 Vennesla",
+      "tekst": "Fysisk kortsalg kl. 18:00–20:00.",
+      "lat": 58.2487,
+      "lon": 7.9538
+    }
+  ]
+}

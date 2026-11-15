@@ -501,6 +501,7 @@ const PHOTOS_URL = '../data/photos_otra.json';
 const VIDEOS_URL = '../data/videoer_otra.json';
 const SONER_URL = '../data/soner_otra.geojson'; // sonepolygoner, laget av scripts/sonepolygoner.py
 const SENTERLINJE_URL = '../data/senterlinje_otra.geojson'; // midtlinja, brukes til sonelinjene i oversikten
+const STEDER_URL = '../data/steder_otra.json'; // kortsalg og parkering som egne punkter
 const SESONG_URL = '../data/sesong.json';
 const SESONG_ELV = 'otra';
 
@@ -1717,6 +1718,108 @@ async function fetchSenterlinje() {
   } catch (e) { /* uten midtlinja vises polygonene som vanlig også i oversikten */ }
 }
 
+// ── STEDER: kortsalg og parkering ─────────────────────────────────────────
+// Punkter fra data/steder_otra.json. Vises fra samme zoomnivå som
+// desinfeksjonspostene (LABEL_ZOOM_THRESHOLD); et åpent popup holder punktet synlig.
+let STEDER = [];          // [{id, type, navn, adresse, tekst, lat, lon}]
+let stedMarkers = [];     // [{mk, sted}]
+const STED_TYPER = {
+  kortsalg:  { navn: 'Kortsalg',  farge: '#6b46c1', tegn: '🎫' },
+  parkering: { navn: 'Parkering', farge: '#2b6cb0', tegn: 'P' }
+};
+
+function stedIconHtml(type, px) {
+  const t = STED_TYPER[type] || { farge: '#4a5568', tegn: '•' };
+  return '<span style="box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;'
+    + 'width:' + px + 'px;height:' + px + 'px;border-radius:5px;background:' + t.farge + ';border:2px solid #fff;'
+    + 'box-shadow:0 0 0 1px rgba(0,0,0,0.35);color:#fff;font-weight:800;font-size:' + Math.round(px * 0.5) + 'px;line-height:1;'
+    + 'font-family:Segoe UI,sans-serif">' + t.tegn + '</span>';
+}
+function stedPopupHtml(s) {
+  const t = STED_TYPER[s.type] || { navn: '' };
+  return '<div style="font-size:.78rem;line-height:1.4"><strong>' + stedIconHtml(s.type, 18) + ' ' + s.navn + '</strong>'
+    + (t.navn ? '<br><span style="color:#4a5568">' + t.navn + '</span>' : '')
+    + (s.tekst ? '<br>' + s.tekst : '')
+    + (s.adresse ? '<br><span style="color:#4a5568">' + s.adresse + '</span>' : '')
+    + '<br><a class="zi-link" href="https://www.google.com/maps/dir/?api=1&destination=' + s.lat + ',' + s.lon
+    + '&travelmode=driving" target="_blank">🧭 Kjør dit ↗</a></div>';
+}
+function updateStedVisibility() {
+  if (!map) return;
+  const zoomed = map.getZoom() >= LABEL_ZOOM_THRESHOLD;
+  stedMarkers.forEach(({ mk }) => {
+    const show = zoomed || mk.isPopupOpen();
+    mk.setOpacity(show ? 1 : 0);
+    if (mk._icon) mk._icon.style.pointerEvents = show ? 'auto' : 'none';
+  });
+}
+function addStedMarkers() {
+  if (!map) return;
+  stedMarkers.forEach(({ mk }) => mk.remove());
+  stedMarkers = [];
+  STEDER.forEach(s => {
+    const mk = L.marker([s.lat, s.lon], {
+      icon: L.divIcon({ html: stedIconHtml(s.type, 24), className: '', iconSize: [24, 24], iconAnchor: [12, 12], tooltipAnchor: [0, -12] }),
+      zIndexOffset: 30
+    }).addTo(map);
+    mk.bindTooltip(((STED_TYPER[s.type] || {}).navn || 'Sted') + ': ' + s.navn, { permanent: false, direction: 'top', className: 'mtip' });
+    mk.bindPopup(stedPopupHtml(s));
+    mk.on('popupopen', updateStedVisibility);
+    mk.on('popupclose', () => setTimeout(updateStedVisibility, 0));
+    stedMarkers.push({ mk, sted: s });
+  });
+  updateStedVisibility();
+}
+async function fetchSteder() {
+  try {
+    const res = await fetch(STEDER_URL);
+    if (!res.ok) return;
+    const j = await res.json();
+    STEDER = (j && Array.isArray(j.steder) ? j.steder : []).filter(s => s && isFinite(s.lat) && isFinite(s.lon));
+    addStedMarkers();
+    map.on('zoomend', updateStedVisibility);
+    if (activeZone) showZoneInfo(activeZone, false);
+  } catch (e) { /* steder er valgfrie - feiler stille */ }
+}
+// Fra soneinfo: vis stedet i kartet med popup åpent.
+function focusSted(id) {
+  const m = stedMarkers.find(x => x.sted.id === id);
+  if (!m || !map) return;
+  map.setView([m.sted.lat, m.sted.lon], Math.max(map.getZoom(), 15));
+  m.mk.openPopup();
+  if (erSmalLayout() && !_mapFsOn) visKartOverst();
+}
+// Rad i soneinfo for fysisk kortsalg.
+function kortsalgRad() {
+  const k = STEDER.filter(s => s.type === 'kortsalg');
+  if (!k.length) return '';
+  return '<div class="zi-row"><span class="zi-label">Kortsalg</span><span class="zi-val">'
+    + k.map(s => '<div class="zi-desinf-item"><strong>' + s.navn + '</strong>' + (s.tekst ? ' – ' + s.tekst : '')
+        + ' <a href="#" onclick="focusSted(\'' + s.id + '\');return false">📍 Vis på kart</a></div>').join('')
+    + '</span></div>';
+}
+// Kjøremål for «Veibeskrivelse hit»: nærmeste parkering når slike er lagt inn,
+// ellers sonens startpunkt som før. pt: [lat, lon] i sonen.
+function kjoremalForSone(zone) {
+  const start = ZONE_COORDS[zone] ? ZONE_COORDS[zone].s : null;
+  const l = mapLayers[zone];
+  const midt = l ? [l.startMk.getLatLng().lat, l.startMk.getLatLng().lng] : start;
+  const p = STEDER.filter(s => s.type === 'parkering');
+  if (midt && p.length) {
+    let best = null;
+    p.forEach(s => { const km = haversineKm(midt, [s.lat, s.lon]); if (!best || km < best.km) best = { s, km }; });
+    return { lat: best.s.lat, lon: best.s.lon, navn: best.s.navn };
+  }
+  const m = start || midt;
+  return m ? { lat: m[0], lon: m[1], navn: null } : null;
+}
+function veibeskrivelseHtml(zone) {
+  const k = kjoremalForSone(zone);
+  if (!k) return '';
+  return '<a class="zi-link" href="https://www.google.com/maps/dir/?api=1&destination=' + k.lat + ',' + k.lon
+    + '&travelmode=driving" target="_blank">🗺 ' + (k.navn ? 'Veibeskrivelse til parkering (' + k.navn + ')' : 'Veibeskrivelse hit') + ' ↗</a>';
+}
+
 // ── DELBARE LENKER ────────────────────────────────────────────────────────
 // Adressen husker hva du ser på, f.eks. #sone=4A&vf=100&aar=2020-2026&mnd=6-7&flue=1
 // Bare det som avviker fra startvisningen tas med. Vannføring tas med når den er
@@ -2255,7 +2358,8 @@ function showZoneInfo(zone, scrollTo = true) {
     ${sesongRad(zone)}
     <div class="zi-row"><span class="zi-label">Merknader</span><span class="zi-val">${info.merknader}</span></div>
     ${desinfZoneHtml(zone)}
-    <a class="zi-link" href="https://www.google.com/maps/dir/?api=1&destination=${ZONE_COORDS[zone]?.s[0]},${ZONE_COORDS[zone]?.s[1]}&travelmode=driving" target="_blank">🗺 Veibeskrivelse hit ↗</a>
+    ${kortsalgRad()}
+    ${veibeskrivelseHtml(zone)}
     ${priceHtml}
     <a class="zi-link" href="${info.kortUrl}" target="_blank">🎫 Kjøp fiskekort ↗</a>
     <a class="zi-link" href="#" onclick="delLenke(this);return false">🔗 Del lenke til sonen</a>
@@ -2872,6 +2976,7 @@ fetchSoner();
 fetchPhotos();
 fetchVideos();
 fetchDesinf();
+fetchSteder();
 window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </script>
 
@@ -2930,7 +3035,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.068</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.069</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span>
 </div>
 
