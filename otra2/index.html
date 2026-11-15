@@ -247,6 +247,8 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .zi-status.delvis { background:#fffaf0; border:1px solid #fbd38d; color:#975a16; }
 .zi-status.apen { background:#f0fff4; border:1px solid #c6f6d5; color:#276749; }
 .zone-stengt { font-size:0.6rem; font-weight:700; color:#c53030; margin-top:1px; }
+.vf-merknad { font-size:0.62rem; line-height:1.4; color:#975a16; background:#fffaf0; border:1px solid #fbd38d; border-radius:6px; padding:4px 8px; }
+.vf-merknad a { color:#2b6cb0; font-weight:700; cursor:pointer; text-decoration:none; white-space:nowrap; }
 .zi-boom { display:flex; gap:8px; align-items:center; margin-top:8px; padding:8px 10px; background:#fffbea; border:1px solid #fbd38d; border-radius:8px; }
 .zi-boom-icon { font-size:1.1rem; line-height:1; flex-shrink:0; }
 .zi-boom-hdr { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#975a16; }
@@ -424,9 +426,10 @@ table.rd-tbl tr.big td.w { color:#9b2c2c; }
     <div class="ctrl-col">
       <div class="ctrl-row" id="flowCtrlRow">
         <label>Vannføring</label>
-        <input type="range" id="flowSlider" min="50" max="300" step="25" value="100" oninput="onFlowChange(this.value)">
+        <input type="range" id="flowSlider" min="50" max="300" step="25" value="100" oninput="vfEndretAvBruker(); onFlowChange(this.value)">
         <span class="ctrl-val" id="flowVal">100–125 m³/s</span>
       </div>
+      <div id="vfMerknad" class="vf-merknad" style="display:none"></div>
       <div class="ctrl-row">
         <label>År</label>
         <div class="dual-slider">
@@ -948,6 +951,8 @@ function update() {
 
   updateMap(scores);
   if (activeZone) showZoneInfo(activeZone, false); // kun oppdater innhold, ikke scroll (kalles ved hver slider-endring)
+  skrivLenke();        // adressen følger valgt sone og sliderne
+  oppdaterVfMerknad();
 
   // Oppdater statistikk-boks
   const perDayStr = st.perDay > 0 ? st.perDay.toFixed(2) : '\u2013';
@@ -1420,7 +1425,8 @@ async function fetchSoner() {
     updateMap(computeScores());
     startPreload();
     fetchSenterlinje();
-  } catch(e) { /* sonepolygoner er valgfrie – uten dem vises bare start/slutt-markørene */ }
+    brukLenkeSone();
+  } catch(e) { /* sonepolygoner er valgfrie – uten dem vises bare start/slutt-markørene */ brukLenkeSone(); }
 }
 
 async function fetchPhotos() {
@@ -1710,6 +1716,131 @@ async function fetchSenterlinje() {
     updateMap(computeScores());
   } catch (e) { /* uten midtlinja vises polygonene som vanlig også i oversikten */ }
 }
+
+// ── DELBARE LENKER ────────────────────────────────────────────────────────
+// Adressen husker hva du ser på, f.eks. #sone=4A&vf=100&aar=2020-2026&mnd=6-7&flue=1
+// Bare det som avviker fra startvisningen tas med. Vannføring tas med når den er
+// satt av brukeren eller av en lenke; da styrer lenken, ikke dagens NVE-måling.
+let _liveBin = null;        // dagens vannføringsintervall fra NVE (null til den er hentet)
+let _vfFraLenke = false;    // vannføringen kom fra en lenke
+let _vfBrukt = false;       // brukeren har selv flyttet vannføringsslideren
+let _lenkeSone = null;      // sone fra lenken som venter på at polygonene er lastet
+let _lenkeKlar = false;     // false til lenken er lest, så update() ikke skriver over den
+
+function soneKode(z) { return z.replace(/^Sone /, '').replace(/ /g, '_'); }
+function soneFraKode(k) {
+  let s = k;
+  try { s = decodeURIComponent(k); } catch (e) { /* bruk som den er */ }
+  s = s.replace(/[ +]/g, '_').toLowerCase();
+  return ZONES.find(z => soneKode(z).toLowerCase() === s)
+      || ZONES.find(z => soneKode(z).toLowerCase().split('_')[0] === s) || null;
+}
+function vfEndretAvBruker() { _vfBrukt = true; _vfFraLenke = false; }
+
+function lagHash() {
+  const deler = [];
+  const sone = activeZone || _lenkeSone;
+  if (sone) deler.push('sone=' + encodeURIComponent(soneKode(sone)));
+  if (_vfFraLenke || (_vfBrukt && currentFlow !== _liveBin)) deler.push('vf=' + currentFlow);
+  const yL = document.getElementById('yearLo'), yH = document.getElementById('yearHi');
+  const aLo = Math.min(yearLo, yearHi), aHi = Math.max(yearLo, yearHi);
+  if (aLo !== +yL.min || aHi !== +yH.max) deler.push('aar=' + aLo + '-' + aHi);
+  const mLo = Math.min(monthLo, monthHi), mHi = Math.max(monthLo, monthHi);
+  if (mLo !== 6 || mHi !== 9) deler.push('mnd=' + mLo + '-' + mHi);
+  if (flyOnly) deler.push('flue=1');
+  return deler.join('&');
+}
+function skrivLenke() {
+  if (!_lenkeKlar) return;
+  const h = lagHash();
+  const ny = location.pathname + location.search + (h ? '#' + h : '');
+  if (ny !== location.pathname + location.search + location.hash) {
+    try { history.replaceState(null, '', ny); } catch (e) { /* f.eks. file:// */ }
+  }
+}
+
+// Leser adressen og stiller sliderne. Returnerer sonen lenken peker på (eller null).
+function lesLenke() {
+  const q = {};
+  location.hash.replace(/^#/, '').split('&').forEach(d => { const i = d.indexOf('='); if (i > 0) q[d.slice(0, i)] = d.slice(i + 1); });
+  const vf = parseInt(q.vf, 10);
+  if (vf >= 50 && vf <= 300 && vf % 25 === 0) {
+    _vfFraLenke = true; _vfBrukt = false;
+    document.getElementById('flowSlider').value = vf;
+    onFlowChange(vf);
+  }
+  const par = (s, lo, hi) => {
+    const m = /^(\d+)(?:-(\d+))?$/.exec(s || '');
+    if (!m) return null;
+    const a = +m[1], b = m[2] ? +m[2] : a;
+    return (a >= lo && b <= hi && a <= b) ? [a, b] : null;
+  };
+  const yL = document.getElementById('yearLo'), yH = document.getElementById('yearHi');
+  const aar = par(q.aar, +yL.min, +yH.max);
+  if (aar) { yL.value = aar[0]; yH.value = aar[1]; onYearChange(); }
+  const mnd = par(q.mnd, 6, 9);
+  if (mnd) { document.getElementById('monthLo').value = mnd[0]; document.getElementById('monthHi').value = mnd[1]; onMonthChange(); }
+  if ((q.flue === '1') !== flyOnly) toggleFly();
+  return q.sone ? soneFraKode(q.sone) : null;
+}
+
+// Velger sonen fra lenken. Kalles når polygonene er lastet (eller ikke kunne lastes).
+function brukLenkeSone() {
+  if (!_lenkeSone) return;
+  const z = _lenkeSone;
+  _lenkeSone = null;
+  if (activeZone !== z && (zonePolys[z] || ZONE_COORDS[z])) {
+    selectZone(z);
+    if (erSmalLayout()) visKartOverst();
+  }
+}
+
+// Merknad når lenkens vannføring ikke er dagens.
+function oppdaterVfMerknad() {
+  const el = document.getElementById('vfMerknad');
+  if (!el) return;
+  if (_vfFraLenke && _liveBin !== null && currentFlow !== _liveBin) {
+    el.innerHTML = 'Lenken viser ' + flowBinLabel(currentFlow) + ' m³/s. Elva går nå på '
+      + flowBinLabel(_liveBin) + '. <a onclick="brukDagensVf()">Bruk dagens</a>';
+    el.style.display = '';
+  } else {
+    el.style.display = 'none';
+  }
+}
+function brukDagensVf() {
+  if (_liveBin === null) return;
+  _vfFraLenke = false; _vfBrukt = false;
+  document.getElementById('flowSlider').value = _liveBin;
+  onFlowChange(_liveBin);
+}
+
+// «Del lenke» i soneinfo: delingsarket på mobil, ellers kopier til utklippstavla.
+function delLenke(el) {
+  skrivLenke();
+  const url = location.href;
+  const kvitter = (t) => { const f = el.textContent; el.textContent = t; setTimeout(() => { el.textContent = f; }, 1800); };
+  if (navigator.share && erSmalLayout()) {
+    navigator.share({ title: document.title, url }).catch(() => { /* avbrutt av brukeren */ });
+    return;
+  }
+  const reserve = () => {
+    const ta = document.createElement('textarea');
+    ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { /* ikke støttet */ }
+    ta.remove();
+    kvitter(ok ? '✓ Lenke kopiert' : 'Kopier fra adressefeltet');
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(() => kvitter('✓ Lenke kopiert'), reserve);
+  } else reserve();
+}
+
+window.addEventListener('hashchange', () => {
+  const z = lesLenke();
+  if (z && z !== activeZone && (zonePolys[z] || ZONE_COORDS[z])) selectZone(z);
+});
 
 // ── POSISJON: «hvilken sone står jeg i?» ──────────────────────────────────
 // «Hvor er jeg?» følger posisjonen løpende (blå prikk + nøyaktighetssirkel) og
@@ -2127,6 +2258,7 @@ function showZoneInfo(zone, scrollTo = true) {
     <a class="zi-link" href="https://www.google.com/maps/dir/?api=1&destination=${ZONE_COORDS[zone]?.s[0]},${ZONE_COORDS[zone]?.s[1]}&travelmode=driving" target="_blank">🗺 Veibeskrivelse hit ↗</a>
     ${priceHtml}
     <a class="zi-link" href="${info.kortUrl}" target="_blank">🎫 Kjøp fiskekort ↗</a>
+    <a class="zi-link" href="#" onclick="delLenke(this);return false">🔗 Del lenke til sonen</a>
     <div class="zi-sources">Kilder: <a href="https://lakseelver.no/nb/elver/otra" target="_blank">lakseelver.no/otra</a> · <a href="https://www.scanatura.no/webshop/?id=006" target="_blank">scanatura.no</a></div>
   `;
   const panel = document.getElementById('zoneInfoPanel');
@@ -2180,6 +2312,7 @@ function nextFlowWithMedia(dir) {
 function stepFlow(dir) {
   const next = nextFlowWithMedia(dir);
   if (next === null) return;
+  vfEndretAvBruker();
   currentFlow = next;
   document.getElementById('flowSlider').value = currentFlow;
   onFlowChange(currentFlow);
@@ -2652,9 +2785,15 @@ async function fetchNVE() {
     document.getElementById('audnaFlow').textContent = val.toFixed(1);
     document.getElementById('audnaStatus').innerHTML = '<span style="color:#68d391">✅ Live NVE</span>';
     const bin = Math.floor(val/25)*25;
-    currentFlow = Math.max(50, Math.min(300, bin));
-    document.getElementById('flowSlider').value = currentFlow;
-    onFlowChange(currentFlow);
+    _liveBin = Math.max(50, Math.min(300, bin));
+    // En lenke med vf=… (eller en slider brukeren alt har flyttet) styrer; ellers dagens vannføring.
+    if (!_vfFraLenke && !_vfBrukt) {
+      currentFlow = _liveBin;
+      document.getElementById('flowSlider').value = currentFlow;
+      onFlowChange(currentFlow);
+    } else {
+      oppdaterVfMerknad();
+    }
 
     // Trend: compare to 3 hours ago
     const val3h = obs.length >= 4 ? obs[obs.length - 4].value : null;
@@ -2710,6 +2849,8 @@ initMap();
 onFlowChange(100);
 onYearChange();
 onMonthChange();
+_lenkeSone = lesLenke();   // delbar lenke: stiller sliderne nå, sonen velges når polygonene er lastet
+_lenkeKlar = true;
 // Init stat boxes with placeholders so header never collapses
 document.getElementById('statBox').innerHTML =
   '<div class="stat-item"><span class="stat-num">–</span><span class="stat-lbl">Fangster</span></div>' +
@@ -2789,7 +2930,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.067</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.068</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span>
 </div>
 
