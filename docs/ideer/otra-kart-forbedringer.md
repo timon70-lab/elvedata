@@ -39,6 +39,14 @@ kartløsningen for laksefiske som finnes på internett.
 ### 1. Flyfoto og Kartverket-topo som kartlag (liten innsats, størst effekt)
 - **Svar fra Kartverket 2026-11-16:** Norge i bilder er ikke tilgjengelig for Elvesona. Flyfoto må
   kjøpes via forhandlere av kartdata, og forhandleravtale gjelder kun virksomheter.
+- **Esri vurdert 2026-11-17** (ArcGIS Location Platform Agreement, rev. 2025-11-21, og prissidene):
+  2 mill. bakgrunnsfliser gratis per måned, flyfoto ligger i samme priskategori, betaling er
+  avslått som standard. Ikke-inntektsgivende apper er uttrykkelig tillatt (3.1.c.1). Forhåndshenting
+  er bare tillatt «to the extent necessary» og etter cache-headerne (3.1.d.6), svar kan ikke deles
+  mellom brukere (3.1.d.2, altså ingen mellomlagring på egen server), kildehenvisning er påkrevd
+  (3.1.d.4), og siden må ha brukervilkår som binder besøkende til avtalen (3.1.c.5).
+  Det nøkkelløse endepunktet `server.arcgisonline.com`, som otra2 bruker, er ikke nevnt i avtalen.
+  Uavklart: riktig flis-URL for rent flyfoto i Leaflet med nøkkel.
 - Lagvelger med Kart / Topo / Flyfoto, og maks zoom hevet til 18–19.
 - Kartverkets topo-lag svarte 2026-11-14 på zoom 13, 17 og 18
   (`https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png`). Det viser
