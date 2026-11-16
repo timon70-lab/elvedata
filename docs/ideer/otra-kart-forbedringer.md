@@ -37,6 +37,8 @@ kartløsningen for laksefiske som finnes på internett.
 ## Forslag, prioritert
 
 ### 1. Flyfoto og Kartverket-topo som kartlag (liten innsats, størst effekt)
+- **Svar fra Kartverket 2026-11-16:** Norge i bilder er ikke tilgjengelig for Elvesona. Flyfoto må
+  kjøpes via forhandlere av kartdata, og forhandleravtale gjelder kun virksomheter.
 - Lagvelger med Kart / Topo / Flyfoto, og maks zoom hevet til 18–19.
 - Kartverkets topo-lag svarte 2026-11-14 på zoom 13, 17 og 18
   (`https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png`). Det viser
