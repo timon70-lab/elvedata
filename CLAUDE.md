@@ -21,6 +21,11 @@ Detaljer ligger i egne filer — les dem når oppgaven berører temaet:
 1. **Hemmeligheter committes aldri.** NVE-API-nøkkelen finnes kun som GitHub Actions-secret
    og i lokal `.env` (gitignored). Aldri i HTML, JS, markdown eller commit-meldinger.
    Les ikke `.env`-innhold inn i svar.
+   **Unntak (2026-11-17):** offentlige nettlesernøkler som er laget for å stå i nettsiden og
+   bare gir tilgang til bakgrunnskart, kan stå i HTML. I dag gjelder det kun Esri-nøkkelen
+   `ESRI_KEY` i `otra2/index.html` (ArcGIS Location Platform, «Public application», kun
+   Basemaps, betaling avslått, utløper 2027-11-17). NVE-nøkkelen og alle andre nøkler er
+   fortsatt hemmelige.
 2. **Fiskernavn vises aldri i dashboard.** Kolonnene `Navn`/`Fisker` i fangstloggene beholdes
    uendret i rådata — ingen data fjernes fra loggene — men de skal aldri embeddes i, eller vises i,
    dashboard, statistikkside eller oversiktskart. Kun `Art == "Laks"` inngår i fangst-pipelines.

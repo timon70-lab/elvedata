@@ -46,7 +46,8 @@ kartløsningen for laksefiske som finnes på internett.
   mellom brukere (3.1.d.2, altså ingen mellomlagring på egen server), kildehenvisning er påkrevd
   (3.1.d.4), og siden må ha brukervilkår som binder besøkende til avtalen (3.1.c.5).
   Det nøkkelløse endepunktet `server.arcgisonline.com`, som otra2 bruker, er ikke nevnt i avtalen.
-  Uavklart: riktig flis-URL for rent flyfoto i Leaflet med nøkkel.
+  **Løst 2026-11-17 (otra2 v0.071):** konto og nøkkel opprettet. Flyfoto hentes fra
+  `ibasemaps-api.arcgis.com` med token, og siden har fått vilkår (`vilkar/`).
 - Lagvelger med Kart / Topo / Flyfoto, og maks zoom hevet til 18–19.
 - Kartverkets topo-lag svarte 2026-11-14 på zoom 13, 17 og 18
   (`https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png`). Det viser

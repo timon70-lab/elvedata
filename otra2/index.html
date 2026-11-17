@@ -114,6 +114,8 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .bl-btn:last-child { border-right:none; }
 .bl-btn:hover { background:#f0fff4; }
 .bl-btn.on { background:#276749; color:#fff; }
+.bl-btn.av, .bl-btn:disabled { color:#a0aec0; cursor:not-allowed; background:#fff; }
+.kart-melding { position:absolute; left:50%; top:10px; transform:translateX(-50%); z-index:1000; background:rgba(26,32,44,.88); color:#fff; font-size:.74rem; padding:6px 10px; border-radius:6px; pointer-events:none; max-width:80%; text-align:center; }
 .bl-btn:focus-visible { outline:2px solid #9ae6b4; outline-offset:-2px; }
 /* Flyfoto er mørkt: gi sonekantene litt mer trøkk så de synes */
 #map.bl-foto:not(.lav-zoom) .leaflet-soneflater-pane path { stroke-width:2.5px; }
@@ -992,6 +994,11 @@ function update() {
 // Tre bakgrunnskart: OSM (som før), Kartverkets topografiske kart (stedsnavn,
 // stier, høydekurver) og flyfoto (grusører, stryk, bruer). Valget huskes i
 // nettleseren. maxNativeZoom lar kartet zoome videre ved å forstørre flisene.
+// Esri-nøkkel for flyfoto: offentlig nettlesernøkkel (ArcGIS Location Platform,
+// «Public application», kun Basemaps, utløper 2027-11-17). Den er ment å stå i
+// nettsiden, jf. unntaket i CLAUDE.md regel 1. Betaling er avslått på kontoen, så
+// brukes gratiskvoten opp, stopper tjenesten - da byttes det til Topo (fotoUtilgjengelig).
+const ESRI_KEY = 'AAPTaCPYGVGyZYL3yXsz57t7SRw.._myVw51i_hv3KUpCrZPU7uGNGBf1hn9pG3FG7bFs3qXfXgu3JLiValeeu9Oz7WQ3JQFJs9COxXv1XjaLxOVR73BuCJDefGsc2WaRIaFOcppfvaTduLWrhuRJzbckL2tE7r8211bVsufn7bT_lHxShP2WcLsgTRBUKtHtGPX_TsTsQANqvyJT9oYFhDX00qRl-o9COxq_2HIgqPoDQsrPLTaUIeH683ljlo4ipRCH-9bqTR3Nsao3WI0.AT1_NeQimiwY';
 const BASE_LAYER_DEFS = [
   { id: 'kart', navn: 'Kart', url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     opt: { attribution: '© OpenStreetMap', maxNativeZoom: 19, maxZoom: 19 },
@@ -999,9 +1006,11 @@ const BASE_LAYER_DEFS = [
   { id: 'topo', navn: 'Topo', url: 'https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png',
     opt: { attribution: '© Kartverket', maxNativeZoom: 18, maxZoom: 19 },
     buf: { bbox: [10, 11, 12, 13], korridor: [14, 15, 16], sone: [17] } },   // store fliser (50–130 kB)
-  { id: 'foto', navn: 'Flyfoto', url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    opt: { attribution: 'Flyfoto © Esri, Maxar, Earthstar Geographics', maxNativeZoom: 18, maxZoom: 19 },
-    buf: { bbox: [10, 11, 12, 13, 14, 15], korridor: [16, 17], sone: [18] } }   // små fliser (10–20 kB)
+  { id: 'foto', navn: 'Flyfoto', url: 'https://ibasemaps-api.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}?token=' + ESRI_KEY,
+    opt: { attribution: 'Powered by <a href="https://www.esri.com" target="_blank" rel="noopener">Esri</a> · Flyfoto: Esri, Vantor, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community', maxNativeZoom: 18, maxZoom: 19 },
+    // Esri-avtalen 3.1.d.6: forhåndshenting bare så langt det trengs. Derfor bare
+    // elvekorridoren fra z14 (ikke hele utsnittet), og dypeste nivå kun for valgt sone.
+    buf: { bbox: [10, 11, 12, 13], korridor: [14, 15, 16], sone: [17, 18] } }   // små fliser (10–20 kB)
 ];
 // Felles flisopsjoner: større kant av ferdige fliser rundt utsnittet, og last
 // også mens kartet dras (standard på mobil er å vente til det står stille).
@@ -1012,6 +1021,7 @@ let _baseLayerId = null;
 
 function setBaseLayer(id) {
   if (!_baseLayers[id]) id = 'kart';
+  if (id === 'foto' && _fotoAv) id = 'topo';
   // Mykt bytte: det gamle laget blir liggende under til det nye er ferdig lastet,
   // så kartet aldri står tomt mellom to lag.
   const gammelId = _baseLayerId, gammel = gammelId && _baseLayers[gammelId], ny = _baseLayers[id];
@@ -1036,8 +1046,38 @@ function setBaseLayer(id) {
   try { localStorage.setItem(BASE_LAYER_KEY, id); } catch (e) { /* privat modus e.l. */ }
 }
 
+// Flyfoto utilgjengelig: Esri svarer med en feilmelding (JSON) i stedet for bilde når
+// gratiskvoten er brukt opp eller nøkkelen er utløpt. Da byttes det til Topo, knappen
+// slås av for resten av besøket, og brukeren får en kort beskjed i kartet.
+let _fotoAv = false, _fotoSjekker = false;
+function sjekkFotoFeil(url) {
+  if (_fotoAv || _fotoSjekker || !url) return;
+  _fotoSjekker = true;
+  fetch(url).then(r => {
+    const ct = r.headers.get('content-type') || '';
+    if (!r.ok || !ct.startsWith('image')) fotoUtilgjengelig();
+  }).catch(() => { /* nettverksfeil (f.eks. uten dekning) - ikke Esris skyld */ })
+    .finally(() => { setTimeout(() => { _fotoSjekker = false; }, 30000); });
+}
+function fotoUtilgjengelig() {
+  if (_fotoAv) return;
+  _fotoAv = true;
+  const b = document.querySelector('.bl-btn[data-bl="foto"]');
+  if (b) { b.disabled = true; b.title = 'Flyfoto er ikke tilgjengelig akkurat nå'; b.classList.add('av'); }
+  if (_baseLayerId === 'foto') {
+    setBaseLayer('topo');
+    try { localStorage.setItem(BASE_LAYER_KEY, 'foto'); } catch (e) { /* behold valget til neste besøk */ }
+  }
+  const m = document.createElement('div');
+  m.className = 'kart-melding';
+  m.textContent = 'Flyfoto er ikke tilgjengelig akkurat nå. Viser Topo.';
+  document.getElementById('map').appendChild(m);
+  setTimeout(() => m.remove(), 6000);
+}
+
 function initBaseLayers() {
   BASE_LAYER_DEFS.forEach(d => { _baseLayers[d.id] = L.tileLayer(d.url, Object.assign({}, TILE_OPT, d.opt)); });
+  _baseLayers.foto.on('tileerror', e => sjekkFotoFeil(e.tile && e.tile.src));
   const BlControl = L.Control.extend({
     options: { position: 'bottomleft' },
     onAdd: function() {
@@ -3039,8 +3079,9 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.070</span><br>
-  <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.071</span><br>
+  <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span><br>
+  <a href="../vilkar/" style="font-size:0.6rem; color:#94a3b8;">Vilkår for bruk</a>
 </div>
 
 <div class="rd-overlay" id="rdOverlay"
