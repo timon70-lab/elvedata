@@ -380,7 +380,10 @@ table.rd-tbl tr.big td.w { color:#9b2c2c; }
   #mapFs.fs-on #fsCtrlBox .fc-cnt { display:none; }
   /* Mobil: bare vannføring i boksen, soneinfo som ark nederst */
   #mapFs.fs-on #fsCtrlBox .ctrl-row.fs-extra { display:none; }
-  #mapFs.fs-on #zoneInfoPanel { left:8px; right:8px; width:auto; max-width:none; top:auto; bottom:84px; max-height:42vh; }
+  /* Soneinfo går helt ned, men stopper rett over kildehenvisningen (Esri krever at den vises). */
+  #mapFs.fs-on #zoneInfoPanel { left:8px; right:8px; width:auto; max-width:none; top:auto; bottom:22px; max-height:calc(42vh + 62px); }
+  /* «Esc lukker fullskjerm» gir ingen mening uten tastatur, og lå oppå soneinfo */
+  #mapFs.fs-on #fsHint { display:none; }
 }
 
 /* ===== PC-layout: kartet som hovedflate =====
@@ -1494,7 +1497,7 @@ async function fetchSoner() {
       const lag = L.geoJSON(f, {pane: 'soneflater'}).addTo(map);
       lag.isDel = f.properties.slag === 'del';
       lag.bindTooltip(zone, {sticky: true, direction: 'top', className: 'mtip'});
-      lag.on('click', () => { selectZone(zone); if (activeZone === zone) showZoneInfo(zone); });
+      lag.on('click', e => { selectZone(zone, { fra: e.latlng }); if (activeZone === zone) showZoneInfo(zone); });
       zonePolys[zone] = lag;
       const g = f.geometry;
       const polys = g.type === 'MultiPolygon' ? g.coordinates : [g.coordinates];
@@ -1780,7 +1783,7 @@ function lagSoneLinjer(senter) {
     const linje = L.polyline(snitt(d.fra, d.til), { pane: 'sonelinjer', weight: 6, opacity: 0,
       lineCap: 'butt', lineJoin: 'round' }).addTo(map);
     linje.bindTooltip(d.zone, { sticky: true, direction: 'top', className: 'mtip' });
-    linje.on('click', () => { selectZone(d.zone); if (activeZone === d.zone) showZoneInfo(d.zone); });
+    linje.on('click', e => { selectZone(d.zone, { fra: e.latlng }); if (activeZone === d.zone) showZoneInfo(d.zone); });
     soneLinjer[d.zone] = linje;
   });
 }
@@ -2285,7 +2288,7 @@ let _legendTxt = '';
 function lagSoneMarkor(zone, latlng) {
   const mk = L.marker(latlng, {icon: makeStartIcon('–', '#94a3b8', false, false), zIndexOffset: 10}).addTo(map);
   mk.bindTooltip(zone, {permanent: false, direction: 'top', className: 'zone-label'});
-  mk.on('click', () => { selectZone(zone); if (activeZone === zone) showZoneInfo(zone); });
+  mk.on('click', () => { selectZone(zone, { fra: mk.getLatLng() }); if (activeZone === zone) showZoneInfo(zone); });
   return mk;
 }
 
@@ -2424,7 +2427,10 @@ function updateMap(scores) {
   oppdaterPosKort();
 }
 
-function selectZone(zone) {
+// valg.fra = punktet brukeren klikket på i kartet. Da zoomes det ikke: zoomnivået beholdes,
+// og kartet flyttes bare så mye at punktet ikke havner under soneinfo (fullskjerm).
+// Uten valg.fra (topp 3, delt lenke, «Hvor er jeg?») zoomes det til sonen som før.
+function selectZone(zone, valg = {}) {
   if (activeZone === zone) {
     activeZone = null;
     document.getElementById('mapTitle').textContent = '🗺 Kart';
@@ -2447,7 +2453,22 @@ function selectZone(zone) {
   update();
   // Zoom til sonen ETTER update(): da er soneinfo tegnet, og i fullskjerm vet vi
   // hvor mye av kartet panelet dekker (se kartInnrykk).
-  if (activeZone === zone) zoomTilSone(zone, !hoydeskift);
+  if (activeZone !== zone) return;
+  if (valg.fra) setTimeout(() => holdSynlig(valg.fra), 0);   // etter at soneinfo er vist
+  else zoomTilSone(zone, !hoydeskift);
+}
+
+// Flytter kartet (uten å endre zoom) så punktet ligger i den synlige delen av kartet,
+// med litt luft. Gjør ingenting hvis punktet allerede er synlig.
+function holdSynlig(latlng) {
+  const inn = kartInnrykk(), str = map.getSize(), luft = 50;
+  const p = map.latLngToContainerPoint(latlng);
+  let dx = 0, dy = 0;
+  if (p.x < inn.venstre + luft) dx = p.x - (inn.venstre + luft);
+  else if (p.x > str.x - luft) dx = p.x - (str.x - luft);
+  if (p.y < luft) dy = p.y - luft;
+  else if (p.y > str.y - inn.bunn - luft) dy = p.y - (str.y - inn.bunn - luft);
+  if (dx || dy) map.panBy([dx, dy], { animate: true, duration: 0.4 });
 }
 
 // Hvor mye av kartflaten som er dekket av paneler i fullskjerm, i piksler fra
@@ -3264,7 +3285,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.083</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.084</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span><br>
   <a href="../vilkar/" style="font-size:0.6rem; color:#94a3b8;">Vilkår for bruk</a>
 </div>
