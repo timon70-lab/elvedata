@@ -384,6 +384,8 @@ table.rd-tbl tr.big td.w { color:#9b2c2c; }
   #mapFs:not(.fs-on) .map-panel { max-width:none; height:100%; display:flex; flex-direction:column; }
   #mapFs:not(.fs-on) #map { flex:1 1 auto; height:auto !important; min-height:0; }
   .photo-panel, .zone-info-panel { margin-top:0; margin-bottom:14px; }
+  /* Rulles et panel fram, flukter toppen med kartets topp (top:34px over). */
+  .photo-panel, .zone-info-panel { scroll-margin-top:34px; }
 }
 /* Smal skjerm med valgt sone: kartet står fast øverst på skjermen (lavere enn
    ellers), og soneinfo/bilder ruller under det. */
@@ -2416,7 +2418,8 @@ function showZoneInfo(zone, scrollTo = true) {
   if (scrollTo) {
     // Smal skjerm: kartet øverst og soneinfo under, i stedet for at panelet tar hele skjermen.
     if (erSmalLayout() && !_mapFsOn) visKartOverst();
-    else panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    // PC: toppen av soneinfo flukter med toppen av kartet (scroll-margin-top i CSS).
+    else panel.scrollIntoView({ behavior: 'smooth', block: _mapFsOn ? 'nearest' : 'start' });
   }
 }
 
@@ -3081,7 +3084,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.073</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.074</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span><br>
   <a href="../vilkar/" style="font-size:0.6rem; color:#94a3b8;">Vilkår for bruk</a>
 </div>
