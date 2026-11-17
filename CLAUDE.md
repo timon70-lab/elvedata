@@ -153,6 +153,10 @@ grep -oE 'v[0-9]+\.[0-9]{3}' <fil>
 - Farger: marineblå `#0f2d4a`, elveblå `#5eb6d9`, nålegrønn `#9ae6b4`.
 - `favicon.svg` (roten) er merket fra logoen, altså linja og prikken uten tekst, på et marineblått
   avrundet kvadrat. Alle sider peker på denne fila, så ett bytte endrer ikonet overalt.
+- App-ikon på mobil (2026-11-17): `apple-touch-icon.png` (180 px, iPhone) og `icon-192.png`
+  (Android), begge i roten, med samme merke på heldekkende marineblått. Alle sider har
+  `<link>` til begge rett under favicon-linja. `icon-512.png` ligger klar for et eventuelt
+  web-manifest. Ny side skal ha de samme tre ikon-linjene.
 
 ### Kode og data
 
