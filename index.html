@@ -13,7 +13,7 @@
   * { box-sizing: border-box; }
   html, body { height: 100%; }
   body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f2d4a; color: #e2e8f0;
-         display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+         display: flex; flex-direction: column; height: 100vh; height: 100dvh; height: var(--app-h, 100dvh); }
   header { padding: 18px 56px 10px; text-align: center; position: relative; } /* 56px: plass til QR-knapp (venstre) og tilbakemelding (høyre) */
   header h1 { margin: 0; font-size: 1.3rem; font-weight: 700; }
   .brand-ikon { width: 1.25em; height: 1.25em; flex-shrink: 0; vertical-align: -0.22em; }
@@ -376,7 +376,13 @@ const map = L.map('map', { zoomControl: true, zoomSnap: 0.25, zoomDelta: 1 });
 // fastsatt. Da faller ingen elv utenfor naar en ny kommer til, og kartet
 // tilpasser seg skjermstoerrelsen. Elver uten dashbord (Kvina, Sireaana,
 // Bjerkreimselva, Nidelva, Storelva) ligger utenfor og naas ved aa panorere.
-(function settUtsnitt() {
+let _iUtsnitt = false;       // true mens settUtsnitt selv flytter kartet
+let _brukerFlyttet = false;  // true når brukeren har panorert/zoomet - da tilpasses ikke utsnittet mer
+function settUtsnitt() {
+  _iUtsnitt = true;
+  try { settUtsnittIndre(); } finally { _iUtsnitt = false; }
+}
+function settUtsnittIndre() {
   const m = RIVERS.filter(r => r.hasData);
   if (!m.length) { map.setView([58.24, 7.69], 9); return; }
   // fitBounds polstrer rundt selve koordinatpunktet, ikke rundt markoeren. Markoeren
@@ -393,8 +399,43 @@ const map = L.map('map', { zoomControl: true, zoomSnap: 0.25, zoomDelta: 1 });
   map.fitBounds(L.latLngBounds(m.map(r => [r.lat, r.lon])), {
     paddingTopLeft: [HALV + OVER.venstre + luft, HALV + OVER.opp + luft],
     paddingBottomRight: [HALV + OVER.hoeyre + luft, HALV + OVER.ned + luft],
-    maxZoom: 9           // samme zoomnivaa som foer paa PC, men riktig senter
+    maxZoom: 9,          // samme zoomnivaa som foer paa PC, men riktig senter
+    animate: false
   });
+}
+settUtsnitt();
+map.on('movestart zoomstart', function () { if (!_iUtsnitt) _brukerFlyttet = true; });
+// Vinduet kan endre høyde rett etter åpning (særlig i installert app på Android, der system-
+// linjene legger seg på plass). Da tilpasses utsnittet på nytt, så ytterelvene ikke klemmes
+// mot kanten - men bare så lenge brukeren ikke har flyttet kartet selv.
+map.on('resize', function () { if (!_brukerFlyttet) settUtsnitt(); });
+
+// Sidehøyden følger den faktisk synlige høyden. 100dvh oppdateres ikke alltid riktig i
+// installert app (f.eks. etter dra-ned-for-å-oppdatere), og da ble footeren skjøvet ut.
+(function folgSynligHoyde() {
+  let sist = 0;
+  function oppdater() {
+    // visualViewport.height krymper ved knipezoom; ganget med scale gir det høyden uten zoom.
+    const vv = window.visualViewport;
+    const h = Math.round(vv ? vv.height * vv.scale : window.innerHeight);
+    if (!h || h === sist) return;
+    sist = h;
+    document.documentElement.style.setProperty('--app-h', h + 'px');
+    map.invalidateSize({ pan: false });
+  }
+  oppdater();
+  window.addEventListener('resize', oppdater);
+  window.addEventListener('pageshow', oppdater);
+  window.addEventListener('orientationchange', function () { setTimeout(oppdater, 300); });
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', oppdater);
+  // Ikke alle endringer gir resize-hendelse (sett i installert app og ved emulering).
+  // ResizeObserver ser selve layouten: <html> følger vinduet, #map følger sidehøyden.
+  if (window.ResizeObserver) {
+    new ResizeObserver(oppdater).observe(document.documentElement);
+    new ResizeObserver(function () { map.invalidateSize({ pan: false }); }).observe(document.getElementById('map'));
+  }
+  // Systemlinjene kan legge seg på plass etter load uten resize-hendelse: sjekk et par ganger til.
+  [300, 1000, 2500].forEach(function (ms) { setTimeout(oppdater, ms); });
 })();
 
 // Lukk ev. åpen popup når fanen mister fokus (f.eks. fordi "Åpne elvesiden"-lenken
@@ -737,7 +778,7 @@ loadNewsTicker();
 </script>
 
 <div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.062</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.063</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
