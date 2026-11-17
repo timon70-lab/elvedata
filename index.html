@@ -42,6 +42,12 @@
   #map { width: 100%; flex: 1 1 auto; min-height: 380px; }  /* fyller resten av skjermen - ingen scroll */
   .legend { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; padding: 8px 16px 10px; font-size: 0.7rem; color: #94a3b8; }
   .legend span { display: inline-flex; align-items: center; gap: 5px; }
+  /* Score-tegnforklaring inne i kartet, lik den på elvekartene */
+  .kart-legend { display:flex; align-items:center; gap:7px; background:rgba(255,255,255,0.9); color:#374151; font-size:0.6rem; font-weight:700; padding:3px 8px; border-radius:6px; border:1px solid rgba(0,0,0,0.12); white-space:nowrap; pointer-events:none; }
+  .kart-legend i { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:3px; vertical-align:-1px; }
+  .kart-legend span { font-weight:600; font-variant-numeric:tabular-nums; }
+  /* Løftes over kildehenvisningen, som går helt ut på smal skjerm (som på elvekartene) */
+  #map .leaflet-bottom.leaflet-left { bottom:16px; }
   .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
   .river-marker { display: flex; align-items: center; justify-content: center; border-radius: 50%; color: #fff; font-weight: 800; font-size: 0.82rem; border: 2px solid rgba(255,255,255,0.85); box-shadow: 0 1px 4px rgba(0,0,0,0.35); }
   .river-marker.stop { background: #b91c1c; font-size: 1.1rem; }
@@ -123,16 +129,9 @@
 
 <div id="map"></div>
 
-<div class="legend">
-  <span><span class="dot" style="background:#38a169"></span> 56–100 svært godt</span>
-  <span><span class="dot" style="background:#3182ce"></span> 36–55 godt</span>
-  <span><span class="dot" style="background:#dd6b20"></span> 20–35 middels</span>
-  <span><span class="dot" style="background:#e53e3e"></span> 0–19 svakt</span>
-  <span><span class="dot" style="background:#4a5568"></span> Ingen data</span>
-</div>
-<div class="legend" style="padding-top:0; flex-direction:column; align-items:center; gap:4px;">
+<div class="legend" style="flex-direction:column; align-items:center; gap:4px;">
   <span><svg width="13" height="13" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" fill="#9ae6b4" stroke="#64748b" stroke-width="1.4" stroke-linejoin="round"/></svg> Dråpe = uregulert elv (naturlig vannføring)</span>
-  <span><svg width="13" height="13" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="#f09595" stroke="#64748b" stroke-width="1.4" stroke-linejoin="round"/></svg><svg width="13" height="13" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="#e24b4a" stroke="#64748b" stroke-width="1.4" stroke-linejoin="round"/></svg><svg width="13" height="13" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="#791f1f" stroke="#64748b" stroke-width="1.4" stroke-linejoin="round"/></svg> Lyn = regulert elv (kraftregulering) — mørkere farge = sterkere regulering</span>
+  <span><svg width="13" height="13" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="#f09595" stroke="#64748b" stroke-width="1.4" stroke-linejoin="round"/></svg><svg width="13" height="13" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="#e24b4a" stroke="#64748b" stroke-width="1.4" stroke-linejoin="round"/></svg><svg width="13" height="13" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="#791f1f" stroke="#64748b" stroke-width="1.4" stroke-linejoin="round"/></svg> Lyn = regulert elv (kraftregulering)</span>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -248,7 +247,7 @@ function scoreColor(s) {
   if (s === null) return '#718096';
   if (s >= 56) return '#38a169';
   if (s >= 36) return '#3182ce';
-  if (s >= 20) return '#dd6b20';
+  if (s >= 20) return '#ed8936';
   return '#e53e3e';
 }
 
@@ -403,6 +402,22 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap-bidragsytere',
   maxZoom: 18
 }).addTo(map);
+
+// Tegnforklaring for scorefargene nede til venstre, samme utseende og rekkefølge
+// (lavest til venstre) som på elvekartene.
+const ScoreLegend = L.Control.extend({
+  options: { position: 'bottomleft' },
+  onAdd: function () {
+    const el = L.DomUtil.create('div', 'kart-legend');
+    el.innerHTML = 'Score <span><i style="background:#e53e3e"></i>0–19</span>'
+      + '<span><i style="background:#ed8936"></i>20–35</span>'
+      + '<span><i style="background:#3182ce"></i>36–55</span>'
+      + '<span><i style="background:#38a169"></i>56+</span>'
+      + '<span><i style="background:#4a5568"></i>ingen data</span>';
+    return el;
+  }
+});
+new ScoreLegend().addTo(map);
 
 const now = new Date();
 
@@ -718,7 +733,7 @@ loadNewsTicker();
 </script>
 
 <div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.060</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.061</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
