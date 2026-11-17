@@ -24,6 +24,9 @@ h1 { font-size: 1.25rem; margin-bottom: 4px; }
 .chip { font-size: 0.7rem; font-weight: 600; border-radius: 999px; padding: 3px 10px; }
 .chip.ok { background: #dcfce7; color: #166534; }
 .chip.mangler { background: #fee2e2; color: #b91c1c; }
+.chip.advar { background: #fef3c7; color: #92400e; }
+.chip.sjekker { background: #e2e8f0; color: #475569; }
+.chip.klikk { cursor: pointer; }
 .topbar-settings { background: none; border: 1px solid #cbd5e1; border-radius: 6px;
         padding: 4px 10px; font-size: 0.72rem; color: #475569; cursor: pointer; }
 .topbar-settings:hover { background: #f1f5f9; }
@@ -2565,13 +2568,52 @@ function switchTab(which) {
   document.getElementById('tabBtnBilde').classList.toggle('active', which === 'bilde');
 }
 
-function updateChips() {
-  const tokOk = !!getToken();
-  const nveOk = !!localStorage.getItem(NVE_KEY);
+// Tokenmerket viser om GitHub faktisk godtar tokenet, ikke bare om det finnes.
+// Hver nettleser har sitt eget token i localStorage, så et gammelt token i én
+// nettleser gir 401 der selv om en annen nettleser virker.
+let _tokSjekk = 0;
+function settTokenChip(tekst, klasse, tittel) {
   const ct = document.getElementById('chipToken');
+  ct.textContent = 'GitHub-token ' + tekst;
+  ct.className = 'chip ' + klasse + (klasse === 'ok' || klasse === 'sjekker' ? '' : ' klikk');
+  ct.title = tittel || '';
+  ct.onclick = (klasse === 'ok' || klasse === 'sjekker') ? null : openSettings;
+}
+async function sjekkToken() {
+  const nr = ++_tokSjekk;
+  if (!getToken()) { settTokenChip('✗', 'mangler', 'Ingen token i denne nettleseren. Klikk for å legge inn.'); return; }
+  settTokenChip('…', 'sjekker', 'Sjekker tokenet mot GitHub');
+  try {
+    const res = await fetch('https://api.github.com/repos/' + OWNER + '/' + REPO, { headers: headers(), cache: 'no-store' });
+    if (nr !== _tokSjekk) return;   // et nyere token er lagret i mellomtiden
+    if (res.status === 401) {
+      settTokenChip('✗ ugyldig', 'mangler', 'GitHub avviser tokenet i denne nettleseren (utløpt, slettet eller feil). Klikk for å legge inn et nytt.');
+      return;
+    }
+    if (!res.ok) {
+      settTokenChip('✗ ingen tilgang', 'mangler', 'GitHub svarte HTTP ' + res.status + ' for ' + REPO + '. Tokenet mangler trolig tilgang til repoet. Klikk for å bytte.');
+      return;
+    }
+    const repo = await res.json();
+    if (repo.permissions && !repo.permissions.push) {
+      settTokenChip('⚠ kun lese', 'advar', 'Tokenet kan lese, men ikke skrive til ' + REPO + ' (Contents: read/write mangler).');
+      return;
+    }
+    // Utløpsdatoen (github-authentication-token-expiration) er ikke CORS-eksponert,
+    // så nettleseren kan ikke lese den. Merket sier bare at tokenet virker.
+    // permissions gjelder brukeren, ikke tokenets rettigheter, så skrivetilgang
+    // vises først ved lagring.
+    settTokenChip('✓', 'ok', 'GitHub godtar tokenet for ' + REPO + '.');
+  } catch (e) {
+    if (nr !== _tokSjekk) return;
+    settTokenChip('?', 'advar', 'Fikk ikke kontakt med GitHub for å sjekke tokenet: ' + e.message);
+  }
+}
+
+function updateChips() {
+  const nveOk = !!localStorage.getItem(NVE_KEY);
   const cn = document.getElementById('chipNve');
-  ct.textContent = 'GitHub-token ' + (tokOk ? '✓' : '✗');
-  ct.className = 'chip ' + (tokOk ? 'ok' : 'mangler');
+  sjekkToken();
   cn.textContent = 'NVE-nøkkel ' + (nveOk ? '✓' : '✗');
   cn.className = 'chip ' + (nveOk ? 'ok' : 'mangler');
 }
