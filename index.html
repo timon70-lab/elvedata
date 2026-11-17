@@ -39,7 +39,11 @@
   .qr-cap small { display: block; margin-top: 4px; font-size: .75rem; font-weight: 400; color: #94a3b8; }
   .qr-close { position: absolute; top: 12px; right: 14px; width: 40px; height: 40px; border-radius: 999px;
     background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25); color: #fff; font-size: 1.2rem; cursor: pointer; }
-  #map { width: 100%; flex: 1 1 auto; min-height: 380px; }  /* fyller resten av skjermen - ingen scroll */
+  /* Kartet fyller det som er igjen av skjermen, slik at header og footer alltid vises uten
+     scrolling. Bare kartet krymper; alt annet beholder høyden sin. Under 180 px kart (svært lave
+     vinduer) scroller siden heller enn at kartet blir ubrukelig. */
+  #map { width: 100%; flex: 1 1 auto; min-height: 180px; }
+  body > :not(#map) { flex-shrink: 0; }
   .legend { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; padding: 8px 16px 10px; font-size: 0.7rem; color: #94a3b8; }
   .legend span { display: inline-flex; align-items: center; gap: 5px; }
   /* Score-tegnforklaring inne i kartet, lik den på elvekartene */
@@ -733,7 +737,7 @@ loadNewsTicker();
 </script>
 
 <div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.061</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.062</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
