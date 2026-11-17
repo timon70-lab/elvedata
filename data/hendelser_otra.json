@@ -1,0 +1,20 @@
+{
+  "_meta": {
+    "endret": "2026-11-17",
+    "notat": "Midlertidige hendelser og advarsler i Otra-kartet (vises med utropstegn). fra/til: YYYY-MM-DD, til = null betyr på ubestemt tid. soner: hvilke soners soneinfo varselet vises i. lat/lon er valgfrie: uten dem vises varselet bare i soneinfo, med dem også som ikon i kartet."
+  },
+  "hendelser": [
+    {
+      "id": "h1",
+      "tittel": "Hengebrua er stengt",
+      "tekst": "Hengebrua over Sone 3A er stengt på ubestemt tid.",
+      "soner": [
+        "Sone 3A"
+      ],
+      "fra": "2026-11-17",
+      "til": null,
+      "lat": 58.21706,
+      "lon": 7.929968
+    }
+  ]
+}

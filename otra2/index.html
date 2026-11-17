@@ -260,6 +260,7 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .zi-status b { font-weight:800; }
 .zi-status.stengt { background:#fff5f5; border:1px solid #feb2b2; color:#9b2c2c; }
 .zi-status.delvis { background:#fffaf0; border:1px solid #fbd38d; color:#975a16; }
+.zi-status.hendelse { background:#fffff0; border:1px solid #ecc94b; color:#744210; }
 .zi-status.apen { background:#f0fff4; border:1px solid #c6f6d5; color:#276749; }
 .zone-stengt { font-size:0.6rem; font-weight:700; color:#c53030; margin-top:1px; }
 .vf-merknad { font-size:0.62rem; line-height:1.4; color:#975a16; background:#fffaf0; border:1px solid #fbd38d; border-radius:6px; padding:4px 8px; }
@@ -523,6 +524,7 @@ const VIDEOS_URL = '../data/videoer_otra.json';
 const SONER_URL = '../data/soner_otra2.geojson';
 const SENTERLINJE_URL = '../data/senterlinje_otra.geojson'; // midtlinja, brukes til sonelinjene i oversikten
 const STEDER_URL = '../data/steder_otra.json'; // kortsalg og parkering som egne punkter
+const HENDELSER_URL = '../data/hendelser_otra.json'; // midlertidige hendelser/advarsler (utropstegn)
 const SESONG_URL = '../data/sesong.json';
 const SESONG_ELV = 'otra';
 
@@ -1872,6 +1874,82 @@ function addStedMarkers() {
   spredIkoner();
 }
 
+// ── HENDELSER: midlertidige varsler ───────────────────────────────────────
+// Fra data/hendelser_otra.json. Aktiv fra «fra» til og med «til» (null = på
+// ubestemt tid). Vises øverst i soneinfo for sonene i «soner», og som gult
+// varseltrekant-ikon i kartet når hendelsen har koordinater - på alle zoomnivå,
+// siden varsler skal sees også i oversikten.
+let HENDELSER = [];
+let hendelseMarkers = [];   // [{mk, hendelse}]
+function datoIso(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function hendelseAktiv(h) {
+  const dag = datoIso(iDag());
+  return (!h.fra || h.fra <= dag) && (!h.til || dag <= h.til);
+}
+function aktiveHendelser() { return HENDELSER.filter(hendelseAktiv); }
+function hendelseIconHtml(px) {
+  return '<span style="display:inline-block;vertical-align:middle;line-height:0;filter:drop-shadow(0 0 1px #fff) drop-shadow(0 1px 2px rgba(0,0,0,.35))">'
+    + '<svg width="' + px + '" height="' + Math.round(px * 0.92) + '" viewBox="0 0 26 24">'
+    + '<path d="M13 1.6 L24.8 22.4 H1.2 Z" fill="#f6c343" stroke="#1a202c" stroke-width="1.6" stroke-linejoin="round"/>'
+    + '<rect x="11.8" y="7.5" width="2.4" height="8.5" rx="1.1" fill="#1a202c"/><circle cx="13" cy="19" r="1.5" fill="#1a202c"/></svg></span>';
+}
+function fmtDatoKort(iso) {
+  const [a, m, d] = iso.split('-');
+  return parseInt(d, 10) + '.' + parseInt(m, 10) + '.' + a;
+}
+function hendelsePeriode(h) {
+  if (h.til) return (h.fra ? fmtDatoKort(h.fra) + '–' : 'til ') + fmtDatoKort(h.til);
+  return h.fra ? 'fra ' + fmtDatoKort(h.fra) : 'inntil videre';
+}
+function hendelsePopupHtml(h) {
+  return '<div style="font-size:.78rem;line-height:1.4;max-width:230px"><strong>' + hendelseIconHtml(16) + ' ' + h.tittel + '</strong>'
+    + (h.tekst ? '<br>' + h.tekst : '')
+    + '<br><span style="color:#4a5568">' + (h.soner && h.soner.length ? h.soner.join(', ') + ' · ' : '') + hendelsePeriode(h) + '</span></div>';
+}
+function addHendelseMarkers() {
+  if (!map) return;
+  hendelseMarkers.forEach(({ mk }) => mk.remove());
+  hendelseMarkers = [];
+  aktiveHendelser().filter(h => isFinite(h.lat) && isFinite(h.lon) && h.lat !== null && h.lon !== null).forEach(h => {
+    const mk = L.marker([h.lat, h.lon], {
+      icon: L.divIcon({ html: hendelseIconHtml(26), className: '', iconSize: [26, 24], iconAnchor: [13, 12], tooltipAnchor: [0, -12], popupAnchor: [0, -12] }),
+      zIndexOffset: 40
+    }).addTo(map);
+    mk.bindTooltip('⚠ ' + h.tittel, { permanent: false, direction: 'top', className: 'mtip' });
+    mk.bindPopup(hendelsePopupHtml(h));
+    hendelseMarkers.push({ mk, hendelse: h });
+  });
+  spredIkoner();
+}
+async function fetchHendelser() {
+  try {
+    const res = await fetch(HENDELSER_URL, { cache: 'no-cache' });
+    if (!res.ok) return;
+    const j = await res.json();
+    HENDELSER = (j && Array.isArray(j.hendelser) ? j.hendelser : []).filter(h => h && h.tittel);
+    addHendelseMarkers();
+    if (activeZone) showZoneInfo(activeZone, false);
+  } catch (e) { /* hendelser er valgfrie - feiler stille */ }
+}
+function focusHendelse(id) {
+  const m = hendelseMarkers.find(x => x.hendelse.id === id);
+  if (!m || !map) return;
+  map.setView(m.mk.getLatLng(), Math.max(map.getZoom(), 16));
+  m.mk.openPopup();
+  if (erSmalLayout() && !_mapFsOn) visKartOverst();
+}
+// Varselboks(er) øverst i soneinfo.
+function hendelserHtml(zone) {
+  return aktiveHendelser().filter(h => Array.isArray(h.soner) && h.soner.includes(zone)).map(h => {
+    const kart = hendelseMarkers.some(x => x.hendelse.id === h.id)
+      ? ' <a href="#" onclick="focusHendelse(&quot;' + h.id + '&quot;);return false">📍 Vis på kart</a>' : '';
+    return '<div class="zi-status hendelse">' + hendelseIconHtml(15) + ' <b>' + h.tittel + '</b>'
+      + (h.tekst ? ' — ' + h.tekst : '') + ' <span style="opacity:.75">(' + hendelsePeriode(h) + ')</span>' + kart + '</div>';
+  }).join('');
+}
+
 // ── SPREDNING AV PUNKTIKONER ──────────────────────────────────────────────
 // Desinfeksjonsposter, kortsalg og parkering som havner oppå hverandre på
 // skjermen, legges side om side rundt det felles midtpunktet. Bare ikonet
@@ -1880,7 +1958,7 @@ function addStedMarkers() {
 const SPRED_AVSTAND = 28;   // px mellom ikonsentre i en gruppe, og grensen for overlapp
 function spredIkoner() {
   if (!map) return;
-  const alle = desinfMarkers.concat(stedMarkers)
+  const alle = desinfMarkers.concat(stedMarkers, hendelseMarkers)
     .map(({ mk }) => mk)
     .filter(mk => mk._icon && mk._icon.firstElementChild);
   const synlige = alle.filter(mk => mk._icon.style.opacity !== '0');
@@ -2483,6 +2561,7 @@ function showZoneInfo(zone, scrollTo = true) {
 
   document.getElementById('ziTitle').textContent = '📍 ' + info.name;
   document.getElementById('ziBody').innerHTML = `
+    ${hendelserHtml(zone)}
     ${soneStatusHtml(zone)}
     <div class="zi-score-row">
       <div class="zi-score-num" style="color:${col}">${score}</div>
@@ -3115,6 +3194,7 @@ fetchPhotos();
 fetchVideos();
 fetchDesinf();
 fetchSteder();
+fetchHendelser();
 window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </script>
 
@@ -3173,7 +3253,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.077</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.079</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span><br>
   <a href="../vilkar/" style="font-size:0.6rem; color:#94a3b8;">Vilkår for bruk</a>
 </div>
