@@ -155,8 +155,17 @@ grep -oE 'v[0-9]+\.[0-9]{3}' <fil>
   avrundet kvadrat. Alle sider peker på denne fila, så ett bytte endrer ikonet overalt.
 - App-ikon på mobil (2026-11-17): `apple-touch-icon.png` (180 px, iPhone) og `icon-192.png`
   (Android), begge i roten, med samme merke på heldekkende marineblått. Alle sider har
-  `<link>` til begge rett under favicon-linja. `icon-512.png` ligger klar for et eventuelt
-  web-manifest. Ny side skal ha de samme tre ikon-linjene.
+  `<link>` til begge rett under favicon-linja.
+- Web-manifest (2026-11-17): `manifest.webmanifest` i roten gjør at Elvesona kan installeres
+  som app («⋮ → Installer app» i Chrome på Android). Det er ett felles manifest for hele
+  nettstedet: appen åpner alltid oversiktskartet (`start_url: "/"`), uten adresselinje
+  (`display: "standalone"`).
+  - Ikoner: `icon-192.png`/`icon-512.png` (`any`) og `icon-maskable-192.png`/
+    `icon-maskable-512.png` (`maskable`). I maskable-ikonene er merket mindre, slik at Android kan
+    fylle sirkelen med marineblått uten å kutte merket. Merket ligger innenfor 37,4 % av
+    bredden fra midten, og sikker sone er 40 %.
+- Ny side skal ha de samme fire linjene rett etter hverandre: favicon, `icon-192`,
+  `apple-touch-icon` og `manifest`.
 
 ### Kode og data
 
