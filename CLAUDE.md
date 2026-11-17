@@ -23,7 +23,7 @@ Detaljer ligger i egne filer — les dem når oppgaven berører temaet:
    Les ikke `.env`-innhold inn i svar.
    **Unntak (2026-11-17):** offentlige nettlesernøkler som er laget for å stå i nettsiden og
    bare gir tilgang til bakgrunnskart, kan stå i HTML. I dag gjelder det kun Esri-nøkkelen
-   `ESRI_KEY` i `otra2/index.html` (ArcGIS Location Platform, «Public application», kun
+   `ESRI_KEY` i `otra/index.html` og `otra2/index.html` (ArcGIS Location Platform, «Public application», kun
    Basemaps, betaling avslått, utløper 2027-11-17). NVE-nøkkelen og alle andre nøkler er
    fortsatt hemmelige.
 2. **Fiskernavn vises aldri i dashboard.** Kolonnene `Navn`/`Fisker` i fangstloggene beholdes
@@ -134,11 +134,15 @@ grep -oE 'v[0-9]+\.[0-9]{3}' <fil>
 - `admin/index.html` — adminpanelet. Har ingen versjonslinje.
 - `otra2/index.html` — testklone av Otra (fra 2026-11-14): `noindex`, oransje TESTVERSJON-stripe,
   uten GoatCounter, major 0, leser Otras datafiler. Nås kun med direkte lenke og skal ikke lenkes
-  fra noen side. **Kartendringer for Otra gjøres her**, ikke i `otra/index.html`, til Per Lasse ber
-  om go-live. Endres `otra/index.html` i mellomtiden, må samme endring inn i `otra2`.
-  Klonen har egen polygonfil `data/soner_otra2.geojson`
-  (`python scripts/sonepolygoner.py otra --ut soner_otra2.geojson`), så endrede sonegrenser ikke
-  når vanlig Otra før go-live. Vanlig Otra leser fortsatt `data/soner_otra.geojson`.
+  fra noen side. Gikk live som `otra/index.html` v1.078 (2026-11-17); otra2 v0.077 er identisk
+  bortsett fra testmerkingen. **Nye kartendringer for Otra prøves her først**, og kopieres til
+  `otra/index.html` når Per Lasse ber om det. Endres `otra/index.html` direkte, må samme endring inn
+  i `otra2`. Ved kopiering otra2 → otra: fjern `noindex`, stripa og testdato-blokka, sett inn
+  GoatCounter, bruk `SONER_URL = '../data/soner_otra.geojson'`, og sett toppavstandene tilbake
+  (PC 16 px, mobil 8 px). Klonen har egen polygonfil `data/soner_otra2.geojson`
+  (`python scripts/sonepolygoner.py otra --ut soner_otra2.geojson`).
+- `vilkar/index.html` — vilkår for bruk (påkrevd av Esri-avtalen for flyfoto). Lenket fra
+  bunnteksten i otra/otra2.
 
 ### Kode og data
 

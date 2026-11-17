@@ -1,6 +1,7 @@
 # Idé: forbedringer av kartløsningen for Otra
 
-Status: kun idé, ingen implementering påbegynt (loggført 2026-11-14).
+Status: forslag 1–7 er bygget i testklonen `otra2` og gikk live i `otra/index.html` v1.078
+(2026-11-17). Forslag 8 (offline-kart) er lagt på is. Loggført 2026-11-14.
 
 Åtte forslag fra evalueringen av `otra/index.html` v1.054, gjort 2026-11-14 ved kodelesing og test i
 nettleser (PC-bredde, fullskjerm og mobilbredde 375 px). Målet Per Lasse satte: den beste
