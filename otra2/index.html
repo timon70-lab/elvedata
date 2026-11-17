@@ -94,6 +94,13 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .leaflet-tooltip.mtip::before { display: none; }
 .leaflet-tooltip.zone-label { background: #ffffff; color: #1a202c; border: 1px solid rgba(0,0,0,0.15); font-size: 0.58rem; font-weight: 700; padding: 1px 4px; border-radius: 4px; box-shadow: none; pointer-events: none; text-align: center; line-height: 1.2; }
 .leaflet-tooltip.zone-label::before { display: none; }
+/* Av/på for parkering, rett til høyre for +/− (ligger inne i zoomkontrollen). */
+.p-tog { position:absolute; left:calc(100% + 6px); top:-2px; width:30px; height:30px; box-sizing:content-box; border:2px solid rgba(0,0,0,0.2); border-radius:4px; background:#fff; background-clip:padding-box; padding:0; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.p-tog span { box-sizing:border-box; width:20px; height:20px; border-radius:4px; display:flex; align-items:center; justify-content:center; font:800 12px/1 'Segoe UI',sans-serif; color:#fff; background:#a0aec0; }
+.p-tog.on span { background:#2b6cb0; }
+.p-tog:not(.on) span::after { content:''; position:absolute; width:24px; height:2px; background:#4a5568; transform:rotate(-45deg); }
+.p-tog:hover { background:#f4f4f4; }
+.p-tog:focus-visible { outline:2px solid #3182ce; outline-offset:1px; }
 .zoom-lbl { background:rgba(255,255,255,0.8); color:#4a5568; font-size:0.62rem; font-weight:700; padding:1px 0; width:34px; text-align:center; border-radius:4px; pointer-events:none; font-variant-numeric:tabular-nums; margin-top:4px !important; }
 .pos-kort { display:none; max-width:60vw; background:#fff; border:2px solid rgba(0,0,0,0.2); border-radius:8px; padding:8px 10px; font-size:0.72rem; line-height:1.45; color:#1a202c; text-align:left; box-shadow:0 2px 10px rgba(0,0,0,0.18); }
 .pos-kort .pk-hdr { display:flex; justify-content:space-between; align-items:flex-start; gap:6px; font-weight:600; }
@@ -1292,6 +1299,14 @@ function initMap() {
   });
   new ZoomLbl().addTo(map);
 
+  // Parkering av/på: knapp rett til høyre for +/−. Av som standard; valget huskes.
+  const pTog = L.DomUtil.create('button', 'p-tog', map.zoomControl.getContainer());
+  pTog.type = 'button';
+  pTog.innerHTML = '<span>P</span>';
+  L.DomEvent.disableClickPropagation(pTog);
+  L.DomEvent.on(pTog, 'click', (e) => { L.DomEvent.stop(e); settParkering(!_visParkering); });
+  oppdaterPTog();
+
   setTimeout(() => map.invalidateSize(), 50);
   setTimeout(() => map.invalidateSize(), 300);
 
@@ -1804,10 +1819,35 @@ function stedPopupHtml(s) {
     + '<br><a class="zi-link" href="https://www.google.com/maps/dir/?api=1&destination=' + s.lat + ',' + s.lon
     + '&travelmode=driving" target="_blank">🧭 Kjør dit ↗</a></div>';
 }
+// Parkering er av som standard (mange punkter, lite nyttig for de som kjenner elva).
+const PARKERING_KEY = 'elvesona_parkering';
+let _visParkering = false;
+try { _visParkering = localStorage.getItem(PARKERING_KEY) === '1'; } catch (e) { /* ignorer */ }
+function oppdaterPTog() {
+  const b = document.querySelector('.p-tog');
+  if (!b) return;
+  b.classList.toggle('on', _visParkering);
+  b.setAttribute('aria-pressed', _visParkering ? 'true' : 'false');
+  b.title = _visParkering ? 'Skjul parkering' : 'Vis parkering';
+  b.setAttribute('aria-label', b.title);
+}
+function settParkering(on) {
+  _visParkering = !!on;
+  try { localStorage.setItem(PARKERING_KEY, _visParkering ? '1' : '0'); } catch (e) { /* ignorer */ }
+  oppdaterPTog();
+  updateStedVisibility();
+  spredIkoner();
+}
 function updateStedVisibility() {
   if (!map) return;
   const zoomed = map.getZoom() >= LABEL_ZOOM_THRESHOLD;
-  stedMarkers.forEach(({ mk }) => {
+  stedMarkers.forEach(({ mk, sted }) => {
+    if (sted.type === 'parkering' && !_visParkering) {
+      if (mk.isPopupOpen()) mk.closePopup();
+      mk.setOpacity(0);
+      if (mk._icon) mk._icon.style.pointerEvents = 'none';
+      return;
+    }
     const show = zoomed || mk.isPopupOpen();
     mk.setOpacity(show ? 1 : 0);
     if (mk._icon) mk._icon.style.pointerEvents = show ? 'auto' : 'none';
@@ -1889,6 +1929,7 @@ async function fetchSteder() {
 function focusSted(id) {
   const m = stedMarkers.find(x => x.sted.id === id);
   if (!m || !map) return;
+  if (m.sted.type === 'parkering' && !_visParkering) settParkering(true);
   map.setView([m.sted.lat, m.sted.lon], Math.max(map.getZoom(), 15));
   m.mk.openPopup();
   if (erSmalLayout() && !_mapFsOn) visKartOverst();
@@ -3132,7 +3173,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.076</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.077</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span><br>
   <a href="../vilkar/" style="font-size:0.6rem; color:#94a3b8;">Vilkår for bruk</a>
 </div>
