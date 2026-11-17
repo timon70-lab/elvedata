@@ -115,6 +115,12 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .bl-btn:hover { background:#f0fff4; }
 .bl-btn.on { background:#276749; color:#fff; }
 .bl-btn.av, .bl-btn:disabled { color:#a0aec0; cursor:not-allowed; background:#fff; }
+/* Lagknappene nede til venstre løftes over kildehenvisningen, som går helt ut på smal skjerm */
+#map .leaflet-bottom.leaflet-left { bottom:16px; }
+.kilde-mer { cursor:pointer; color:#2b6cb0; }
+.kilde-mer .km-full { display:none; }
+.kilde-mer.apen .km-kort { display:none; }
+.kilde-mer.apen .km-full { display:inline; color:#333; }
 .kart-melding { position:absolute; left:50%; top:10px; transform:translateX(-50%); z-index:1000; background:rgba(26,32,44,.88); color:#fff; font-size:.74rem; padding:6px 10px; border-radius:6px; pointer-events:none; max-width:80%; text-align:center; }
 .bl-btn:focus-visible { outline:2px solid #9ae6b4; outline-offset:-2px; }
 /* Flyfoto er mørkt: gi sonekantene litt mer trøkk så de synes */
@@ -1007,7 +1013,13 @@ const BASE_LAYER_DEFS = [
     opt: { attribution: '© Kartverket', maxNativeZoom: 18, maxZoom: 19 },
     buf: { bbox: [10, 11, 12, 13], korridor: [14, 15, 16], sone: [17] } },   // store fliser (50–130 kB)
   { id: 'foto', navn: 'Flyfoto', url: 'https://ibasemaps-api.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}?token=' + ESRI_KEY,
-    opt: { attribution: 'Powered by <a href="https://www.esri.com" target="_blank" rel="noopener">Esri</a> · Flyfoto: Esri, Vantor, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community', maxNativeZoom: 18, maxZoom: 19 },
+    // Kort kildehenvisning så den ikke dekker knappene; hele kildelista vises ved klikk
+    // på «Kilder» (Esri tillater avkortet henvisning når full tekst er tilgjengelig).
+    opt: { attribution: 'Powered by <a href="https://www.esri.com" target="_blank" rel="noopener">Esri</a> · '
+      + '<span class="kilde-mer" role="button" tabindex="0" onclick="this.classList.toggle(&quot;apen&quot;)" '
+      + 'title="Flyfoto: Esri, Vantor, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community">'
+      + '<span class="km-kort">Kilder ▸</span><span class="km-full">Flyfoto: Esri, Vantor, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community ◂</span></span>',
+      maxNativeZoom: 18, maxZoom: 19 },
     // Esri-avtalen 3.1.d.6: forhåndshenting bare så langt det trengs. Derfor bare
     // elvekorridoren fra z14 (ikke hele utsnittet), og dypeste nivå kun for valgt sone.
     buf: { bbox: [10, 11, 12, 13], korridor: [14, 15, 16], sone: [17, 18] } }   // små fliser (10–20 kB)
@@ -3079,7 +3091,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.071</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.072</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span><br>
   <a href="../vilkar/" style="font-size:0.6rem; color:#94a3b8;">Vilkår for bruk</a>
 </div>
