@@ -1815,9 +1815,13 @@ function addStedMarkers() {
   if (!map) return;
   stedMarkers.forEach(({ mk }) => mk.remove());
   stedMarkers = [];
-  STEDER.forEach(s => {
+  STEDER.forEach((s, i) => {
+    // Står et tidligere sted under 150 m unna, flyttes ikonet 28 px til høyre per
+    // nabo, så punktene ikke dekker hverandre (punktet selv står fortsatt riktig).
+    const naboer = STEDER.slice(0, i).filter(t => haversineKm([s.lat, s.lon], [t.lat, t.lon]) < 0.15).length;
+    const dx = naboer * 28;
     const mk = L.marker([s.lat, s.lon], {
-      icon: L.divIcon({ html: stedIconHtml(s.type, 24), className: '', iconSize: [24, 24], iconAnchor: [12, 12], tooltipAnchor: [0, -12] }),
+      icon: L.divIcon({ html: stedIconHtml(s.type, 24), className: '', iconSize: [24, 24], iconAnchor: [12 - dx, 12], tooltipAnchor: [0, -12], popupAnchor: [0, -12] }),
       zIndexOffset: 30
     }).addTo(map);
     mk.bindTooltip(((STED_TYPER[s.type] || {}).navn || 'Sted') + ': ' + s.navn, { permanent: false, direction: 'top', className: 'mtip' });
@@ -1856,17 +1860,18 @@ function kortsalgRad() {
         + ' <a href="#" onclick="focusSted(\'' + s.id + '\');return false">📍 Vis på kart</a></div>').join('')
     + '</span></div>';
 }
-// Kjøremål for «Veibeskrivelse hit»: nærmeste parkering når slike er lagt inn,
-// ellers sonens startpunkt som før. pt: [lat, lon] i sonen.
+// Kjøremål for «Veibeskrivelse»: parkeringen som er knyttet til sonen (feltet
+// soner i steder_otra.json), ellers sonens startpunkt som før. Nærmeste parkering
+// i luftlinje brukes ikke: den kan ligge på feil side av elva eller mange km unna.
 function kjoremalForSone(zone) {
   const start = ZONE_COORDS[zone] ? ZONE_COORDS[zone].s : null;
   const l = mapLayers[zone];
   const midt = l ? [l.startMk.getLatLng().lat, l.startMk.getLatLng().lng] : start;
-  const p = STEDER.filter(s => s.type === 'parkering');
-  if (midt && p.length) {
-    let best = null;
-    p.forEach(s => { const km = haversineKm(midt, [s.lat, s.lon]); if (!best || km < best.km) best = { s, km }; });
-    return { lat: best.s.lat, lon: best.s.lon, navn: best.s.navn };
+  const p = STEDER.filter(s => s.type === 'parkering' && Array.isArray(s.soner) && s.soner.includes(zone));
+  if (p.length) {
+    let best = p[0];
+    if (midt) p.forEach(s => { if (haversineKm(midt, [s.lat, s.lon]) < haversineKm(midt, [best.lat, best.lon])) best = s; });
+    return { lat: best.lat, lon: best.lon, navn: best.navn, id: best.id };
   }
   const m = start || midt;
   return m ? { lat: m[0], lon: m[1], navn: null } : null;
@@ -1874,8 +1879,9 @@ function kjoremalForSone(zone) {
 function veibeskrivelseHtml(zone) {
   const k = kjoremalForSone(zone);
   if (!k) return '';
-  return '<a class="zi-link" href="https://www.google.com/maps/dir/?api=1&destination=' + k.lat + ',' + k.lon
-    + '&travelmode=driving" target="_blank">🗺 ' + (k.navn ? 'Veibeskrivelse til parkering (' + k.navn + ')' : 'Veibeskrivelse hit') + ' ↗</a>';
+  const lenke = '<a class="zi-link" href="https://www.google.com/maps/dir/?api=1&destination=' + k.lat + ',' + k.lon
+    + '&travelmode=driving" target="_blank">🗺 ' + (k.navn ? 'Veibeskrivelse til ' + k.navn : 'Veibeskrivelse hit') + ' ↗</a>';
+  return k.id ? lenke + ' <a class="zi-link" href="#" onclick="focusSted(&quot;' + k.id + '&quot;);return false">📍 Vis parkering på kart</a>' : lenke;
 }
 
 // ── DELBARE LENKER ────────────────────────────────────────────────────────
@@ -3084,7 +3090,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.074</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.075</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span><br>
   <a href="../vilkar/" style="font-size:0.6rem; color:#94a3b8;">Vilkår for bruk</a>
 </div>

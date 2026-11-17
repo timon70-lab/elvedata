@@ -1,8 +1,8 @@
 {
   "_meta": {
-    "endret": "2026-11-15",
-    "notat": "Steder som vises som egne punkter i Otra-kartet. type: kortsalg | parkering. lat/lon i WGS84. tekst er fritekst som vises i popup og soneinfo.",
-    "kilde": "Otra House: Kartverkets adresse-API (Venneslavegen 229, 4708 Vennesla). Åpningstid oppgitt av Per Lasse 2026-11-15."
+    "endret": "2026-11-17",
+    "notat": "Steder som vises som egne punkter i Otra-kartet. type: kortsalg | parkering. lat/lon i WGS84. tekst er fritekst som vises i popup og soneinfo. soner (kun parkering): hvilke soner «Veibeskrivelse» skal gå til denne parkeringen for; soner uten parkering får veibeskrivelse til sonegrensa.",
+    "kilde": "Otra House: Kartverkets adresse-API (Venneslavegen 229, 4708 Vennesla). Åpningstid oppgitt av Per Lasse 2026-11-15. Parkering: koordinater fra Per Lasse 2026-11-17."
   },
   "steder": [
     {
@@ -13,6 +13,39 @@
       "tekst": "Fysisk kortsalg kl. 18:00–20:00.",
       "lat": 58.2487,
       "lon": 7.9538
+    },
+    {
+      "id": "p1",
+      "type": "parkering",
+      "navn": "Parkering Sone 5A (Otra House)",
+      "tekst": "",
+      "soner": [
+        "Sone 5A Blå"
+      ],
+      "lat": 58.248068,
+      "lon": 7.953656
+    },
+    {
+      "id": "p2",
+      "type": "parkering",
+      "navn": "Parkering Sone 4A Vest",
+      "tekst": "",
+      "soner": [
+        "Sone 4A"
+      ],
+      "lat": 58.243802,
+      "lon": 7.943221
+    },
+    {
+      "id": "p3",
+      "type": "parkering",
+      "navn": "Parkering Sone 3A Øst",
+      "tekst": "",
+      "soner": [
+        "Sone 3A"
+      ],
+      "lat": 58.218857,
+      "lon": 7.931861
     }
   ]
 }
