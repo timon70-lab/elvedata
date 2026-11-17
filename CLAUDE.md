@@ -145,6 +145,15 @@ grep -oE 'v[0-9]+\.[0-9]{3}' <fil>
 - `vilkar/index.html` — vilkår for bruk (påkrevd av Esri-avtalen for flyfoto). Lenket fra
   bunnteksten i otra/otra2.
 
+### Logo og favicon
+
+- `logo/elvesona-logo.svg` er **den offisielle merkevarelogoen**: elvelinje som stiger opp i en
+  kartnål med grønn prikk, og «Elvesona.no» i hvit fet skrift på marineblå bakgrunn.
+  `logo/` har også en transparent variant og PNG/SVG i størrelsene vanlig, `stor` og `2x`.
+- Farger: marineblå `#0f2d4a`, elveblå `#5eb6d9`, nålegrønn `#9ae6b4`.
+- `favicon.svg` (roten) er merket fra logoen, altså linja og prikken uten tekst, på et marineblått
+  avrundet kvadrat. Alle sider peker på denne fila, så ett bytte endrer ikonet overalt.
+
 ### Kode og data
 
 - `scripts/` — pipelines og verktøy: `valider.py` (kjøres før hver commit), `beregn_km.py`,
