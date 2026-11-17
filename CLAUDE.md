@@ -134,13 +134,14 @@ grep -oE 'v[0-9]+\.[0-9]{3}' <fil>
 - `admin/index.html` — adminpanelet. Har ingen versjonslinje.
 - `otra2/index.html` — testklone av Otra (fra 2026-11-14): `noindex`, oransje TESTVERSJON-stripe,
   uten GoatCounter, major 0, leser Otras datafiler. Nås kun med direkte lenke og skal ikke lenkes
-  fra noen side. Gikk live som `otra/index.html` v1.078 (2026-11-17); otra2 v0.077 er identisk
-  bortsett fra testmerkingen. **Nye kartendringer for Otra prøves her først**, og kopieres til
-  `otra/index.html` når Per Lasse ber om det. Endres `otra/index.html` direkte, må samme endring inn
-  i `otra2`. Ved kopiering otra2 → otra: fjern `noindex`, stripa og testdato-blokka, sett inn
-  GoatCounter, bruk `SONER_URL = '../data/soner_otra.geojson'`, og sett toppavstandene tilbake
-  (PC 16 px, mobil 8 px). Klonen har egen polygonfil `data/soner_otra2.geojson`
-  (`python scripts/sonepolygoner.py otra --ut soner_otra2.geojson`).
+  fra noen side. Brukt til den store kartoppdateringen, som gikk live som `otra/index.html` v1.078
+  (2026-11-17). **Fra 2026-11-17 gjøres alle Otra-endringer direkte i `otra/index.html`.** otra2
+  brukes bare når Per Lasse uttrykkelig sier det, og holdes ikke lenger i takt med otra. Skal den
+  brukes igjen: kopier først `otra/index.html` → `otra2` med testmerkingen (`noindex`, stripe,
+  ingen GoatCounter, `SONER_URL = '../data/soner_otra2.geojson'`, toppavstand PC 34 px / mobil
+  24 px). Tilbake til otra: fjern testmerkingen, sett inn GoatCounter, bruk
+  `SONER_URL = '../data/soner_otra.geojson'`, toppavstand PC 16 px / mobil 8 px. Polygonfil for
+  klonen: `python scripts/sonepolygoner.py otra --ut soner_otra2.geojson`.
 - `vilkar/index.html` — vilkår for bruk (påkrevd av Esri-avtalen for flyfoto). Lenket fra
   bunnteksten i otra/otra2.
 
