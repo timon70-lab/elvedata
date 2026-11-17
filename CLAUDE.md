@@ -139,7 +139,8 @@ grep -oE 'v[0-9]+\.[0-9]{3}' <fil>
   brukes bare når Per Lasse uttrykkelig sier det, og holdes ikke lenger i takt med otra. Skal den
   brukes igjen: kopier først `otra/index.html` → `otra2` med testmerkingen (`noindex`, stripe,
   ingen GoatCounter, `SONER_URL = '../data/soner_otra2.geojson'`, toppavstand PC 34 px / mobil
-  24 px). Tilbake til otra: fjern testmerkingen, sett inn GoatCounter, bruk
+  24 px, `<h1>` «Otra 2 (test) · …» med `margin-top:14px`). Tilbake til otra: fjern
+  testmerkingen (også i `<h1>`), sett inn GoatCounter, bruk
   `SONER_URL = '../data/soner_otra.geojson'`, toppavstand PC 16 px / mobil 8 px. Polygonfil for
   klonen: `python scripts/sonepolygoner.py otra --ut soner_otra2.geojson`.
 - `vilkar/index.html` — vilkår for bruk (påkrevd av Esri-avtalen for flyfoto). Lenket fra
