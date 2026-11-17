@@ -1424,6 +1424,7 @@ function initMap() {
   });
   new Legend().addTo(map);
   map.on('zoomend', updateDesinfVisibility);
+  map.on('zoomend', () => setTimeout(spredIkoner, 0));   // etter at synligheten for steder er satt
 }
 
 function addVideoMarkers() {
@@ -1617,6 +1618,7 @@ function addDesinfMarkers() {
     desinfMarkers.push({ mk, post });
   });
   updateDesinfVisibility();
+  spredIkoner();
 }
 
 // Poster vises først fra samme zoomnivå som sonenavn-etikettene (LABEL_ZOOM_THRESHOLD).
@@ -1815,13 +1817,9 @@ function addStedMarkers() {
   if (!map) return;
   stedMarkers.forEach(({ mk }) => mk.remove());
   stedMarkers = [];
-  STEDER.forEach((s, i) => {
-    // Står et tidligere sted under 150 m unna, flyttes ikonet 28 px til høyre per
-    // nabo, så punktene ikke dekker hverandre (punktet selv står fortsatt riktig).
-    const naboer = STEDER.slice(0, i).filter(t => haversineKm([s.lat, s.lon], [t.lat, t.lon]) < 0.15).length;
-    const dx = naboer * 28;
+  STEDER.forEach(s => {
     const mk = L.marker([s.lat, s.lon], {
-      icon: L.divIcon({ html: stedIconHtml(s.type, 24), className: '', iconSize: [24, 24], iconAnchor: [12 - dx, 12], tooltipAnchor: [0, -12], popupAnchor: [0, -12] }),
+      icon: L.divIcon({ html: stedIconHtml(s.type, 24), className: '', iconSize: [24, 24], iconAnchor: [12, 12], tooltipAnchor: [0, -12], popupAnchor: [0, -12] }),
       zIndexOffset: 30
     }).addTo(map);
     mk.bindTooltip(((STED_TYPER[s.type] || {}).navn || 'Sted') + ': ' + s.navn, { permanent: false, direction: 'top', className: 'mtip' });
@@ -1831,6 +1829,50 @@ function addStedMarkers() {
     stedMarkers.push({ mk, sted: s });
   });
   updateStedVisibility();
+  spredIkoner();
+}
+
+// ── SPREDNING AV PUNKTIKONER ──────────────────────────────────────────────
+// Desinfeksjonsposter, kortsalg og parkering som havner oppå hverandre på
+// skjermen, legges side om side rundt det felles midtpunktet. Bare ikonet
+// flyttes (CSS transform på innholdet); markørens koordinat er uendret, og når
+// zoomen skiller punktene, går ikonene tilbake til sin egen plass.
+const SPRED_AVSTAND = 28;   // px mellom ikonsentre i en gruppe, og grensen for overlapp
+function spredIkoner() {
+  if (!map) return;
+  const alle = desinfMarkers.concat(stedMarkers)
+    .map(({ mk }) => mk)
+    .filter(mk => mk._icon && mk._icon.firstElementChild);
+  const synlige = alle.filter(mk => mk._icon.style.opacity !== '0');
+  const pt = new Map(synlige.map(mk => [mk, map.latLngToLayerPoint(mk.getLatLng())]));
+  // Grupper: ikoner nærmere enn SPRED_AVSTAND (også via hverandre) havner i samme gruppe.
+  const grupper = [], brukt = new Set();
+  synlige.forEach(mk => {
+    if (brukt.has(mk)) return;
+    const g = [mk]; brukt.add(mk);
+    for (let i = 0; i < g.length; i++) {
+      synlige.forEach(m => {
+        if (!brukt.has(m) && pt.get(g[i]).distanceTo(pt.get(m)) < SPRED_AVSTAND) { g.push(m); brukt.add(m); }
+      });
+    }
+    grupper.push(g);
+  });
+  const flytt = new Map();
+  grupper.forEach(g => {
+    if (g.length < 2) return;
+    // Fast rekkefølge vest→øst, så ikonene ikke bytter plass mellom zoomnivåer.
+    g.sort((a, b) => a.getLatLng().lng - b.getLatLng().lng);
+    const cx = g.reduce((s, m) => s + pt.get(m).x, 0) / g.length;
+    const cy = g.reduce((s, m) => s + pt.get(m).y, 0) / g.length;
+    g.forEach((m, i) => {
+      const p = pt.get(m);
+      flytt.set(m, [cx + (i - (g.length - 1) / 2) * SPRED_AVSTAND - p.x, cy - p.y]);
+    });
+  });
+  alle.forEach(mk => {
+    const d = flytt.get(mk);
+    mk._icon.firstElementChild.style.transform = d ? 'translate(' + Math.round(d[0]) + 'px,' + Math.round(d[1]) + 'px)' : '';
+  });
 }
 async function fetchSteder() {
   try {
@@ -3090,7 +3132,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.075</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v0.076</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span><br>
   <a href="../vilkar/" style="font-size:0.6rem; color:#94a3b8;">Vilkår for bruk</a>
 </div>
