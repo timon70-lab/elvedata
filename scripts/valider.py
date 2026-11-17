@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validering av Elvesona-HTML før commit.
 
-Bruk:  python scripts/valider.py <fil.html> [<fil2.html> ...] [--mot REF] [--uten-jsdom]
+Bruk:  python scripts/valider.py <fil.html> [<fil2.html> ...] [--mot REF] [--uten-jsdom] [--fjernet navn1,navn2]
 
 Sjekker i rekkefølge:
  1. Git-konfliktmarkører
@@ -10,6 +10,7 @@ Sjekker i rekkefølge:
  4. HTML-nesting (stakkbasert)
  5. Toppnivå let/const/var/function-deklarasjoner mot git-referanse (standard HEAD).
     Info kun for genuint nye filer — ellers FEIL hvis sammenligningen ikke lar seg kjøre.
+    --fjernet godtar navn som er fjernet med vilje (skriv dem i endringsnotatet).
  6. jsdom-røyktest (scripts/jsdom_smoke.js) — FEIL hvis jsdom mangler, med mindre --uten-jsdom
 Avslutter med kode 1 hvis noe feiler.
 """
@@ -72,6 +73,9 @@ def main():
     ref="HEAD"; jsdom=True
     if "--mot" in args:
         i=args.index("--mot"); ref=args[i+1]; del args[i:i+2]
+    fjernet=set()   # --fjernet a,b: deklarasjoner som er fjernet med vilje
+    if "--fjernet" in args:
+        i=args.index("--fjernet"); fjernet=set(args[i+1].split(",")); del args[i:i+2]
     if "--uten-jsdom" in args:
         args.remove("--uten-jsdom"); jsdom=False
     if not args: print(__doc__); sys.exit(2)
@@ -111,7 +115,9 @@ def main():
                          encoding="utf-8",errors="replace")
         if r.returncode==0:
             before, after = decls(r.stdout), decls(html)
-            gone=sorted(before-after); new=sorted(after-before)
+            gone=sorted(before-after-fjernet); new=sorted(after-before)
+            villet=sorted((before-after)&fjernet)
+            if villet: print(f"  info fjernet med vilje (--fjernet): {villet}")
             if gone: ok=False; print(f"  FEIL deklarasjoner borte vs {ref}: {gone}")
             else: print(f"  ok  ingen toppnivå-deklarasjoner forsvunnet vs {ref}")
             if new: print(f"  info nye deklarasjoner: {new}")

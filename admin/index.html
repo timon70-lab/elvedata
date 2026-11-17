@@ -2865,11 +2865,15 @@ function sesLukkAdd() {
 
 function sesLagreAvvik() {
   const arv = document.getElementById('sesAddArv').checked;
-  sesData.elver[sesElv].soner[document.getElementById('sesAddZone').value] = {
+  const soner = sesData.elver[sesElv].soner;
+  const z = document.getElementById('sesAddZone').value;
+  // Behold felt skjemaet ikke redigerer (f.eks. stengt: true på Otra 5B Øst),
+  // og overskriv bare datoene og tillegget.
+  soner[z] = Object.assign({}, soner[z], {
     start: arv ? null : sesLesDato('sesAddStartD','sesAddStartM'),
     slutt: arv ? null : sesLesDato('sesAddSluttD','sesAddSluttM'),
     tillegg: document.getElementById('sesAddTillegg').value
-  };
+  });
   sesLukkAdd();
   sesTegn(false);
 }
