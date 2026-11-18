@@ -1690,10 +1690,15 @@ function focusPost(id, fromLat, fromLon) {
   document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
+// Én anbefalt desinfeksjonspost per sone: den som ligger nærmest sone-ikonet i luftlinje.
+// Ikonet står midt i sonen når polygonene er lastet; ellers brukes sonestart.
 function desinfZoneHtml(zone) {
   const zc = ZONE_COORDS[zone];
-  if (!zc || !DESINF.length) return '';
-  const ns = nearestPost(zc.s), ne = nearestPost(zc.e);
+  const mk = mapLayers[zone] && mapLayers[zone].startMk;
+  if ((!zc && !mk) || !DESINF.length) return '';
+  const ll = mk ? mk.getLatLng() : null;
+  const pt = ll ? [+ll.lat.toFixed(6), +ll.lng.toFixed(6)] : zc.s;
+  const n = nearestPost(pt);
   const line = (lbl, pt, n) => {
     const href = 'https://www.google.com/maps/dir/?api=1&origin=' + pt[0] + ',' + pt[1]
       + '&destination=' + n.post.lat + ',' + n.post.lon + '&travelmode=driving';
@@ -1703,9 +1708,7 @@ function desinfZoneHtml(zone) {
       + '<a href="' + href + '" target="_blank">🧭 Kjør dit ↗</a> · '
       + '<a href="#" onclick="focusPost(\'' + n.post.id + '\',' + pt[0] + ',' + pt[1] + ');return false">📍 Vis på kart</a></div>';
   };
-  const same = ns.post.id === ne.post.id;
-  const body = same ? line('sonen', ns.km <= ne.km ? zc.s : zc.e, ns.km <= ne.km ? ns : ne)
-                    : line('sonestart', zc.s, ns) + line('sonens slutt', zc.e, ne);
+  const body = line('sonen', pt, n);
   return '<div class="zi-row"><span class="zi-label">Desinfisering</span><span class="zi-val">' + body + '</span></div>';
 }
 
@@ -3290,7 +3293,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.085</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.086</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span><br>
   <a href="../vilkar/" style="font-size:0.6rem; color:#94a3b8;">Vilkår for bruk</a>
 </div>
