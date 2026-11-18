@@ -169,6 +169,18 @@ document.addEventListener('click', function (ev) {
   tellHendelse(lenke.dataset.tell, lenke.dataset.tellTittel || 'Klikk');
 });
 
+// Installert app (uten adresselinje): elvesiden åpnes i samme vindu, så tilbake-knappen
+// på telefonen går til oversiktskartet i stedet for å lukke appen. I nettleseren åpnes
+// elvesiden fortsatt i ny fane.
+const ER_APP = (window.matchMedia && matchMedia('(display-mode: standalone)').matches)
+  || window.navigator.standalone === true;
+document.addEventListener('click', function (ev) {
+  if (!ER_APP) return;
+  const t = ev.target;
+  const lenke = t && t.closest ? t.closest('a.pc-link') : null;
+  if (lenke) lenke.removeAttribute('target');
+}, true);
+
 const MONTH_NAMES_LONG = ['','januar','februar','mars','april','mai','juni','juli','august','september','oktober','november','desember'];
 
 function formatShort(md) {
@@ -778,7 +790,7 @@ loadNewsTicker();
 </script>
 
 <div style="width:100%; text-align:center; padding:10px 0 14px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.063</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.064</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
 </div>
 
