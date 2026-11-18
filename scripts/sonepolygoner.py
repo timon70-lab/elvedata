@@ -17,6 +17,11 @@ Slik regnes sonene ut:
     start til sin egen slutt. Strekninger uten sone blir stående som hull.
   * kutt_i_vann = true: kuttene måles fra bredd til bredd i vannflaten og
     forlenges inn på land, så de ikke krysser et nes og treffer elva igjen.
+  * flate = {vann, linjer, kutt} for en sone: sonen lages fra egne OSM-objekter
+    i stedet for midtlinja (Mandalselva Sone 4 over demningen, der midtlinja
+    mangler gjennom magasinet). vann = relasjoner, linjer = elveveier som fyller
+    hull mellom vannflatene, kutt = [{vei, punkt}] der punkt er [lat, lon],
+    "start" eller "slutt". Sonen er biten som henger sammen med startpunktet.
   * En delsone (forelder satt) går fra sin egen start til sin egen slutt, og
     klippes ut av hovedsonen: den er en egen sone med eget kort.
   * side = vest/øst deler strekningen langs midtlinja.
@@ -60,8 +65,14 @@ KUTT_I_VANN = None
 
 def hent_osm(elv, oppsett):
     o = oppsett['osm']
+    veier, rel = list(o['midtlinje']), list(o['vann'])
+    for s in oppsett.get('soner', {}).values():
+        fl = s.get('flate')
+        if fl:
+            veier += fl.get('linjer', []) + [k['vei'] for k in fl.get('kutt', [])]
+            rel += fl.get('vann', [])
     q = '[out:json][timeout:120];(way(id:%s);relation(id:%s););out geom;' % (
-        ','.join(map(str, o['midtlinje'])), ','.join(map(str, o['vann'])))
+        ','.join(map(str, sorted(set(veier)))), ','.join(map(str, sorted(set(rel)))))
     data = urllib.parse.urlencode({'data': q}).encode()
     for forsok in range(5):
         try:
@@ -279,6 +290,64 @@ def strekning_i_vann(midt, korridor, m0, m1):
     return unary_union([b for b in biter if b.intersection(vannbit).area > 1.0])
 
 
+def egen_flate(elv, spek, zc_sone, bredde, xy):
+    """Sone laget fra egne OSM-objekter (se «flate» i docstringen øverst)."""
+    sti = os.path.join(ROOT, 'data', 'raw', 'osm_%s.json' % elv)
+    with open(sti, encoding='utf-8') as fh:
+        el = json.load(fh)['elements']
+    linje = lambda geom: LineString([xy(p['lon'], p['lat']) for p in geom])
+    veier = {e['id']: linje(e['geometry']) for e in el if e['type'] == 'way'}
+    flater = []
+    for e in el:
+        if e['type'] != 'relation' or e['id'] not in spek.get('vann', []):
+            continue
+        ytre = [linje(m['geometry']) for m in e['members']
+                if m['type'] == 'way' and 'geometry' in m and m['role'] != 'inner']
+        indre = [linje(m['geometry']) for m in e['members']
+                 if m['type'] == 'way' and 'geometry' in m and m['role'] == 'inner']
+        f = unary_union(list(polygonize(ytre)))
+        if indre:
+            f = f.difference(unary_union(list(polygonize(indre))))
+        flater.append(f)
+    mangler = set(spek.get('vann', [])) - {e['id'] for e in el if e['type'] == 'relation'}
+    mangler |= set(spek.get('linjer', [])) - set(veier)
+    if mangler:
+        sys.exit('Mangler OSM-objekter %s - kjør med --hent.' % sorted(mangler))
+    linjer = unary_union([veier[v] for v in spek.get('linjer', [])])
+    grunn = unary_union(flater + [linjer.buffer(spek.get('linjebredde', 8) / 2)])
+    # Vannet deles først, så landstripa ikke kan henge sammen over et nes eller et
+    # samløp. Deretter legges landstripa rundt vannet som ble igjen, og det som
+    # stikker forbi kuttene klippes bort med lange kutt.
+    snitt_kort, snitt_lang = [], []
+    for k in spek.get('kutt', []):
+        pk = k['punkt']
+        pk = zc_sone['s'] if pk == 'start' else zc_sone['e'] if pk == 'slutt' else pk
+        vei = veier[k['vei']]
+        m = vei.project(Point(xy(pk[1], pk[0])))
+        p = vei.interpolate(m)
+        tx, ty = tangent(vei, m)
+        nx, ny = -ty, tx
+        lang = LineString([(p.x - nx * 2000, p.y - ny * 2000), (p.x + nx * 2000, p.y + ny * 2000)])
+        biter = list(getattr(lang.intersection(grunn), 'geoms', [lang.intersection(grunn)]))
+        bit = min((b for b in biter if b.length > 0), key=lambda g: g.distance(p))
+        (x0, y0), (x1, y1) = bit.coords[0], bit.coords[-1]
+        d = math.hypot(x1 - x0, y1 - y0) or 1.0
+        ux, uy = (x1 - x0) / d, (y1 - y0) / d
+        lag = lambda e: LineString([(x0 - ux * e, y0 - uy * e), (x1 + ux * e, y1 + uy * e)])
+        snitt_kort.append(lag(3))
+        snitt_lang.append(lag(3 * bredde + 50))
+        print('    kutt ved vei %s: %.0f m over vannet' % (k['vei'], bit.length))
+    start = Point(xy(zc_sone['s'][1], zc_sone['s'][0]))
+    deler = [grunn]
+    for s in snitt_kort:
+        deler = [d for b in deler for d in (split(b, s).geoms if b.intersects(s) else [b])]
+    vann = min(deler, key=lambda g: g.distance(start))
+    deler = [vann.buffer(bredde, join_style='round')]
+    for s in snitt_lang:
+        deler = [d for b in deler for d in (split(b, s).geoms if b.intersects(s) else [b])]
+    return unary_union([d for d in deler if d.intersection(vann).area > 1.0])
+
+
 def side(midt, flate, hvilken):
     """vest/øst-halvdelen av flata, delt langs midtlinja (forlenget i endene)."""
     c = list(midt.coords)
@@ -363,7 +432,7 @@ def behandle(elv, hent=False, ut_fil=None):
         ms, ds = mål(z['s'])
         me, de = mål(z['e'])
         soner.append(dict(navn=navn, ms=ms, me=me, forelder=s.get('forelder'), side=s.get('side'),
-                          kun_side=s.get('kun_side', [])))
+                          kun_side=s.get('kun_side', []), flate=s.get('flate'), zc=z))
         print('  %-20s %6.0f–%6.0f m  (punktene %3.0f / %3.0f m fra midtlinja)' % (navn, ms, me, ds, de))
     # Soner uten egne koordinater, som deler strekning med en annen.
     for navn, s in spesial.items():
@@ -375,6 +444,11 @@ def behandle(elv, hent=False, ut_fil=None):
     starter = sorted({round(z['ms'], 1) for z in hoved})
     flater = []
     for z in soner:
+        if z.get('flate'):
+            flate = egen_flate(elv, z['flate'], z['zc'], oppsett.get('bredde_land', 40), xy)
+            print('  %-20s egen flate: %.0f m²' % (z['navn'], flate.area))
+            flater.append((z, flate))
+            continue
         if z['forelder'] or oppsett.get('egne_grenser'):
             m0, m1 = sorted((z['ms'], z['me']))
         else:
