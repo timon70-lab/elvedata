@@ -385,6 +385,18 @@ table.rd-tbl tr.big td.w { color:#9b2c2c; }
   /* «Esc lukker fullskjerm» gir ingen mening uten tastatur, og lå oppå soneinfo */
   #mapFs.fs-on #fsHint { display:none; }
 }
+/* Mobil: lite kartplass - kontrollene nærmere kanten, mindre kartlagvelger, tettere knapper */
+@media (max-width: 520px) {
+  #map .leaflet-left .leaflet-control { margin-left:5px; }
+  #map .leaflet-right .leaflet-control { margin-right:5px; }
+  #map .leaflet-top .leaflet-control { margin-top:5px; }
+  #map .leaflet-bottom .leaflet-control { margin-bottom:5px; }
+  #map .leaflet-top .leaflet-control.knapp-desinf { margin-top:3px; }
+  #map .kart-knapp { padding:5px 5px !important; }
+  /* Kart · Topo · Flyfoto 25 % mindre */
+  .bl-box { border-radius:5px; }
+  .bl-btn { padding:4px 7px; font-size:0.54rem; min-height:23px; }
+}
 
 /* ===== PC-layout: kartet som hovedflate =====
    Fra 1000 px bredde ligger kartet fast til venstre i full høyde, mens banner,
@@ -1325,7 +1337,7 @@ function initMap() {
   const LocControl = L.Control.extend({
     options: { position: 'topright' },
     onAdd: function() {
-      const btn = L.DomUtil.create('button', '');
+      const btn = L.DomUtil.create('button', 'kart-knapp');
       btn.innerHTML = '📍 Hvor er jeg?';
       btn.style.cssText = 'background:#fff;color:#333;border:2px solid rgba(0,0,0,0.2);border-radius:4px;padding:5px 10px;font-size:0.75rem;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:none;';
       btn.title = 'Vis min posisjon på kartet';
@@ -1350,7 +1362,7 @@ function initMap() {
   const NearestPostControl = L.Control.extend({
     options: { position: 'topright' },
     onAdd: function() {
-      _nearestBtn = L.DomUtil.create('button', '');
+      _nearestBtn = L.DomUtil.create('button', 'kart-knapp knapp-desinf');
       _nearestBtn.innerHTML = desinfIconHtml(18) + ' Desinfisering';
       _nearestBtn.style.cssText = 'background:#ebf4ff;color:#2a4365;border:2px solid rgba(0,0,0,0.2);border-radius:4px;padding:5px 10px;font-size:0.75rem;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:none;';
       _nearestBtn.title = 'Finn desinfeksjonsposten som er nærmest deg';
@@ -3294,7 +3306,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.088</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.089</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span><br>
   <a href="../vilkar/" style="font-size:0.6rem; color:#94a3b8;">Vilkår for bruk</a>
 </div>
