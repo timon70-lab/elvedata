@@ -13,6 +13,10 @@ Slik regnes sonene ut:
     treffer, ikke en rett strek mellom to punkter. Sonene følger svingene.
   * En hovedsone går fra sin start til neste hovedsones start; den øverste
     går til sin egen slutt. Ingen hull eller overlapp mellom hovedsoner.
+  * egne_grenser = true i oppsettet (Mandalselva): hver sone går fra sin egen
+    start til sin egen slutt. Strekninger uten sone blir stående som hull.
+  * kutt_i_vann = true: kuttene måles fra bredd til bredd i vannflaten og
+    forlenges inn på land, så de ikke krysser et nes og treffer elva igjen.
   * En delsone (forelder satt) går fra sin egen start til sin egen slutt, og
     klippes ut av hovedsonen: den er en egen sone med eget kort.
   * side = vest/øst deler strekningen langs midtlinja.
@@ -34,7 +38,7 @@ Data fra OpenStreetMap er under ODbL (© OpenStreetMap contributors).
 import json, math, os, sys, time, urllib.parse, urllib.request
 
 from shapely.geometry import LineString, MultiLineString, MultiPolygon, Point, Polygon, mapping
-from shapely.ops import linemerge, polygonize, split, unary_union
+from shapely.ops import linemerge, polygonize, split, substring, unary_union
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from beregn_km import ROOT, les_zone_coords, projeksjon
@@ -46,6 +50,10 @@ BRUKERAGENT = 'elvesona.no sonekart (ikke-kommersiell, kontakt via elvesona.no)'
 TANGENT_M = 60        # tangenten ved et kutt glattes over ± denne lengden
 FORENKLE_M = 3        # Douglas-Peucker-toleranse før lagring
 DESIMALER = 5         # ~1 m
+
+# Settes av behandle() når oppsettet har kutt_i_vann = true: (vannflate med øyene
+# fylt inn, forlengelse inn på land i meter). Se kutt().
+KUTT_I_VANN = None
 
 
 # ---------------------------------------------------------------- OSM
@@ -126,7 +134,7 @@ def tangent(midt, m):
     return dx / n, dy / n
 
 
-def kutt(midt, korridor, m):
+def kutt(midt, korridor, m, forleng=None):
     """Linjestykket på tvers av korridoren gjennom midtlinja ved mål m.
     Bare delen som henger sammen med midtlinja tas med, så kuttet ikke
     treffer elva igjen i neste sving."""
@@ -135,6 +143,20 @@ def kutt(midt, korridor, m):
     nx, ny = -ty, tx
     L = 2000.0
     lang = LineString([(p.x - nx * L, p.y - ny * L), (p.x + nx * L, p.y + ny * L)])
+    if KUTT_I_VANN:
+        # Mål kuttet fra bredd til bredd i vannflaten (øyene fylt inn) og forleng det
+        # inn på land. I trange svinger smelter landstripene sammen, og da ville et
+        # kutt i korridoren fortsette over neset og treffe elva en gang til.
+        flate, ekstra = KUTT_I_VANN
+        if forleng is not None:
+            ekstra = forleng
+        biter = lang.intersection(flate)
+        biter = list(getattr(biter, 'geoms', [biter]))
+        bit = min((b for b in biter if b.length > 0), key=lambda g: g.distance(p))
+        (x0, y0), (x1, y1) = bit.coords[0], bit.coords[-1]
+        d = math.hypot(x1 - x0, y1 - y0) or 1.0
+        ux, uy = (x1 - x0) / d, (y1 - y0) / d
+        return LineString([(x0 - ux * ekstra, y0 - uy * ekstra), (x1 + ux * ekstra, y1 + uy * ekstra)])
     biter = lang.intersection(korridor)
     biter = list(getattr(biter, 'geoms', [biter]))
     bit = min(biter, key=lambda g: g.distance(p))
@@ -185,6 +207,8 @@ def lag_korridor(midt, vann, bredde, unntak):
 
 def strekning(midt, korridor, m0, m1):
     """Den delen av korridoren som ligger mellom kuttene ved m0 og m1."""
+    if KUTT_I_VANN:
+        return strekning_i_vann(midt, korridor, m0, m1)
     biter = [korridor]
     for m in (m0, m1):
         if 0 < m < midt.length:
@@ -194,8 +218,65 @@ def strekning(midt, korridor, m0, m1):
                 nye.extend(split(b, k).geoms if b.intersects(k) else [b])
             biter = nye
     lo, hi = min(m0, m1), max(m0, m1)
-    valgt = [b for b in biter if lo <= midt.project(b.representative_point()) <= hi]
+    # En bit hører til strekningen hvis et punkt i den ligger mellom kuttene langs
+    # midtlinja, eller hvis mesteparten av midtlinja gjennom biten ligger mellom
+    # kuttene. Det siste trengs for uregelmessige biter (øyer, lange kutt), der
+    # punktet havner utenfor.
+    midtbit = substring(midt, lo, hi)
+    grense = min(20.0, (hi - lo) / 4)
+
+    def med(b):
+        if lo <= midt.project(b.representative_point()) <= hi:
+            return True
+        inne = b.intersection(midtbit).length
+        return inne > grense and inne > 0.5 * b.intersection(midt).length
+    valgt = [b for b in biter if med(b)]
     return unary_union(valgt)
+
+
+def _mellom_kutt(midt, flate, m0, m1):
+    """Bitene av flata mellom kuttene ved m0 og m1 (samme utvalg som strekning())."""
+    biter = [flate]
+    for m in (m0, m1):
+        if 0 < m < midt.length:
+            k = kutt(midt, flate, m)
+            nye = []
+            for b in biter:
+                nye.extend(split(b, k).geoms if b.intersects(k) else [b])
+            biter = nye
+    lo, hi = min(m0, m1), max(m0, m1)
+    midtbit = substring(midt, lo, hi)
+    grense = min(20.0, (hi - lo) / 4)
+
+    def med(b):
+        if lo <= midt.project(b.representative_point()) <= hi:
+            return True
+        inne = b.intersection(midtbit).length
+        return inne > grense and inne > 0.5 * b.intersection(midt).length
+    return [b for b in biter if med(b)]
+
+
+def strekning_i_vann(midt, korridor, m0, m1):
+    """Som strekning(), men vannflaten deles først og landstripa legges rundt
+    vannbiten etterpå. Da kan ikke landstripa fra en nabostrekning i en trang sving
+    henge sammen med sonen."""
+    fylt, ekstra = KUTT_I_VANN
+    bredde = (ekstra - 5) / 2
+    vannbit = unary_union(_mellom_kutt(midt, fylt, m0, m1))
+    if vannbit.is_empty:
+        return vannbit
+    lokal = vannbit.buffer(bredde, join_style='round').intersection(korridor)
+    # Klipp bort landstripa som stikker forbi kuttene. Kuttet forlenges godt forbi
+    # landstripa: lokal er bare denne vannbiten med strimmel, så det treffer ikke naboer.
+    biter = [lokal]
+    for m in (m0, m1):
+        if 0 < m < midt.length:
+            k = kutt(midt, korridor, m, forleng=3 * bredde + 50)
+            nye = []
+            for b in biter:
+                nye.extend(split(b, k).geoms if b.intersects(k) else [b])
+            biter = nye
+    return unary_union([b for b in biter if b.intersection(vannbit).area > 1.0])
 
 
 def side(midt, flate, hvilken):
@@ -207,11 +288,15 @@ def side(midt, flate, hvilken):
                       [(zx + (zx - yx) * 50, zy + (zy - yy) * 50)])
     biter = list(split(flate, fram).geoms)
 
-    # Hver bit sammenlignes med nærmeste punkt på midtlinja.
+    # Hver bit sammenlignes med nærmeste punkt på midtlinja: vest = venstre side
+    # sett oppover elva (midtlinja går fra munningen og oppover). Det virker også
+    # der elva renner mot øst eller vest.
     def er_vest(b):
         p = b.representative_point()
-        q = midt.interpolate(midt.project(p))
-        return p.x < q.x
+        m = midt.project(p)
+        q = midt.interpolate(m)
+        tx, ty = tangent(midt, m)
+        return tx * (p.y - q.y) - ty * (p.x - q.x) > 0
     valgt = [b for b in biter if er_vest(b) == (hvilken == 'vest')]
     return unary_union(valgt)
 
@@ -259,6 +344,11 @@ def behandle(elv, hent=False, ut_fil=None):
         print('  utelater øy (vei %s, %.0f m²) og kanal bak den (%.0f m²)' % (vid, øy.area, kanal.area))
         unntak += [øy, kanal]
     korridor = lag_korridor(midt, vann, oppsett.get('bredde_land', 40), unntak)
+    global KUTT_I_VANN
+    KUTT_I_VANN = None
+    if oppsett.get('kutt_i_vann'):
+        fylt = unary_union([Polygon(p.exterior) for p in getattr(vann, 'geoms', [vann])])
+        KUTT_I_VANN = (fylt, 2 * oppsett.get('bredde_land', 40) + 5)
 
     spesial = oppsett.get('soner', {})
 
@@ -285,8 +375,8 @@ def behandle(elv, hent=False, ut_fil=None):
     starter = sorted({round(z['ms'], 1) for z in hoved})
     flater = []
     for z in soner:
-        if z['forelder']:
-            m0, m1 = z['ms'], z['me']
+        if z['forelder'] or oppsett.get('egne_grenser'):
+            m0, m1 = sorted((z['ms'], z['me']))
         else:
             m0 = z['ms']
             høyere = [m for m in starter if m > round(m0, 1)]
@@ -294,6 +384,9 @@ def behandle(elv, hent=False, ut_fil=None):
             if m0 == min(starter):
                 m0 = min(m0, 0.0)                         # nederste sone til munningen
         flate = strekning(midt, korridor, m0, m1)
+        if flate.is_empty:
+            print('ADVARSEL: %s ble tom' % z['navn'])
+            continue
         if z['side']:
             flate = side(midt, flate, z['side'])
         # Hull er midten av øyer som landstripa ikke rakk inn til - øya hører til sonen.
@@ -319,6 +412,20 @@ def behandle(elv, hent=False, ut_fil=None):
             print('ADVARSEL: %s ble tom' % z['navn'])
             continue
         flater.append((z, flate))
+
+    # Egne grenser: naboer kan overlappe litt der kuttene ikke er helt parallelle.
+    # Den minste sonen beholder overlappen; den trekkes fra de større.
+    if oppsett.get('egne_grenser'):
+        tatt, ryddet = None, {}
+        for z, flate in sorted(flater, key=lambda zf: zf[1].area):
+            if tatt is not None and flate.intersects(tatt):
+                før = flate.area
+                flate = flate.difference(tatt.buffer(0.01))
+                if før - flate.area > 50:
+                    print('  %-20s overlapp med nabo fjernet: %.0f m²' % (z['navn'], før - flate.area))
+            ryddet[z['navn']] = flate
+            tatt = flate if tatt is None else unary_union([tatt, flate])
+        flater = [(z, ryddet[z['navn']]) for z, _ in flater]
 
     # Delsonene er egne soner med eget kort: klipp dem ut av hovedsonen (forelderen),
     # så hovedsonen bare dekker vann som faktisk hører til den.

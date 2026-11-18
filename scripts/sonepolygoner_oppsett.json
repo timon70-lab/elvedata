@@ -18,5 +18,48 @@
       "Sone 5B Rød": { "side": "vest" },
       "Sone 5B Øst": { "som": "Sone 5B Rød", "side": "øst" }
     }
+  },
+  "mandalselva": {
+    "osm": { "midtlinje": [5083244], "vann": [4039102] },
+    "bredde_land": 40,
+    "egne_grenser": true,
+    "kutt_i_vann": true,
+    "soner": {
+      "Holmegård": { "side": "vest" },
+      "Heia": { "side": "øst" },
+      "Nedre Nøding": { "side": "øst" },
+      "Fuskeland A": { "side": "vest" },
+      "Fuskeland B": { "side": "vest" },
+      "Fuskeland C": { "side": "vest" },
+      "Fuskeland D": { "side": "vest" },
+      "Bringsdal A": { "side": "øst" },
+      "Bringsdal B": { "side": "øst" },
+      "Bringsdal C": { "side": "øst" },
+      "Fossefjellene syd": { "side": "vest" },
+      "Fossefjellene": { "side": "vest" },
+      "Grimefossen A": { "side": "øst" },
+      "Grimefossen B": { "side": "øst" },
+      "Furuholmen": { "side": "vest" },
+      "Stoveland": { "side": "øst" },
+      "Bjørkenes": { "side": "vest" },
+      "Øvre Nøding": { "side": "øst" },
+      "Smeland": { "side": "vest" },
+      "Holmesland A": { "side": "vest" },
+      "Holmesland B": { "side": "vest" },
+      "Holmesland P": { "side": "vest" },
+      "Holmesland C": { "side": "vest" },
+      "Hauge A": { "side": "øst" },
+      "Hauge B1": { "side": "øst" },
+      "Hauge B2": { "side": "øst" },
+      "Hauge C": { "side": "øst" },
+      "Hauge D": { "side": "øst" },
+      "Strædethylen": { "side": "vest" },
+      "Nodehylen": { "kun_side": [
+        { "side": "øst", "fra": [58.27918, 7.52291], "til": "slutt" }
+      ] },
+      "Laksehylen": { "kun_side": [
+        { "side": "øst", "fra": "start", "til": [58.28334, 7.52582] }
+      ] }
+    }
   }
 }

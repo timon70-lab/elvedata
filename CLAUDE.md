@@ -23,9 +23,10 @@ Detaljer ligger i egne filer — les dem når oppgaven berører temaet:
    Les ikke `.env`-innhold inn i svar.
    **Unntak (2026-11-17):** offentlige nettlesernøkler som er laget for å stå i nettsiden og
    bare gir tilgang til bakgrunnskart, kan stå i HTML. I dag gjelder det kun Esri-nøkkelen
-   `ESRI_KEY` i `otra/index.html` og `otra2/index.html` (ArcGIS Location Platform, «Public application», kun
-   Basemaps, betaling avslått, utløper 2027-11-17). NVE-nøkkelen og alle andre nøkler er
-   fortsatt hemmelige.
+   `ESRI_KEY` i `otra/index.html`, `otra2/index.html` og `mandalselva2/index.html` (fra 2026-11-18,
+   og i `mandalselva/index.html` når klonen går live) (ArcGIS Location Platform, «Public
+   application», kun Basemaps, betaling avslått, utløper 2027-11-17). NVE-nøkkelen og alle andre
+   nøkler er fortsatt hemmelige.
 2. **Fiskernavn vises aldri i dashboard.** Kolonnene `Navn`/`Fisker` i fangstloggene beholdes
    uendret i rådata — ingen data fjernes fra loggene — men de skal aldri embeddes i, eller vises i,
    dashboard, statistikkside eller oversiktskart. Kun `Art == "Laks"` inngår i fangst-pipelines.
@@ -143,8 +144,17 @@ grep -oE 'v[0-9]+\.[0-9]{3}' <fil>
   testmerkingen (også i `<h1>`), sett inn GoatCounter, bruk
   `SONER_URL = '../data/soner_otra.geojson'`, toppavstand PC 16 px / mobil 8 px. Polygonfil for
   klonen: `python scripts/sonepolygoner.py otra --ut soner_otra2.geojson`.
+- `mandalselva2/index.html` — testklone av Mandalselva (fra 2026-11-18), bygd på Otra-koden
+  (kartlag, PC/mobil-oppsett, sonepolygoner, delbare lenker, «Hvor er jeg?») med Mandalselvas
+  data. Samme testmerking som otra2 (`noindex`, stripe, ingen GoatCounter, major 0, toppavstand
+  PC 34 px / mobil 24 px, `<h1>` «Mandalselva 2 (test) · …»). Leser Mandalselvas datafiler,
+  inkludert `data/soner_mandalselva.geojson`
+  (`python scripts/sonepolygoner.py mandalselva`), som ikke brukes av `mandalselva/index.html`.
+  Nås kun med direkte lenke. Mandalselva-endringer gjøres i klonen til Per Lasse sier den skal
+  gå live som `mandalselva/index.html`; da fjernes testmerkingen (også i `<h1>`), GoatCounter
+  settes inn, toppavstand PC 16 px / mobil 8 px, og versjonen blir v1.{neste minor}.
 - `vilkar/index.html` — vilkår for bruk (påkrevd av Esri-avtalen for flyfoto). Lenket fra
-  bunnteksten i otra/otra2.
+  bunnteksten i otra/otra2/mandalselva2.
 
 ### Logo og favicon
 
