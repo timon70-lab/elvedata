@@ -23,8 +23,8 @@ Detaljer ligger i egne filer — les dem når oppgaven berører temaet:
    Les ikke `.env`-innhold inn i svar.
    **Unntak (2026-11-17):** offentlige nettlesernøkler som er laget for å stå i nettsiden og
    bare gir tilgang til bakgrunnskart, kan stå i HTML. I dag gjelder det kun Esri-nøkkelen
-   `ESRI_KEY` i `otra/index.html`, `otra2/index.html` og `mandalselva2/index.html` (fra 2026-11-18,
-   og i `mandalselva/index.html` når klonen går live) (ArcGIS Location Platform, «Public
+   `ESRI_KEY` i `otra/index.html`, `otra2/index.html`, `mandalselva/index.html` og
+   `mandalselva2/index.html` (fra 2026-11-18) (ArcGIS Location Platform, «Public
    application», kun Basemaps, betaling avslått, utløper 2027-11-17). NVE-nøkkelen og alle andre
    nøkler er fortsatt hemmelige.
 2. **Fiskernavn vises aldri i dashboard.** Kolonnene `Navn`/`Fisker` i fangstloggene beholdes
@@ -150,11 +150,14 @@ grep -oE 'v[0-9]+\.[0-9]{3}' <fil>
   PC 34 px / mobil 24 px, `<h1>` «Mandalselva 2 (test) · …»). Leser Mandalselvas datafiler,
   inkludert `data/soner_mandalselva.geojson`
   (`python scripts/sonepolygoner.py mandalselva`), som ikke brukes av `mandalselva/index.html`.
-  Nås kun med direkte lenke. Mandalselva-endringer gjøres i klonen til Per Lasse sier den skal
-  gå live som `mandalselva/index.html`; da fjernes testmerkingen (også i `<h1>`), GoatCounter
-  settes inn, toppavstand PC 16 px / mobil 8 px, og versjonen blir v1.{neste minor}.
+  Nås kun med direkte lenke. Gikk live som `mandalselva/index.html` v1.066 (2026-11-18).
+  **Fra 2026-11-18 gjøres alle Mandalselva-endringer direkte i `mandalselva/index.html`.**
+  mandalselva2 brukes bare når Per Lasse uttrykkelig sier det, og holdes ikke i takt med
+  mandalselva. Skal den brukes igjen: kopier `mandalselva/index.html` → `mandalselva2` med
+  testmerkingen over. Tilbake: fjern testmerkingen (også `<h1>`), sett inn GoatCounter,
+  toppavstand PC 16 px / mobil 8 px.
 - `vilkar/index.html` — vilkår for bruk (påkrevd av Esri-avtalen for flyfoto). Lenket fra
-  bunnteksten i otra/otra2/mandalselva2.
+  bunnteksten i otra/otra2/mandalselva/mandalselva2.
 
 ### Logo og favicon
 
