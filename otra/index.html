@@ -2357,10 +2357,9 @@ function updateMap(scores) {
   if (_elvKant) _elvKant.setStyle({ opacity: linjeModus ? 0.95 : 0 });
   ZONES.forEach(zone => {
     const isSelected = zone === activeZone;
-    // Delsoner til den valgte sonen (f.eks. 4B/4C når 4A er valgt) vises i egen farge med
-    // navn og pris - de er egne soner med eget kort og skal ikke se ut som en del av 4A.
-    const forelderValgt = !!(zonePolys[zone] && zonePolys[zone].isDel && zonePolys[zone].forelder === activeZone);
-    const isDimmed = activeZone !== null && !isSelected && !forelderValgt;
+    // Alle soner som ikke er valgt, gråes ut - også delsonene til den valgte hovedsonen
+    // (4B/4C når 4A er valgt). De er egne soner med eget kort.
+    const isDimmed = activeZone !== null && !isSelected;
     const sc = scores ? (scores[zone]?.score || 0) : 0;
     const st = soneStatus(zone);
     const lukket = st.lukket;   // stengt hele sesongen eller stengt i dag: grå og stiplet
@@ -2371,13 +2370,13 @@ function updateMap(scores) {
     const erDel = !!(poly && poly.isDel);
     // Delsonepolygonet skjules i oversikten (under zoom 13), men ikonet vises som for
     // alle andre soner, med samme størrelse og klikk.
-    const skjult = lav && erDel && !isSelected && !forelderValgt;
+    const skjult = lav && erDel && !isSelected;
     // I linjemodus erstatter sonelinja polygonet for hovedsonene.
     const polySkjult = skjult || (linjeModus && !erDel);
     if (poly) {
       poly.setStyle(polySkjult ? { opacity: 0, fillOpacity: 0 } : {
         color: col, fillColor: col,
-        weight: isSelected ? 3 : (forelderValgt ? 2.5 : 1.5),
+        weight: isSelected ? 3 : 1.5,
         opacity: isDimmed ? 0.5 : 0.9,
         fillOpacity: isSelected ? 0.35 : ((isDimmed || lukket) ? 0.08 : 0.22),
         dashArray: lukket ? '3,7' : null   // stiplet betyr bare stengt
@@ -2412,8 +2411,8 @@ function updateMap(scores) {
       ? zone + '<br><span style="color:' + priceColor(priceInfo.dogn) + '">' + priceLbl + '</span>'
       : zone)
       + ((lukket || st.delvis) ? '<br><span style="color:' + (lukket ? '#c53030' : '#b7791f') + '">' + st.kort + '</span>' : '');
-    // Etikett (navn + pris): fast for valgt sone og dens delsoner, ellers bare ved hover.
-    const fastEtikett = isSelected || forelderValgt;
+    // Etikett (navn + pris): fast for valgt sone, ellers bare ved hover.
+    const fastEtikett = isSelected;
     if (l.perm !== fastEtikett) {
       l.startMk.unbindTooltip();
       l.startMk.bindTooltip(tipHtml, {permanent: fastEtikett, direction: 'top', className: 'zone-label'});
@@ -3295,7 +3294,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.087</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.088</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span><br>
   <a href="../vilkar/" style="font-size:0.6rem; color:#94a3b8;">Vilkår for bruk</a>
 </div>
