@@ -69,5 +69,14 @@
         ]
       } }
     }
+  },
+  "audna": {
+    "osm": { "midtlinje": [5036778], "vann": [16353382] },
+    "bredde_land": 40,
+    "soner": {
+      "Sone5": { "behold_hel": true },
+      "Sone 5A": { "forelder": "Sone5" },
+      "Sone 5B": { "forelder": "Sone5" }
+    }
   }
 }

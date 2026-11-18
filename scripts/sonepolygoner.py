@@ -24,6 +24,8 @@ Slik regnes sonene ut:
     "start" eller "slutt". Sonen er biten som henger sammen med startpunktet.
   * En delsone (forelder satt) går fra sin egen start til sin egen slutt, og
     klippes ut av hovedsonen: den er en egen sone med eget kort.
+    behold_hel = true på hovedsonen lar den beholde hele strekningen, med
+    delsonene tegnet oppå (Audna: gamle Sone5 = dagens 5A + 5B).
   * side = vest/øst deler strekningen langs midtlinja.
   * kun_side = liste av {side, fra, til}: på delstrekningen fra–til hører bare
     den ene bredden til sonen (fiske fra én side). fra/til er [lat, lon] eller
@@ -505,7 +507,7 @@ def behandle(elv, hent=False, ut_fil=None):
     # så hovedsonen bare dekker vann som faktisk hører til den.
     features = []
     for z, flate in flater:
-        if not z['forelder']:
+        if not z['forelder'] and not spesial.get(z['navn'], {}).get('behold_hel'):
             barn = [f for b, f in flater if b['forelder'] == z['navn']]
             if barn:
                 før = flate.area
