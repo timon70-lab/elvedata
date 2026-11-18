@@ -13,8 +13,8 @@ Slik regnes sonene ut:
     treffer, ikke en rett strek mellom to punkter. Sonene følger svingene.
   * En hovedsone går fra sin start til neste hovedsones start; den øverste
     går til sin egen slutt. Ingen hull eller overlapp mellom hovedsoner.
-  * En delsone (forelder satt) går fra sin egen start til sin egen slutt og
-    tegnes oppå hovedsonen.
+  * En delsone (forelder satt) går fra sin egen start til sin egen slutt, og
+    klippes ut av hovedsonen: den er en egen sone med eget kort.
   * side = vest/øst deler strekningen langs midtlinja.
   * kun_side = liste av {side, fra, til}: på delstrekningen fra–til hører bare
     den ene bredden til sonen (fiske fra én side). fra/til er [lat, lon] eller
@@ -283,7 +283,7 @@ def behandle(elv, hent=False, ut_fil=None):
 
     hoved = sorted([z for z in soner if not z['forelder']], key=lambda z: z['ms'])
     starter = sorted({round(z['ms'], 1) for z in hoved})
-    features = []
+    flater = []
     for z in soner:
         if z['forelder']:
             m0, m1 = z['ms'], z['me']
@@ -318,9 +318,24 @@ def behandle(elv, hent=False, ut_fil=None):
         if flate.is_empty:
             print('ADVARSEL: %s ble tom' % z['navn'])
             continue
+        flater.append((z, flate))
+
+    # Delsonene er egne soner med eget kort: klipp dem ut av hovedsonen (forelderen),
+    # så hovedsonen bare dekker vann som faktisk hører til den.
+    features = []
+    for z, flate in flater:
+        if not z['forelder']:
+            barn = [f for b, f in flater if b['forelder'] == z['navn']]
+            if barn:
+                før = flate.area
+                flate = flate.difference(unary_union(barn).buffer(0.01))
+                print('  %-20s delsoner klippet ut: %.0f m² fjernet' % (z['navn'], før - flate.area))
+        props = {'sone': z['navn'], 'slag': 'del' if z['forelder'] else 'hoved'}
+        if z['forelder']:
+            props['forelder'] = z['forelder']
         features.append({
             'type': 'Feature',
-            'properties': {'sone': z['navn'], 'slag': 'del' if z['forelder'] else 'hoved'},
+            'properties': props,
             'geometry': som_lonlat(flate, inv),
         })
     # Hovedsoner først, så delsonene tegnes oppå.
