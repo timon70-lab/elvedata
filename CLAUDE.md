@@ -24,7 +24,8 @@ Detaljer ligger i egne filer — les dem når oppgaven berører temaet:
    **Unntak (2026-11-17):** offentlige nettlesernøkler som er laget for å stå i nettsiden og
    bare gir tilgang til bakgrunnskart, kan stå i HTML. I dag gjelder det kun Esri-nøkkelen
    `ESRI_KEY` i `otra/index.html`, `otra2/index.html`, `mandalselva/index.html`,
-   `mandalselva2/index.html` (fra 2026-11-18) og `audna2/index.html` (fra 2026-11-18) (ArcGIS Location Platform, «Public
+   `mandalselva2/index.html` (fra 2026-11-18), `audna/index.html` og `audna2/index.html`
+   (fra 2026-11-18) (ArcGIS Location Platform, «Public
    application», kun Basemaps, betaling avslått, utløper 2027-11-17). NVE-nøkkelen og alle andre
    nøkler er fortsatt hemmelige.
 2. **Fiskernavn vises aldri i dashboard.** Kolonnene `Navn`/`Fisker` i fangstloggene beholdes
@@ -160,11 +161,14 @@ grep -oE 'v[0-9]+\.[0-9]{3}' <fil>
   (Otra-kartet) med Audnas data, nedbørsbaserte fiskemelding og egen elvescore
   (`computeRiverScore`). Samme testmerking som mandalselva2 (`<h1>` «Audna 2 (test) · …»).
   Leser Audnas datafiler (`data/vannforing.json`, `data/nedbor.json` uten suffiks), inkludert
-  `data/soner_audna.geojson` (`python scripts/sonepolygoner.py audna`), som ikke brukes av
-  `audna/index.html`. Nås kun med direkte lenke. Byggeskript-mønster: data og tekst byttes inn
-  fra `audna/index.html`, fiskemeldingen og elvescoren portes med.
+  `data/soner_audna.geojson` (`python scripts/sonepolygoner.py audna`). Nås kun med direkte
+  lenke. Gikk live som `audna/index.html` v1.169 (2026-11-18).
+  **Fra 2026-11-18 gjøres alle Audna-endringer direkte i `audna/index.html`.** audna2 brukes
+  bare når Per Lasse uttrykkelig sier det, og holdes ikke i takt med audna. Skal den brukes
+  igjen: kopier `audna/index.html` → `audna2` med testmerkingen over. Tilbake: fjern
+  testmerkingen (også `<h1>`), sett inn GoatCounter, toppavstand PC 16 px / mobil 8 px.
 - `vilkar/index.html` — vilkår for bruk (påkrevd av Esri-avtalen for flyfoto). Lenket fra
-  bunnteksten i otra/otra2/mandalselva/mandalselva2/audna2.
+  bunnteksten i otra/otra2/mandalselva/mandalselva2/audna/audna2.
 
 ### Logo og favicon
 
