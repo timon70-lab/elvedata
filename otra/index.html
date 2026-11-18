@@ -2369,7 +2369,9 @@ function updateMap(scores) {
     const col = lukket ? STENGT_FARGE : (isDimmed ? '#94a3b8' : (scores ? scoreColor(sc) : '#94a3b8'));
     const poly = zonePolys[zone];
     const erDel = !!(poly && poly.isDel);
-    const skjult = lav && erDel && !isSelected && !forelderValgt;   // delsoner vises ikke i oversikten
+    // Delsonepolygonet skjules i oversikten (under zoom 13), men ikonet vises som for
+    // alle andre soner, med samme størrelse og klikk.
+    const skjult = lav && erDel && !isSelected && !forelderValgt;
     // I linjemodus erstatter sonelinja polygonet for hovedsonene.
     const polySkjult = skjult || (linjeModus && !erDel);
     if (poly) {
@@ -2391,12 +2393,12 @@ function updateMap(scores) {
     }
     const l = mapLayers[zone]; if (!l) return;
     const scoreText = st.kode === 'stengt' ? '✕' : (scores ? String(sc) : '–');
-    l.startMk.setIcon(makeStartIcon(scoreText, col, isSelected, isDimmed, lav || erDel,
+    l.startMk.setIcon(makeStartIcon(scoreText, col, isSelected, isDimmed, lav,
       st.kode === 'stengt-idag' ? 'stengt' : (st.delvis ? 'delvis' : null)));
     // Valgt sone øverst, ellers høyest score øverst der markører overlapper.
     l.startMk.setZIndexOffset(isSelected ? 1000 : 10 + sc);
-    l.startMk.setOpacity(skjult ? 0 : 1);
-    if (l.startMk._icon) l.startMk._icon.style.pointerEvents = skjult ? 'none' : 'auto';
+    l.startMk.setOpacity(1);
+    if (l.startMk._icon) l.startMk._icon.style.pointerEvents = 'auto';
     if (l.endMk) {
       // Sluttmarkøren trengs bare som reserve når polygonene ikke er lastet.
       const visSlutt = isSelected && !_harPolygoner;
@@ -3293,7 +3295,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.086</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.087</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span><br>
   <a href="../vilkar/" style="font-size:0.6rem; color:#94a3b8;">Vilkår for bruk</a>
 </div>
