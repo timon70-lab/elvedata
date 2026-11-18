@@ -30,6 +30,8 @@ Slik regnes sonene ut:
   * kun_side = liste av {side, fra, til}: på delstrekningen fra–til hører bare
     den ene bredden til sonen (fiske fra én side). fra/til er [lat, lon] eller
     "start"/"slutt" for sonens egne grenser.
+  * osm.midtlinje = "senterlinje": bruk data/senterlinje_<elv>.geojson som midtlinje
+    (Tovdalselva, der OSM-elvelinja har hull gjennom Flakksvannet og Senumstadfjorden).
   * utelat_øy_med_kanal = OSM-id til en vei i øyas ring. Øya, sidekanalen
     bak den (sett fra midtlinja) og landstripa langs kanalen tas ut av sonene.
     Kanalåpningene lukkes med korteste linje fra øyspissene til bredden.
@@ -67,14 +69,18 @@ KUTT_I_VANN = None
 
 def hent_osm(elv, oppsett):
     o = oppsett['osm']
-    veier, rel = list(o['midtlinje']), list(o['vann'])
+    veier = [] if o['midtlinje'] == 'senterlinje' else list(o['midtlinje'])
+    rel = list(o['vann'])
     for s in oppsett.get('soner', {}).values():
         fl = s.get('flate')
         if fl:
             veier += fl.get('linjer', []) + [k['vei'] for k in fl.get('kutt', [])]
             rel += fl.get('vann', [])
-    q = '[out:json][timeout:120];(way(id:%s);relation(id:%s););out geom;' % (
-        ','.join(map(str, sorted(set(veier)))), ','.join(map(str, sorted(set(rel)))))
+    deler = ''
+    if veier:
+        deler += 'way(id:%s);' % ','.join(map(str, sorted(set(veier))))
+    deler += 'relation(id:%s);' % ','.join(map(str, sorted(set(rel))))
+    q = '[out:json][timeout:120];(%s);out geom;' % deler
     data = urllib.parse.urlencode({'data': q}).encode()
     for forsok in range(5):
         try:
@@ -105,12 +111,20 @@ def les_osm(elv, oppsett, xy):
 
     # Midtlinja: veiene i oppsettet, satt sammen. OSM tegner waterway=river
     # i strømretningen; vi snur den så målet går fra munningen og oppover.
-    veier = [linje(e['geometry']) for e in elementer
-             if e['type'] == 'way' and e['id'] in oppsett['osm']['midtlinje']]
-    midt = linemerge(veier)
-    if midt.geom_type != 'LineString':
-        sys.exit('Midtlinja henger ikke sammen (%d deler).' % len(midt.geoms))
-    midt = LineString(list(midt.coords)[::-1])
+    if oppsett['osm']['midtlinje'] == 'senterlinje':
+        # Den manuelle senterlinja (data/senterlinje_<elv>.geojson) går allerede fra
+        # munningen og oppover. Brukes der OSM-elvelinja har hull gjennom innsjøer.
+        with open(os.path.join(ROOT, 'data', 'senterlinje_%s.geojson' % elv), encoding='utf-8') as fh:
+            g = json.load(fh)
+        f = g['features'][0] if 'features' in g else g
+        midt = LineString([xy(lon, lat) for lon, lat in f['geometry']['coordinates']])
+    else:
+        veier = [linje(e['geometry']) for e in elementer
+                 if e['type'] == 'way' and e['id'] in oppsett['osm']['midtlinje']]
+        midt = linemerge(veier)
+        if midt.geom_type != 'LineString':
+            sys.exit('Midtlinja henger ikke sammen (%d deler).' % len(midt.geoms))
+        midt = LineString(list(midt.coords)[::-1])
 
     # Vannflaten: ytre ringer minus indre (øyer).
     ytre, indre, indre_id = [], [], []
@@ -457,7 +471,7 @@ def behandle(elv, hent=False, ut_fil=None):
             m0 = z['ms']
             høyere = [m for m in starter if m > round(m0, 1)]
             m1 = høyere[0] if høyere else z['me']
-            if m0 == min(starter):
+            if round(m0, 1) == min(starter):
                 m0 = min(m0, 0.0)                         # nederste sone til munningen
         flate = strekning(midt, korridor, m0, m1)
         if flate.is_empty:

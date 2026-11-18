@@ -24,8 +24,8 @@ Detaljer ligger i egne filer — les dem når oppgaven berører temaet:
    **Unntak (2026-11-17):** offentlige nettlesernøkler som er laget for å stå i nettsiden og
    bare gir tilgang til bakgrunnskart, kan stå i HTML. I dag gjelder det kun Esri-nøkkelen
    `ESRI_KEY` i `otra/index.html`, `otra2/index.html`, `mandalselva/index.html`,
-   `mandalselva2/index.html` (fra 2026-11-18), `audna/index.html` og `audna2/index.html`
-   (fra 2026-11-18) (ArcGIS Location Platform, «Public
+   `mandalselva2/index.html` (fra 2026-11-18), `audna/index.html`, `audna2/index.html`
+   (fra 2026-11-18) og `tovdalselva2/index.html` (fra 2026-11-19) (ArcGIS Location Platform, «Public
    application», kun Basemaps, betaling avslått, utløper 2027-11-17). NVE-nøkkelen og alle andre
    nøkler er fortsatt hemmelige.
 2. **Fiskernavn vises aldri i dashboard.** Kolonnene `Navn`/`Fisker` i fangstloggene beholdes
@@ -167,8 +167,15 @@ grep -oE 'v[0-9]+\.[0-9]{3}' <fil>
   bare når Per Lasse uttrykkelig sier det, og holdes ikke i takt med audna. Skal den brukes
   igjen: kopier `audna/index.html` → `audna2` med testmerkingen over. Tilbake: fjern
   testmerkingen (også `<h1>`), sett inn GoatCounter, toppavstand PC 16 px / mobil 8 px.
+- `tovdalselva2/index.html` — testklone av Tovdalselva (fra 2026-11-19), bygd på
+  `audna/index.html` (Otra-kartet + fiskemelding og elvescore) med Tovdalselvas data og
+  «Kun laks»-knappen (`laksOnly`, `activeData()`, `activeConsts()`, lenkeparameter `laks=1`).
+  Samme testmerking som audna2 (`<h1>` «Tovdalselva 2 (test) · …»). Leser Tovdalselvas
+  datafiler, inkludert `data/soner_tovdalselva.geojson`
+  (`python scripts/sonepolygoner.py tovdalselva`, midtlinje = den manuelle senterlinja), som
+  ikke brukes av `tovdalselva/index.html`. Nås kun med direkte lenke.
 - `vilkar/index.html` — vilkår for bruk (påkrevd av Esri-avtalen for flyfoto). Lenket fra
-  bunnteksten i otra/otra2/mandalselva/mandalselva2/audna/audna2.
+  bunnteksten i otra/otra2/mandalselva/mandalselva2/audna/audna2/tovdalselva2.
 
 ### Logo og favicon
 

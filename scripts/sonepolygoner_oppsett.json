@@ -78,5 +78,14 @@
       "Sone 5A": { "forelder": "Sone5" },
       "Sone 5B": { "forelder": "Sone5" }
     }
+  },
+  "tovdalselva": {
+    "osm": { "midtlinje": "senterlinje", "vann": [15605961, 15605287, 6286645, 6158746, 6158751, 6158748, 6158750, 6158745] },
+    "bredde_land": 40,
+    "soner": {
+      "Teinefoss Fluefiske": { "forelder": "Sone 4 og 5" },
+      "Buhølen": { "forelder": "Sone 4 og 5" },
+      "Laksefoss": { "forelder": "Sone 4 og 5" }
+    }
   }
 }
