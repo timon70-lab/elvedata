@@ -70,11 +70,12 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
   .panel-body { grid-template-columns: 1fr; }
   .ctrl-col { border-left: none; border-top: 2px solid #f0fff4; justify-content: flex-start; }
   .ctrl-row > input[type=range], .dual-slider { width: auto; flex: 1 1 auto; }
+  .zi-topbins { margin-left: 0; align-items: flex-start; width: 100%; margin-top: 4px; }
 }
 .panel-header { padding: 11px 14px 9px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; display: flex; flex-direction: column; gap: 1px; min-height: 64px; }
 .panel-name { font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #276749; }
 .panel-sub { font-size: 0.58rem; color: #94a3b8; }
-.zone-list { padding: 10px 12px 14px; display: flex; flex-direction: column; gap: 9px; min-height: 160px; }
+.zone-list { scroll-margin-top: 8px; padding: 10px 12px 14px; display: flex; flex-direction: column; gap: 9px; min-height: 160px; }
 .zone-row { display: flex; align-items: center; gap: 10px; cursor: pointer; border-radius: 8px; padding: 4px 6px; transition: background 0.15s; }
 .zone-row:hover { background: #f0fff4; }
 .zone-row.active { background: #c6f6d5; }
@@ -91,11 +92,53 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .map-header { padding: 10px 14px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; display: flex; justify-content: space-between; align-items: center; }
 .map-header .map-title { font-size: 0.78rem; font-weight: 700; color: #276749; }
 .map-header .map-hint { font-size: 0.62rem; color: #94a3b8; }
-#map { height: 320px; width: 100%; }
+#map { height: clamp(320px, 52vh, 480px); width: 100%; }
+.kart-legend { display:flex; align-items:center; gap:7px; background:rgba(255,255,255,0.9); color:#374151; font-size:0.6rem; font-weight:700; padding:3px 8px; border-radius:6px; border:1px solid rgba(0,0,0,0.12); white-space:nowrap; pointer-events:none; }
+.kart-legend i { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:3px; vertical-align:-1px; }
+.kart-legend span { font-weight:600; font-variant-numeric:tabular-nums; }
 .leaflet-tooltip.mtip { background: #1a202c; color: #e2e8f0; border: 1px solid #4a5568; font-size: .72rem; font-weight: 700; padding: 2px 7px; border-radius: 5px; box-shadow: none; }
+.leaflet-tooltip.mtip::before { display: none; }
 .leaflet-tooltip.zone-label { background: #ffffff; color: #1a202c; border: 1px solid rgba(0,0,0,0.15); font-size: 0.58rem; font-weight: 700; padding: 1px 4px; border-radius: 4px; box-shadow: none; pointer-events: none; text-align: center; line-height: 1.2; }
 .leaflet-tooltip.zone-label::before { display: none; }
-.leaflet-tooltip.mtip::before { display: none; }
+/* Av/på for parkering, rett til høyre for +/− (ligger inne i zoomkontrollen). */
+.p-tog { position:absolute; left:calc(100% + 6px); top:-2px; width:30px; height:30px; box-sizing:content-box; border:2px solid rgba(0,0,0,0.2); border-radius:4px; background:#fff; background-clip:padding-box; padding:0; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.p-tog span { box-sizing:border-box; width:20px; height:20px; border-radius:4px; display:flex; align-items:center; justify-content:center; font:800 12px/1 'Segoe UI',sans-serif; color:#fff; background:#a0aec0; }
+.p-tog.on span { background:#2b6cb0; }
+.p-tog:not(.on) span::after { content:''; position:absolute; width:24px; height:2px; background:#4a5568; transform:rotate(-45deg); }
+.p-tog:hover { background:#f4f4f4; }
+.p-tog:focus-visible { outline:2px solid #3182ce; outline-offset:1px; }
+.zoom-lbl { background:rgba(255,255,255,0.8); color:#4a5568; font-size:0.62rem; font-weight:700; padding:1px 0; width:34px; text-align:center; border-radius:4px; pointer-events:none; font-variant-numeric:tabular-nums; margin-top:4px !important; }
+.pos-kort { display:none; max-width:60vw; background:#fff; border:2px solid rgba(0,0,0,0.2); border-radius:8px; padding:8px 10px; font-size:0.72rem; line-height:1.45; color:#1a202c; text-align:left; box-shadow:0 2px 10px rgba(0,0,0,0.18); }
+.pos-kort .pk-hdr { display:flex; justify-content:space-between; align-items:flex-start; gap:6px; font-weight:600; }
+.pos-kort .pk-hdr { align-items:center; white-space:nowrap; }
+.pos-kort .pk-hdr b { font-weight:800; color:#276749; }
+.pos-kort .pk-sone { cursor:pointer; }
+.pos-kort .pk-x { background:none; border:none; color:#94a3b8; font-size:0.95rem; line-height:1; cursor:pointer; padding:0 2px; font-family:inherit; }
+.pos-kort .pk-rad { margin-top:3px; color:#4a5568; }
+.pos-kort .pk-score { display:inline-block; min-width:24px; text-align:center; color:#fff; font-weight:800; border-radius:999px; padding:0 6px; margin-right:4px; }
+.pos-kort .pk-stengt { color:#c53030; font-weight:700; }
+.pos-kort .pk-delvis { color:#b7791f; font-weight:700; }
+.pos-kort .pk-apen { color:#276749; font-weight:700; }
+.pos-kort .pk-lenker { margin-top:5px; }
+.pos-kort .pk-lenker a { color:#2b6cb0; text-decoration:none; font-weight:700; cursor:pointer; }
+.pos-kort .pk-svak { color:#94a3b8; font-size:0.64rem; margin-top:3px; }
+.bl-box { display:flex; background:#fff; border:2px solid rgba(0,0,0,0.2); border-radius:6px; overflow:hidden; }
+.bl-btn { background:#fff; color:#374151; border:none; border-right:1px solid #e2e8f0; padding:6px 10px; font-size:0.72rem; font-weight:700; font-family:inherit; cursor:pointer; min-height:30px; }
+.bl-btn:last-child { border-right:none; }
+.bl-btn:hover { background:#f0fff4; }
+.bl-btn.on { background:#276749; color:#fff; }
+.bl-btn.av, .bl-btn:disabled { color:#a0aec0; cursor:not-allowed; background:#fff; }
+/* Lagknappene nede til venstre løftes over kildehenvisningen, som går helt ut på smal skjerm */
+#map .leaflet-bottom.leaflet-left { bottom:16px; }
+.kilde-mer { cursor:pointer; color:#2b6cb0; }
+.kilde-mer .km-full { display:none; }
+.kilde-mer.apen .km-kort { display:none; }
+.kilde-mer.apen .km-full { display:inline; color:#333; }
+.kart-melding { position:absolute; left:50%; top:10px; transform:translateX(-50%); z-index:1000; background:rgba(26,32,44,.88); color:#fff; font-size:.74rem; padding:6px 10px; border-radius:6px; pointer-events:none; max-width:80%; text-align:center; }
+.bl-btn:focus-visible { outline:2px solid #9ae6b4; outline-offset:-2px; }
+/* Flyfoto er mørkt: gi sonekantene litt mer trøkk så de synes */
+#map.bl-foto:not(.lav-zoom) .leaflet-soneflater-pane path { stroke-width:2.5px; }
+.leaflet-soneflater-pane path:focus { outline: none; } /* nettleserens fokusramme rundt klikket sonepolygon */
 
 .photo-panel { width: 100%; max-width: 480px; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-top: 14px; display: none; }
 .photo-panel.visible { display: block; }
@@ -119,34 +162,6 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .pg-nav-btn { background:none; border:2px solid #9ae6b4; border-radius:8px; color:#276749; font-size:1.35rem; font-weight:700; cursor:pointer; padding:6px 20px; line-height:1; min-height:44px; }
 .pg-nav-btn:disabled { color:#cbd5e0; border-color:#e2e8f0; cursor:not-allowed; }
 .photo-nav-row { display: flex; justify-content: center; align-items: center; gap: 18px; padding: 8px 14px; background: #f0fff4; border-bottom: 2px solid #c6f6d5; }
-.video-thumb { position:relative; cursor:pointer; }
-.video-thumb img { width:100%; display:block; max-height:280px; object-fit:cover; }
-.video-play { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  font-size:2.4rem; color:white; background:rgba(0,0,0,0.35); text-shadow:0 2px 8px rgba(0,0,0,.6); }
-.video-thumb:hover .video-play { background:rgba(0,0,0,0.5); }
-.video-fs-btn { position:absolute; top:8px; right:8px; background:rgba(0,0,0,0.5); color:white; border:none;
-  border-radius:6px; width:32px; height:32px; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-.video-fs-btn:hover { background:rgba(0,0,0,0.7); }
-.video-frame { width:100%; aspect-ratio:16/9; display:block; border:0; }
-.flow-chip { background:#f0fff4; border:1px solid #c6f6d5; border-radius:999px; color:#276749;
-  font-size:0.6rem; font-weight:700; cursor:default; padding:2px 4px; line-height:1.3; white-space:nowrap;
-  display:inline-flex; align-items:center; gap:2px; }
-.flow-chip.on { background:#276749; border-color:#276749; color:white; }
-/* color/font-size:inherit slår .photo-hdr span (klasse+element) – ellers blir teksten usynlig */
-.flow-chip .fc-lbl { padding:6px; cursor:pointer; text-align:center; border-radius:999px;
-  color:inherit; font-size:inherit; font-weight:inherit; }
-.flow-chip.on .fc-lbl { min-width:82px; }
-.flow-chip .fc-lbl:active { background:rgba(255,255,255,0.16); }
-/* Pilene: 32px synlig sirkel, 44px trykkflate via usynlig ::after */
-.flow-chip .fc-arw { display:none; position:relative; background:rgba(255,255,255,0.14); border:none; color:inherit;
-  font-size:1.15rem; font-weight:700; line-height:1; cursor:pointer; padding:0;
-  width:32px; height:32px; border-radius:999px; -webkit-tap-highlight-color:transparent; }
-.flow-chip.on .fc-arw { display:inline-flex; align-items:center; justify-content:center; }
-.flow-chip .fc-arw::after { content:''; position:absolute; top:-6px; bottom:-6px; left:-6px; right:-6px; }
-.flow-chip .fc-arw:active { background:rgba(255,255,255,0.34); }
-.flow-chip .fc-arw:disabled { opacity:.3; cursor:not-allowed; background:none; }
-.flow-chip .fc-arw:focus-visible, .flow-chip .fc-lbl:focus-visible { outline:2px solid #9ae6b4; outline-offset:2px; }
-.flow-chip .fc-cnt { color:inherit; font-size:inherit; opacity:.72; font-weight:600; }
 .photo-img { width: 100%; display: block; max-height: 280px; object-fit: cover; cursor: pointer; }
 .photo-cap { padding: 7px 14px 10px; font-size: 0.68rem; color: #64748b; }
 .dir-link { display: inline-block; margin: 0 14px 10px; font-size: 0.68rem; color: #276749; background: #f0fff4;
@@ -189,8 +204,12 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .zi-row { display:flex; justify-content:space-between; align-items:baseline; font-size:.72rem; padding:2px 0; border-bottom:1px solid #f8fafc; }
 .zi-row:last-child { border-bottom:none; }
 .zi-label { color:#64748b; }
+.zi-desinf-item { font-weight:400; font-size:.7rem; line-height:1.45; margin-bottom:4px; }
+.zi-desinf-item:last-child { margin-bottom:0; }
+.zi-desinf-km { color:#4a5568; }
+.zi-desinf-item a { color:#2b6cb0; text-decoration:none; white-space:nowrap; }
 .zi-val { color:#1a202c; font-weight:600; text-align:right; max-width:60%; }
-.zi-score-row { display:flex; align-items:center; gap:8px; padding:6px 0 4px; border-bottom:1px solid #f1f5f9; margin-bottom:4px; }
+.zi-score-row { display:flex; align-items:center; gap:8px; padding:6px 0 4px; border-bottom:1px solid #f1f5f9; margin-bottom:4px; flex-wrap:wrap; }
 .zi-score-num { font-size:1.6rem; font-weight:800; line-height:1; }
 .zi-score-label { font-size:.68rem; color:#64748b; }
 .zi-topbins { margin-left:auto; display:flex; flex-direction:column; gap:3px; align-items:flex-start; }
@@ -198,6 +217,7 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .zi-topbin-row { display:flex; align-items:center; gap:5px; }
 .zi-topbin-row svg { display:block; flex-shrink:0; }
 .zi-topbin-txt { font-size:.62rem; color:#64748b; white-space:nowrap; }
+.zi-topbin-empty { font-size:.62rem; color:#94a3b8; font-style:italic; }
 .zi-topbin-stats { font-size:.6rem; color:#94a3b8; margin-top:2px; white-space:nowrap; }
 .zi-link { display:inline-block; margin-top:8px; font-size:.7rem; color:#276749; text-decoration:none; border:1px solid #c6f6d5; border-radius:6px; padding:4px 10px; }
 .zi-link:hover { background:#f0fff4; }
@@ -213,17 +233,44 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .stat-num { font-size:1.05rem; font-weight:800; color:#276749; line-height:1.1; }
 .stat-lbl { font-size:0.54rem; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; text-align:center; margin-top:1px; }
 
-.video-panel { width:100%; max-width:480px; background:white; border-radius:14px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,.07); margin-top:14px; display:none; }
-.video-panel.visible { display:block; }
-.vp-hdr { padding:10px 14px; background:#fff5f5; border-bottom:2px solid #fed7d7; display:flex; justify-content:space-between; align-items:center; }
-.vp-hdr-title { font-size:.78rem; font-weight:700; color:#c53030; }
-.vp-hdr button { background:none; border:none; color:#94a3b8; font-size:1rem; cursor:pointer; }
-.vp-iframe-wrap { position:relative; padding-bottom:56.25%; height:0; overflow:hidden; }
-.vp-iframe-wrap iframe { position:absolute; top:0; left:0; width:100%; height:100%; border:none; }
-.vp-info { padding:12px 14px 14px; font-size:.71rem; color:#374151; }
-.vp-yt-btn { display:inline-block; margin-top:8px; background:#c53030; color:white; text-decoration:none; border-radius:6px; padding:7px 14px; font-size:.75rem; font-weight:700; }
-.vp-yt-btn:hover { background:#9b2c2c; }
+.video-thumb { position:relative; cursor:pointer; }
+.video-thumb img { width:100%; display:block; max-height:280px; object-fit:cover; }
+.video-play { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:2.4rem; color:white; background:rgba(0,0,0,0.35); text-shadow:0 2px 8px rgba(0,0,0,.6); }
+.video-thumb:hover .video-play { background:rgba(0,0,0,0.5); }
+.video-fs-btn { position:absolute; top:8px; right:8px; background:rgba(0,0,0,0.5); color:white; border:none;
+  border-radius:6px; width:32px; height:32px; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.video-fs-btn:hover { background:rgba(0,0,0,0.7); }
+.video-frame { width:100%; aspect-ratio:16/9; display:block; border:0; }
+.flow-chip { background:#f0fff4; border:1px solid #c6f6d5; border-radius:999px; color:#276749;
+  font-size:0.6rem; font-weight:700; cursor:default; padding:2px 4px; line-height:1.3; white-space:nowrap;
+  display:inline-flex; align-items:center; gap:2px; }
+.flow-chip.on { background:#276749; border-color:#276749; color:white; }
+/* color/font-size:inherit slår .photo-hdr span (klasse+element) – ellers blir teksten usynlig */
+.flow-chip .fc-lbl { padding:6px; cursor:pointer; text-align:center; border-radius:999px;
+  color:inherit; font-size:inherit; font-weight:inherit; }
+.flow-chip.on .fc-lbl { min-width:82px; }
+.flow-chip .fc-lbl:active { background:rgba(255,255,255,0.16); }
+/* Pilene: 32px synlig sirkel, 44px trykkflate via usynlig ::after */
+.flow-chip .fc-arw { display:none; position:relative; background:rgba(255,255,255,0.14); border:none; color:inherit;
+  font-size:1.15rem; font-weight:700; line-height:1; cursor:pointer; padding:0;
+  width:32px; height:32px; border-radius:999px; -webkit-tap-highlight-color:transparent; }
+.flow-chip.on .fc-arw { display:inline-flex; align-items:center; justify-content:center; }
+.flow-chip .fc-arw::after { content:''; position:absolute; top:-6px; bottom:-6px; left:-6px; right:-6px; }
+.flow-chip .fc-arw:active { background:rgba(255,255,255,0.34); }
+.flow-chip .fc-arw:disabled { opacity:.3; cursor:not-allowed; background:none; }
+.flow-chip .fc-arw:focus-visible, .flow-chip .fc-lbl:focus-visible { outline:2px solid #9ae6b4; outline-offset:2px; }
+.flow-chip .fc-cnt { color:inherit; font-size:inherit; opacity:.72; font-weight:600; }
 
+.zi-status { font-size:.72rem; line-height:1.45; padding:7px 10px; border-radius:8px; margin-bottom:4px; }
+.zi-status b { font-weight:800; }
+.zi-status.stengt { background:#fff5f5; border:1px solid #feb2b2; color:#9b2c2c; }
+.zi-status.delvis { background:#fffaf0; border:1px solid #fbd38d; color:#975a16; }
+.zi-status.hendelse { background:#fffff0; border:1px solid #ecc94b; color:#744210; }
+.zi-status.apen { background:#f0fff4; border:1px solid #c6f6d5; color:#276749; }
+.zone-stengt { font-size:0.6rem; font-weight:700; color:#c53030; margin-top:1px; }
+.vf-merknad { font-size:0.62rem; line-height:1.4; color:#975a16; background:#fffaf0; border:1px solid #fbd38d; border-radius:6px; padding:4px 8px; }
+.vf-merknad a { color:#2b6cb0; font-weight:700; cursor:pointer; text-decoration:none; white-space:nowrap; }
 .zi-boom { display:flex; gap:8px; align-items:center; margin-top:8px; padding:8px 10px; background:#fffbea; border:1px solid #fbd38d; border-radius:8px; }
 .zi-boom-icon { font-size:1.1rem; line-height:1; flex-shrink:0; }
 .zi-boom-hdr { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#975a16; }
@@ -318,8 +365,13 @@ table.rd-tbl tr.big td.w { color:#9b2c2c; }
 #mapFs.fs-on #photoPanel { position:absolute; right:12px; bottom:12px; z-index:9600; width:465px; max-width:calc(100vw - 24px); max-height:calc(100vh - 24px); overflow:auto; margin-top:0; }
 #mapFs.fs-on #photoPanel .photo-img { max-height:420px; }
 #mapFs.fs-on #photoFs { z-index:9900; }
+/* Fullskjerm: alle sliderne i kontrollboksen, soneinfo som sidepanel til venstre */
+#mapFs.fs-on #fsCtrlBox .dual-slider { width:auto; flex:1 1 auto; min-width:0; }
+#mapFs.fs-on #zoneInfoPanel { position:absolute; left:12px; top:236px; width:360px; max-width:calc(100vw - 24px); max-height:calc(100% - 236px - 84px); overflow:auto; margin:0; z-index:9590; box-shadow:0 4px 18px rgba(0,0,0,0.28); }
 /* Gi plass til «Avslutt fullskjerm» over Leaflets topright-kontroller */
 #mapFs.fs-on .leaflet-top.leaflet-right { margin-top:46px; }
+/* Kartlagvelgeren skal ikke ligge oppå «Esc lukker fullskjerm» */
+#mapFs.fs-on .leaflet-bottom.leaflet-left { margin-bottom:34px; }
 @media (max-width: 520px) {
   #mapFs.fs-on #fsCtrlBox { width:172px; max-width:calc(100vw - 60px); padding:8px 10px; gap:7px; border-radius:10px; top:10px; left:50px; }
   #mapFs.fs-on #fsCtrlBox .ctrl-row { gap:6px; }
@@ -330,7 +382,51 @@ table.rd-tbl tr.big td.w { color:#9b2c2c; }
   #mapFs.fs-on #fsCtrlBox .flow-chip .fc-arw { width:30px; height:30px; font-size:1.05rem; }
   #mapFs.fs-on #fsCtrlBox .flow-chip.on .fc-lbl { min-width:64px; padding:6px 2px; }
   #mapFs.fs-on #fsCtrlBox .fc-cnt { display:none; }
+  /* Mobil: bare vannføring i boksen, soneinfo som ark nederst */
+  #mapFs.fs-on #fsCtrlBox .ctrl-row.fs-extra { display:none; }
+  /* Soneinfo går helt ned, men stopper rett over kildehenvisningen (Esri krever at den vises). */
+  #mapFs.fs-on #zoneInfoPanel { left:8px; right:8px; width:auto; max-width:none; top:auto; bottom:22px; max-height:calc(42vh + 62px); }
+  /* «Esc lukker fullskjerm» gir ingen mening uten tastatur, og lå oppå soneinfo */
+  #mapFs.fs-on #fsHint { display:none; }
 }
+/* Mobil: lite kartplass - kontrollene nærmere kanten, mindre kartlagvelger, tettere knapper */
+@media (max-width: 520px) {
+  #map .leaflet-left .leaflet-control { margin-left:5px; }
+  #map .leaflet-right .leaflet-control { margin-right:5px; }
+  #map .leaflet-top .leaflet-control { margin-top:5px; }
+  #map .leaflet-bottom .leaflet-control { margin-bottom:5px; }
+  #map .leaflet-top .leaflet-control.knapp-desinf { margin-top:3px; }
+  #map .kart-knapp { padding:5px 5px !important; }
+  /* Kart · Topo · Flyfoto 25 % mindre */
+  .bl-box { border-radius:5px; }
+  .bl-btn { padding:4px 7px; font-size:0.54rem; min-height:23px; }
+}
+
+/* ===== PC-layout: kartet som hovedflate =====
+   Fra 1000 px bredde ligger kartet fast til venstre i full høyde, mens banner,
+   topp 3, slidere, soneinfo og bilder ruller i en 480 px kolonne til høyre.
+   Under 1000 px er siden som før (én kolonne, kart 320 px høyt). */
+@media (min-width: 1000px) {
+  body { align-items:flex-end; padding:16px 24px 40px 16px; }
+  body > h1 { width:480px; }
+  #mapFs:not(.fs-on) { display:block; position:fixed; left:16px; top:16px; bottom:16px; right:520px; z-index:5; }
+  #mapFs:not(.fs-on) .map-panel { max-width:none; height:100%; display:flex; flex-direction:column; }
+  #mapFs:not(.fs-on) #map { flex:1 1 auto; height:auto !important; min-height:0; }
+  .photo-panel, .zone-info-panel { margin-top:0; margin-bottom:14px; }
+  /* Rulles et panel fram, flukter toppen med kartets topp (top:16px over). */
+  .photo-panel, .zone-info-panel { scroll-margin-top:16px; }
+}
+/* Smal skjerm med valgt sone: kartet står fast øverst på skjermen (lavere enn
+   ellers), og soneinfo/bilder ruller under det. */
+@media (max-width: 999px) {
+  /* Tegnforklaringen tar for mye av et lite kart: vises bare i fullskjerm. */
+  #mapFs:not(.fs-on) .kart-legend { display:none; }
+  .map-panel { scroll-margin-top:8px; }
+  body.sone-valgt .map-panel { position:sticky; top:8px; z-index:60; box-shadow:0 6px 18px rgba(0,0,0,0.22); }
+  body.sone-valgt #map { height:max(230px, 36vh); }
+}
+.wheel-hint { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:1100; background:rgba(15,45,74,0.85); color:#fff; font-size:0.72rem; font-weight:700; padding:8px 14px; border-radius:8px; pointer-events:none; opacity:0; transition:opacity 0.2s; white-space:nowrap; }
+.wheel-hint.vis { opacity:1; }
 </style>
 <script data-goatcounter="https://elvedata.goatcounter.com/count"
         data-goatcounter-settings='{"allow_local": false}'
@@ -376,9 +472,10 @@ table.rd-tbl tr.big td.w { color:#9b2c2c; }
     <div class="ctrl-col">
       <div class="ctrl-row" id="flowCtrlRow">
         <label>Vannføring</label>
-        <input type="range" id="flowSlider" min="0" max="85" step="5" value="25" oninput="onFlowChange(this.value)">
+        <input type="range" id="flowSlider" min="0" max="85" step="5" value="25" oninput="vfEndretAvBruker(); onFlowChange(this.value)">
         <span class="ctrl-val" id="flowVal">25–30 m³/s</span>
       </div>
+      <div id="vfMerknad" class="vf-merknad" style="display:none"></div>
       <div class="ctrl-row">
         <label>År</label>
         <div class="dual-slider">
@@ -513,9 +610,13 @@ const ZONES = ["Sone 1", "Sone 2", "Sone 3", "Sone 4 og 5", "Teinefoss Fluefiske
 
 
 const BILDE_BASE = '../bilder/tovdalselva/';
-const LABEL_ZOOM_THRESHOLD = 13; // Sonenavn-etiketter vises først fra dette zoomnivået
 const PHOTOS_URL = '../data/photos_tovdalselva.json';
 const VIDEOS_URL = '../data/videoer_tovdalselva.json';
+// Lages med: python scripts/sonepolygoner.py tovdalselva
+const SONER_URL = '../data/soner_tovdalselva.geojson';
+const SENTERLINJE_URL = '../data/senterlinje_tovdalselva.geojson'; // midtlinja, brukes til sonelinjene i oversikten
+const STEDER_URL = '../data/steder_tovdalselva.json'; // kortsalg og parkering som egne punkter
+const HENDELSER_URL = '../data/hendelser_tovdalselva.json'; // midlertidige hendelser/advarsler (utropstegn)
 const SESONG_URL = '../data/sesong.json';
 const SESONG_ELV = 'tovdalselva';
 
@@ -535,6 +636,7 @@ async function fetchSesong() {
   } catch (e) {
     SESONG = null;
   }
+  try { update(); } catch (e) { /* kartet er ikke klart ennå - update() kjøres uansett ved init */ }
   if (activeZone) showZoneInfo(activeZone, false);
 }
 
@@ -563,6 +665,49 @@ function sesongRad(zone) {
   if (!t) return '';
   return '<div class="zi-row"><span class="zi-label">Sesong</span>'
        + '<span class="zi-val">' + t + '</span></div>';
+}
+
+/* ---------- Dagsstatus: «Kan jeg fiske her i dag?» ----------
+   Leser data/sesong.json: soner[zone].stengt (sonen er stengt hele sesongen) og
+   ukedager[zone] (grunneierdager o.l.). Ukedagsreglene gjelder bare i sesong;
+   utenfor sesong vises alt som før. Testdato: ?dato=ÅÅÅÅ-MM-DD i adressen. */
+const UKEDAG_KODE = ['son', 'man', 'tir', 'ons', 'tor', 'fre', 'lor'];
+const UKEDAG_NAVN = ['søndag', 'mandag', 'tirsdag', 'onsdag', 'torsdag', 'fredag', 'lørdag'];
+const _testDato = (/[?&]dato=(\d{4}-\d{2}-\d{2})/.exec(location.search) || [])[1] || null;
+function iDag() { return _testDato ? new Date(_testDato + 'T12:00:00') : new Date(); }
+
+// Returnerer { kode, lukket, delvis, kort, tekst }.
+// kode: 'stengt' (hele sesongen) | 'stengt-idag' | 'delvis' | 'apen' | 'utenfor' | 'ukjent'
+function soneStatus(zone) {
+  const ingen = (kode) => ({ kode, lukket: false, delvis: false, kort: '', tekst: '' });
+  if (!SESONG) return ingen('ukjent');
+  const o = (SESONG.soner && SESONG.soner[zone]) || null;
+  if (o && o.stengt) {
+    const t = (o.tillegg || '').replace(/[\u2013\u2014-]/g, '').trim();
+    return { kode: 'stengt', lukket: true, delvis: false, kort: 'Stengt', tekst: t || 'Ikke åpen for ordinært fiske.' };
+  }
+  const d = iDag();
+  const md = String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const start = (o && o.start) || SESONG.start, slutt = (o && o.slutt) || SESONG.slutt;
+  if (!start || !slutt || md < start || md > slutt) return ingen('utenfor');
+  const regler = (SESONG.ukedager && SESONG.ukedager[zone]) || [];
+  const kode = UKEDAG_KODE[d.getDay()], dag = UKEDAG_NAVN[d.getDay()];
+  const treff = regler.filter(r => (r.dager || []).includes(kode));
+  const stengt = treff.find(r => r.grad === 'stengt');
+  if (stengt) return { kode: 'stengt-idag', lukket: true, delvis: false, kort: 'Stengt i dag', tekst: stengt.tekst || '', dag };
+  const delvis = treff.find(r => r.grad === 'delvis');
+  if (delvis) return { kode: 'delvis', lukket: false, delvis: true, kort: 'Delvis stengt i dag', tekst: delvis.tekst || '', dag };
+  return { kode: 'apen', lukket: false, delvis: false, kort: 'Åpen i dag', tekst: '', dag };
+}
+
+function soneStatusHtml(zone) {
+  const st = soneStatus(zone);
+  const dag = st.dag ? ' (' + st.dag + ')' : '';
+  if (st.kode === 'stengt')      return '<div class="zi-status stengt">🚫 <b>Stengt</b> — ' + st.tekst + '</div>';
+  if (st.kode === 'stengt-idag') return '<div class="zi-status stengt">🚫 <b>Stengt i dag</b>' + dag + (st.tekst ? ' — ' + st.tekst : '') + '</div>';
+  if (st.kode === 'delvis')      return '<div class="zi-status delvis">⚠️ <b>Delvis stengt i dag</b>' + dag + (st.tekst ? ' — ' + st.tekst : '') + '</div>';
+  if (st.kode === 'apen')        return '<div class="zi-status apen">✅ <b>Åpen i dag</b>' + dag + '</div>';
+  return '';   // utenfor sesong / ukjent: ingen endring
 }
 
 /* ---------- Sentral konfig (data/config.json) — scoringsparametre ---------- */
@@ -613,13 +758,11 @@ let photoMarkers = [];
 
 let VIDEOS = [];
 let videoMarkers = [];
+let zonePolys = {}; // sone → Leaflet-lag med polygonet (tomt til SONER_URL er lastet)
 
 let activePhoto = null;
+const FLOW_STEP = 5; // Tovdalselva: bins i 5 m³/s intervaller (matcher flowSlider step-attributt)
 let currentFlow = 25;
-// Fiskemeldingen kombinerer nedbørvarsel med LIVE vannføring. Grunnlag: 980 sesongdøgn
-// 2016-2025, nedbør fra MET Hynnekleiv SN38730 mot vannføring ved Flakksvann 20.3.0.
-// Etter >=10 mm nedbør er median stigning t+2 ca. +40 % naar elva staar over 10 m3/s,
-// men bare ca. +12 % under 10 m3/s - tørt nedbørfelt absorberer regnet.
 let yearLo = 2016, yearHi = 2026;
 let monthLo = 6, monthHi = 9;
 let flyOnly = false;
@@ -638,6 +781,11 @@ function activeConsts() {
 let activeZone = null;
 let map = null;
 let mapLayers = {};
+const LABEL_ZOOM_THRESHOLD = 13; // Sonenavn-etiketter vises først fra dette zoomnivået
+const DESINF_URL = '../data/desinfisering.json'; // delt fil, nøkkel per elv (SESONG_ELV)
+let DESINF = [];        // [{id, navn, beskrivelse, lat, lon}] - desinfeksjonsposter
+let desinfMarkers = []; // [{mk, post}]
+let _nearestLine = null;
 
 // ── CONTROLS ──────────────────────────────────────────────────────────────
 function onFlowChange(val) {
@@ -727,65 +875,6 @@ function binZoneStats(bin) {
   return { catches, days };
 }
 
-function scaleScore(x, p90, xmax) {
-  // To-segments skala: lineær 0→knee opp til P90, log-komprimert knee→100 mot historisk maks
-  if (x <= 0 || p90 <= 0) return 0;
-  const knee = SCORE_CFG.knee;
-  if (x <= p90) return knee * x / p90;
-  return Math.min(100, knee + (100 - knee) * Math.log(x / p90) / Math.log(Math.max(xmax / p90, 1.001)));
-}
-
-function computeScores() {
-  // Rørledning: glatting (nabobins, vekter 1-2-1) → shrinkage (mot sonens
-  // snittrate i vinduet, styrke shrinkC pseudo-dager) → to-segments skala.
-  // Justerbare parametre (vekting, shrinkC, knee) hentes fra data/config.json.
-  const {p90Rate, p90Vol, maxRate, maxVol} = activeConsts();
-  const data = activeData();
-
-  // Senterbin + nabobins (glatting)
-  const center = binZoneStats(String(currentFlow));
-  const lower  = binZoneStats(String(currentFlow - 5));
-  const upper  = binZoneStats(String(currentFlow + 5));
-  const wC = 2, wN = 1;
-  const poolDays = wC*center.days + (lower.days > 0 ? wN*lower.days : 0) + (upper.days > 0 ? wN*upper.days : 0);
-  if (poolDays === 0) return null;   // ingen observerte dager nær denne vannføringen i vinduet
-  const effDays = poolDays / wC;
-
-  // Prior: sonens snittrate over ALLE vannføringer i valgt vindu
-  const totals = {};
-  ZONES.forEach(z => totals[z] = 0);
-  let allDays = 0;
-  for (let y = Math.min(yearLo,yearHi); y <= Math.max(yearLo,yearHi); y++) {
-    for (let m = Math.min(monthLo,monthHi); m <= Math.max(monthLo,monthHi); m++) {
-      const dm = DAYS_DATA[String(y)]?.[String(m)];
-      if (dm) for (const b of Object.keys(dm)) allDays += dm[b];
-      const md = data[String(y)]?.[String(m)];
-      if (!md) continue;
-      for (const b of Object.keys(md)) {
-        for (const [zone, cnt] of Object.entries(md[b])) {
-          if (totals.hasOwnProperty(zone)) totals[zone] += cnt;
-        }
-      }
-    }
-  }
-
-  const C = SCORE_CFG.shrinkC;
-  const scores = {};
-  ZONES.forEach(z => {
-    const vol    = center.catches[z];
-    const pooled = wC*center.catches[z] + (lower.days > 0 ? wN*lower.catches[z] : 0) + (upper.days > 0 ? wN*upper.catches[z] : 0);
-    const smRate = pooled / poolDays;
-    const prior  = allDays > 0 ? totals[z] / allDays : 0;
-    const shrunk = (smRate * effDays + C * prior) / (effDays + C);
-    const combined = Math.round(
-      scaleScore(shrunk, p90Rate, maxRate) * SCORE_CFG.rate +
-      scaleScore(vol,    p90Vol,  maxVol)  * SCORE_CFG.vol
-    );
-    scores[z] = { score: combined, catches: vol, winTotal: totals[z] };
-  });
-  return scores;
-}
-
 function binTotals(bin) {
   // Elvas samlede fangster og dager for en bin i valgt aar/maaned-vindu
   const { catches, days } = binZoneStats(bin);
@@ -840,6 +929,65 @@ function computeRiverScore() {
   );
 }
 
+function scaleScore(x, p90, xmax) {
+  // To-segments skala: lineær 0→knee opp til P90, log-komprimert knee→100 mot historisk maks
+  if (x <= 0 || p90 <= 0) return 0;
+  const knee = SCORE_CFG.knee;
+  if (x <= p90) return knee * x / p90;
+  return Math.min(100, knee + (100 - knee) * Math.log(x / p90) / Math.log(Math.max(xmax / p90, 1.001)));
+}
+
+function computeScores() {
+  // Rørledning: glatting (nabobins, vekter 1-2-1) → shrinkage (mot sonens
+  // snittrate i vinduet, styrke shrinkC pseudo-dager) → to-segments skala.
+  // Justerbare parametre (vekting, shrinkC, knee) hentes fra data/config.json.
+  const {p90Rate, p90Vol, maxRate, maxVol} = activeConsts();
+  const data = activeData();
+
+  // Senterbin + nabobins (glatting)
+  const center = binZoneStats(String(currentFlow));
+  const lower  = binZoneStats(String(currentFlow - FLOW_STEP));
+  const upper  = binZoneStats(String(currentFlow + FLOW_STEP));
+  const wC = 2, wN = 1;
+  const poolDays = wC*center.days + (lower.days > 0 ? wN*lower.days : 0) + (upper.days > 0 ? wN*upper.days : 0);
+  if (poolDays === 0) return null;   // ingen observerte dager nær denne vannføringen i vinduet
+  const effDays = poolDays / wC;
+
+  // Prior: sonens snittrate over ALLE vannføringer i valgt vindu
+  const totals = {};
+  ZONES.forEach(z => totals[z] = 0);
+  let allDays = 0;
+  for (let y = Math.min(yearLo,yearHi); y <= Math.max(yearLo,yearHi); y++) {
+    for (let m = Math.min(monthLo,monthHi); m <= Math.max(monthLo,monthHi); m++) {
+      const dm = DAYS_DATA[String(y)]?.[String(m)];
+      if (dm) for (const b of Object.keys(dm)) allDays += dm[b];
+      const md = data[String(y)]?.[String(m)];
+      if (!md) continue;
+      for (const b of Object.keys(md)) {
+        for (const [zone, cnt] of Object.entries(md[b])) {
+          if (totals.hasOwnProperty(zone)) totals[zone] += cnt;
+        }
+      }
+    }
+  }
+
+  const C = SCORE_CFG.shrinkC;
+  const scores = {};
+  ZONES.forEach(z => {
+    const vol    = center.catches[z];
+    const pooled = wC*center.catches[z] + (lower.days > 0 ? wN*lower.catches[z] : 0) + (upper.days > 0 ? wN*upper.catches[z] : 0);
+    const smRate = pooled / poolDays;
+    const prior  = allDays > 0 ? totals[z] / allDays : 0;
+    const shrunk = (smRate * effDays + C * prior) / (effDays + C);
+    const combined = Math.round(
+      scaleScore(shrunk, p90Rate, maxRate) * SCORE_CFG.rate +
+      scaleScore(vol,    p90Vol,  maxVol)  * SCORE_CFG.vol
+    );
+    scores[z] = { score: combined, catches: vol, winTotal: totals[z] };
+  });
+  return scores;
+}
+
 function scoreColor(s) {
   const k = SCORE_CFG.knee / 100;   // terskler skalert til knee (80 => 56/36/20)
   if (s >= 70*k) return '#38a169';
@@ -870,8 +1018,10 @@ function drawMiniRing(score, color) {
 
 function computeZoneBinScores(zone) {
   // Beregner sonens score for HVER vannføringsbin i valgt år/måned-vindu.
-  // Brukes til «beste vannføring for denne sonen»-visningen i infopanelet —
-  // avhenger bevisst KUN av år/måned-sliderne, ikke av vannførings-slideren.
+  // Brukes til "beste vannføring for denne sonen"-visningen i infopanelet —
+  // avhenger bevisst KUN av år/måned-sliderne, ikke av vannførings-slideren,
+  // slik at brukeren kan se hvilken vannføring som historisk gir best score
+  // for akkurat denne sonen, uavhengig av hva slideren står på nå.
   const {p90Rate, p90Vol, maxRate, maxVol} = activeConsts();
   const data = activeData();
   const C = SCORE_CFG.shrinkC;
@@ -879,6 +1029,7 @@ function computeZoneBinScores(zone) {
   const yLo = Math.min(yearLo,yearHi), yHi = Math.max(yearLo,yearHi);
   const mLo = Math.min(monthLo,monthHi), mHi = Math.max(monthLo,monthHi);
 
+  // Samle alle bins med observerte dager i valgt vindu + sonens snittrate (prior)
   const binSet = new Set();
   let allDays = 0, zoneTotal = 0;
   for (let y = yLo; y <= yHi; y++) {
@@ -895,8 +1046,8 @@ function computeZoneBinScores(zone) {
   binSet.forEach(binStr => {
     const bin = parseInt(binStr);
     const center = binZoneStats(binStr);
-    const lower  = binZoneStats(String(bin - 5));
-    const upper  = binZoneStats(String(bin + 5));
+    const lower  = binZoneStats(String(bin - FLOW_STEP));
+    const upper  = binZoneStats(String(bin + FLOW_STEP));
     const poolDays = wC*center.days + (lower.days > 0 ? wN*lower.days : 0) + (upper.days > 0 ? wN*upper.days : 0);
     if (poolDays === 0) return;
     const effDays = poolDays / wC;
@@ -958,10 +1109,18 @@ function update() {
       +'<div class="zone-info">'
       +'<div class="zone-name">'+zone+'</div>'
       +'<div class="zone-catches">'+perDay+' fangster/dag</div>'
+      +(soneStatus(zone).lukket ? '<div class="zone-stengt">🚫 ' + soneStatus(zone).kort + '</div>' : '')
       +(ZONE_COORDS[zone] ? '<div class="zone-map-hint">📍 Klikk for å vise på kart</div>' : '')
       +'</div>';
     if (ZONE_COORDS[zone]) {
-      row.addEventListener('click', () => selectZone(zone));
+      row.addEventListener('click', () => {
+        selectZone(zone);
+        // Topp 3 øverst i vinduet, kartet med valgt sone rett under.
+        if (activeZone === zone) {
+          if (erSmalLayout()) visKartOverst();
+          else document.getElementById('zoneList').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
     }
     container.appendChild(row);
   });
@@ -974,6 +1133,8 @@ function update() {
 
   updateMap(scores);
   if (activeZone) showZoneInfo(activeZone, false); // kun oppdater innhold, ikke scroll (kalles ved hver slider-endring)
+  skrivLenke();        // adressen følger valgt sone og sliderne
+  oppdaterVfMerknad();
 
   // Oppdater statistikk-boks
   const perDayStr = st.perDay > 0 ? st.perDay.toFixed(2) : '\u2013';
@@ -994,62 +1155,408 @@ function update() {
     + '<div class="total-score-lbl">Score</div>';
 }
 
+// ── KARTLAG ───────────────────────────────────────────────────────────────
+// Tre bakgrunnskart: OSM (som før), Kartverkets topografiske kart (stedsnavn,
+// stier, høydekurver) og flyfoto (grusører, stryk, bruer). Valget huskes i
+// nettleseren. maxNativeZoom lar kartet zoome videre ved å forstørre flisene.
+// Esri-nøkkel for flyfoto: offentlig nettlesernøkkel (ArcGIS Location Platform,
+// «Public application», kun Basemaps, utløper 2027-11-17). Den er ment å stå i
+// nettsiden, jf. unntaket i CLAUDE.md regel 1. Betaling er avslått på kontoen, så
+// brukes gratiskvoten opp, stopper tjenesten - da byttes det til Topo (fotoUtilgjengelig).
+const ESRI_KEY = 'AAPTaCPYGVGyZYL3yXsz57t7SRw.._myVw51i_hv3KUpCrZPU7uGNGBf1hn9pG3FG7bFs3qXfXgu3JLiValeeu9Oz7WQ3JQFJs9COxXv1XjaLxOVR73BuCJDefGsc2WaRIaFOcppfvaTduLWrhuRJzbckL2tE7r8211bVsufn7bT_lHxShP2WcLsgTRBUKtHtGPX_TsTsQANqvyJT9oYFhDX00qRl-o9COxq_2HIgqPoDQsrPLTaUIeH683ljlo4ipRCH-9bqTR3Nsao3WI0.AT1_NeQimiwY';
+const BASE_LAYER_DEFS = [
+  { id: 'kart', navn: 'Kart', url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    opt: { attribution: '© OpenStreetMap', maxNativeZoom: 19, maxZoom: 19 },
+    buf: null },   // OSM: ingen forhåndslasting (flisvilkårene frarår det)
+  { id: 'topo', navn: 'Topo', url: 'https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png',
+    opt: { attribution: '© Kartverket', maxNativeZoom: 18, maxZoom: 19 },
+    buf: { bbox: [10, 11, 12, 13], korridor: [14, 15, 16], sone: [17] } },   // store fliser (50–130 kB)
+  { id: 'foto', navn: 'Flyfoto', url: 'https://ibasemaps-api.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}?token=' + ESRI_KEY,
+    // Kort kildehenvisning så den ikke dekker knappene; hele kildelista vises ved klikk
+    // på «Kilder» (Esri tillater avkortet henvisning når full tekst er tilgjengelig).
+    opt: { attribution: 'Powered by <a href="https://www.esri.com" target="_blank" rel="noopener">Esri</a> · '
+      + '<span class="kilde-mer" role="button" tabindex="0" onclick="this.classList.toggle(&quot;apen&quot;)" '
+      + 'title="Flyfoto: Esri, Vantor, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community">'
+      + '<span class="km-kort">Kilder ▸</span><span class="km-full">Flyfoto: Esri, Vantor, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community ◂</span></span>',
+      maxNativeZoom: 18, maxZoom: 19 },
+    // Esri-avtalen 3.1.d.6: forhåndshenting bare så langt det trengs. Derfor bare
+    // elvekorridoren fra z14 (ikke hele utsnittet), og dypeste nivå kun for valgt sone.
+    buf: { bbox: [10, 11, 12, 13], korridor: [14, 15, 16], sone: [17, 18] } }   // små fliser (10–20 kB)
+];
+// Felles flisopsjoner: større kant av ferdige fliser rundt utsnittet, og last
+// også mens kartet dras (standard på mobil er å vente til det står stille).
+const TILE_OPT = { keepBuffer: 4, updateWhenIdle: false };
+const BASE_LAYER_KEY = 'elvesona_kartlag';
+let _baseLayers = {};      // id → L.tileLayer
+let _baseLayerId = null;
+
+function setBaseLayer(id) {
+  if (!_baseLayers[id]) id = 'kart';
+  if (id === 'foto' && _fotoAv) id = 'topo';
+  // Mykt bytte: det gamle laget blir liggende under til det nye er ferdig lastet,
+  // så kartet aldri står tomt mellom to lag.
+  const gammelId = _baseLayerId, gammel = gammelId && _baseLayers[gammelId], ny = _baseLayers[id];
+  _baseLayerId = id;
+  if (gammel && gammel !== ny) {
+    gammel.setZIndex(1); ny.setZIndex(2);
+    ny.addTo(map);
+    const fjern = () => { if (_baseLayerId !== gammelId && map.hasLayer(gammel)) map.removeLayer(gammel); };
+    ny.once('load', fjern);
+    setTimeout(fjern, 4000);
+  } else {
+    ny.setZIndex(2);
+    ny.addTo(map);
+  }
+  startPreload();
+  document.getElementById('map').classList.toggle('bl-foto', id === 'foto');
+  document.querySelectorAll('.bl-btn').forEach(b => {
+    const on = b.dataset.bl === id;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+  try { localStorage.setItem(BASE_LAYER_KEY, id); } catch (e) { /* privat modus e.l. */ }
+}
+
+// Flyfoto utilgjengelig: Esri svarer med en feilmelding (JSON) i stedet for bilde når
+// gratiskvoten er brukt opp eller nøkkelen er utløpt. Da byttes det til Topo, knappen
+// slås av for resten av besøket, og brukeren får en kort beskjed i kartet.
+let _fotoAv = false, _fotoSjekker = false;
+function sjekkFotoFeil(url) {
+  if (_fotoAv || _fotoSjekker || !url) return;
+  _fotoSjekker = true;
+  fetch(url).then(r => {
+    const ct = r.headers.get('content-type') || '';
+    if (!r.ok || !ct.startsWith('image')) fotoUtilgjengelig();
+  }).catch(() => { /* nettverksfeil (f.eks. uten dekning) - ikke Esris skyld */ })
+    .finally(() => { setTimeout(() => { _fotoSjekker = false; }, 30000); });
+}
+function fotoUtilgjengelig() {
+  if (_fotoAv) return;
+  _fotoAv = true;
+  const b = document.querySelector('.bl-btn[data-bl="foto"]');
+  if (b) { b.disabled = true; b.title = 'Flyfoto er ikke tilgjengelig akkurat nå'; b.classList.add('av'); }
+  if (_baseLayerId === 'foto') {
+    setBaseLayer('topo');
+    try { localStorage.setItem(BASE_LAYER_KEY, 'foto'); } catch (e) { /* behold valget til neste besøk */ }
+  }
+  const m = document.createElement('div');
+  m.className = 'kart-melding';
+  m.textContent = 'Flyfoto er ikke tilgjengelig akkurat nå. Viser Topo.';
+  document.getElementById('map').appendChild(m);
+  setTimeout(() => m.remove(), 6000);
+}
+
+function initBaseLayers() {
+  BASE_LAYER_DEFS.forEach(d => { _baseLayers[d.id] = L.tileLayer(d.url, Object.assign({}, TILE_OPT, d.opt)); });
+  _baseLayers.foto.on('tileerror', e => sjekkFotoFeil(e.tile && e.tile.src));
+  const BlControl = L.Control.extend({
+    options: { position: 'bottomleft' },
+    onAdd: function() {
+      const box = L.DomUtil.create('div', 'bl-box');
+      box.setAttribute('role', 'group');
+      box.setAttribute('aria-label', 'Velg bakgrunnskart');
+      BASE_LAYER_DEFS.forEach(d => {
+        const b = L.DomUtil.create('button', 'bl-btn', box);
+        b.type = 'button';
+        b.dataset.bl = d.id;
+        b.textContent = d.navn;
+        L.DomEvent.on(b, 'click', (e) => { L.DomEvent.stop(e); setBaseLayer(d.id); });
+      });
+      L.DomEvent.disableClickPropagation(box);
+      return box;
+    }
+  });
+  new BlControl().addTo(map);
+  let valgt = 'kart';
+  try { valgt = localStorage.getItem(BASE_LAYER_KEY) || 'kart'; } catch (e) { /* ignorer */ }
+  setBaseLayer(valgt);
+}
+
+// ── FLISBUFFER ────────────────────────────────────────────────────────────
+// Kart-UX D: ingen tomme felter ved flytting og zoom. Fliser for valgt kartlag
+// hentes på forhånd inn i nettleserens hurtiglager, i tre trinn:
+//   bbox      – hele utsnittet som viser elva (lave zoomnivå, få fliser)
+//   korridor  – bare flisene som berører sonepolygonene (midlere zoom)
+//   sone      – korridoren for valgt sone på dypeste nivå, når sonen velges
+// Hvilke zoomnivå som går i hvert trinn står i BASE_LAYER_DEFS[].buf, fordi
+// flisstørrelsen varierer mye mellom kildene. Ingenting lastes utenfor elva.
+const PRELOAD_PARALLEL = 6;
+const PRELOAD_START_MS = 1500;   // la de synlige flisene komme først
+let _soneRinger = {};            // sone → [ytre ringer som [[lat,lon],...]]
+let _plKo = [];                  // url-er som venter
+let _plAktive = 0;
+let _plSett = {};                // lagId → Set med url-er som er hentet/bestilt
+let _plStats = { bestilt: 0, ferdig: 0, feil: 0 };
+
+function preloadModus() {
+  // 'av' = ingen forhåndslasting, 'lett' = mobilnett/mobil, 'full' = ellers.
+  const k = navigator.connection;
+  if (k && k.saveData) return 'av';
+  if (k && (k.type === 'cellular' || /2g|3g/.test(k.effectiveType || ''))) return 'lett';
+  if (!k && window.matchMedia && window.matchMedia('(pointer: coarse)').matches) return 'lett';
+  return 'full';
+}
+
+function tileXY(lat, lon, z) {
+  const n = Math.pow(2, z), r = lat * Math.PI / 180;
+  return [Math.floor((lon + 180) / 360 * n),
+          Math.floor((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * n)];
+}
+function tileCenter(x, y, z) {
+  const n = Math.pow(2, z);
+  return [Math.atan(Math.sinh(Math.PI * (1 - 2 * (y + 0.5) / n))) * 180 / Math.PI, (x + 0.5) / n * 360 - 180];
+}
+function pointInRing(lat, lon, ring) {
+  let inne = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const a = ring[i], b = ring[j];
+    if ((a[0] > lat) !== (b[0] > lat) && lon < (b[1] - a[1]) * (lat - a[0]) / (b[0] - a[0]) + a[1]) inne = !inne;
+  }
+  return inne;
+}
+function ringerBbox(ringer) {
+  let s = 90, w = 180, n = -90, e = -180;
+  ringer.forEach(r => r.forEach(p => { s = Math.min(s, p[0]); n = Math.max(n, p[0]); w = Math.min(w, p[1]); e = Math.max(e, p[1]); }));
+  return { s, w, n, e };
+}
+function alleRinger() { return Object.values(_soneRinger).reduce((a, r) => a.concat(r), []); }
+
+// Alle fliser i et rektangel, utvidet med 'pad' (andel av bredde/høyde) på hver side.
+function bboxTiles(z, b, pad) {
+  const dLat = (b.n - b.s) * pad, dLon = (b.e - b.w) * pad;
+  const a = tileXY(b.n + dLat, b.w - dLon, z), c = tileXY(b.s - dLat, b.e + dLon, z);
+  const ut = [];
+  for (let x = a[0]; x <= c[0]; x++) for (let y = a[1]; y <= c[1]; y++) ut.push([x, y, z]);
+  return ut;
+}
+// Fliser som berører ringene: enten ligger flisas midtpunkt inne i en ring,
+// eller så går kanten av en ring gjennom flisa.
+function korridorTiles(z, ringer) {
+  if (!ringer.length) return [];
+  const sett = new Set(), ut = [];
+  const ta = (x, y) => { const k = x + '/' + y; if (!sett.has(k)) { sett.add(k); ut.push([x, y, z]); } };
+  ringer.forEach(ring => {
+    for (let i = 0; i < ring.length; i++) {
+      const a = ring[i], b = ring[(i + 1) % ring.length];
+      const ta0 = tileXY(a[0], a[1], z), tb0 = tileXY(b[0], b[1], z);
+      const steg = Math.max(1, 2 * Math.max(Math.abs(ta0[0] - tb0[0]), Math.abs(ta0[1] - tb0[1])));
+      for (let s = 0; s <= steg; s++) {
+        const t = tileXY(a[0] + (b[0] - a[0]) * s / steg, a[1] + (b[1] - a[1]) * s / steg, z);
+        ta(t[0], t[1]);
+      }
+    }
+  });
+  bboxTiles(z, ringerBbox(ringer), 0).forEach(t => {
+    if (sett.has(t[0] + '/' + t[1])) return;
+    const m = tileCenter(t[0], t[1], z);
+    if (ringer.some(r => pointInRing(m[0], m[1], r))) ta(t[0], t[1]);
+  });
+  return ut;
+}
+
+function tileUrl(lagId, t) {
+  const lag = _baseLayers[lagId];
+  const pt = { x: t[0], y: t[1], z: t[2] };
+  return L.Util.template(lag._url, { s: lag._getSubdomain(pt), x: t[0], y: t[1], z: t[2], r: '' });
+}
+function plLeggTil(lagId, tiles, forst) {
+  const sett = _plSett[lagId] || (_plSett[lagId] = new Set());
+  const nye = [];
+  tiles.forEach(t => { const u = tileUrl(lagId, t); if (!sett.has(u)) { sett.add(u); nye.push(u); } });
+  _plStats.bestilt += nye.length;
+  _plKo = forst ? nye.concat(_plKo) : _plKo.concat(nye);
+  plPump();
+}
+function plPump() {
+  while (_plAktive < PRELOAD_PARALLEL && _plKo.length) {
+    const img = new Image();
+    _plAktive++;
+    img.onload = () => { _plAktive--; _plStats.ferdig++; plPump(); };
+    img.onerror = () => { _plAktive--; _plStats.feil++; plPump(); };
+    img.src = _plKo.shift();
+  }
+}
+
+// Bygger køen for valgt kartlag. Kalles når sonepolygonene er lastet og ved lagbytte.
+function startPreload() {
+  const lagId = _baseLayerId;
+  const def = BASE_LAYER_DEFS.find(d => d.id === lagId);
+  const modus = preloadModus();
+  // Ved lagbytte er det gamle lagets kø ikke lenger interessant. Det som ikke
+  // rakk å bli hentet, glemmes også i _plSett så det kan bestilles på nytt senere.
+  Object.keys(_plSett).forEach(id => _plKo.forEach(u => _plSett[id].delete(u)));
+  _plStats.bestilt -= _plKo.length;
+  _plKo = [];
+  if (!def || !def.buf || modus === 'av') return;
+  const ringer = alleRinger();
+  if (!ringer.length) return;   // venter på fetchSoner()
+  setTimeout(() => {
+    if (_baseLayerId !== lagId) return;
+    const b = ringerBbox(ringer);
+    def.buf.bbox.forEach(z => {
+      if (modus === 'lett' && z > 12) return;
+      // Lave nivå: samme utsnitt som startvisningen (elva med god luft rundt).
+      plLeggTil(lagId, bboxTiles(z, b, z <= 12 ? 0.75 : 0.2), false);
+    });
+    if (modus === 'full') def.buf.korridor.forEach(z => plLeggTil(lagId, korridorTiles(z, ringer), false));
+    if (activeZone) preloadZone(activeZone);
+  }, PRELOAD_START_MS);
+}
+
+// Når en sone velges: hent sonens korridor på de dypeste nivåene først i køen.
+function preloadZone(zone) {
+  const def = BASE_LAYER_DEFS.find(d => d.id === _baseLayerId);
+  const modus = preloadModus();
+  const ringer = _soneRinger[zone];
+  if (!def || !def.buf || modus === 'av' || !ringer) return;
+  const nivaa = modus === 'lett' ? def.buf.korridor.filter(z => z <= 16) : def.buf.sone;
+  nivaa.slice().reverse().forEach(z => plLeggTil(_baseLayerId, korridorTiles(z, ringer), true));
+}
+
 // ── MAP ───────────────────────────────────────────────────────────────────
 function initMap() {
   if (map) return;
   const container = document.getElementById('map');
-  container.style.height = '320px';
-  map = L.map('map', {zoomControl: true}).setView([58.292383, 8.188960], 10);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap', maxZoom: 17
-  }).addTo(map);
+  map = L.map('map', {zoomControl: true, maxZoom: 19}).setView([58.292383, 8.188960], 10);
+  initBaseLayers();
+
+  // Hjulzoom: i PC-layout og fullskjerm er kartet en egen flate, og hjulet zoomer.
+  // Ligger kartet inne i siden (smal skjerm), kreves Ctrl + hjul, så siden kan
+  // rulles forbi kartet uten at det zoomer.
+  const hjulHint = L.DomUtil.create('div', 'wheel-hint', container);
+  hjulHint.textContent = 'Hold Ctrl og rull for å zoome kartet';
+  let hjulTimer = null;
+  container.addEventListener('wheel', (e) => {
+    const egenFlate = _mapFsOn || window.matchMedia('(min-width: 1000px)').matches;
+    if (egenFlate || e.ctrlKey) { map.scrollWheelZoom.enable(); return; }
+    map.scrollWheelZoom.disable();
+    hjulHint.classList.add('vis');
+    clearTimeout(hjulTimer);
+    hjulTimer = setTimeout(() => hjulHint.classList.remove('vis'), 1200);
+  }, { capture: true, passive: true });
+
+  // Diskret zoomnivå-visning under +/−, så det er lett å vise til «zoom 13».
+  const ZoomLbl = L.Control.extend({
+    options: { position: 'topleft' },
+    onAdd: function() {
+      const el = L.DomUtil.create('div', 'zoom-lbl');
+      el.title = 'Zoomnivå';
+      const vis = () => { el.textContent = 'z ' + map.getZoom(); };
+      map.on('zoomend', vis);
+      vis();
+      return el;
+    }
+  });
+  new ZoomLbl().addTo(map);
+
+  // Parkering av/på: knapp rett til høyre for +/−. Av som standard; valget huskes.
+  const pTog = L.DomUtil.create('button', 'p-tog', map.zoomControl.getContainer());
+  pTog.type = 'button';
+  pTog.innerHTML = '<span>P</span>';
+  pTog.style.display = 'none';   // vises når steder-fila har minst én parkering (fetchSteder)
+  L.DomEvent.disableClickPropagation(pTog);
+  L.DomEvent.on(pTog, 'click', (e) => { L.DomEvent.stop(e); settParkering(!_visParkering); });
+  oppdaterPTog();
 
   setTimeout(() => map.invalidateSize(), 50);
   setTimeout(() => map.invalidateSize(), 300);
+
+  // Sonepolygonene ligger i en egen pane under alle markører (markørene er i
+  // markerPane, z 600), så bilder, video og poster kan fortsatt klikkes.
+  map.createPane('soneflater').style.zIndex = 350;
 
   // "Hvor er jeg?"-kontroll oppe til høyre
   const LocControl = L.Control.extend({
     options: { position: 'topright' },
     onAdd: function() {
-      const btn = L.DomUtil.create('button', '');
+      const btn = L.DomUtil.create('button', 'kart-knapp');
       btn.innerHTML = '📍 Hvor er jeg?';
       btn.style.cssText = 'background:#fff;color:#333;border:2px solid rgba(0,0,0,0.2);border-radius:4px;padding:5px 10px;font-size:0.75rem;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:none;';
       btn.title = 'Vis min posisjon på kartet';
       L.DomEvent.on(btn, 'click', L.DomEvent.stopPropagation);
       L.DomEvent.on(btn, 'click', () => {
+        if (_folger) { stoppPosisjon(); return; }   // andre trykk slår av
+        _folger = true;
+        _forsteFix = true;
         btn.innerHTML = '⏳ Søker...';
         btn.disabled = true;
-        map.locate({ setView: true, maxZoom: 14 });
+        finnPosisjon(true);
       });
+      _locBtn = btn;
       return btn;
     }
   });
   new LocControl().addTo(map);
 
-  let _myLocMarker = null;
+  // "Nærmeste desinfeksjonspost"-kontroll rett under "Hvor er jeg?"
+  let _nearestPostPending = false;
+  let _nearestBtn = null;
+  const NearestPostControl = L.Control.extend({
+    options: { position: 'topright' },
+    onAdd: function() {
+      _nearestBtn = L.DomUtil.create('button', 'kart-knapp knapp-desinf');
+      _nearestBtn.style.display = 'none';   // vises når elva har desinfeksjonsposter (fetchDesinf)
+      _nearestBtn.innerHTML = desinfIconHtml(18) + ' Desinfisering';
+      _nearestBtn.style.cssText = 'background:#ebf4ff;color:#2a4365;border:2px solid rgba(0,0,0,0.2);border-radius:4px;padding:5px 10px;font-size:0.75rem;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:none;';
+      _nearestBtn.title = 'Finn desinfeksjonsposten som er nærmest deg';
+      L.DomEvent.on(_nearestBtn, 'click', L.DomEvent.stopPropagation);
+      L.DomEvent.on(_nearestBtn, 'click', () => {
+        if (!DESINF.length) { alert('Desinfeksjonspostene er ikke lastet ennå. Prøv igjen om et øyeblikk.'); return; }
+        if (_minPos) { showNearestPostFrom(_minPos.latlng); return; }   // posisjonen er allerede kjent
+        _nearestBtn.innerHTML = '⏳ Søker...';
+        _nearestBtn.disabled = true;
+        _nearestPostPending = true;
+        finnPosisjon(false);
+      });
+      return _nearestBtn;
+    }
+  });
+  new NearestPostControl().addTo(map);
+  function resetNearestBtn() {
+    _nearestPostPending = false;
+    if (_nearestBtn) { _nearestBtn.innerHTML = desinfIconHtml(18) + ' Desinfisering'; _nearestBtn.disabled = false; }
+  }
+
+  // Posisjonskortet: «Du står i Sone …», under knappene oppe til høyre.
+  const PosKort = L.Control.extend({
+    options: { position: 'topright' },
+    onAdd: function() {
+      _posKortEl = L.DomUtil.create('div', 'pos-kort');
+      L.DomEvent.disableClickPropagation(_posKortEl);
+      L.DomEvent.disableScrollPropagation(_posKortEl);
+      return _posKortEl;
+    }
+  });
+  new PosKort().addTo(map);
+
   map.on('locationfound', (e) => {
-    if (_myLocMarker) _myLocMarker.remove();
-    _myLocMarker = L.circleMarker(e.latlng, {
-      radius: 8, color: '#e53e3e', fillColor: '#e53e3e',
-      fillOpacity: 0.9, weight: 2
-    }).addTo(map).bindTooltip('📍 Du er her', { permanent: false, direction: 'top', className: 'mtip' });
-    document.querySelector('.leaflet-control button') && (document.querySelectorAll('.leaflet-control button')[document.querySelectorAll('.leaflet-control button').length - 1].innerHTML = '📍 Hvor er jeg?');
-    const locBtn = document.querySelector('[title="Vis min posisjon på kartet"]');
-    if (locBtn) { locBtn.innerHTML = '📍 Hvor er jeg?'; locBtn.disabled = false; }
+    _locatingInProgress = false;
+    _minPos = { latlng: e.latlng, accuracy: e.accuracy || 0 };
+    if (_nearestPostPending) {
+      resetNearestBtn();
+      showNearestPostFrom(e.latlng);
+    }
+    tegnPosisjon();
+    // Første treff flytter kartet til deg; etterpå står kartet i ro så du kan se deg rundt.
+    if (_folger && _forsteFix) {
+      _forsteFix = false;
+      map.setView(e.latlng, Math.max(map.getZoom(), 15));
+    }
+    if (_locBtn) { _locBtn.disabled = false; _locBtn.innerHTML = _folger ? '📍 Følger deg · stopp' : '📍 Hvor er jeg?'; }
+    oppdaterPosKort();
   });
   map.on('locationerror', () => {
-    const locBtn = document.querySelector('[title="Vis min posisjon på kartet"]');
-    if (locBtn) { locBtn.innerHTML = '📍 Hvor er jeg?'; locBtn.disabled = false; }
-    alert('Posisjon ikke tilgjengelig. Sjekk at du har gitt tilgang til posisjon i nettleseren.');
+    resetNearestBtn();
+    const fulgte = _folger;
+    stoppPosisjon();
+    visPosFeil(fulgte ? 'Fant ikke posisjonen din.' : 'Fant ikke posisjonen din, så nærmeste post kan ikke vises.');
   });
 
   ZONES.forEach(zone => {
     const zc = ZONE_COORDS[zone]; if (!zc) return;
 
-    const startMk = L.marker(zc.s, {icon: makeStartIcon('–', '#94a3b8', false, false), zIndexOffset: 10}).addTo(map);
-    startMk.bindTooltip(zone, {permanent: true, direction: 'top', className: 'zone-label', offset: [0, 0]});
-    startMk.closeTooltip();
-    startMk.on('click', () => { selectZone(zone); if (activeZone === zone) showZoneInfo(zone); });
+    // Foreløpig på startgrensa; flyttes til midten av sonen når polygonene er lastet.
+    const startMk = lagSoneMarkor(zone, zc.s);
 
     const endMk = L.marker(zc.e, {icon: makeEndIcon(), opacity: 0, zIndexOffset: 5, interactive: false}).addTo(map);
     endMk.bindTooltip(zone + ' · slutt', {permanent: false, direction: 'top', className: 'mtip'});
@@ -1057,39 +1564,34 @@ function initMap() {
     mapLayers[zone] = {startMk, endMk};
   });
 
-  function updateLabelVisibility() {
-    const show = map.getZoom() >= LABEL_ZOOM_THRESHOLD;
-    Object.values(mapLayers).forEach(({ startMk }) => {
-      if (show) startMk.openTooltip(); else startMk.closeTooltip();
-    });
-  }
-  updateLabelVisibility();
-  map.on('zoomend', updateLabelVisibility);
-
-}
-
-function addPhotoMarkers() {
-  if (!map) return;
-  photoMarkers.forEach(({ mk }) => mk.remove());
-  photoMarkers = [];
-  PHOTOS.forEach((photo, idx) => {
-    const icon = makePhotoIcon(false);
-    const mk = L.marker([photo.lat, photo.lon], { icon, zIndexOffset: 200, opacity: 0 }).addTo(map);
-    mk.bindTooltip('📷 Vis bilde', { permanent: false, direction: 'top', className: 'mtip' });
-    mk.on('click', (e) => { L.DomEvent.stopPropagation(e); openZoneMedia(photo.zone, photo); });
-    photoMarkers.push({ mk, zone: photo.zone, photosIdx: idx });
+  // Zoom kartet til å vise alle soner med kjente koordinater, i stedet for
+  // et fast senterpunkt som kan vise mye tomt terreng (f.eks. naturreservat).
+  const allZoneCoords = [];
+  ZONES.forEach(zone => {
+    const zc = ZONE_COORDS[zone];
+    if (zc) { allZoneCoords.push(zc.s); allZoneCoords.push(zc.e); }
   });
-}
+  if (allZoneCoords.length) {
+    map.fitBounds(allZoneCoords, {padding: [30, 30], maxZoom: 14, animate: false});
+  }
 
-async function fetchPhotos() {
-  try {
-    const res = await fetch(PHOTOS_URL);
-    if (!res.ok) return;
-    PHOTOS = await res.json();
-    PHOTOS.forEach(p => p.mtype = 'photo');
-    addPhotoMarkers();
-    updateMap(computeScores());
-  } catch(e) { /* bilder er valgfrie – feiler stille */ }
+  // Under LABEL_ZOOM_THRESHOLD tegnes kartet i oversiktsmodus (se updateMap):
+  // tegn på nytt bare når zoomen krysser terskelen.
+  let _varLav = map.getZoom() < LABEL_ZOOM_THRESHOLD;
+  map.on('zoomend', () => {
+    const lav = map.getZoom() < LABEL_ZOOM_THRESHOLD;
+    if (lav !== _varLav) { _varLav = lav; updateMap(computeScores()); }
+  });
+
+  // Tegnforklaring for scorefargene, nede til venstre over kartlagvelgeren
+  // (nede til høyre kolliderer den med velgeren på smale skjermer).
+  const Legend = L.Control.extend({
+    options: { position: 'bottomleft' },
+    onAdd: function() { _legendEl = L.DomUtil.create('div', 'kart-legend'); return _legendEl; }
+  });
+  new Legend().addTo(map);
+  map.on('zoomend', updateDesinfVisibility);
+  map.on('zoomend', () => setTimeout(spredIkoner, 0));   // etter at synligheten for steder er satt
 }
 
 function addVideoMarkers() {
@@ -1113,6 +1615,57 @@ async function fetchVideos() {
     addVideoMarkers();
     updateMap(computeScores());
   } catch(e) { /* videoer er valgfrie – feiler stille */ }
+}
+
+function addPhotoMarkers() {
+  if (!map) return;
+  photoMarkers.forEach(({ mk }) => mk.remove());
+  photoMarkers = [];
+  PHOTOS.forEach((photo, idx) => {
+    const icon = makePhotoIcon(false);
+    const mk = L.marker([photo.lat, photo.lon], { icon, zIndexOffset: 200, opacity: 0 }).addTo(map);
+    mk.bindTooltip('📷 Vis bilde', { permanent: false, direction: 'top', className: 'mtip' });
+    mk.on('click', (e) => { L.DomEvent.stopPropagation(e); openZoneMedia(photo.zone, photo); });
+    photoMarkers.push({ mk, zone: photo.zone, photosIdx: idx });
+  });
+}
+
+async function fetchSoner() {
+  try {
+    const res = await fetch(SONER_URL);
+    if (!res.ok) return;
+    const gj = await res.json();
+    // Hovedsonene ligger først i fila, delsonene etter - de tegnes oppå.
+    gj.features.forEach(f => {
+      const zone = f.properties.sone;
+      if (!ZONES.includes(zone)) return;
+      const lag = L.geoJSON(f, {pane: 'soneflater'}).addTo(map);
+      lag.isDel = f.properties.slag === 'del';
+      lag.forelder = f.properties.forelder || null;   // delsonens hovedsone (fra soner_tovdalselva.geojson)
+      lag.bindTooltip(zone, {sticky: true, direction: 'top', className: 'mtip'});
+      lag.on('click', e => { selectZone(zone, { fra: e.latlng }); if (activeZone === zone) showZoneInfo(zone); });
+      zonePolys[zone] = lag;
+      const g = f.geometry;
+      const polys = g.type === 'MultiPolygon' ? g.coordinates : [g.coordinates];
+      _soneRinger[zone] = polys.map(p => p[0].map(k => [k[1], k[0]]));   // GeoJSON er [lon, lat]
+    });
+    plasserSoneMarkorer();
+    updateMap(computeScores());
+    startPreload();
+    fetchSenterlinje();
+    brukLenkeSone();
+  } catch(e) { /* sonepolygoner er valgfrie – uten dem vises bare start/slutt-markørene */ brukLenkeSone(); }
+}
+
+async function fetchPhotos() {
+  try {
+    const res = await fetch(PHOTOS_URL);
+    if (!res.ok) return;
+    PHOTOS = await res.json();
+    PHOTOS.forEach(p => p.mtype = 'photo');
+    addPhotoMarkers();
+    updateMap(computeScores());
+  } catch(e) { /* bilder er valgfrie – feiler stille */ }
 }
 
 
@@ -1148,15 +1701,21 @@ function makePhotoIcon(active) {
     tooltipAnchor: [0, -10],
   });
 }
-function makeStartIcon(label, color, isSelected, isDimmed) {
-  const size = isSelected ? 36 : 30;
-  const fs = isSelected ? 11 : 9;
+function makeStartIcon(scoreText, color, isSelected, isDimmed, liten, merke) {
+  const size = isSelected ? 36 : (liten ? 24 : 30);
+  const fs = isSelected ? 12 : (liten ? 9 : 10);
   const opacity = isDimmed ? 0.50 : 1;
-  const stroke = isSelected ? '#fff' : 'rgba(0,0,0,0.15)';
-  const sw = isSelected ? 2.5 : 1.5;
+  // Små markører ligger oppå en linje i samme farge: hvit kant skiller dem ut.
+  const stroke = (isSelected || liten) ? '#fff' : 'rgba(0,0,0,0.15)';
+  const sw = isSelected ? 2.5 : (liten ? 2 : 1.5);
+  // merke: 'stengt' = hvit skråstrek over tallet, 'delvis' = oransje prikk oppe til høyre.
+  const k = size * 0.24;
+  const ekstra = merke === 'stengt'
+    ? `<line x1="${k}" y1="${size-k}" x2="${size-k}" y2="${k}" stroke="#fff" stroke-width="2" stroke-linecap="round"/>`
+    : (merke === 'delvis' ? `<circle cx="${size-5}" cy="5" r="4" fill="#ed8936" stroke="#fff" stroke-width="1.5"/>` : '');
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" opacity="${opacity}">
     <circle cx="${size/2}" cy="${size/2}" r="${size/2-2}" fill="${color}" stroke="${stroke}" stroke-width="${sw}"/>
-    <text x="${size/2}" y="${size/2+fs*0.38}" text-anchor="middle" fill="#fff" font-size="${fs}" font-weight="700" font-family="Segoe UI,sans-serif">${label}</text>
+    <text x="${size/2}" y="${size/2+fs*0.38}" text-anchor="middle" fill="#fff" font-size="${fs}" font-weight="700" font-family="Segoe UI,sans-serif">${scoreText}</text>${ekstra}
   </svg>`;
   return L.divIcon({html: svg, className: '', iconSize: [size,size], iconAnchor: [size/2,size/2], tooltipAnchor: [0,-size/2]});
 }
@@ -1170,26 +1729,850 @@ function makeEndIcon(color) {
   return L.divIcon({html: svg, className: '', iconSize: [21,21], iconAnchor: [10.5,10.5]});
 }
 
+// ── DESINFEKSJONSPOSTER ───────────────────────────────────────────────────
+// Egentegnet SVG-flaske (lik på alle plattformer, i motsetning til emoji) i oransje ring.
+const DESINF_BOTTLE = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width:68%;height:68%;display:block">'
+  + '<rect x="8" y="9.5" width="8" height="12.5" rx="1.5" fill="#90cdf4" stroke="#1a365d" stroke-width="1.3"/>'
+  + '<rect x="11" y="5" width="2" height="4.5" fill="#1a365d"/>'
+  + '<rect x="8" y="2.5" width="8" height="2.6" rx="1.2" fill="#1a365d"/>'
+  + '<rect x="14" y="3.2" width="5.5" height="1.6" rx=".8" fill="#1a365d"/>'
+  + '<rect x="8" y="14" width="8" height="4.5" fill="#fff"/></svg>';
+function desinfIconHtml(px) {
+  return '<span style="box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;'
+    + 'width:' + px + 'px;height:' + px + 'px;border-radius:50%;background:#ed8936;border:2px solid #fff;box-shadow:0 0 0 1px #7b341e">'
+    + DESINF_BOTTLE + '</span>';
+}
+function makeDesinfIcon() {
+  return L.divIcon({html: desinfIconHtml(22), className: '', iconSize: [22,22], iconAnchor: [11,11], tooltipAnchor: [0,-11]});
+}
+
+function haversineKm(a, b) {
+  const R = 6371, rad = Math.PI / 180;
+  const dLat = (b[0] - a[0]) * rad, dLon = (b[1] - a[1]) * rad;
+  const h = Math.sin(dLat/2)**2 + Math.cos(a[0]*rad) * Math.cos(b[0]*rad) * Math.sin(dLon/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+// pt: [lat, lon]. Returnerer {post, km} (luftlinje) eller null hvis ingen poster er lastet.
+function nearestPost(pt) {
+  let best = null;
+  DESINF.forEach(post => {
+    const km = haversineKm(pt, [post.lat, post.lon]);
+    if (!best || km < best.km) best = {post, km};
+  });
+  return best;
+}
+
+function fmtKm(km) { return km.toFixed(1).replace('.', ','); }
+
+function postPopupHtml(post, km) {
+  return '<div style="font-size:.78rem;line-height:1.4"><strong>' + desinfIconHtml(18) + ' ' + post.navn + '</strong>'
+    + (post.beskrivelse ? '<br>' + post.beskrivelse : '')
+    + (km != null ? '<br><span style="color:#4a5568">' + fmtKm(km) + ' km fra deg (luftlinje)</span>' : '')
+    + '<br><a class="zi-link" href="https://www.google.com/maps/dir/?api=1&destination=' + post.lat + ',' + post.lon
+    + '&travelmode=driving" target="_blank">🧭 Kjør til posten ↗</a></div>';
+}
+
+function addDesinfMarkers() {
+  if (!map) return;
+  desinfMarkers.forEach(({ mk }) => mk.remove());
+  desinfMarkers = [];
+  DESINF.forEach(post => {
+    const mk = L.marker([post.lat, post.lon], { icon: makeDesinfIcon(), zIndexOffset: 20 }).addTo(map);
+    mk.bindTooltip('Desinfeksjonspost: ' + post.navn, { permanent: false, direction: 'top', className: 'mtip' });
+    mk.bindPopup(postPopupHtml(post));
+    mk.on('popupopen', updateDesinfVisibility);
+    mk.on('popupclose', () => setTimeout(updateDesinfVisibility, 0)); // isPopupOpen() er fortsatt true under selve eventet
+    desinfMarkers.push({ mk, post });
+  });
+  updateDesinfVisibility();
+  spredIkoner();
+}
+
+// Poster vises først fra samme zoomnivå som sonenavn-etikettene (LABEL_ZOOM_THRESHOLD).
+// Et åpent popup holder sin post synlig, så «Nærmeste»/«Vis på kart» virker også utzoomet.
+function updateDesinfVisibility() {
+  if (!map) return;
+  const zoomed = map.getZoom() >= LABEL_ZOOM_THRESHOLD;
+  desinfMarkers.forEach(({ mk }) => {
+    const show = zoomed || mk.isPopupOpen();
+    mk.setOpacity(show ? 1 : 0);
+    if (mk._icon) mk._icon.style.pointerEvents = show ? 'auto' : 'none';
+  });
+}
+
+async function fetchDesinf() {
+  try {
+    const res = await fetch(DESINF_URL);
+    if (!res.ok) return;
+    const all = await res.json();
+    const data = all && all.elver && all.elver[SESONG_ELV];
+    DESINF = Array.isArray(data) ? data.filter(p => p && isFinite(p.lat) && isFinite(p.lon)) : [];
+    // Knappen «Desinfisering» vises bare når elva har poster.
+    const knapp = document.querySelector('.knapp-desinf');
+    if (knapp) knapp.style.display = DESINF.length ? '' : 'none';
+    addDesinfMarkers();
+    if (activeZone) showZoneInfo(activeZone, false);
+  } catch(e) { /* desinfeksjonsposter er valgfrie - feiler stille */ }
+}
+
+// Fra «Nærmeste post»-knappen: zoom til brukeren + nærmeste post, tegn linje og åpne popup.
+function showNearestPostFrom(latlng) {
+  const n = nearestPost([latlng.lat, latlng.lng]);
+  if (!n) return;
+  if (_nearestLine) { _nearestLine.remove(); _nearestLine = null; }
+  _nearestLine = L.polyline([[latlng.lat, latlng.lng], [n.post.lat, n.post.lon]],
+    {color: '#2b6cb0', weight: 3, dashArray: '6,6'}).addTo(map);
+  map.fitBounds([[latlng.lat, latlng.lng], [n.post.lat, n.post.lon]], {padding: [60, 60], maxZoom: 14});
+  const m = desinfMarkers.find(x => x.post.id === n.post.id);
+  if (m) { m.mk.setPopupContent(postPopupHtml(n.post, n.km)); m.mk.openPopup(); }
+}
+
+// Fra soneinfo: vis post sammen med sonens startpunkt.
+function focusPost(id, fromLat, fromLon) {
+  const m = desinfMarkers.find(x => x.post.id === id);
+  if (!m || !map) return;
+  map.fitBounds([[fromLat, fromLon], [m.post.lat, m.post.lon]], {padding: [60, 60], maxZoom: 14});
+  m.mk.setPopupContent(postPopupHtml(m.post));
+  m.mk.openPopup();
+  document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Én anbefalt desinfeksjonspost per sone: den som ligger nærmest sone-ikonet i luftlinje.
+// Ikonet står midt i sonen når polygonene er lastet; ellers brukes sonestart.
+function desinfZoneHtml(zone) {
+  const zc = ZONE_COORDS[zone];
+  const mk = mapLayers[zone] && mapLayers[zone].startMk;
+  if ((!zc && !mk) || !DESINF.length) return '';
+  const ll = mk ? mk.getLatLng() : null;
+  const pt = ll ? [+ll.lat.toFixed(6), +ll.lng.toFixed(6)] : zc.s;
+  const n = nearestPost(pt);
+  const line = (lbl, pt, n) => {
+    const href = 'https://www.google.com/maps/dir/?api=1&origin=' + pt[0] + ',' + pt[1]
+      + '&destination=' + n.post.lat + ',' + n.post.lon + '&travelmode=driving';
+    return '<div class="zi-desinf-item"><strong>' + n.post.navn + '</strong>'
+      + (n.post.beskrivelse ? ' – ' + n.post.beskrivelse : '')
+      + '<br><span class="zi-desinf-km">' + fmtKm(n.km) + ' km fra ' + lbl + ' (luftlinje)</span> '
+      + '<a href="' + href + '" target="_blank">🧭 Kjør dit ↗</a> · '
+      + '<a href="#" onclick="focusPost(\'' + n.post.id + '\',' + pt[0] + ',' + pt[1] + ');return false">📍 Vis på kart</a></div>';
+  };
+  const body = line('sonen', pt, n);
+  return '<div class="zi-row"><span class="zi-label">Desinfisering</span><span class="zi-val">' + body + '</span></div>';
+}
+
+// ── SONELINJER (oversikt under zoom 13) ───────────────────────────────────
+// I oversikten er polygonene for smale til å leses. Der tegnes hver hovedsone
+// i stedet som én glatt linje langs elvas midtlinje, med hvit kant under.
+let soneLinjer = {};     // sone → L.polyline
+let _elvKant = null;     // hvit kant under alle sonelinjene
+
+function erSmalLayout() { return !window.matchMedia('(min-width: 1000px)').matches; }
+// Smal skjerm: rull så kartet står øverst, med detaljene rett under.
+function visKartOverst() {
+  document.querySelector('.map-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Chaikin-glatting: kutter hjørnene på en grovt tegnet linje.
+function chaikin(pts, runder) {
+  for (let r = 0; r < runder; r++) {
+    const ut = [pts[0]];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const a = pts[i], b = pts[i + 1];
+      ut.push([0.75 * a[0] + 0.25 * b[0], 0.75 * a[1] + 0.25 * b[1]]);
+      ut.push([0.25 * a[0] + 0.75 * b[0], 0.25 * a[1] + 0.75 * b[1]]);
+    }
+    ut.push(pts[pts.length - 1]);
+    pts = ut;
+  }
+  return pts;
+}
+
+function lagSoneLinjer(senter) {
+  const pts = chaikin(senter, 2);
+  const kum = [0];   // avstand langs linja til hvert punkt, i meter
+  for (let i = 1; i < pts.length; i++) kum.push(kum[i - 1] + haversineKm(pts[i - 1], pts[i]) * 1000);
+  // Avstand langs linja til punktet på linja som er nærmest v.
+  const kjeding = (v) => {
+    let best = 0, bd = Infinity;
+    const kx = Math.cos(v[0] * Math.PI / 180) * 111320, ky = 110540;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const ax = (pts[i][1] - v[1]) * kx, ay = (pts[i][0] - v[0]) * ky;
+      const bx = (pts[i + 1][1] - v[1]) * kx, by = (pts[i + 1][0] - v[0]) * ky;
+      const dx = bx - ax, dy = by - ay, l2 = dx * dx + dy * dy;
+      const t = l2 > 0 ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / l2)) : 0;
+      const px = ax + t * dx, py = ay + t * dy, d = px * px + py * py;
+      if (d < bd) { bd = d; best = kum[i] + t * (kum[i + 1] - kum[i]); }
+    }
+    return best;
+  };
+  const punktVed = (m) => {
+    for (let i = 0; i < pts.length - 1; i++) {
+      if (m <= kum[i + 1]) {
+        const t = (m - kum[i]) / ((kum[i + 1] - kum[i]) || 1);
+        return [pts[i][0] + t * (pts[i + 1][0] - pts[i][0]), pts[i][1] + t * (pts[i + 1][1] - pts[i][1])];
+      }
+    }
+    return pts[pts.length - 1];
+  };
+  const snitt = (fra, til) => [punktVed(fra)].concat(pts.filter((q, i) => kum[i] > fra && kum[i] < til), [punktVed(til)]);
+
+  map.createPane('sonelinjer').style.zIndex = 360;   // over polygonene (350), under markørene
+  let lavest = Infinity, hoyest = -Infinity;
+  const deler = [];
+  ZONES.forEach(zone => {
+    const poly = zonePolys[zone], ring = (_soneRinger[zone] || [])[0];
+    if (!poly || poly.isDel || !ring) return;
+    let fra = Infinity, til = -Infinity;
+    ring.forEach(v => { const k = kjeding(v); fra = Math.min(fra, k); til = Math.max(til, k); });
+    if (til - fra < 20) return;
+    lavest = Math.min(lavest, fra); hoyest = Math.max(hoyest, til);
+    deler.push({ zone, fra, til });
+  });
+  if (!deler.length) return;
+  _elvKant = L.polyline(snitt(lavest, hoyest), { pane: 'sonelinjer', color: '#fff', weight: 10, opacity: 0,
+    lineCap: 'round', lineJoin: 'round', interactive: false }).addTo(map);
+  deler.forEach(d => {
+    const linje = L.polyline(snitt(d.fra, d.til), { pane: 'sonelinjer', weight: 6, opacity: 0,
+      lineCap: 'butt', lineJoin: 'round' }).addTo(map);
+    linje.bindTooltip(d.zone, { sticky: true, direction: 'top', className: 'mtip' });
+    linje.on('click', e => { selectZone(d.zone, { fra: e.latlng }); if (activeZone === d.zone) showZoneInfo(d.zone); });
+    soneLinjer[d.zone] = linje;
+  });
+}
+
+async function fetchSenterlinje() {
+  try {
+    const res = await fetch(SENTERLINJE_URL);
+    if (!res.ok) return;
+    const gj = await res.json();
+    const f = gj.features.find(x => x.geometry && x.geometry.type === 'LineString');
+    if (!f) return;
+    lagSoneLinjer(f.geometry.coordinates.map(k => [k[1], k[0]]));   // GeoJSON er [lon, lat]
+    updateMap(computeScores());
+  } catch (e) { /* uten midtlinja vises polygonene som vanlig også i oversikten */ }
+}
+
+// ── STEDER: kortsalg og parkering ─────────────────────────────────────────
+// Punkter fra data/steder_otra.json. Vises fra samme zoomnivå som
+// desinfeksjonspostene (LABEL_ZOOM_THRESHOLD); et åpent popup holder punktet synlig.
+let STEDER = [];          // [{id, type, navn, adresse, tekst, lat, lon}]
+let stedMarkers = [];     // [{mk, sted}]
+const STED_TYPER = {
+  kortsalg:  { navn: 'Kortsalg',  farge: '#6b46c1', tegn: '🎫' },
+  parkering: { navn: 'Parkering', farge: '#2b6cb0', tegn: 'P' }
+};
+
+function stedIconHtml(type, px) {
+  const t = STED_TYPER[type] || { farge: '#4a5568', tegn: '•' };
+  return '<span style="box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;'
+    + 'width:' + px + 'px;height:' + px + 'px;border-radius:5px;background:' + t.farge + ';border:2px solid #fff;'
+    + 'box-shadow:0 0 0 1px rgba(0,0,0,0.35);color:#fff;font-weight:800;font-size:' + Math.round(px * 0.5) + 'px;line-height:1;'
+    + 'font-family:Segoe UI,sans-serif">' + t.tegn + '</span>';
+}
+function stedPopupHtml(s) {
+  const t = STED_TYPER[s.type] || { navn: '' };
+  return '<div style="font-size:.78rem;line-height:1.4"><strong>' + stedIconHtml(s.type, 18) + ' ' + s.navn + '</strong>'
+    + (t.navn ? '<br><span style="color:#4a5568">' + t.navn + '</span>' : '')
+    + (s.tekst ? '<br>' + s.tekst : '')
+    + (s.adresse ? '<br><span style="color:#4a5568">' + s.adresse + '</span>' : '')
+    + '<br><a class="zi-link" href="https://www.google.com/maps/dir/?api=1&destination=' + s.lat + ',' + s.lon
+    + '&travelmode=driving" target="_blank">🧭 Kjør dit ↗</a></div>';
+}
+// Parkering er av som standard (mange punkter, lite nyttig for de som kjenner elva).
+const PARKERING_KEY = 'elvesona_parkering';
+let _visParkering = false;
+try { _visParkering = localStorage.getItem(PARKERING_KEY) === '1'; } catch (e) { /* ignorer */ }
+function oppdaterPTog() {
+  const b = document.querySelector('.p-tog');
+  if (!b) return;
+  b.classList.toggle('on', _visParkering);
+  b.setAttribute('aria-pressed', _visParkering ? 'true' : 'false');
+  b.title = _visParkering ? 'Skjul parkering' : 'Vis parkering';
+  b.setAttribute('aria-label', b.title);
+}
+function settParkering(on) {
+  _visParkering = !!on;
+  try { localStorage.setItem(PARKERING_KEY, _visParkering ? '1' : '0'); } catch (e) { /* ignorer */ }
+  oppdaterPTog();
+  updateStedVisibility();
+  spredIkoner();
+}
+function updateStedVisibility() {
+  if (!map) return;
+  const zoomed = map.getZoom() >= LABEL_ZOOM_THRESHOLD;
+  stedMarkers.forEach(({ mk, sted }) => {
+    if (sted.type === 'parkering' && !_visParkering) {
+      if (mk.isPopupOpen()) mk.closePopup();
+      mk.setOpacity(0);
+      if (mk._icon) mk._icon.style.pointerEvents = 'none';
+      return;
+    }
+    const show = zoomed || mk.isPopupOpen();
+    mk.setOpacity(show ? 1 : 0);
+    if (mk._icon) mk._icon.style.pointerEvents = show ? 'auto' : 'none';
+  });
+}
+function addStedMarkers() {
+  if (!map) return;
+  stedMarkers.forEach(({ mk }) => mk.remove());
+  stedMarkers = [];
+  STEDER.forEach(s => {
+    const mk = L.marker([s.lat, s.lon], {
+      icon: L.divIcon({ html: stedIconHtml(s.type, 24), className: '', iconSize: [24, 24], iconAnchor: [12, 12], tooltipAnchor: [0, -12], popupAnchor: [0, -12] }),
+      zIndexOffset: 30
+    }).addTo(map);
+    mk.bindTooltip(((STED_TYPER[s.type] || {}).navn || 'Sted') + ': ' + s.navn, { permanent: false, direction: 'top', className: 'mtip' });
+    mk.bindPopup(stedPopupHtml(s));
+    mk.on('popupopen', updateStedVisibility);
+    mk.on('popupclose', () => setTimeout(updateStedVisibility, 0));
+    stedMarkers.push({ mk, sted: s });
+  });
+  updateStedVisibility();
+  spredIkoner();
+}
+
+// ── HENDELSER: midlertidige varsler ───────────────────────────────────────
+// Fra data/hendelser_otra.json. Aktiv fra «fra» til og med «til» (null = på
+// ubestemt tid). Vises øverst i soneinfo for sonene i «soner», og som gult
+// varseltrekant-ikon i kartet når hendelsen har koordinater, fra samme zoomnivå
+// som de andre punktene (LABEL_ZOOM_THRESHOLD). Et åpent popup holder ikonet synlig.
+let HENDELSER = [];
+let hendelseMarkers = [];   // [{mk, hendelse}]
+function datoIso(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function hendelseAktiv(h) {
+  const dag = datoIso(iDag());
+  return (!h.fra || h.fra <= dag) && (!h.til || dag <= h.til);
+}
+function aktiveHendelser() { return HENDELSER.filter(hendelseAktiv); }
+function hendelseIconHtml(px) {
+  return '<span style="display:inline-block;vertical-align:middle;line-height:0;filter:drop-shadow(0 0 1px #fff) drop-shadow(0 1px 2px rgba(0,0,0,.35))">'
+    + '<svg width="' + px + '" height="' + Math.round(px * 0.92) + '" viewBox="0 0 26 24">'
+    + '<path d="M13 1.6 L24.8 22.4 H1.2 Z" fill="#f6c343" stroke="#1a202c" stroke-width="1.6" stroke-linejoin="round"/>'
+    + '<rect x="11.8" y="7.5" width="2.4" height="8.5" rx="1.1" fill="#1a202c"/><circle cx="13" cy="19" r="1.5" fill="#1a202c"/></svg></span>';
+}
+function fmtDatoKort(iso) {
+  const [a, m, d] = iso.split('-');
+  return parseInt(d, 10) + '.' + parseInt(m, 10) + '.' + a;
+}
+// Vises bare når hendelsen har sluttdato; uten den sier teksten selv hvor lenge.
+function hendelsePeriode(h) {
+  return h.til ? 'til og med ' + fmtDatoKort(h.til) : '';
+}
+function hendelsePopupHtml(h) {
+  return '<div style="font-size:.78rem;line-height:1.4;max-width:230px"><strong>' + hendelseIconHtml(16) + ' ' + h.tittel + '</strong>'
+    + (h.tekst ? '<br>' + h.tekst : '')
+    + '<br><span style="color:#4a5568">' + [(h.soner || []).join(', '), hendelsePeriode(h)].filter(Boolean).join(' · ') + '</span></div>';
+}
+function addHendelseMarkers() {
+  if (!map) return;
+  hendelseMarkers.forEach(({ mk }) => mk.remove());
+  hendelseMarkers = [];
+  aktiveHendelser().filter(h => isFinite(h.lat) && isFinite(h.lon) && h.lat !== null && h.lon !== null).forEach(h => {
+    const mk = L.marker([h.lat, h.lon], {
+      icon: L.divIcon({ html: hendelseIconHtml(26), className: '', iconSize: [26, 24], iconAnchor: [13, 12], tooltipAnchor: [0, -12], popupAnchor: [0, -12] }),
+      zIndexOffset: 40
+    }).addTo(map);
+    mk.bindTooltip('⚠ ' + h.tittel, { permanent: false, direction: 'top', className: 'mtip' });
+    mk.bindPopup(hendelsePopupHtml(h));
+    mk.on('popupopen', updateHendelseVisibility);
+    mk.on('popupclose', () => setTimeout(updateHendelseVisibility, 0));
+    hendelseMarkers.push({ mk, hendelse: h });
+  });
+  updateHendelseVisibility();
+  spredIkoner();
+}
+function updateHendelseVisibility() {
+  if (!map) return;
+  const zoomed = map.getZoom() >= LABEL_ZOOM_THRESHOLD;
+  hendelseMarkers.forEach(({ mk }) => {
+    const show = zoomed || mk.isPopupOpen();
+    mk.setOpacity(show ? 1 : 0);
+    if (mk._icon) mk._icon.style.pointerEvents = show ? 'auto' : 'none';
+  });
+}
+async function fetchHendelser() {
+  try {
+    const res = await fetch(HENDELSER_URL, { cache: 'no-cache' });
+    if (!res.ok) return;
+    const j = await res.json();
+    HENDELSER = (j && Array.isArray(j.hendelser) ? j.hendelser : []).filter(h => h && h.tittel);
+    addHendelseMarkers();
+    map.on('zoomend', updateHendelseVisibility);
+    if (activeZone) showZoneInfo(activeZone, false);
+  } catch (e) { /* hendelser er valgfrie - feiler stille */ }
+}
+function focusHendelse(id) {
+  const m = hendelseMarkers.find(x => x.hendelse.id === id);
+  if (!m || !map) return;
+  map.setView(m.mk.getLatLng(), Math.max(map.getZoom(), 16));
+  m.mk.openPopup();
+  if (erSmalLayout() && !_mapFsOn) visKartOverst();
+}
+// Varselboks(er) øverst i soneinfo.
+function hendelserHtml(zone) {
+  return aktiveHendelser().filter(h => Array.isArray(h.soner) && h.soner.includes(zone)).map(h => {
+    const kart = hendelseMarkers.some(x => x.hendelse.id === h.id)
+      ? ' <a href="#" onclick="focusHendelse(&quot;' + h.id + '&quot;);return false">📍 Vis på kart</a>' : '';
+    return '<div class="zi-status hendelse">' + hendelseIconHtml(15) + ' <b>' + h.tittel + '</b>'
+      + (h.tekst ? ' — ' + h.tekst : '') + (hendelsePeriode(h) ? ' <span style="opacity:.75">(' + hendelsePeriode(h) + ')</span>' : '') + kart + '</div>';
+  }).join('');
+}
+
+// ── SPREDNING AV PUNKTIKONER ──────────────────────────────────────────────
+// Desinfeksjonsposter, kortsalg og parkering som havner oppå hverandre på
+// skjermen, legges side om side rundt det felles midtpunktet. Bare ikonet
+// flyttes (CSS transform på innholdet); markørens koordinat er uendret, og når
+// zoomen skiller punktene, går ikonene tilbake til sin egen plass.
+const SPRED_AVSTAND = 28;   // px mellom ikonsentre i en gruppe, og grensen for overlapp
+function spredIkoner() {
+  if (!map) return;
+  const alle = desinfMarkers.concat(stedMarkers, hendelseMarkers)
+    .map(({ mk }) => mk)
+    .filter(mk => mk._icon && mk._icon.firstElementChild);
+  const synlige = alle.filter(mk => mk._icon.style.opacity !== '0');
+  const pt = new Map(synlige.map(mk => [mk, map.latLngToLayerPoint(mk.getLatLng())]));
+  // Grupper: ikoner nærmere enn SPRED_AVSTAND (også via hverandre) havner i samme gruppe.
+  const grupper = [], brukt = new Set();
+  synlige.forEach(mk => {
+    if (brukt.has(mk)) return;
+    const g = [mk]; brukt.add(mk);
+    for (let i = 0; i < g.length; i++) {
+      synlige.forEach(m => {
+        if (!brukt.has(m) && pt.get(g[i]).distanceTo(pt.get(m)) < SPRED_AVSTAND) { g.push(m); brukt.add(m); }
+      });
+    }
+    grupper.push(g);
+  });
+  const flytt = new Map();
+  grupper.forEach(g => {
+    if (g.length < 2) return;
+    // Fast rekkefølge vest→øst, så ikonene ikke bytter plass mellom zoomnivåer.
+    g.sort((a, b) => a.getLatLng().lng - b.getLatLng().lng);
+    const cx = g.reduce((s, m) => s + pt.get(m).x, 0) / g.length;
+    const cy = g.reduce((s, m) => s + pt.get(m).y, 0) / g.length;
+    g.forEach((m, i) => {
+      const p = pt.get(m);
+      flytt.set(m, [cx + (i - (g.length - 1) / 2) * SPRED_AVSTAND - p.x, cy - p.y]);
+    });
+  });
+  alle.forEach(mk => {
+    const d = flytt.get(mk);
+    mk._icon.firstElementChild.style.transform = d ? 'translate(' + Math.round(d[0]) + 'px,' + Math.round(d[1]) + 'px)' : '';
+  });
+}
+async function fetchSteder() {
+  try {
+    const res = await fetch(STEDER_URL);
+    if (!res.ok) return;
+    const j = await res.json();
+    STEDER = (j && Array.isArray(j.steder) ? j.steder : []).filter(s => s && isFinite(s.lat) && isFinite(s.lon));
+    // Parkeringsknappen vises bare når det finnes parkering.
+    const pt = document.querySelector('.p-tog');
+    if (pt) pt.style.display = STEDER.some(s => s.type === 'parkering') ? '' : 'none';
+    addStedMarkers();
+    map.on('zoomend', updateStedVisibility);
+    if (activeZone) showZoneInfo(activeZone, false);
+  } catch (e) { /* steder er valgfrie - feiler stille */ }
+}
+// Fra soneinfo: vis stedet i kartet med popup åpent.
+function focusSted(id) {
+  const m = stedMarkers.find(x => x.sted.id === id);
+  if (!m || !map) return;
+  if (m.sted.type === 'parkering' && !_visParkering) settParkering(true);
+  map.setView([m.sted.lat, m.sted.lon], Math.max(map.getZoom(), 15));
+  m.mk.openPopup();
+  if (erSmalLayout() && !_mapFsOn) visKartOverst();
+}
+// Rad i soneinfo for fysisk kortsalg.
+function kortsalgRad() {
+  const k = STEDER.filter(s => s.type === 'kortsalg');
+  if (!k.length) return '';
+  return '<div class="zi-row"><span class="zi-label">Kortsalg</span><span class="zi-val">'
+    + k.map(s => '<div class="zi-desinf-item"><strong>' + s.navn + '</strong>' + (s.tekst ? ' – ' + s.tekst : '')
+        + ' <a href="#" onclick="focusSted(\'' + s.id + '\');return false">📍 Vis på kart</a></div>').join('')
+    + '</span></div>';
+}
+// Kjøremål for «Veibeskrivelse»: parkeringen som er knyttet til sonen (feltet
+// soner i steder_otra.json), ellers sonens startpunkt som før. Nærmeste parkering
+// i luftlinje brukes ikke: den kan ligge på feil side av elva eller mange km unna.
+function kjoremalForSone(zone) {
+  const start = ZONE_COORDS[zone] ? ZONE_COORDS[zone].s : null;
+  const l = mapLayers[zone];
+  const midt = l ? [l.startMk.getLatLng().lat, l.startMk.getLatLng().lng] : start;
+  const p = STEDER.filter(s => s.type === 'parkering' && Array.isArray(s.soner) && s.soner.includes(zone));
+  if (p.length) {
+    let best = p[0];
+    if (midt) p.forEach(s => { if (haversineKm(midt, [s.lat, s.lon]) < haversineKm(midt, [best.lat, best.lon])) best = s; });
+    return { lat: best.lat, lon: best.lon, navn: best.navn, id: best.id };
+  }
+  const m = start || midt;
+  return m ? { lat: m[0], lon: m[1], navn: null } : null;
+}
+function veibeskrivelseHtml(zone) {
+  const k = kjoremalForSone(zone);
+  if (!k) return '';
+  const lenke = '<a class="zi-link" href="https://www.google.com/maps/dir/?api=1&destination=' + k.lat + ',' + k.lon
+    + '&travelmode=driving" target="_blank">🗺 ' + (k.navn ? 'Veibeskrivelse til ' + k.navn : 'Veibeskrivelse hit') + ' ↗</a>';
+  return k.id ? lenke + ' <a class="zi-link" href="#" onclick="focusSted(&quot;' + k.id + '&quot;);return false">📍 Vis parkering på kart</a>' : lenke;
+}
+
+// ── DELBARE LENKER ────────────────────────────────────────────────────────
+// Adressen husker hva du ser på, f.eks. #sone=3&vf=25&aar=2020-2026&mnd=6-7&flue=1&laks=1
+// Bare det som avviker fra startvisningen tas med. Vannføring tas med når den er
+// satt av brukeren eller av en lenke; da styrer lenken, ikke dagens NVE-måling.
+let _liveBin = null;        // dagens vannføringsintervall fra NVE (null til den er hentet)
+let _vfFraLenke = false;    // vannføringen kom fra en lenke
+let _vfBrukt = false;       // brukeren har selv flyttet vannføringsslideren
+let _lenkeSone = null;      // sone fra lenken som venter på at polygonene er lastet
+let _lenkeKlar = false;     // false til lenken er lest, så update() ikke skriver over den
+
+function soneKode(z) { return z.replace(/^Sone /, '').replace(/ /g, '_'); }
+function soneFraKode(k) {
+  let s = k;
+  try { s = decodeURIComponent(k); } catch (e) { /* bruk som den er */ }
+  s = s.replace(/[ +]/g, '_').toLowerCase();
+  return ZONES.find(z => soneKode(z).toLowerCase() === s)
+      || ZONES.find(z => soneKode(z).toLowerCase().split('_')[0] === s) || null;
+}
+function vfEndretAvBruker() { _vfBrukt = true; _vfFraLenke = false; }
+
+function lagHash() {
+  const deler = [];
+  const sone = activeZone || _lenkeSone;
+  if (sone) deler.push('sone=' + encodeURIComponent(soneKode(sone)));
+  if (_vfFraLenke || (_vfBrukt && currentFlow !== _liveBin)) deler.push('vf=' + currentFlow);
+  const yL = document.getElementById('yearLo'), yH = document.getElementById('yearHi');
+  const aLo = Math.min(yearLo, yearHi), aHi = Math.max(yearLo, yearHi);
+  if (aLo !== +yL.min || aHi !== +yH.max) deler.push('aar=' + aLo + '-' + aHi);
+  const mLo = Math.min(monthLo, monthHi), mHi = Math.max(monthLo, monthHi);
+  if (mLo !== 6 || mHi !== 9) deler.push('mnd=' + mLo + '-' + mHi);
+  if (flyOnly) deler.push('flue=1');
+  if (laksOnly) deler.push('laks=1');
+  return deler.join('&');
+}
+function skrivLenke() {
+  if (!_lenkeKlar) return;
+  const h = lagHash();
+  const ny = location.pathname + location.search + (h ? '#' + h : '');
+  if (ny !== location.pathname + location.search + location.hash) {
+    try { history.replaceState(null, '', ny); } catch (e) { /* f.eks. file:// */ }
+  }
+}
+
+// Leser adressen og stiller sliderne. Returnerer sonen lenken peker på (eller null).
+function lesLenke() {
+  const q = {};
+  location.hash.replace(/^#/, '').split('&').forEach(d => { const i = d.indexOf('='); if (i > 0) q[d.slice(0, i)] = d.slice(i + 1); });
+  const vf = parseInt(q.vf, 10);
+  if (vf >= 0 && vf <= 85 && vf % 5 === 0) {
+    _vfFraLenke = true; _vfBrukt = false;
+    document.getElementById('flowSlider').value = vf;
+    onFlowChange(vf);
+  }
+  const par = (s, lo, hi) => {
+    const m = /^(\d+)(?:-(\d+))?$/.exec(s || '');
+    if (!m) return null;
+    const a = +m[1], b = m[2] ? +m[2] : a;
+    return (a >= lo && b <= hi && a <= b) ? [a, b] : null;
+  };
+  const yL = document.getElementById('yearLo'), yH = document.getElementById('yearHi');
+  const aar = par(q.aar, +yL.min, +yH.max);
+  if (aar) { yL.value = aar[0]; yH.value = aar[1]; onYearChange(); }
+  const mnd = par(q.mnd, 6, 9);
+  if (mnd) { document.getElementById('monthLo').value = mnd[0]; document.getElementById('monthHi').value = mnd[1]; onMonthChange(); }
+  if ((q.flue === '1') !== flyOnly) toggleFly();
+  if ((q.laks === '1') !== laksOnly) toggleLaks();
+  return q.sone ? soneFraKode(q.sone) : null;
+}
+
+// Velger sonen fra lenken. Kalles når polygonene er lastet (eller ikke kunne lastes).
+function brukLenkeSone() {
+  if (!_lenkeSone) return;
+  const z = _lenkeSone;
+  _lenkeSone = null;
+  if (activeZone !== z && (zonePolys[z] || ZONE_COORDS[z])) {
+    selectZone(z);
+    if (erSmalLayout()) visKartOverst();
+  }
+}
+
+// Merknad når lenkens vannføring ikke er dagens.
+function oppdaterVfMerknad() {
+  const el = document.getElementById('vfMerknad');
+  if (!el) return;
+  if (_vfFraLenke && _liveBin !== null && currentFlow !== _liveBin) {
+    el.innerHTML = 'Lenken viser ' + flowBinLabel(currentFlow) + ' m³/s. Elva går nå på '
+      + flowBinLabel(_liveBin) + '. <a onclick="brukDagensVf()">Bruk dagens</a>';
+    el.style.display = '';
+  } else {
+    el.style.display = 'none';
+  }
+}
+function brukDagensVf() {
+  if (_liveBin === null) return;
+  _vfFraLenke = false; _vfBrukt = false;
+  document.getElementById('flowSlider').value = _liveBin;
+  onFlowChange(_liveBin);
+}
+
+// «Del lenke» i soneinfo: delingsarket på mobil, ellers kopier til utklippstavla.
+function delLenke(el) {
+  skrivLenke();
+  const url = location.href;
+  const kvitter = (t) => { const f = el.textContent; el.textContent = t; setTimeout(() => { el.textContent = f; }, 1800); };
+  if (navigator.share && erSmalLayout()) {
+    navigator.share({ title: document.title, url }).catch(() => { /* avbrutt av brukeren */ });
+    return;
+  }
+  const reserve = () => {
+    const ta = document.createElement('textarea');
+    ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { /* ikke støttet */ }
+    ta.remove();
+    kvitter(ok ? '✓ Lenke kopiert' : 'Kopier fra adressefeltet');
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(() => kvitter('✓ Lenke kopiert'), reserve);
+  } else reserve();
+}
+
+window.addEventListener('hashchange', () => {
+  const z = lesLenke();
+  if (z && z !== activeZone && (zonePolys[z] || ZONE_COORDS[z])) selectZone(z);
+});
+
+// ── POSISJON: «hvilken sone står jeg i?» ──────────────────────────────────
+// «Hvor er jeg?» følger posisjonen løpende (blå prikk + nøyaktighetssirkel) og
+// viser et kort med sonen du står i, score, dagsstatus og pris.
+// Testposisjon uten GPS: ?pos=58.2335,7.9385 i adressen.
+let _folger = false;              // «Hvor er jeg?» er slått på
+let _forsteFix = false;           // neste treff skal flytte kartet til posisjonen
+let _minPos = null;               // { latlng, accuracy } – siste kjente posisjon
+let _posMk = null, _posSirkel = null;
+let _posKortEl = null, _locBtn = null;
+let _posFeilTimer = null;
+let _locatingInProgress = false;  // leses av _onMapFsChange (tillatelsesdialogen kan avbryte fullskjerm)
+const _testPos = (() => {
+  const m = /[?&]pos=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/.exec(location.search);
+  return m ? [parseFloat(m[1]), parseFloat(m[2])] : null;
+})();
+
+function finnPosisjon(folg) {
+  _locatingInProgress = true;
+  if (_testPos) {
+    setTimeout(() => map.fire('locationfound', { latlng: L.latLng(_testPos[0], _testPos[1]), accuracy: 12 }), 300);
+    return;
+  }
+  map.locate(folg ? { watch: true, setView: false, enableHighAccuracy: true, maximumAge: 5000 }
+                  : { setView: false });
+}
+
+function tegnPosisjon() {
+  if (!_minPos) return;
+  const ll = _minPos.latlng, r = Math.max(_minPos.accuracy, 5);
+  if (!_posSirkel) {
+    _posSirkel = L.circle(ll, { radius: r, color: '#2b6cb0', weight: 1, fillColor: '#2b6cb0', fillOpacity: 0.12, interactive: false }).addTo(map);
+    _posMk = L.circleMarker(ll, { radius: 7, color: '#fff', weight: 2.5, fillColor: '#2b6cb0', fillOpacity: 1 }).addTo(map)
+      .bindTooltip('Du er her', { direction: 'top', className: 'mtip' });
+  } else {
+    _posSirkel.setLatLng(ll).setRadius(r);
+    _posMk.setLatLng(ll);
+  }
+}
+
+function stoppPosisjon() {
+  _folger = false;
+  _forsteFix = false;
+  _locatingInProgress = false;
+  if (map) map.stopLocate();
+  if (_posMk) { _posMk.remove(); _posMk = null; }
+  if (_posSirkel) { _posSirkel.remove(); _posSirkel = null; }
+  _minPos = null;
+  if (_locBtn) { _locBtn.disabled = false; _locBtn.innerHTML = '📍 Hvor er jeg?'; }
+  oppdaterPosKort();
+}
+
+function visPosFeil(tekst) {
+  if (!_posKortEl) return;
+  _posKortEl.innerHTML = '<div class="pk-hdr" style="white-space:normal;max-width:200px"><span>⚠️ ' + tekst + '</span></div>'
+    + '<div class="pk-svak" style="white-space:normal;max-width:200px">Sjekk at nettleseren har tilgang til posisjon.</div>';
+  _posKortEl.style.display = 'block';
+  clearTimeout(_posFeilTimer);
+  _posFeilTimer = setTimeout(() => { if (!_folger) _posKortEl.style.display = 'none'; }, 6000);
+}
+
+// Sonen punktet ligger i. En delsone vinner over hovedsonen den ligger inni.
+function soneVedPunkt(lat, lon) {
+  let treff = null;
+  ZONES.forEach(z => {
+    const ringer = _soneRinger[z];
+    if (!ringer || !ringer.some(r => pointInRing(lat, lon, r))) return;
+    if (!treff || (zonePolys[z] && zonePolys[z].isDel)) treff = z;
+  });
+  return treff;
+}
+function visSoneFraPos(zone) {
+  if (activeZone !== zone) selectZone(zone);
+  showZoneInfo(zone);
+}
+
+function oppdaterPosKort() {
+  if (!_posKortEl) return;
+  if (!_folger || !_minPos) { clearTimeout(_posFeilTimer); _posKortEl.style.display = 'none'; return; }
+  const lat = _minPos.latlng.lat, lon = _minPos.latlng.lng;
+  // Brukes mest på mobil, så kortet viser bare sonen. Resten står i soneinfo:
+  // trykk på sonenavnet her eller på sonen i kartet.
+  const x = '<button class="pk-x" onclick="stoppPosisjon()" title="Slå av posisjon" aria-label="Slå av posisjon">✕</button>';
+  const zone = soneVedPunkt(lat, lon);
+  const html = '<div class="pk-hdr">'
+    + (zone ? '<span>📍 <b class="pk-sone" data-z="' + zone + '" onclick="visSoneFraPos(this.dataset.z)">' + zone + '</b></span>'
+            : '<span>📍 Utenfor sonene</span>')
+    + x + '</div>';
+  clearTimeout(_posFeilTimer);
+  _posKortEl.innerHTML = html;
+  _posKortEl.style.display = 'block';
+}
+
+const STENGT_FARGE = '#64748b';   // stengt sone (hele sesongen eller i dag)
+let _harPolygoner = false;   // true når sonepolygonene er lastet
+let _legendEl = null;
+let _legendTxt = '';
+
+function lagSoneMarkor(zone, latlng) {
+  const mk = L.marker(latlng, {icon: makeStartIcon('–', '#94a3b8', false, false), zIndexOffset: 10}).addTo(map);
+  mk.bindTooltip(zone, {permanent: false, direction: 'top', className: 'zone-label'});
+  mk.on('click', () => { selectZone(zone, { fra: mk.getLatLng() }); if (activeZone === zone) showZoneInfo(zone); });
+  return mk;
+}
+
+// Et punkt godt inne i sonen: rutenett over sonens utstrekning, behold punktene
+// som ligger inne i polygonet, og velg det som er nærmest tyngdepunktet.
+// 'unngaa' er andre markører ([lat, lon] + minsteavstand i meter) som denne
+// ikke skal havne oppå.
+function soneMidtpunkt(ring, unngaa) {
+  const b = ringerBbox([ring]), N = 40, inne = [];
+  for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
+    const lat = b.s + (i + 0.5) / N * (b.n - b.s), lon = b.w + (j + 0.5) / N * (b.e - b.w);
+    if (pointInRing(lat, lon, ring)) inne.push([lat, lon]);
+  }
+  if (!inne.length) return [(b.s + b.n) / 2, (b.w + b.e) / 2];
+  const c = [inne.reduce((s, q) => s + q[0], 0) / inne.length, inne.reduce((s, q) => s + q[1], 0) / inne.length];
+  const frie = inne.filter(q => unngaa.every(u => haversineKm(q, u.p) * 1000 >= u.m));
+  const kand = frie.length ? frie : inne;
+  let best = kand[0], bd = Infinity;
+  kand.forEach(q => { const d = haversineKm(q, c); if (d < bd) { bd = d; best = q; } });
+  return best;
+}
+
+// Flytter scoremarkørene fra sonegrensa til midten av sonen. Delsonene plasseres
+// først; hovedsonene holder avstand til dem og til hverandre.
+function plasserSoneMarkorer() {
+  const plassert = [];
+  const rekke = ZONES.filter(z => zonePolys[z] && zonePolys[z].isDel)
+    .concat(ZONES.filter(z => zonePolys[z] && !zonePolys[z].isDel));
+  rekke.forEach(zone => {
+    const ring = (_soneRinger[zone] || [])[0];
+    if (!ring) return;
+    const erDel = zonePolys[zone].isDel;
+    const pos = soneMidtpunkt(ring, erDel ? [] : plassert);
+    plassert.push({ p: pos, m: erDel ? 500 : 150 });
+    if (mapLayers[zone]) mapLayers[zone].startMk.setLatLng(pos);
+    else mapLayers[zone] = { startMk: lagSoneMarkor(zone, pos), endMk: null };
+  });
+  _harPolygoner = true;
+}
+
+function oppdaterTegnforklaring() {
+  if (!_legendEl) return;
+  const k = SCORE_CFG.knee / 100;
+  const a = Math.ceil(70 * k), b = Math.ceil(45 * k), d = Math.ceil(25 * k);
+  // Lavest score til venstre, høyest til høyre.
+  const txt = 'Score <span><i style="background:#e53e3e"></i>0–' + (d - 1) + '</span>'
+    + '<span><i style="background:#ed8936"></i>' + d + '–' + (b - 1) + '</span>'
+    + '<span><i style="background:#3182ce"></i>' + b + '–' + (a - 1) + '</span>'
+    + '<span><i style="background:#38a169"></i>' + a + '+</span>'
+    + (ZONES.some(z => soneStatus(z).lukket) ? '<span><i style="background:' + STENGT_FARGE + '"></i>stengt</span>' : '');
+  if (txt !== _legendTxt) { _legendTxt = txt; _legendEl.innerHTML = txt; }
+}
+
 function updateMap(scores) {
   if (!map) return;
+  oppdaterTegnforklaring();
+  // Oversiktsmodus under zoom 13: hovedsonene vises som glatte linjer langs
+  // midtlinja (soneLinjer), og polygonene og delsonene skjules.
+  const lav = map.getZoom() < LABEL_ZOOM_THRESHOLD;
+  const linjeModus = lav && Object.keys(soneLinjer).length > 0;
+  document.getElementById('map').classList.toggle('lav-zoom', lav);
+  if (_elvKant) _elvKant.setStyle({ opacity: linjeModus ? 0.95 : 0 });
   ZONES.forEach(zone => {
-    const l = mapLayers[zone]; if (!l) return;
     const isSelected = zone === activeZone;
+    // Alle soner som ikke er valgt, gråes ut - også delsonene til den valgte hovedsonen
+    // (4B/4C når 4A er valgt). De er egne soner med eget kort.
     const isDimmed = activeZone !== null && !isSelected;
     const sc = scores ? (scores[zone]?.score || 0) : 0;
-    const col = isDimmed ? '#94a3b8' : (scores ? scoreColor(sc) : '#94a3b8');
-    const scoreText = scores ? String(sc) : '–';
-    l.startMk.setIcon(makeStartIcon(scoreText, col, isSelected, isDimmed));
-    l.startMk.setZIndexOffset(isSelected ? 100 : 10);
-    l.endMk.setIcon(makeEndIcon(col));
-    l.endMk.setOpacity(isSelected ? 1 : 0);
-    if (l.endMk._icon) l.endMk._icon.style.pointerEvents = isSelected ? 'auto' : 'none';
+    const st = soneStatus(zone);
+    const lukket = st.lukket;   // stengt hele sesongen eller stengt i dag: grå og stiplet
+    // Stengt har egen, mørkere gråtone: den må skille seg både fra den hvite kanten
+    // under sonelinja og fra dimmede soner (#94a3b8).
+    const col = lukket ? STENGT_FARGE : (isDimmed ? '#94a3b8' : (scores ? scoreColor(sc) : '#94a3b8'));
+    const poly = zonePolys[zone];
+    const erDel = !!(poly && poly.isDel);
+    // Delsonepolygonet skjules i oversikten (under zoom 13), men ikonet vises som for
+    // alle andre soner, med samme størrelse og klikk.
+    const skjult = lav && erDel && !isSelected;
+    // I linjemodus erstatter sonelinja polygonet for hovedsonene.
+    const polySkjult = skjult || (linjeModus && !erDel);
+    if (poly) {
+      poly.setStyle(polySkjult ? { opacity: 0, fillOpacity: 0 } : {
+        color: col, fillColor: col,
+        weight: isSelected ? 3 : 1.5,
+        opacity: isDimmed ? 0.5 : 0.9,
+        fillOpacity: isSelected ? 0.35 : ((isDimmed || lukket) ? 0.08 : 0.22),
+        dashArray: lukket ? '3,7' : null   // stiplet betyr bare stengt
+      });
+      poly.eachLayer(pl => { if (pl._path) pl._path.style.pointerEvents = polySkjult ? 'none' : ''; });
+    }
+    const linje = soneLinjer[zone];
+    if (linje) {
+      // Heltrukket også for stengte soner: stiplet grå oppå hvit kant leses som en hvit strek.
+      linje.setStyle({ color: col, weight: isSelected ? 9 : 6, opacity: linjeModus ? (isDimmed && !lukket ? 0.6 : 1) : 0 });
+      if (linje._path) linje._path.style.pointerEvents = linjeModus ? '' : 'none';
+      if (linjeModus && isSelected) linje.bringToFront();
+    }
+    const l = mapLayers[zone]; if (!l) return;
+    const scoreText = st.kode === 'stengt' ? '✕' : (scores ? String(sc) : '–');
+    l.startMk.setIcon(makeStartIcon(scoreText, col, isSelected, isDimmed, lav,
+      st.kode === 'stengt-idag' ? 'stengt' : (st.delvis ? 'delvis' : null)));
+    // Valgt sone øverst, ellers høyest score øverst der markører overlapper.
+    l.startMk.setZIndexOffset(isSelected ? 1000 : 10 + sc);
+    l.startMk.setOpacity(1);
+    if (l.startMk._icon) l.startMk._icon.style.pointerEvents = 'auto';
+    if (l.endMk) {
+      // Sluttmarkøren trengs bare som reserve når polygonene ikke er lastet.
+      const visSlutt = isSelected && !_harPolygoner;
+      l.endMk.setIcon(makeEndIcon(col));
+      l.endMk.setOpacity(visSlutt ? 1 : 0);
+      if (l.endMk._icon) l.endMk._icon.style.pointerEvents = visSlutt ? 'auto' : 'none';
+    }
     const priceInfo = PRICES[zone];
     const priceLbl = priceInfo && priceInfo.dogn ? priceInfo.dogn + ' kr' : null;
-    const tipHtml = priceLbl
+    const tipHtml = (priceLbl
       ? zone + '<br><span style="color:' + priceColor(priceInfo.dogn) + '">' + priceLbl + '</span>'
-      : zone;
-    l.startMk.setTooltipContent(tipHtml);
+      : zone)
+      + ((lukket || st.delvis) ? '<br><span style="color:' + (lukket ? '#c53030' : '#b7791f') + '">' + st.kort + '</span>' : '');
+    // Etikett (navn + pris): fast for valgt sone, ellers bare ved hover.
+    const fastEtikett = isSelected;
+    if (l.perm !== fastEtikett) {
+      l.startMk.unbindTooltip();
+      l.startMk.bindTooltip(tipHtml, {permanent: fastEtikett, direction: 'top', className: 'zone-label'});
+      l.perm = fastEtikett;
+    } else {
+      l.startMk.setTooltipContent(tipHtml);
+    }
   });
   // Show photo markers only when their zone is active
   photoMarkers.forEach(({ mk, zone, photosIdx }) => {
@@ -1203,9 +2586,13 @@ function updateMap(scores) {
     if (mk._icon) mk._icon.style.pointerEvents = show ? 'auto' : 'none';
   });
   _syncFlowChip(); // pillens antall følger valgt sone og vannføring
+  oppdaterPosKort();
 }
 
-function selectZone(zone) {
+// valg.fra = punktet brukeren klikket på i kartet. Da zoomes det ikke: zoomnivået beholdes,
+// og kartet flyttes bare så mye at punktet ikke havner under soneinfo (fullskjerm).
+// Uten valg.fra (topp 3, delt lenke, «Hvor er jeg?») zoomes det til sonen som før.
+function selectZone(zone, valg = {}) {
   if (activeZone === zone) {
     activeZone = null;
     document.getElementById('mapTitle').textContent = '🗺 Kart';
@@ -1216,10 +2603,76 @@ function selectZone(zone) {
     activeZone = zone;
     document.getElementById('mapTitle').textContent = '🗺 ' + zone;
     closeMedia(); // lukk ev. åpent bilde/video fra forrige sone
-    const zc = ZONE_COORDS[zone];
-    if (zc) map.fitBounds([zc.s, zc.e], {padding: [50,50], animate: true, maxZoom: 14});
+    preloadZone(zone);
   }
+  // Smal skjerm: valgt sone gjør kartet lavere og fast øverst (CSS body.sone-valgt).
+  // Kartet skifter da høyde, så Leaflet må måle på nytt, og zoomen til sonen
+  // gjøres uten animasjon (en animasjon som starter midt i høydeskiftet kan bomme).
+  const hoydeskift = erSmalLayout() && !_mapFsOn
+    && document.body.classList.contains('sone-valgt') !== (activeZone !== null);
+  document.body.classList.toggle('sone-valgt', activeZone !== null);
+  if (hoydeskift) map.invalidateSize({ animate: false });
   update();
+  // Zoom til sonen ETTER update(): da er soneinfo tegnet, og i fullskjerm vet vi
+  // hvor mye av kartet panelet dekker (se kartInnrykk).
+  if (activeZone !== zone) return;
+  if (valg.fra) setTimeout(() => holdSynlig(valg.fra), 0);   // etter at soneinfo er vist
+  else zoomTilSone(zone, !hoydeskift);
+}
+
+// Flytter kartet (uten å endre zoom) så punktet ligger i den synlige delen av kartet,
+// med litt luft. Gjør ingenting hvis punktet allerede er synlig.
+function holdSynlig(latlng) {
+  const inn = kartInnrykk(), str = map.getSize(), luft = 50;
+  const p = map.latLngToContainerPoint(latlng);
+  let dx = 0, dy = 0;
+  if (p.x < inn.venstre + luft) dx = p.x - (inn.venstre + luft);
+  else if (p.x > str.x - luft) dx = p.x - (str.x - luft);
+  if (p.y < luft) dy = p.y - luft;
+  else if (p.y > str.y - inn.bunn - luft) dy = p.y - (str.y - inn.bunn - luft);
+  if (dx || dy) map.panBy([dx, dy], { animate: true, duration: 0.4 });
+}
+
+// Hvor mye av kartflaten som er dekket av paneler i fullskjerm, i piksler fra
+// hver kant. Utenfor fullskjerm ligger panelene ved siden av/under kartet → 0.
+// Et panel som spenner over det meste av bredden (mobil) regnes som dekke
+// nederst; et smalt panel til venstre (soneinfo på PC) som dekke til venstre.
+function kartInnrykk() {
+  const inn = { venstre: 0, bunn: 0 };
+  if (!_mapFsOn) return inn;
+  const m = document.getElementById('map').getBoundingClientRect();
+  ['zoneInfoPanel', 'photoPanel'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || !el.classList.contains('visible')) return;
+    const r = el.getBoundingClientRect();
+    if (r.width >= m.width * 0.6) inn.bunn = Math.max(inn.bunn, m.bottom - r.top);
+    else if (id === 'zoneInfoPanel') inn.venstre = Math.max(inn.venstre, r.right - m.left);
+  });
+  // Er nesten hele kartet dekket, gir det ingen mening å skyve fokus.
+  if (m.height - inn.bunn < 80) inn.bunn = 0;
+  if (m.width - inn.venstre < 160) inn.venstre = 0;
+  return inn;
+}
+
+function zoomTilSone(zone, animer = true) {
+  const inn = kartInnrykk();
+  const zc = ZONE_COORDS[zone];
+  if (zonePolys[zone]) map.fitBounds(zonePolys[zone].getBounds(),
+    {paddingTopLeft: [30 + inn.venstre, 30], paddingBottomRight: [30, 30 + inn.bunn], animate: animer, maxZoom: 15});
+  else if (zc) map.fitBounds([zc.s, zc.e],
+    {paddingTopLeft: [50 + inn.venstre, 50], paddingBottomRight: [50, 50 + inn.bunn], animate: animer, maxZoom: 14});
+}
+
+// Flytter kartet så punktet havner midt i den SYNLIGE delen av kartet.
+function panTilSynlig(lat, lon) {
+  const inn = kartInnrykk();
+  const pt = map.latLngToContainerPoint([lat, lon]);
+  const senter = pt.add([-inn.venstre / 2, inn.bunn / 2]);
+  map.panTo(map.containerPointToLatLng(senter), { animate: true, duration: 0.4 });
+}
+function _panTilAktivtMedium() {
+  const m = _activeZoneMedia[_activeMediaIdx];
+  if (m && document.getElementById('photoPanel').classList.contains('visible')) panTilSynlig(m.lat, m.lon);
 }
 
 function showZoneInfo(zone, scrollTo = true) {
@@ -1240,36 +2693,36 @@ function showZoneInfo(zone, scrollTo = true) {
   if (topBins.length) {
     const tb = topBins[0];
     const bc = scoreColor(tb.score);
-    const label = tb.bin >= 85 ? '85+' : tb.bin + '–' + (tb.bin + 5);
-    const perDay = tb.days > 0 ? (tb.catches / tb.days).toFixed(2).replace('.', ',') : '–';
-    topBinsHtml = '<div class="zi-topbins-hdr">Beste vannføring for sonen</div>'
+    const label = tb.bin >= 85 ? '85+' : tb.bin + '\u2013' + (tb.bin + FLOW_STEP);
+    const perDay = tb.days > 0 ? (tb.catches / tb.days).toFixed(2).replace('.', ',') : '\u2013';
+    topBinsHtml = '<div class="zi-topbins-hdr">Beste vannf\u00f8ring for sonen</div>'
       + '<div class="zi-topbin-row">' + drawMiniRing(tb.score, bc)
-      + '<span class="zi-topbin-txt">' + label + ' m³/s</span></div>'
+      + '<span class="zi-topbin-txt">' + label + ' m\u00b3/s</span></div>'
       + '<div class="zi-topbin-stats">'
       + tb.catches + (tb.catches === 1 ? ' fangst' : ' fangster')
-      + ' · ' + tb.days + (tb.days === 1 ? ' dag' : ' dager')
-      + ' · ' + perDay + ' per dag</div>';
+      + ' \u00b7 ' + tb.days + (tb.days === 1 ? ' dag' : ' dager')
+      + ' \u00b7 ' + perDay + ' per dag</div>';
   }
 
   const boom = BOOM_DAYS[zone];
   let boomTxt;
-  if (boom) {{
+  if (boom) {
     const bd = new Date(boom.date + 'T00:00:00');
     const dateLbl = bd.getDate() + '. ' + MONTH_NAMES_FULL[bd.getMonth()] + ' ' + bd.getFullYear();
     boomTxt = dateLbl + ' — ' + boom.count + ' fangster'
       + (boom.flow != null ? ' (' + boom.flow + ' m³/s)' : '');
-  }} else {{
+  } else {
     boomTxt = 'Ingen rekorddag verdt å nevne';
-  }}
+  }
 
   let rekordlaksHtml = '';
   const rekord = REKORDLAKS_DATA[zone];
-  if (rekord) {{
+  if (rekord) {
     const rd = new Date(rekord.dato + 'T00:00:00');
     const rekordDateLbl = rd.getDate() + '. ' + MONTH_NAMES_FULL[rd.getMonth()] + ' ' + rd.getFullYear();
     const vektStr = rekord.vekt.toFixed(1).replace('.', ',');
     rekordlaksHtml = '<div class="zi-record-txt">REKORDLAKS - ' + vektStr + ' kg (' + rekordDateLbl + ')</div>';
-  }}
+  }
 
   const boomColHtml = '<div style="display:flex;gap:8px;align-items:center;">'
     + '<span class="zi-boom-icon">🏆</span>'
@@ -1306,6 +2759,8 @@ function showZoneInfo(zone, scrollTo = true) {
 
   document.getElementById('ziTitle').textContent = '📍 ' + info.name;
   document.getElementById('ziBody').innerHTML = `
+    ${hendelserHtml(zone)}
+    ${soneStatusHtml(zone)}
     <div class="zi-score-row">
       <div class="zi-score-num" style="color:${col}">${score}</div>
       <div class="zi-score-label">Score (${yrLbl} · ${moLbl} · ${currentFlow >= 85 ? '85+' : currentFlow + '–' + (currentFlow+5)} m³/s)<br>${catches === 1 ? '1 fangst' : catches + ' fangster'} i utvalget</div>
@@ -1316,14 +2771,22 @@ function showZoneInfo(zone, scrollTo = true) {
     <div class="zi-row"><span class="zi-label">Redskap</span><span class="zi-val">${info.redskap}</span></div>
     ${sesongRad(zone)}
     <div class="zi-row"><span class="zi-label">Merknader</span><span class="zi-val">${info.merknader}</span></div>
-    <a class="zi-link" href="https://www.google.com/maps/dir/?api=1&destination=${ZONE_COORDS[zone]?.s[0]},${ZONE_COORDS[zone]?.s[1]}&travelmode=driving" target="_blank">🗺 Veibeskrivelse hit ↗</a>
+    ${desinfZoneHtml(zone)}
+    ${kortsalgRad()}
+    ${veibeskrivelseHtml(zone)}
     ${priceHtml}
     <a class="zi-link" href="${info.kortUrl}" target="_blank">🎫 Kjøp fiskekort ↗</a>
+    <a class="zi-link" href="#" onclick="delLenke(this);return false">🔗 Del lenke til sonen</a>
     <div class="zi-sources">Kilder: <a href="https://www.inatur.no/laksefiske/56978820e4b0fc575c11475a" target="_blank">inatur.no</a> · <a href="https://lakseelver.no/nb/elver/tovdalselva/about" target="_blank">lakseelver.no</a> · <a href="https://laksebors.inatur.no/bors/5" target="_blank">laksebørsen</a></div>
   `;
   const panel = document.getElementById('zoneInfoPanel');
   panel.classList.add('visible');
-  if (scrollTo) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (scrollTo) {
+    // Smal skjerm: kartet øverst og soneinfo under, i stedet for at panelet tar hele skjermen.
+    if (erSmalLayout() && !_mapFsOn) visKartOverst();
+    // PC: toppen av soneinfo flukter med toppen av kartet (scroll-margin-top i CSS).
+    else panel.scrollIntoView({ behavior: 'smooth', block: _mapFsOn ? 'nearest' : 'start' });
+  }
 }
 
 function closeZoneInfo() {
@@ -1368,6 +2831,7 @@ function nextFlowWithMedia(dir) {
 function stepFlow(dir) {
   const next = nextFlowWithMedia(dir);
   if (next === null) return;
+  vfEndretAvBruker();
   currentFlow = next;
   document.getElementById('flowSlider').value = currentFlow;
   onFlowChange(currentFlow);
@@ -1424,7 +2888,13 @@ function openZoneMedia(zone, target) {
   _activeMediaIdx = posInGroup >= 0 ? posInGroup : 0;
   _renderMedia();
   document.getElementById('photoPanel').classList.add('visible');
-  document.getElementById('photoPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  // Panelet er først nå synlig, og bildet endrer høyden når det er lastet:
+  // sentrer på nytt begge ganger så markøren ikke havner bak panelet.
+  _panTilAktivtMedium();
+  const _pImg = document.getElementById('photoImg');
+  if (!_pImg._panBundet) { _pImg._panBundet = true; _pImg.addEventListener('load', _panTilAktivtMedium); }
+  if (erSmalLayout() && !_mapFsOn) visKartOverst();
+  else document.getElementById('photoPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function showMedia(idx) {
@@ -1485,7 +2955,7 @@ function _renderMedia() {
   nextBtn.disabled = _activeMediaIdx >= n - 1;
   nextBtn.style.opacity = _activeMediaIdx >= n - 1 ? '0.3' : '1';
 
-  // Uthev aktiv markør på kartet
+  // Highlight active photo marker on map
   const activePhoto = _activeZoneMedia[_activeMediaIdx];
   photoMarkers.forEach(({ mk, zone, photosIdx }) => {
     if (activeZone !== zone) return; // only update visible markers
@@ -1500,8 +2970,22 @@ function _renderMedia() {
 
   // Sentrer kartet på aktiv markør
   if (activePhoto) {
-    map.panTo([activePhoto.lat, activePhoto.lon], { animate: true, duration: 0.4 });
+    panTilSynlig(activePhoto.lat, activePhoto.lon);
   }
+
+  _preloadNeighborImages();
+}
+
+// Forhåndslaster forrige/neste bilde i bakgrunnen (kun bilder, ikke video-thumbnails)
+// slik at navigering med pilene føles instant på trege mobilnett.
+function _preloadNeighborImages() {
+  [_activeMediaIdx - 1, _activeMediaIdx + 1].forEach(function (i) {
+    const p = _activeZoneMedia[i];
+    if (p && p.mtype !== 'video') {
+      const pre = new Image();
+      pre.src = BILDE_BASE + p.file;
+    }
+  });
 }
 function closeMedia() {
   document.getElementById('photoPanel').classList.remove('visible');
@@ -1753,15 +3237,21 @@ function _enterMapFs() {
   var chip = document.getElementById('flowChip');
   var pp   = document.getElementById('photoPanel');
   var pfs  = document.getElementById('photoFs');
+  var zi   = document.getElementById('zoneInfoPanel');
+  // År, måned og «Kun flue» følger med inn i boksen (skjules på mobil via .fs-extra).
+  var ekstra = Array.prototype.filter.call(document.querySelectorAll('.ctrl-col > .ctrl-row'),
+    function (r) { return r !== row; });
+  ekstra.forEach(function (r) { r.classList.add('fs-extra'); });
   _fsHomes = [];
-  [row, chip, pp, pfs].forEach(_fsStash);
+  [row].concat(ekstra, [chip, pp, pfs, zi]).forEach(_fsStash);
   if (row)  box.appendChild(row);
+  ekstra.forEach(function (r) { box.appendChild(r); });
   if (chip) box.appendChild(chip);
   if (pp)   wrap.appendChild(pp);
   if (pfs)  wrap.appendChild(pfs);
+  if (zi)   wrap.appendChild(zi);   // soneinfo vises som sidepanel i fullskjerm
   wrap.classList.add('fs-on');
   _mapFsOn = true;
-  closeZoneInfo();
   _fsObserveMap();
   try {
     if (wrap.requestFullscreen) wrap.requestFullscreen().catch(function () {});
@@ -1813,52 +3303,8 @@ window.addEventListener('resize', function () {
   if (_mapFsOn && typeof map !== 'undefined' && map) map.invalidateSize();
 });
 
+
 // ── NVE ───────────────────────────────────────────────────────────────────
-async function fetchNVE() {
-  try {
-    const res = await fetch(NVE_CACHE_URL);
-    if (!res.ok) throw new Error('cache ikke tilgjengelig');
-    const json = await res.json();
-    const obs = json.data[0].observations.filter(o => o.value !== null);
-    if (!obs.length) throw new Error('no data');
-
-    // Current value
-    const val = obs[obs.length - 1].value;
-    liveFlow = val;
-    document.getElementById('tovdalFlow').textContent = val.toFixed(1);
-    document.getElementById('tovdalStatus').innerHTML = '<span style="color:#68d391">✅ Live NVE</span>';
-    const bin = Math.floor(val/5)*5;
-    currentFlow = Math.max(0, Math.min(85, bin));
-    document.getElementById('flowSlider').value = currentFlow;
-    onFlowChange(currentFlow);
-
-    // Trend: compare to 3 hours ago
-    const val3h = obs.length >= 4 ? obs[obs.length - 4].value : null;
-    const trendEl = document.getElementById('trendBadge');
-    const lblEl   = document.getElementById('trendLabel');
-    if (val3h !== null) {
-      const diff = val - val3h;
-      if (diff > 0.5)       { trendEl.textContent = '↑'; trendEl.style.color = '#68d391'; lblEl.textContent = 'Stigende siste 3t'; }
-      else if (diff < -0.5) { trendEl.textContent = '↓'; trendEl.style.color = '#fc8181'; lblEl.textContent = 'Synkende siste 3t'; }
-      else                  { trendEl.textContent = '→'; trendEl.style.color = '#94a3b8'; lblEl.textContent = 'Stabil siste 3t'; }
-    }
-
-    // Del vannforingen med fiskemeldingen, som trenger den for a regne ut
-    // forventet stigning. Dognendringen skiller fallende fra stillestaende vann.
-    liveFlow = val;
-    const val24h = obs.length >= 25 ? obs[obs.length - 25].value : null;
-    liveDiff24 = val24h !== null ? val - val24h : null;
-    oppdaterFiskemelding();
-
-    // Sparkline
-    drawSparkline(obs.map(o => o.value));
-    return;
-  } catch(e) {
-    document.getElementById('tovdalFlow').textContent = '–';
-    document.getElementById('tovdalStatus').innerHTML = '<span style="color:#fc8181">⚠️ NVE ikke tilgjengelig</span>';
-  }
-}
-
 // ---------------------------------------------------------------------------
 // Fiskemelding
 //
@@ -1987,6 +3433,55 @@ async function fetchNedbor() {
   } catch(e) { /* fiskemelding er valgfri – feiler stille */ }
 }
 
+async function fetchNVE() {
+  try {
+    const res = await fetch(NVE_CACHE_URL);
+    if (!res.ok) throw new Error('cache ikke tilgjengelig');
+    const json = await res.json();
+    const obs = json.data[0].observations.filter(o => o.value !== null);
+    if (!obs.length) throw new Error('no data');
+
+    // Current value
+    const val = obs[obs.length - 1].value;
+    document.getElementById('tovdalFlow').textContent = val.toFixed(1);
+    document.getElementById('tovdalStatus').innerHTML = '<span style="color:#68d391">✅ Live NVE</span>';
+    const bin = Math.floor(val/5)*5;
+    _liveBin = Math.max(0, Math.min(85, bin));
+    // En lenke med vf=… (eller en slider brukeren alt har flyttet) styrer; ellers dagens vannføring.
+    if (!_vfFraLenke && !_vfBrukt) {
+      currentFlow = _liveBin;
+      document.getElementById('flowSlider').value = currentFlow;
+      onFlowChange(currentFlow);
+    } else {
+      oppdaterVfMerknad();
+    }
+
+    // Trend: compare to 3 hours ago
+    const val3h = obs.length >= 4 ? obs[obs.length - 4].value : null;
+    const trendEl = document.getElementById('trendBadge');
+    const lblEl   = document.getElementById('trendLabel');
+    if (val3h !== null) {
+      const diff = val - val3h;
+      if (diff > 0.5)       { trendEl.textContent = '↑'; trendEl.style.color = '#68d391'; lblEl.textContent = 'Stigende siste 3t'; }
+      else if (diff < -0.5) { trendEl.textContent = '↓'; trendEl.style.color = '#fc8181'; lblEl.textContent = 'Synkende siste 3t'; }
+      else                  { trendEl.textContent = '→'; trendEl.style.color = '#94a3b8'; lblEl.textContent = 'Stabil siste 3t'; }
+    }
+
+    // Del vannforingen med fiskemeldingen, som trenger den for a regne ut
+    // forventet stigning. Dognendringen skiller fallende fra stillestaende vann.
+    liveFlow = val;
+    const val24h = obs.length >= 25 ? obs[obs.length - 25].value : null;
+    liveDiff24 = val24h !== null ? val - val24h : null;
+    oppdaterFiskemelding();
+
+    // Sparkline
+    drawSparkline(obs.map(o => o.value));
+    return;
+  } catch(e) {
+    document.getElementById('tovdalFlow').textContent = '–';
+    document.getElementById('tovdalStatus').innerHTML = '<span style="color:#fc8181">⚠️ NVE ikke tilgjengelig</span>';
+  }
+}
 
 function drawSparkline(values) {
   const svg = document.getElementById('sparkSvg');
@@ -2019,9 +3514,11 @@ function drawSparkline(values) {
 
 // ── INIT ──────────────────────────────────────────────────────────────────
 initMap();
-onFlowChange(5);
+onFlowChange(25);
 onYearChange();
 onMonthChange();
+_lenkeSone = lesLenke();   // delbar lenke: stiller sliderne nå, sonen velges når polygonene er lastet
+_lenkeKlar = true;
 // Init stat boxes with placeholders so header never collapses
 document.getElementById('statBox').innerHTML =
   '<div class="stat-item"><span class="stat-num">–</span><span class="stat-lbl">Fangster</span></div>' +
@@ -2036,8 +3533,12 @@ document.getElementById('totalScoreBox').innerHTML =
 fetchNVE().then(() => update());
 fetchNedbor();
 fetchSesong();
+fetchSoner();
 fetchPhotos();
 fetchVideos();
+fetchDesinf();
+fetchSteder();
+fetchHendelser();
 window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </script>
 
@@ -2096,8 +3597,9 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.015</span><br>
-  <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Inatur.no</span>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.017</span><br>
+  <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span><br>
+  <a href="../vilkar/" style="font-size:0.6rem; color:#94a3b8;">Vilkår for bruk</a>
 </div>
 
 <div class="rd-overlay" id="rdOverlay"
