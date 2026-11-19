@@ -26,7 +26,7 @@ Detaljer ligger i egne filer — les dem når oppgaven berører temaet:
    `ESRI_KEY` i `otra/index.html`, `otra2/index.html`, `mandalselva/index.html`,
    `mandalselva2/index.html` (fra 2026-11-18), `audna/index.html`, `audna2/index.html`
    (fra 2026-11-18), `tovdalselva/index.html`, `tovdalselva2/index.html`, `sygna/index.html`, `sygna2/index.html`
-   (fra 2026-11-19) og `lygna2/index.html` (fra 2026-11-19) (ArcGIS Location Platform, «Public
+   (fra 2026-11-19) `lygna2/index.html` (fra 2026-11-19) og `lygna/index.html` (fra 2026-11-20) (ArcGIS Location Platform, «Public
    application», kun Basemaps, betaling avslått, utløper 2027-11-17). NVE-nøkkelen og alle andre
    nøkler er fortsatt hemmelige.
 2. **Fiskernavn vises aldri i dashboard.** Kolonnene `Navn`/`Fisker` i fangstloggene beholdes
@@ -197,9 +197,14 @@ grep -oE 'v[0-9]+\.[0-9]{3}' <fil>
   (`python scripts/sonepolygoner.py lygna`). De fleste Lygna-sonene har bare ett punkt, så
   grensene er beregnet midt mellom nabopunktene (`punkt_grenser`) og merket «omtrentlig» i
   soneinfo. Sone 2 (nord) og Sone 3 (sør) deler strekning, Sone 8 har bare østbredden, og
-  Sone 7 har ingen koordinater. Nås kun med direkte lenke.
+  Sone 7 har ingen koordinater. Nås kun med direkte lenke. Gikk live som
+  `lygna/index.html` v1.072 (2026-11-20).
+  **Fra 2026-11-20 gjøres alle Lygna-endringer direkte i `lygna/index.html`.** lygna2 brukes
+  bare når Per Lasse uttrykkelig sier det, og holdes ikke i takt med lygna. Skal den brukes
+  igjen: kopier `lygna/index.html` → `lygna2` med testmerkingen over. Tilbake: fjern
+  testmerkingen (også `<h1>`), sett inn GoatCounter, toppavstand PC 16 px / mobil 8 px.
 - `vilkar/index.html` — vilkår for bruk (påkrevd av Esri-avtalen for flyfoto). Lenket fra
-  bunnteksten i otra/otra2/mandalselva/mandalselva2/audna/audna2/tovdalselva/tovdalselva2/sygna/sygna2/lygna2.
+  bunnteksten i otra/otra2/mandalselva/mandalselva2/audna/audna2/tovdalselva/tovdalselva2/sygna/sygna2/lygna/lygna2.
 
 ### Logo og favicon
 
