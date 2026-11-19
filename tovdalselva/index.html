@@ -1920,10 +1920,11 @@ function lagSoneLinjer(senter) {
   let lavest = Infinity, hoyest = -Infinity;
   const deler = [];
   ZONES.forEach(zone => {
-    const poly = zonePolys[zone], ring = (_soneRinger[zone] || [])[0];
-    if (!poly || poly.isDel || !ring) return;
+    // Alle bitene i sonen: Sone 4 og 5 er delt i flere av delsonene som er klippet ut.
+    const poly = zonePolys[zone], ringer = _soneRinger[zone] || [];
+    if (!poly || poly.isDel || !ringer.length) return;
     let fra = Infinity, til = -Infinity;
-    ring.forEach(v => { const k = kjeding(v); fra = Math.min(fra, k); til = Math.max(til, k); });
+    ringer.forEach(ring => ring.forEach(v => { const k = kjeding(v); fra = Math.min(fra, k); til = Math.max(til, k); }));
     if (til - fra < 20) return;
     lavest = Math.min(lavest, fra); hoyest = Math.max(hoyest, til);
     deler.push({ zone, fra, til });
@@ -2475,7 +2476,9 @@ function plasserSoneMarkorer() {
   const rekke = ZONES.filter(z => zonePolys[z] && zonePolys[z].isDel)
     .concat(ZONES.filter(z => zonePolys[z] && !zonePolys[z].isDel));
   rekke.forEach(zone => {
-    const ring = (_soneRinger[zone] || [])[0];
+    // Ikonet i den største biten av sonen (ringareal i grader², godt nok til å sammenligne).
+    const areal = r => Math.abs(r.reduce((s, q, i) => { const p = r[(i + 1) % r.length]; return s + q[1] * p[0] - p[1] * q[0]; }, 0));
+    const ring = (_soneRinger[zone] || []).reduce((a, r) => (!a || areal(r) > areal(a)) ? r : a, null);
     if (!ring) return;
     const erDel = zonePolys[zone].isDel;
     const pos = soneMidtpunkt(ring, erDel ? [] : plassert);
@@ -3597,7 +3600,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.017</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.018</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span><br>
   <a href="../vilkar/" style="font-size:0.6rem; color:#94a3b8;">Vilkår for bruk</a>
 </div>
