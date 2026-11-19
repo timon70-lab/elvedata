@@ -87,5 +87,9 @@
       "Buhølen": { "forelder": "Sone 4 og 5" },
       "Laksefoss": { "forelder": "Sone 4 og 5" }
     }
+  },
+  "sygna": {
+    "osm": { "midtlinje": [133270709, 180876571], "vann": [8229980] },
+    "bredde_land": 40
   }
 }

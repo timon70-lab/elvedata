@@ -1,0 +1,7 @@
+{
+  "_meta": {
+    "endret": "2026-11-19",
+    "notat": "Midlertidige hendelser og advarsler i Sygna-kartet (vises med utropstegn). fra/til: YYYY-MM-DD, til = null betyr på ubestemt tid. soner: hvilke soners soneinfo varselet vises i. lat/lon er valgfrie: uten dem vises varselet bare i soneinfo, med dem også som ikon i kartet."
+  },
+  "hendelser": []
+}
