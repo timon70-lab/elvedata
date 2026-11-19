@@ -91,5 +91,17 @@
   "sygna": {
     "osm": { "midtlinje": [133270709, 180876571], "vann": [8229980] },
     "bredde_land": 40
+  },
+  "lygna": {
+    "osm": { "midtlinje": "senterlinje", "vann": [11860556, 16359048, 11860152],
+             "sjø": [58.134, 7.018, 58.148, 7.042] },
+    "bredde_land": 40,
+    "punkt_grenser": true,
+    "korridor_maks": 250,
+    "soner": {
+      "Sone 2 Årnes": { "gruppe": "Sone 2 og 3", "side": "vest" },
+      "Sone 3 Kvavik": { "gruppe": "Sone 2 og 3", "side": "øst" },
+      "Sone 8 Prestegården": { "kun_side": [{ "side": "øst" }] }
+    }
   }
 }

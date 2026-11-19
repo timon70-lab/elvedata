@@ -1,0 +1,7 @@
+{
+  "_meta": {
+    "endret": "2026-11-19",
+    "notat": "Steder som vises som egne punkter i Lygna-kartet. type: kortsalg | parkering. lat/lon i WGS84. tekst er fritekst som vises i popup og soneinfo. soner (kun parkering): hvilke soner «Veibeskrivelse» skal gå til denne parkeringen for; soner uten parkering får veibeskrivelse til sonegrensa."
+  },
+  "steder": []
+}

@@ -27,11 +27,23 @@ Slik regnes sonene ut:
     behold_hel = true på hovedsonen lar den beholde hele strekningen, med
     delsonene tegnet oppå (Audna: gamle Sone5 = dagens 5A + 5B).
   * side = vest/øst deler strekningen langs midtlinja.
+  * punkt_grenser = true i oppsettet (Lygna): soner der start = slutt (bare ett
+    punkt) får omtrentlige grenser midt mellom nabopunktene langs midtlinja. Grenser
+    mot en ekte strekning følger strekningens ende. Den nederste går til munningen.
+    Sonene får egenskapen omtrentlig = true. gruppe = navn på soner som deler
+    strekning (Lygna Sone 2 og 3 på hver sin bredd); punktet er snittet av dem.
   * kun_side = liste av {side, fra, til}: på delstrekningen fra–til hører bare
     den ene bredden til sonen (fiske fra én side). fra/til er [lat, lon] eller
     "start"/"slutt" for sonens egne grenser.
   * osm.midtlinje = "senterlinje": bruk data/senterlinje_<elv>.geojson som midtlinje
     (Tovdalselva, der OSM-elvelinja har hull gjennom Flakksvannet og Senumstadfjorden).
+  * osm.sjø = [sør, vest, nord, øst]: munningen ligger i sjøen, der OSM ikke har
+    noen vannflate. Boksen deles med kystlinja (natural=coastline), og biten der
+    midtlinja starter legges til vannflaten (Lygna ved Kvavik). Bare sjøen innenfor
+    sjø_bredde meter (standard 200) fra midtlinja tas med, så sonen ikke blir en
+    firkant ute i fjorden.
+  * korridor_maks = meter: korridoren klippes til denne avstanden fra midtlinja, så
+    sideelver som henger med i OSM-flaten ikke blir med i sonene (Lygna).
   * utelat_øy_med_kanal = OSM-id til en vei i øyas ring. Øya, sidekanalen
     bak den (sett fra midtlinja) og landstripa langs kanalen tas ut av sonene.
     Kanalåpningene lukkes med korteste linje fra øyspissene til bredden.
@@ -80,6 +92,8 @@ def hent_osm(elv, oppsett):
     if veier:
         deler += 'way(id:%s);' % ','.join(map(str, sorted(set(veier))))
     deler += 'relation(id:%s);' % ','.join(map(str, sorted(set(rel))))
+    if o.get('sjø'):
+        deler += 'way["natural"="coastline"](%s);' % ','.join(map(str, o['sjø']))
     q = '[out:json][timeout:120];(%s);out geom;' % deler
     data = urllib.parse.urlencode({'data': q}).encode()
     for forsok in range(5):
@@ -142,6 +156,19 @@ def les_osm(elv, oppsett, xy):
     øyer = list(polygonize(indre))
     if øyer:
         vann = vann.difference(unary_union(øyer))
+    sjø = oppsett['osm'].get('sjø')
+    if sjø:
+        s_, w_, n_, e_ = sjø
+        boks = Polygon([xy(w_, s_), xy(e_, s_), xy(e_, n_), xy(w_, n_)])
+        kyst = [linje(e['geometry']) for e in elementer
+                if e['type'] == 'way' and e.get('tags', {}).get('natural') == 'coastline']
+        biter = list(split(boks, unary_union(kyst)).geoms) if kyst else [boks]
+        start = midt.interpolate(0)
+        hav = min(biter, key=lambda b: b.distance(start))
+        hav = hav.intersection(midt.buffer(oppsett.get('sjø_bredde', 200)))
+        hav = min(getattr(hav, 'geoms', [hav]), key=lambda b: b.distance(start))
+        print('Sjø ved munningen: %.0f m² (%d kystlinjer)' % (hav.area, len(kyst)))
+        vann = unary_union([vann, hav])
     # Øy per OSM-vei, så oppsettet kan peke på en øy med id-en til en av veiene i ringen.
     øy_for_vei = {}
     for vid, v in zip(indre_id, indre):
@@ -429,6 +456,8 @@ def behandle(elv, hent=False, ut_fil=None):
         print('  utelater øy (vei %s, %.0f m²) og kanal bak den (%.0f m²)' % (vid, øy.area, kanal.area))
         unntak += [øy, kanal]
     korridor = lag_korridor(midt, vann, oppsett.get('bredde_land', 40), unntak)
+    if oppsett.get('korridor_maks'):
+        korridor = korridor.intersection(midt.buffer(oppsett['korridor_maks']))
     global KUTT_I_VANN
     KUTT_I_VANN = None
     if oppsett.get('kutt_i_vann'):
@@ -456,6 +485,39 @@ def behandle(elv, hent=False, ut_fil=None):
             mal = next(z for z in soner if z['navn'] == s['som'])
             soner.append(dict(mal, navn=navn, side=s.get('side'), kun_side=s.get('kun_side', [])))
 
+    # Punktsoner (start = slutt): grenser midt mellom nabopunktene.
+    punkt = {}
+    if oppsett.get('punkt_grenser'):
+        enheter = {}
+        for z in soner:
+            if not z['forelder'] and not z.get('flate'):
+                enheter.setdefault(spesial.get(z['navn'], {}).get('gruppe', z['navn']), []).append(z)
+        liste = []
+        for zs in enheter.values():
+            if all(abs(z['me'] - z['ms']) < 1 for z in zs):
+                a = sum(z['ms'] for z in zs) / len(zs)
+                liste.append((a, a, True, zs))
+            else:
+                liste.append((min(min(z['ms'], z['me']) for z in zs),
+                              max(max(z['ms'], z['me']) for z in zs), False, zs))
+        liste.sort(key=lambda e: e[0])
+        for i, (lo, hi, er_punkt, zs) in enumerate(liste):
+            if not er_punkt:
+                continue
+            if i == 0:
+                m0 = 0.0
+            else:
+                f = liste[i - 1]
+                m0 = (f[1] + lo) / 2 if f[2] else f[1]
+            if i == len(liste) - 1:
+                m1 = midt.length
+            else:
+                n = liste[i + 1]
+                m1 = (hi + n[0]) / 2 if n[2] else n[0]
+            for z in zs:
+                punkt[z['navn']] = (m0, m1)
+                print('  %-24s omtrentlig %6.0f–%6.0f m' % (z['navn'], m0, m1))
+
     hoved = sorted([z for z in soner if not z['forelder']], key=lambda z: z['ms'])
     starter = sorted({round(z['ms'], 1) for z in hoved})
     flater = []
@@ -465,7 +527,9 @@ def behandle(elv, hent=False, ut_fil=None):
             print('  %-20s egen flate: %.0f m²' % (z['navn'], flate.area))
             flater.append((z, flate))
             continue
-        if z['forelder'] or oppsett.get('egne_grenser'):
+        if z['navn'] in punkt:
+            m0, m1 = punkt[z['navn']]
+        elif z['forelder'] or oppsett.get('egne_grenser') or oppsett.get('punkt_grenser'):
             m0, m1 = sorted((z['ms'], z['me']))
         else:
             m0 = z['ms']
@@ -530,6 +594,8 @@ def behandle(elv, hent=False, ut_fil=None):
         props = {'sone': z['navn'], 'slag': 'del' if z['forelder'] else 'hoved'}
         if z['forelder']:
             props['forelder'] = z['forelder']
+        if z['navn'] in punkt:
+            props['omtrentlig'] = True
         features.append({
             'type': 'Feature',
             'properties': props,
