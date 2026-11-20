@@ -4,7 +4,7 @@ Praktisk veiledning for `admin/index.html`. Fungerer både på PC og mobil; toke
 legges inn separat i hver nettleser.
 
 Seksjoner (i rekkefølge på siden): 📰 Nyheter · 🎬 Media · 📅 Sesong · 💬 Tilbakemeldinger ·
-⚖️ Scoringsparametre · 🔑 Nøkler og tilgang.
+📍 Feltpunkter · ⚖️ Scoringsparametre · 🔑 Nøkler og tilgang.
 
 ---
 
@@ -157,6 +157,32 @@ Viser innsendinger fra `elvesona.no/tilbakemelding/`. De lagres i det **private*
 |---|---|
 | «Fant ikke tilbakemeldinger.json … (GitHub svarer 404 i begge tilfeller)» | Nesten alltid at tokenet mangler tilgang til `elvesona-tilbakemeldinger` — se token-oppsettet øverst |
 | «Lagre GitHub-token først.» | Ingen token i denne nettleseren |
+
+---
+
+## 📍 Feltpunkter
+
+Punkter du markerer ute ved elva: grenseskilt, parkering, desinfeksjonsstasjoner, kortsalg
+og annet. De lagres i det **private** repoet `elvesona-tilbakemeldinger` (fila `punkter.json`)
+og publiseres ikke.
+
+**Markere et punkt (i elvekartet, f.eks. elvesona.no/otra/):**
+- Knappen **➕ Marker punkt** vises oppe til høyre i kartet bare i nettlesere der GitHub-tokenet
+  er lagret. Legg inn tokenet i adminpanelet på telefonen én gang, så får du knappen der.
+- **📍 GPS** bruker posisjonen din. Den følger GPS-en i opptil 20 sekunder og bruker den beste
+  målingen. Nøyaktigheten (±m) lagres med punktet.
+- **✓ Marker her** bruker krysset midt i kartet. Flytt kartet til skiltet, gjerne i flyfoto.
+- **Langt trykk** (mobil) eller **høyreklikk** (PC) i kartet markerer der du trykker.
+- Velg type, kontroller sonen (foreslås ut fra polygonet) og skriv en kommentar.
+- Uten dekning legges punktet i kø på telefonen og sendes når nettet er tilbake (grå prikk).
+  Lagrede punkter vises som oransje prikker, behandlede som grønne.
+
+**I adminpanelet:**
+- **↻ Hent** laster lista, nyeste først. Filtrer på type, elv og status.
+- **🗺 Vis i kartet** åpner elvekartet zoomet inn på punktet.
+- **📋 Kopier koordinater** kopierer «lat, lon».
+- Når punktet er lagt inn som ekte data (sonegrense, `steder_<elv>.json` eller
+  `desinfisering.json`), trykk **Behandlet**.
 
 ---
 

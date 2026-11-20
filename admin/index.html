@@ -233,6 +233,7 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
 .fb-st.ny { background: #fee2e2; color: #b91c1c; }
 .fb-st.lest { background: #dbeafe; color: #1d4ed8; }
 .fb-st.ferdig { background: #dcfce7; color: #166534; }
+.fb-st.behandlet { background: #dcfce7; color: #166534; }
 .fb-txt { font-size: 0.82rem; color: #1a202c; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.45; }
 .fb-meta { font-size: 0.68rem; color: #94a3b8; margin-top: 4px; overflow-wrap: anywhere; }
 .fb-meta a { color: #2b6cb0; }
@@ -621,6 +622,38 @@ input[type="range"] { width: 100%; accent-color: #2b6cb0; }
   </div>
   <div id="fbList"></div>
   <div id="fbStatus"></div>
+</div>
+</details>
+
+<details class="card-details" id="ptDetails">
+  <summary>📍 Feltpunkter <span class="sum-hint">(markert i elvekartene · privat repo)</span><span class="fb-ny-chip" id="ptNyChip" style="display:none"></span></summary>
+<div class="card">
+  <h2>📍 Feltpunkter</h2>
+  <div class="hint" style="margin-top:0">Punkter du har markert med «➕ Marker punkt» i elvekartene: grenseskilt,
+    parkering, desinfisering, kortsalg og annet. Knappen vises bare i nettlesere der GitHub-tokenet er lagret.
+    Punktene ligger i <code>punkter.json</code> i det private repoet <code>elvesona-tilbakemeldinger</code> og
+    publiseres ikke. Når et punkt er lagt inn som ekte data (sonegrense, steder eller desinfisering), merk det som behandlet.</div>
+  <div class="save-row">
+    <button onclick="ptHent()">↻ Hent</button>
+  </div>
+  <div class="fb-filter" id="ptFilter" style="display:none">
+    <select id="ptFType" onchange="ptRender()">
+      <option value="">Alle typer</option>
+      <option value="grense">🚩 Sonegrense / skilt</option>
+      <option value="parkering">🅿️ Parkering</option>
+      <option value="desinfisering">🧴 Desinfisering</option>
+      <option value="kortsalg">🎫 Kortsalg</option>
+      <option value="annet">📝 Annet</option>
+    </select>
+    <select id="ptFElv" onchange="ptRender()"><option value="">Alle elver</option></select>
+    <select id="ptFStatus" onchange="ptRender()">
+      <option value="">Alle statuser</option>
+      <option value="ny">Ny</option>
+      <option value="behandlet">Behandlet</option>
+    </select>
+  </div>
+  <div id="ptList"></div>
+  <div id="ptStatus"></div>
 </div>
 </details>
 
@@ -1646,6 +1679,131 @@ async function fbSlett(id) {
     fbStatus('Slettet ' + id + '. ✓', false);
   } catch (e) {
     fbStatus('Kunne ikke slette: ' + fbFeiltekst(e), true);
+  }
+}
+
+/* ---- FELTPUNKTER ----
+   Skrives av felles/registrering.js (elvekartene) til punkter.json i det private repoet.
+   Vises med textContent, aldri innerHTML. */
+const PT_PATH = 'punkter.json';
+const PT_TYPER = { grense: '🚩 Sonegrense / skilt', parkering: '🅿️ Parkering', desinfisering: '🧴 Desinfisering', kortsalg: '🎫 Kortsalg', annet: '📝 Annet' };
+let ptListe = [];
+
+function ptStatus(msg, isErr) {
+  const el = document.getElementById('ptStatus');
+  el.textContent = msg;
+  el.className = isErr ? 'err' : 'ok';
+}
+
+async function ptHent() {
+  if (!getToken()) { ptStatus('Lagre GitHub-token først.', true); return; }
+  ptStatus('Henter …', false);
+  try {
+    const { list, sha } = await fetchJsonFile(PT_PATH, FB_REPO);
+    ptListe = Array.isArray(list) ? list : [];
+    const elver = [...new Set(ptListe.map(p => p.elv).filter(Boolean))].sort();
+    const sel = document.getElementById('ptFElv');
+    const valgt = sel.value;
+    sel.length = 1;
+    elver.forEach(e => sel.add(new Option(e.charAt(0).toUpperCase() + e.slice(1), e)));
+    sel.value = elver.includes(valgt) ? valgt : '';
+    document.getElementById('ptFilter').style.display = ptListe.length ? 'flex' : 'none';
+    ptRender();
+    // GitHub svarer 404 både når fila ikke finnes ennå og når tokenet mangler tilgang.
+    ptStatus(sha ? ptListe.length + ' punkt' + (ptListe.length === 1 ? '' : 'er') + ' hentet. ✓'
+                 : 'Fant ikke ' + PT_PATH + ' i ' + FB_REPO + '. Fila lages når du lagrer det første punktet i et elvekart. Får du feil da, mangler tokenet tilgang til repoet.', false);
+  } catch (e) {
+    ptStatus('Kunne ikke hente: ' + fbFeiltekst(e), true);
+  }
+}
+
+function ptRender() {
+  const antNy = ptListe.filter(p => p.status === 'ny').length;
+  const chip = document.getElementById('ptNyChip');
+  chip.textContent = antNy + ' ny' + (antNy === 1 ? '' : 'e');
+  chip.style.display = antNy ? 'inline' : 'none';
+
+  const fType = document.getElementById('ptFType').value;
+  const fElv = document.getElementById('ptFElv').value;
+  const fSt = document.getElementById('ptFStatus').value;
+  const vis = ptListe
+    .filter(p => (!fType || p.type === fType) && (!fElv || p.elv === fElv) && (!fSt || p.status === fSt))
+    .sort((a, b) => String(b.registrert).localeCompare(String(a.registrert)));
+
+  const wrap = document.getElementById('ptList');
+  wrap.replaceChildren();
+  if (!ptListe.length) { wrap.appendChild(fbEl('div', 'hint', 'Ingen feltpunkter ennå.')); return; }
+  if (!vis.length) { wrap.appendChild(fbEl('div', 'hint', 'Ingen treff med dette filteret.')); return; }
+
+  vis.forEach(p => {
+    const row = fbEl('div', 'fb-row' + (p.status === 'ny' ? ' ny' : ''));
+    const hdr = fbEl('div', 'fb-hdr');
+    hdr.appendChild(fbEl('span', 'fb-type', PT_TYPER[p.type] || p.type));
+    hdr.appendChild(fbEl('span', null, [p.elv ? p.elv.charAt(0).toUpperCase() + p.elv.slice(1) : '', p.sone || 'ingen sone'].filter(Boolean).join(' · ')));
+    const d = new Date(p.registrert);
+    hdr.appendChild(fbEl('span', null, isNaN(d) ? '' : d.toLocaleString('no-NO', { dateStyle: 'short', timeStyle: 'short' })));
+    hdr.appendChild(fbEl('span', 'fb-st ' + (p.status || 'ny'), p.status || 'ny'));
+    row.appendChild(hdr);
+    if (p.kommentar) row.appendChild(fbEl('div', 'fb-txt', p.kommentar));
+
+    const koord = p.lat + ', ' + p.lon;
+    const meta = fbEl('div', 'fb-meta');
+    const a = fbEl('a', null, '🗺 Vis i kartet');
+    a.href = '../' + encodeURIComponent(p.elv) + '/#punkt=' + p.lat + ',' + p.lon;
+    a.target = '_blank';
+    meta.append(a, ' · ' + koord + ' · ' + (p.noyaktighet_m ? 'GPS ±' + p.noyaktighet_m + ' m' : 'plassert i kartet') + ' · ' + p.id);
+    row.appendChild(meta);
+
+    const act = fbEl('div', 'fb-actions');
+    const kop = fbEl('button', 'secondary', '📋 Kopier koordinater');
+    kop.onclick = () => navigator.clipboard.writeText(koord).then(() => ptStatus('Kopierte ' + koord + '. ✓', false));
+    act.appendChild(kop);
+    const nySt = p.status === 'behandlet' ? 'ny' : 'behandlet';
+    const st = fbEl('button', 'secondary', nySt === 'ny' ? 'Merk som ny' : 'Behandlet');
+    st.onclick = () => ptSettStatus(p.id, nySt);
+    act.appendChild(st);
+    const slett = fbEl('button', 'slett', '🗑 Slett');
+    slett.onclick = () => ptSlett(p.id);
+    act.appendChild(slett);
+    row.appendChild(act);
+    wrap.appendChild(row);
+  });
+}
+
+async function ptSettStatus(id, status) {
+  if (!getToken()) { ptStatus('Lagre GitHub-token først.', true); return; }
+  ptStatus('Lagrer …', false);
+  try {
+    // Fersk kopi rett før skriving: kartet kan ha lagt til punkter i mellomtiden.
+    const { list, sha } = await fetchJsonFile(PT_PATH, FB_REPO);
+    const post = list.find(p => p.id === id);
+    if (!post) throw new Error('Fant ikke ' + id);
+    post.status = status;
+    await putJsonFile(PT_PATH, list, 'Feltpunkt ' + id + ': ' + status + ' via admin', sha, FB_REPO);
+    ptListe = list;
+    ptRender();
+    ptStatus('Lagret ' + id + ' som «' + status + '». ✓', false);
+  } catch (e) {
+    ptStatus('Kunne ikke lagre: ' + fbFeiltekst(e), true);
+  }
+}
+
+async function ptSlett(id) {
+  if (!getToken()) { ptStatus('Lagre GitHub-token først.', true); return; }
+  const post = ptListe.find(p => p.id === id);
+  const utdrag = post && post.kommentar ? '\n\n«' + post.kommentar.slice(0, 80) + (post.kommentar.length > 80 ? '…' : '') + '»' : '';
+  if (!confirm('Slette feltpunkt ' + id + '?' + utdrag)) return;
+  ptStatus('Sletter …', false);
+  try {
+    const { list, sha } = await fetchJsonFile(PT_PATH, FB_REPO);
+    const ny = list.filter(p => p.id !== id);
+    if (ny.length === list.length) throw new Error('Fant ikke ' + id);
+    await putJsonFile(PT_PATH, ny, 'Slett feltpunkt ' + id + ' via admin', sha, FB_REPO);
+    ptListe = ny;
+    ptRender();
+    ptStatus('Slettet ' + id + '. ✓', false);
+  } catch (e) {
+    ptStatus('Kunne ikke slette: ' + fbFeiltekst(e), true);
   }
 }
 

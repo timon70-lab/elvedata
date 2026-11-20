@@ -135,6 +135,11 @@ grep -oE 'v[0-9]+\.[0-9]{3}' <fil>
 - `staging/index.html` — staging for oversiktskartet: `noindex`, oransje STAGING-stripe og
   deaktivert GoatCounter, men ekte data.
 - `admin/index.html` — adminpanelet. Har ingen versjonslinje.
+- `felles/registrering.js` (fra 2026-11-20) — feltregistrering i elvekartene: «➕ Marker punkt»
+  (GPS, kryss eller langt trykk) med type, sone og kommentar. Lastes av de seks dashboardene
+  bare når admin-tokenet ligger i nettleseren, så vanlige brukere får den aldri. Punktene lagres
+  i `punkter.json` i det private repoet `elvesona-tilbakemeldinger` og vises under
+  «📍 Feltpunkter» i adminpanelet. De gjøres om til ekte data for hånd.
 - `otra2/index.html` — testklone av Otra (fra 2026-11-14): `noindex`, oransje TESTVERSJON-stripe,
   uten GoatCounter, major 0, leser Otras datafiler. Nås kun med direkte lenke og skal ikke lenkes
   fra noen side. Brukt til den store kartoppdateringen, som gikk live som `otra/index.html` v1.078
