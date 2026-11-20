@@ -6,6 +6,19 @@
 <link rel="icon" type="image/png" sizes="192x192" href="../icon-192.png">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <link rel="manifest" href="../manifest.webmanifest">
+<script>
+/* Feltregistrering (felles/registrering.js) lastes bare når admin-tokenet ligger i nettleseren,
+   altså bare for Per Lasse. Hashen tas vare på før kartet skriver den om (#punkt=lat,lon). */
+(function () {
+  try {
+    if (!localStorage.getItem('elvedata_admin_token')) return;
+    window._regLenke = location.hash;
+    var s = document.createElement('script');
+    s.src = '../felles/registrering.js?v=1';
+    document.head.appendChild(s);
+  } catch (e) { /* localStorage blokkert: ingen registrering */ }
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sygna – Dynamisk oversikt</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
@@ -3474,7 +3487,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.048</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.049</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span><br>
   <a href="../vilkar/" style="font-size:0.6rem; color:#94a3b8;">Vilkår for bruk</a>
 </div>
