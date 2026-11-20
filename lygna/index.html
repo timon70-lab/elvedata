@@ -1984,6 +1984,25 @@ function erSmalLayout() { return !window.matchMedia('(min-width: 1000px)').match
 function visKartOverst() {
   document.querySelector('.map-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+// Smal skjerm: rull så panelet står rett under kartet. Når en sone er valgt, står kartet
+// fast øverst (sticky), og da flytter visKartOverst() ingenting: panelet kunne havne bak
+// kartet, over der brukeren leser soneinfo.
+// Rullingen er uten animasjon: når bildet lastes og panelet vokser, flytter nettleserens
+// scroll anchoring siden og avbryter en myk rulling. Derfor justeres det også på nytt
+// når bildet er lastet (innen 4 s etter klikket).
+let _underKartetPanel = null, _underKartetTid = 0;
+function visUnderKartet(panel) {
+  const kart = document.querySelector('.map-panel');
+  if (getComputedStyle(kart).position !== 'sticky') { visKartOverst(); return; }
+  const y = panel.getBoundingClientRect().top + window.scrollY - kart.offsetHeight - 16;
+  window.scrollTo({ top: Math.max(0, y), behavior: 'auto' });
+  _underKartetPanel = panel; _underKartetTid = Date.now();
+}
+function _justerUnderKartet() {
+  if (_underKartetPanel && Date.now() - _underKartetTid < 4000 && erSmalLayout() && !_mapFsOn) {
+    const p = _underKartetPanel; _underKartetPanel = null; visUnderKartet(p); _underKartetPanel = null;
+  }
+}
 
 // Chaikin-glatting: kutter hjørnene på en grovt tegnet linje.
 function chaikin(pts, runder) {
@@ -3007,8 +3026,8 @@ function openZoneMedia(zone, target) {
   // sentrer på nytt begge ganger så markøren ikke havner bak panelet.
   _panTilAktivtMedium();
   const _pImg = document.getElementById('photoImg');
-  if (!_pImg._panBundet) { _pImg._panBundet = true; _pImg.addEventListener('load', _panTilAktivtMedium); }
-  if (erSmalLayout() && !_mapFsOn) visKartOverst();
+  if (!_pImg._panBundet) { _pImg._panBundet = true; _pImg.addEventListener('load', _panTilAktivtMedium); _pImg.addEventListener('load', _justerUnderKartet); }
+  if (erSmalLayout() && !_mapFsOn) visUnderKartet(document.getElementById('photoPanel'));
   else document.getElementById('photoPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
@@ -3723,7 +3742,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.073</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.074</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span><br>
   <a href="../vilkar/" style="font-size:0.6rem; color:#94a3b8;">Vilkår for bruk</a>
 </div>
