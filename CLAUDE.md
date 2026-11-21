@@ -23,10 +23,10 @@ Detaljer ligger i egne filer — les dem når oppgaven berører temaet:
    Les ikke `.env`-innhold inn i svar.
    **Unntak (2026-11-17):** offentlige nettlesernøkler som er laget for å stå i nettsiden og
    bare gir tilgang til bakgrunnskart, kan stå i HTML. I dag gjelder det kun Esri-nøkkelen
-   `ESRI_KEY` i `otra/index.html`, `otra2/index.html`, `mandalselva/index.html`,
-   `mandalselva2/index.html` (fra 2026-11-18), `audna/index.html`, `audna2/index.html`
-   (fra 2026-11-18), `tovdalselva/index.html`, `tovdalselva2/index.html`, `sygna/index.html`, `sygna2/index.html`
-   (fra 2026-11-19) `lygna2/index.html` (fra 2026-11-19) og `lygna/index.html` (fra 2026-11-20) (ArcGIS Location Platform, «Public
+   `ESRI_KEY` i `otra/index.html`, `otra2/index.html`, `mandalselva/index.html` (fra 2026-11-18),
+   `audna/index.html` (fra 2026-11-18), `tovdalselva/index.html`, `sygna/index.html` (fra
+   2026-11-19) og `lygna/index.html` (fra 2026-11-20), pluss en testklone `{elv}2/index.html`
+   mens den finnes (ArcGIS Location Platform, «Public
    application», kun Basemaps, betaling avslått, utløper 2027-11-17). NVE-nøkkelen og alle andre
    nøkler er fortsatt hemmelige.
 2. **Fiskernavn vises aldri i dashboard.** Kolonnene `Navn`/`Fisker` i fangstloggene beholdes
@@ -151,65 +151,25 @@ grep -oE 'v[0-9]+\.[0-9]{3}' <fil>
   testmerkingen (også i `<h1>`), sett inn GoatCounter, bruk
   `SONER_URL = '../data/soner_otra.geojson'`, toppavstand PC 16 px / mobil 8 px. Polygonfil for
   klonen: `python scripts/sonepolygoner.py otra --ut soner_otra2.geojson`.
-- `mandalselva2/index.html` — testklone av Mandalselva (fra 2026-11-18), bygd på Otra-koden
-  (kartlag, PC/mobil-oppsett, sonepolygoner, delbare lenker, «Hvor er jeg?») med Mandalselvas
-  data. Samme testmerking som otra2 (`noindex`, stripe, ingen GoatCounter, major 0, toppavstand
-  PC 34 px / mobil 24 px, `<h1>` «Mandalselva 2 (test) · …»). Leser Mandalselvas datafiler,
-  inkludert `data/soner_mandalselva.geojson`
-  (`python scripts/sonepolygoner.py mandalselva`), som ikke brukes av `mandalselva/index.html`.
-  Nås kun med direkte lenke. Gikk live som `mandalselva/index.html` v1.066 (2026-11-18).
-  **Fra 2026-11-18 gjøres alle Mandalselva-endringer direkte i `mandalselva/index.html`.**
-  mandalselva2 brukes bare når Per Lasse uttrykkelig sier det, og holdes ikke i takt med
-  mandalselva. Skal den brukes igjen: kopier `mandalselva/index.html` → `mandalselva2` med
-  testmerkingen over. Tilbake: fjern testmerkingen (også `<h1>`), sett inn GoatCounter,
-  toppavstand PC 16 px / mobil 8 px.
-- `audna2/index.html` — testklone av Audna (fra 2026-11-18), bygd på `mandalselva/index.html`
-  (Otra-kartet) med Audnas data, nedbørsbaserte fiskemelding og egen elvescore
-  (`computeRiverScore`). Samme testmerking som mandalselva2 (`<h1>` «Audna 2 (test) · …»).
-  Leser Audnas datafiler (`data/vannforing.json`, `data/nedbor.json` uten suffiks), inkludert
-  `data/soner_audna.geojson` (`python scripts/sonepolygoner.py audna`). Nås kun med direkte
-  lenke. Gikk live som `audna/index.html` v1.169 (2026-11-18).
-  **Fra 2026-11-18 gjøres alle Audna-endringer direkte i `audna/index.html`.** audna2 brukes
-  bare når Per Lasse uttrykkelig sier det, og holdes ikke i takt med audna. Skal den brukes
-  igjen: kopier `audna/index.html` → `audna2` med testmerkingen over. Tilbake: fjern
-  testmerkingen (også `<h1>`), sett inn GoatCounter, toppavstand PC 16 px / mobil 8 px.
-- `tovdalselva2/index.html` — testklone av Tovdalselva (fra 2026-11-19), bygd på
-  `audna/index.html` (Otra-kartet + fiskemelding og elvescore) med Tovdalselvas data og
-  «Kun laks»-knappen (`laksOnly`, `activeData()`, `activeConsts()`, lenkeparameter `laks=1`).
-  Samme testmerking som audna2 (`<h1>` «Tovdalselva 2 (test) · …»). Leser Tovdalselvas
-  datafiler, inkludert `data/soner_tovdalselva.geojson`
-  (`python scripts/sonepolygoner.py tovdalselva`, midtlinje = den manuelle senterlinja).
-  Nås kun med direkte lenke. Gikk live som `tovdalselva/index.html` v1.017 (2026-11-19).
-  **Fra 2026-11-19 gjøres alle Tovdalselva-endringer direkte i `tovdalselva/index.html`.**
-  tovdalselva2 brukes bare når Per Lasse uttrykkelig sier det, og holdes ikke i takt med
-  tovdalselva. Skal den brukes igjen: kopier `tovdalselva/index.html` → `tovdalselva2` med
-  testmerkingen over. Tilbake: fjern testmerkingen (også `<h1>`), sett inn GoatCounter,
-  toppavstand PC 16 px / mobil 8 px.
-- `sygna2/index.html` — testklone av Sygna (fra 2026-11-19), bygd på `tovdalselva/index.html`
-  (Otra-kartet, fiskemelding og «Kun laks») med Sygnas data. Sygna har én sone («Alle åpne
-  soner»), vannføring i steg på 2 m³/s og ingen samlet elvescore (ingen `totalScoreBox` eller
-  `computeRiverScore`). Samme testmerking som tovdalselva2 (`<h1>` «Sygna 2 (test) · …»).
-  Leser Sygnas datafiler, inkludert `data/soner_sygna.geojson`
-  (`python scripts/sonepolygoner.py sygna`). Nås kun med direkte lenke. Gikk live som
-  `sygna/index.html` v1.048 (2026-11-19).
-  **Fra 2026-11-19 gjøres alle Sygna-endringer direkte i `sygna/index.html`.** sygna2 brukes
-  bare når Per Lasse uttrykkelig sier det, og holdes ikke i takt med sygna. Skal den brukes
-  igjen: kopier `sygna/index.html` → `sygna2` med testmerkingen over. Tilbake: fjern
-  testmerkingen (også `<h1>`), sett inn GoatCounter, toppavstand PC 16 px / mobil 8 px.
-- `lygna2/index.html` — testklone av Lygna (fra 2026-11-19), bygd på `audna/index.html`
-  (Otra-kartet, fiskemelding og elvescore) med Lygnas data. Samme testmerking som sygna2
-  (`<h1>` «Lygna 2 (test) · …»). Leser Lygnas datafiler, inkludert `data/soner_lygna.geojson`
-  (`python scripts/sonepolygoner.py lygna`). De fleste Lygna-sonene har bare ett punkt, så
-  grensene er beregnet midt mellom nabopunktene (`punkt_grenser`) og merket «omtrentlig» i
-  soneinfo. Sone 2 (nord) og Sone 3 (sør) deler strekning, Sone 8 har bare østbredden, og
-  Sone 7 har ingen koordinater. Nås kun med direkte lenke. Gikk live som
-  `lygna/index.html` v1.072 (2026-11-20).
-  **Fra 2026-11-20 gjøres alle Lygna-endringer direkte i `lygna/index.html`.** lygna2 brukes
-  bare når Per Lasse uttrykkelig sier det, og holdes ikke i takt med lygna. Skal den brukes
-  igjen: kopier `lygna/index.html` → `lygna2` med testmerkingen over. Tilbake: fjern
-  testmerkingen (også `<h1>`), sett inn GoatCounter, toppavstand PC 16 px / mobil 8 px.
+- **Det nye kartet i alle seks elver (2026-11-17 – 2026-11-20).** Mandalselva, Audna, Tovdalselva,
+  Sygna og Lygna fikk Otra-kartet (kartlag, PC/mobil-oppsett, sonepolygoner, delbare lenker,
+  «Hvor er jeg?») via testklonene `{elv}2`, som ble slettet 2026-11-21. Alle endringer gjøres
+  direkte i `{elv}/index.html`. Polygonfil per elv: `python scripts/sonepolygoner.py <elv>`
+  → `data/soner_<elv>.geojson`. Særtrekk:
+  - Audna leser de usuffikserte `data/vannforing.json` og `data/nedbor.json`.
+  - Tovdalselva har «Kun laks» (`laksOnly`, `activeData()`, `activeConsts()`, lenkeparameter
+    `laks=1`) og bruker den manuelle senterlinja som midtlinje.
+  - Sygna har én sone («Alle åpne soner»), vannføring i steg på 2 m³/s og ingen samlet elvescore.
+  - Lygna: de fleste sonene har bare ett punkt, så grensene er beregnet midt mellom
+    nabopunktene (`punkt_grenser`) og merket «omtrentlig» i soneinfo. Sone 2 (nord) og Sone 3
+    (sør) deler strekning, Sone 8 har bare østbredden, og Sone 7 har ingen koordinater.
+- **Ny testklone ved store endringer:** kopier `{elv}/index.html` → `{elv}2/index.html` med
+  testmerking: `noindex`, oransje stripe, ingen GoatCounter, major 0, toppavstand PC 34 px /
+  mobil 24 px, `<h1>` «{Elv} 2 (test) · …» med `margin-top:14px`. Legg den inn i Esri-unntaket
+  under regel 1 og i `robots.txt`. Tilbake til live: fjern testmerkingen (også `<h1>`), sett inn
+  GoatCounter, toppavstand PC 16 px / mobil 8 px. Slett klonen når endringen er live.
 - `vilkar/index.html` — vilkår for bruk (påkrevd av Esri-avtalen for flyfoto). Lenket fra
-  bunnteksten i otra/otra2/mandalselva/mandalselva2/audna/audna2/tovdalselva/tovdalselva2/sygna/sygna2/lygna/lygna2.
+  bunnteksten i alle seks elvekart og otra2.
 
 ### Logo og favicon
 

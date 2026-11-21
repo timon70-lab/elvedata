@@ -108,6 +108,37 @@ I `selectZone()`s «lukk sone»-gren skal `map.fitBounds(allCoords, {...})` fjer
 
 ---
 
+## 5b. Det nye kartet (fra 2026-11-20 standard for alle elver)
+
+Alle seks elver har kartet som ble utviklet i Otra. En ny elv bygges på det, ikke på eldre maler.
+
+- [ ] **Malfil:** kopier den eksisterende elva som ligner mest:
+  - uregulert med fiskemelding og elvescore: `audna/index.html` eller `lygna/index.html`.
+  - sjøørret i fangsten («Kun laks»): `tovdalselva/index.html`.
+  - én sone: `sygna/index.html`.
+  - regulert: `mandalselva/index.html` eller `otra/index.html`.
+  Bytt alle data og URL-er (`vannforing_`, `nedbor_`, `photos_`, `videoer_`, `bilder/`, `soner_`,
+  `senterlinje_`, `steder_`, `hendelser_`, `SESONG_ELV`, `cfg.score`/`cfg.sparkline`). Søk etter
+  malelvas navn etterpå: det skal ikke være noen treff igjen.
+- [ ] **Sonepolygoner:** legg elva inn i `scripts/sonepolygoner_oppsett.json` (OSM-midtlinje eller
+  `"senterlinje"`, vannrelasjoner, `bredde_land`, delsoner, `side`/`kun_side`). Er sonene bare
+  punkter, bruk `punkt_grenser` (Lygna). Munning i sjøen: `osm.sjø`. Sideelver i OSM-flaten:
+  `korridor_maks`. Kjør `python scripts/sonepolygoner.py <elv> --hent` → `data/soner_<elv>.geojson`
+  og `data/raw/osm_<elv>.json`. Kontroller at polygonfilene for de andre elvene er uendret.
+- [ ] **Datafiler:** lag `data/steder_<elv>.json` og `data/hendelser_<elv>.json` (tomme lister med
+  `_meta`), og `data/videoer_<elv>.json` (`[]`) hvis elva ikke har video. Ellers gir kartet 404.
+- [ ] **Esri-nøkkelen:** `ESRI_KEY` følger med fra malfila. Før den nye fila (og en eventuell
+  testklone) opp i unntaket under regel 1 i `CLAUDE.md`.
+- [ ] **Bunntekst:** lenke til `vilkar/` (påkrevd av Esri-avtalen for flyfoto) og lasteren for
+  `felles/registrering.js` i `<head>`.
+- [ ] **Testklone ved behov:** se «Ny testklone» i `CLAUDE.md`. Legg den i `robots.txt` og slett den når
+  elva er live.
+- [ ] **Ved go-live:** legg elva i `sitemap.xml`. Oversiktskartet endres bare på forespørsel.
+- [ ] **Test:** PC og mobil (375 px), delbare lenker (`#sone=…`), «Hvor er jeg?», kartlagene og
+  ingen tomme fliser ved panorering og zoom.
+
+---
+
 ## 6. Validering før levering (uansett elv)
 
 Kjør `python scripts/valider.py <fil.html>`. Skriptet gjør alt under, pluss konfliktmarkør-sjekk,
@@ -123,6 +154,7 @@ HTML-nesting og jsdom-røyktest:
 
 | Dato | Endring |
 |---|---|
+| 2026-11-21 | Nytt punkt 5b: det nye kartet (malfil, sonepolygoner, datafiler, Esri-nøkkel, sitemap) |
 | 2026-09-26 | Revisjon av docs: konsolideringsbanner og deklarasjonssjekk (mot `HEAD`, ikke mal) rettet |
 | 2026-09-20 | Tilpasset Claude Code: `/ny-elv`-trigger, fangstlogg beholdes uendret, validering via `scripts/valider.py`, peker til `docs/kart-ux-standarder.md` |
 | 2026-07-13 | Første versjon — kombinerer opprinnelig huskeliste med lærdom fra Otra-implementeringen (kvoteformat-variasjon, Cowork/chat-arbeidsdeling, trigger-frase-presisering) |
