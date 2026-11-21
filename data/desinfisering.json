@@ -12,6 +12,9 @@
       {"id":"d2","navn":"Hauge","lat":58.134032,"lon":7.539281},
       {"id":"d3","navn":"Mandalselva Villakssenter","lat":58.245333,"lon":7.513411},
       {"id":"d4","navn":"Adventure Norway","lat":58.354959,"lon":7.527093}
+    ],
+    "lygna": [
+      {"id":"d1","navn":"Kvelland","lat":58.184768,"lon":7.100652}
     ]
   }
 }
