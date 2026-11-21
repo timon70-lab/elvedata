@@ -71,8 +71,8 @@ Nøkler og tilgang.
 - Kartløsning: **live i alle seks elver** (Otra v1.078 2026-11-17, deretter Mandalselva, Audna,
   Tovdalselva, Sygna og Lygna til 2026-11-20). Testklonene `{elv}2` er slettet; `otra2` står igjen.
   Gjenstår: admin kan ikke redigere `ukedager`/`steder_<elv>.json` og har ingen bryter for `stengt`;
-  parkeringer og kortsalg for de fem andre elvene; offline-kart (på is). Ikke målt: tomme fliser ved
-  panorering/zoom i de fem siste kartene (samme kode som Otra).
+  parkeringer og kortsalg for de fem andre elvene; offline-kart (på is). Tomme fliser:
+  ingen funnet i de fem siste kartene (testet av Per Lasse 2026-11-21).
   Se `docs/ideer/otra-kart-forbedringer.md`.
 - Egen tilbakemeldingsside — runde 1 (Worker, side, admin) er bygd, men ikke satt i drift eller lenket.
   Neste runder: lenke fra alle seks dashboard, statistikk og 💬 på oversiktskartet; deretter
