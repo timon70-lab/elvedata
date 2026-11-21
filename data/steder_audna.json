@@ -1,7 +1,18 @@
 {
   "_meta": {
-    "endret": "2026-11-18",
-    "notat": "Steder som vises som egne punkter i Audna-kartet. type: kortsalg | parkering. lat/lon i WGS84. tekst er fritekst som vises i popup og soneinfo. soner (kun parkering): hvilke soner «Veibeskrivelse» skal gå til denne parkeringen for; soner uten parkering får veibeskrivelse til sonegrensa."
+    "endret": "2026-11-21",
+    "notat": "Steder som vises som egne punkter i Audna-kartet. type: kortsalg | parkering. lat/lon i WGS84. tekst er fritekst som vises i popup og soneinfo. soner (kun parkering): hvilke soner «Veibeskrivelse» skal gå til denne parkeringen for; soner uten parkering får veibeskrivelse til sonegrensa.",
+    "kilde": "Kortsalg: koordinater fra Per Lasse 2026-11-21. Adressen er nærmeste adresse i Kartverkets adresse-API (20 m unna)."
   },
-  "steder": []
+  "steder": [
+    {
+      "id": "k1",
+      "type": "kortsalg",
+      "navn": "Kortsalg",
+      "adresse": "Smibakken 14, 4520 Lindesnes",
+      "tekst": "",
+      "lat": 58.084649,
+      "lon": 7.302802
+    }
+  ]
 }
