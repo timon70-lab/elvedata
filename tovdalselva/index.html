@@ -120,6 +120,9 @@ h1 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spa
 .p-tog:not(.on) span::after { content:''; position:absolute; width:24px; height:2px; background:#4a5568; transform:rotate(-45deg); }
 .p-tog:hover { background:#f4f4f4; }
 .p-tog:focus-visible { outline:2px solid #3182ce; outline-offset:1px; }
+/* Fullskjerm: kontrollboksen ligger rett til høyre for +/−, så P-knappen flyttes ned
+   under zoomnivået (z 11) for ikke å havne under vannføringsslideren. */
+#mapFs.fs-on .p-tog { left:-2px; top:calc(100% + 27px); }
 .zoom-lbl { background:rgba(255,255,255,0.8); color:#4a5568; font-size:0.62rem; font-weight:700; padding:1px 0; width:34px; text-align:center; border-radius:4px; pointer-events:none; font-variant-numeric:tabular-nums; margin-top:4px !important; }
 .pos-kort { display:none; max-width:60vw; background:#fff; border:2px solid rgba(0,0,0,0.2); border-radius:8px; padding:8px 10px; font-size:0.72rem; line-height:1.45; color:#1a202c; text-align:left; box-shadow:0 2px 10px rgba(0,0,0,0.18); }
 .pos-kort .pk-hdr { display:flex; justify-content:space-between; align-items:flex-start; gap:6px; font-weight:600; }
@@ -3632,7 +3635,7 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 </div>
 
 <div style="width:100%; max-width:480px; text-align:center; padding:16px 0 24px; font-size:0.65rem; color:#94a3b8;">
-  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.020</span><br>
+  © 2026 Per Lasse Brønstad · Alle rettigheter forbeholdt <span style="opacity:.35">· v1.021</span><br>
   <span style="font-size:0.6rem;">Data: NVE HydAPI · OpenStreetMap · Kartverket · Esri · Inatur.no</span><br>
   <a href="../vilkar/" style="font-size:0.6rem; color:#94a3b8;">Vilkår for bruk</a>
 </div>
